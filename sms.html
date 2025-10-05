@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="tk" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ýeňil Demirýollary — SMS Zaýawka</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+  /* Ortadagi logotip */
+.logo-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 15px;
+  z-index: 99;
+}
+.logo-img {
+  height: 40px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+.logo-img:hover {
+  transform: scale(1.1);
+}
+body.dark-mode .logo-img {
+  filter: brightness(0.9);
+}
+
+/* Mobil uchun logotip */
+@media (max-width: 768px) {
+  .logo-center {
+    top: -113px;
+  }
+  .logo-img {
+    height: 300px;
+  }
+}
+</style>
+</head>
+<body class="light-mode">
+  <!-- Menyu — Ortada logotip -->
+<header class="header">
+  <div class="container">
+    <nav class="navbar">
+      <div class="menu-toggle" id="menu-toggle">☰</div>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="index.html">Bosh sahifa</a></li>
+        <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
+        <li><a href="pay.html">Ýeňil pay</a></li>
+        <li><a href="about.html">Biz barada</a></li>
+        <li><a href="help.html">Kömek</a></li>
+        <li><button class="theme-toggle" id="theme-toggle">🌓</button></li>
+      </ul>
+    </nav>
+    <div class="logo-center">
+      <img src="images/logo-header.png" alt="Ýeňil" class="logo-img" onclick="window.location='index.html'">
+    </div>
+  </div>
+</header>
+
+  <div class="main-content">
+    <div class="container">
+      <a href="demiryol.html" class="back-btn">← Geri</a>
+      <div class="logo-page">Ýeňil demirýollary — SMS zaýawka</div>
+
+      <div class="content">
+        <h1>Ýeňil demirýollary — SMS zaýawka</h1>
+        
+        <div class="highlight">
+          <p>📝 <strong>Biz size ýeňillik bolar ýaly SMS zaýawka hem goşdyk.</strong></p>
+          <p>Siz online sargyt etip bilmedik ýagdaýyňyzda paýdalanyp bilersiňiz.</p>
+          <p><strong>Pul öňünden geçirilýär</strong> we şol geçirilen nomerdan zaýawka ibermeli.</p>
+        </div>
+
+        <h2>Bahalary</h2>
+        <ul>
+          <li><strong>4-15 gün galandaky baha:</strong> 60 TMT</li>
+          <li><strong>2-3 gün galandaky baha:</strong> 70 TMT</li>
+          <li><strong>1 gün galandaky baha:</strong> 80 TMT</li>
+        </ul>
+
+        <h2>SMS Zaýawka formaty (mysaly)</h2>
+        <pre style="background: #f0fdfa; padding: 15px; border-radius: 10px; font-family: monospace; font-size: 0.9rem;">
+Dädebaý Dädebaýew 01.01.2001 I-DZ 123456
+Aşgabat-Daşoguz 05.05.2025
+        </pre>
+        
+        <p><strong>Eger sizde dogluş hakyndaky şahadatnama ýada harby bilet bolsa</strong>, Pasport ID ornyna şony ýazmaly.</p>
+
+        <h2>Bizniň töleg nomerlerimiz:</h2>
+        <div class="numbers">
+          <p>+993 71 789091</p>
+          <p>+993 64 629487</p>
+          <p>+993 71 234567</p>
+        </div>
+
+        <p>Ýokarydaky nomerlerden birine jemi töleg miqdaryny otgazyň.</p>
+
+        <div class="note">
+          <p>🔔 <strong>Eslatma:</strong> Töleg edeniňizden soň 15 minut içinde SMS habary wagty iberilmeli.</p>
+        </div>
+      </div>
+
+      <footer>
+        © 2025 Ýeňil. Hemme hukuklar gorapdyrylar.
+      </footer>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

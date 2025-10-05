@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="tk" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ýeňil Pay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0d9488;
+      --light-bg: #ffffff;
+      --light-text: #1e293b;
+      --dark-bg: #0f172a;
+      --dark-text: #f1f5f9;
+      --card-light: #f8fafc;
+      --card-dark: #1e293b;
+      --shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--light-bg);
+      color: var(--light-text);
+      transition: background 0.4s, color 0.4s;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.dark-mode {
+      background: var(--dark-bg);
+      color: var(--dark-text);
+    }
+
+    .container {
+      width: 90%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+/* Ortadagi logotip */
+.logo-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 15px;
+  z-index: 99;
+}
+.logo-img {
+  height: 40px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+.logo-img:hover {
+  transform: scale(1.1);
+}
+body.dark-mode .logo-img {
+  filter: brightness(0.9);
+}
+
+/* Mobil uchun logotip */
+@media (max-width: 768px) {
+  .logo-center {
+    top: -113px;
+  }
+  .logo-img {
+    height: 300px;
+  }
+}
+    /* Menyu — CHAPDA */
+    /* Header uchun tuzatish */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  background: var(--light-bg);
+  z-index: 100;
+  position: relative;
+}
+body.dark-mode .header {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  background: var(--dark-bg);
+}
+    .logo-header {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-right: 20px;
+    }
+    /* Nav menyu uchun tuzatish */
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  justify-content: space-between;
+}
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 25px;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+}
+.nav-menu:first-child {
+  justify-content: flex-start;
+}
+.nav-menu:last-child {
+  justify-content: flex-end;
+}
+    .nav-menu a {
+      text-decoration: none;
+      color: var(--light-text);
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+    body.dark-mode .nav-menu a {
+      color: var(--dark-text);
+    }
+    .nav-menu a:hover {
+      color: var(--primary);
+    }
+    .theme-toggle {
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .menu-toggle {
+      display: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--light-text);
+    }
+    body.dark-mode .menu-toggle {
+      color: var(--dark-text);
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+      .nav-menu {
+        position: absolute;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background: var(--light-bg);
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        display: none;
+        border-top: 1px solid rgba(0,0,0,0.1);
+      }
+      body.dark-mode .nav-menu {
+        background: var(--dark-bg);
+        border-top: 1px solid rgba(255,255,255,0.1);
+      }
+      .nav-menu.active {
+        display: flex;
+      }
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 20px 0;
+    }
+
+    .logo-page {
+      font-size: 2.2rem;
+      color: var(--primary);
+      text-align: center;
+      margin: 20px 0 40px;
+    }
+
+    .back-btn {
+      display: inline-block;
+      color: var(--primary);
+      text-decoration: none;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .content {
+      background: var(--card-light);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+    }
+    body.dark-mode .content {
+      background: var(--card-dark);
+    }
+
+    h1, h2, h3 {
+      color: var(--primary);
+      margin: 20px 0 15px;
+    }
+
+    p {
+      margin-bottom: 15px;
+    }
+
+    .highlight {
+      background: rgba(13, 148, 136, 0.08);
+      padding: 20px;
+      border-radius: 12px;
+      margin: 25px 0;
+      border-left: 4px solid var(--primary);
+    }
+
+    .crypto-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .crypto-item {
+      background: #f0fdfa;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    body.dark-mode .crypto-item {
+      background: rgba(13, 148, 136, 0.1);
+    }
+
+    .price-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    .price-table th, .price-table td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    body.dark-mode .price-table th,
+    body.dark-mode .price-table td {
+      border-color: #334155;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 20px;
+      margin: 30px 0;
+    }
+    .action-btn {
+      flex: 1;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
+    .buy-btn { background: #0d9488; color: white; }
+    .sell-btn { background: #dc2626; color: white; }
+    .action-btn:hover { opacity: 0.9; }
+
+    .form-group {
+      margin: 25px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 1rem;
+      background: white;
+    }
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea {
+      background: #1e293b;
+      border-color: #334155;
+      color: white;
+    }
+
+    .price-display {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 30px 0;
+      padding: 20px;
+      background: rgba(13, 148, 136, 0.08);
+      border-radius: 16px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.3s;
+      margin-top: 20px;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .note {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 20px 0;
+      font-size: 0.95rem;
+    }
+    body.dark-mode .note {
+      background: #451a03;
+      color: #fcd34d;
+    }
+
+    .numbers {
+      background: #f0fdfa;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 20px 0;
+      border: 1px dashed var(--primary);
+    }
+    body.dark-mode .numbers {
+      background: rgba(13, 148, 136, 0.1);
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 20px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .radio-option {
+      flex: 1;
+      min-width: 200px;
+      padding: 15px;
+      background: var(--card-light);
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+      cursor: pointer;
+    }
+    body.dark-mode .radio-option {
+      background: var(--card-dark);
+      border-color: #334155;
+    }
+    .radio-option:hover {
+      border-color: var(--primary);
+    }
+    .radio-option input[type="radio"] {
+      accent-color: var(--primary);
+      margin-right: 10px;
+    }
+
+    .success-message {
+      text-align: center;
+      padding: 30px;
+      background: #f0fdf4;
+      border-radius: 20px;
+      margin: 30px 0;
+      color: #065f46;
+    }
+    body.dark-mode .success-message {
+      background: rgba(6, 95, 70, 0.2);
+      color: #bbf7d0;
+    }
+
+    /* Yuklanish animatsiyasi */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Xato xabari */
+    .error-message {
+      display: none;
+      background: #fee;
+      color: #c33;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    body.dark-mode .error-message {
+      background: #4a1a1a;
+      color: #f87171;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body class="light-mode">
+  <!-- Menyu — CHAPDA -->
+ <!-- Menyu — Ortada logotip -->
+<header class="header">
+  <div class="container">
+    <nav class="navbar">
+      <div class="menu-toggle" id="menu-toggle">☰</div>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="index.html">Baş sahypa</a></li>
+        <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
+        <li><a href="pay.html">Ýeňil pay</a></li>
+        <li><a href="about.html">Biz barada</a></li>
+        <li><a href="help.html">Ýardam</a></li>
+        <li><button class="theme-toggle" id="theme-toggle">🌓</button></li>
+      </ul>
+    </nav>
+    <div class="logo-center">
+      <img src="images/logo-header.png" alt="Ýeňil" class="logo-img" onclick="window.location='index.html'">
+    </div>
+  </div>
+</header>
+
+  <div class="main-content">
+    <div class="container">
+      <a href="index.html" class="back-btn">← Yza</a>
+      <div class="logo-page">Ýeňil Pay</div>
+
+      <div class="content">
+        <h1>Ýeňil Pay bilen doly tanyşyň</h1>
+        
+        <p>Online işlerde pul soralýamy?</p>
+        <p>Treding we birjalar we Forex bazary bilen işlemekde daşary ýurt puly tapylanokmy?</p>
+        <p>Pul geçirmekde maşeniklardan ýadadyňyzmy?</p>
+        
+        <p class="highlight">Ýeňil pay indi daşary ýurt pullaryny alyş çalyş hem etýär arzan we ynamly.<br>
+        Bize doly 100% ynam berişiňiz mümkin — biz eden işimize doly dakazady bilen jogap bere bilýäs.</p>
+
+        <h2>Biz aşakda belläp geçilenler bilen alyş çalyş edip bilýäs:</h2>
+        
+        <div class="crypto-list">
+          <div class="crypto-item">Payeer</div>
+          <div class="crypto-item">Web Money</div>
+          <div class="crypto-item">Perfect Money</div>
+          <div class="crypto-item">Tonkeeper</div>
+          <div class="crypto-item">Trust Wallet</div>
+          <div class="crypto-item">Bitcoin</div>
+          <div class="crypto-item">Toncoin</div>
+          <div class="crypto-item">Litecoin</div>
+          <div class="crypto-item">Ethereum</div>
+          <div class="crypto-item">Tether</div>
+          <div class="crypto-item">Dogecoin</div>
+          <div class="crypto-item">Tron</div>
+        </div>
+
+        <h2>Alyş çalyş bahalary</h2>
+        
+        <h3>Satyn almak bahasy (min 1$)</h3>
+        <table class="price-table">
+          <tr><th>Platforma</th><th>Baha</th></tr>
+          <tr><td>Payeer</td><td>1$ = 19 TMT</td></tr>
+          <tr><td>Perfect Money</td><td>1$ = 19 TMT</td></tr>
+          <tr><td>Webmoney WMZ</td><td>1 WMZ = 19 TMT</td></tr>
+        </table>
+
+        <h3>Bize satmak bahasy (min 10 TMT)</h3>
+        <table class="price-table">
+          <tr><th>Platforma</th><th>Baha</th></tr>
+          <tr><td>Payeer</td><td>10 TMT = 0.53$</td></tr>
+          <tr><td>Perfect Money</td><td>10 TMT = 0.53$</td></tr>
+          <tr><td>Webmoney</td><td>10 TMT = 0.53 WMZ</td></tr>
+        </table>
+
+        <div class="action-buttons">
+          <button class="action-btn buy-btn" id="buy-btn">Satyn almak</button>
+          <button class="action-btn sell-btn" id="sell-btn">Satmak</button>
+        </div>
+      </div>
+
+      <!-- Satyn almak forma -->
+      <div class="content" id="buy-section" style="display:none;">
+        <h2>Satyn almak</h2>
+        
+        <div class="form-group">
+          <label for="buy-crypto">Platforma saýlaň</label>
+          <select id="buy-crypto" required>
+            <option value="">Saýlaň...</option>
+            <option value="payeer">Payeer</option>
+            <option value="perfect">Perfect Money</option>
+            <option value="webmoney">Webmoney</option>
+          </select>
+        </div>
+
+        <!-- Payeer uchun -->
+        <div id="buy-payeer-fields" style="display:none;">
+          <div class="form-group">
+            <label for="buy-payeer-id">Payeer ID</label>
+            <input type="text" id="buy-payeer-id" placeholder="P123456789">
+          </div>
+          <div class="form-group">
+            <label for="buy-currency">Valiuta</label>
+            <select id="buy-currency">
+              <option value="usd">USD ($)</option>
+              <option value="rub">RUB (₽)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="buy-amount" id="buy-amount-label">Näçe USD almakçysyňyz?</label>
+            <input type="number" id="buy-amount" min="1" step="0.01" placeholder="1.00">
+          </div>
+        </div>
+
+        <!-- Perfect Money uchun -->
+        <div id="buy-perfect-fields" style="display:none;">
+          <div class="form-group">
+            <label for="buy-perfect-id">Perfect Money ID</label>
+            <input type="text" id="buy-perfect-id" placeholder="U1234567">
+          </div>
+          <div class="form-group">
+            <label for="buy-perfect-amount">Näçe USD almakçysyňyz?</label>
+            <input type="number" id="buy-perfect-amount" min="1" step="0.01" placeholder="1.00">
+          </div>
+        </div>
+
+        <!-- WebMoney uchun -->
+        <div id="buy-webmoney-fields" style="display:none;">
+          <div class="form-group">
+            <label for="buy-webmoney-id">WebMoney ID (WMZ)</label>
+            <input type="text" id="buy-webmoney-id" placeholder="Z123456789012">
+          </div>
+          <div class="form-group">
+            <label for="buy-webmoney-amount">Näçe WMZ almakçysyňyz?</label>
+            <input type="number" id="buy-webmoney-amount" min="1" step="0.01" placeholder="1.00">
+          </div>
+        </div>
+
+        <div class="price-display">
+          Jemi: <span id="buy-total"></span> TMT
+        </div>
+
+        <div class="form-group">
+          <label for="buy-phone">Nomeriňiz (Pul göýberjek nomer)</label>
+          <input type="tel" id="buy-phone" placeholder="+993 XX XXXXXX">
+        </div>
+
+        <button class="btn" id="buy-confirm-btn">Tassyklamak we töleg etmek</button>
+      </div>
+
+      <!-- Satmak forma -->
+      <div class="content" id="sell-section" style="display:none;">
+        <h2>Satmak</h2>
+        
+        <div class="form-group">
+          <label for="sell-crypto">Platforma saýlaň</label>
+          <select id="sell-crypto" required>
+            <option value="">Saýlaň...</option>
+            <option value="payeer">Payeer</option>
+            <option value="perfect">Perfect Money</option>
+            <option value="webmoney">Webmoney</option>
+            <option value="crypto">Kriptawalýutalar</option>
+          </select>
+        </div>
+
+        <!-- Payeer satmak -->
+        <div id="sell-payeer-fields" style="display:none;">
+          <div class="form-group">
+            <label for="sell-currency">Walýuta</label>
+            <select id="sell-currency">
+              <option value="usd">USD ($)</option>
+              <option value="rub">RUB (₽)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="sell-amount" id="sell-amount-label">Näçe USD satmak isleýändigiňiz?</label>
+            <input type="number" id="sell-amount" min="0.53" step="0.01" placeholder="1.00">
+          </div>
+          <div class="form-group">
+            <label for="sell-payeer-id">Siziň Payeer ID</label>
+            <input type="text" id="sell-payeer-id" placeholder="P123456789">
+          </div>
+        </div>
+
+        <!-- Perfect Money satmak -->
+        <div id="sell-perfect-fields" style="display:none;">
+          <div class="form-group">
+            <label for="sell-perfect-amount">Näçe USD satmak isleýändigiňiz?</label>
+            <input type="number" id="sell-perfect-amount" min="0.53" step="0.01" placeholder="1.00">
+          </div>
+          <div class="form-group">
+            <label for="sell-perfect-id">Siziň Perfect Money ID</label>
+            <input type="text" id="sell-perfect-id" placeholder="U1234567">
+          </div>
+        </div>
+
+        <!-- WebMoney satmak -->
+        <div id="sell-webmoney-fields" style="display:none;">
+          <div class="form-group">
+            <label for="sell-webmoney-amount">Näçe WMZ satmak isleýändigiňiz?</label>
+            <input type="number" id="sell-webmoney-amount" min="0.53" step="0.01" placeholder="1.00">
+          </div>
+          <div class="form-group">
+            <label for="sell-webmoney-id">Siziň WebMoney ID (WMZ)</label>
+            <input type="text" id="sell-webmoney-id" placeholder="Z123456789012">
+          </div>
+        </div>
+
+        <!-- Kripto uchun -->
+        <div id="sell-crypto-warning" style="display:none;">
+          <div class="note">
+            <strong>⚠️ Habar:</strong> Bu usul häzirçe goşulmadyk. Ýakyn wagtda goşular!
+          </div>
+        </div>
+
+        <div class="price-display">
+          Siz alarsyňyz: <span id="sell-total"></span>$
+        </div>
+
+        <div class="form-group">
+          <label for="secret-code">Bir gizlin söz (tassyklama üçin)</label>
+          <input type="text" id="secret-code" placeholder="Sözüňizi giriziň">
+          <p class="note">Bu sözi hiç kime aýtmaň! diňe siz we biz bilýäriz.</p>
+        </div>
+
+        <button class="btn" id="sell-confirm-btn">Töleg etmek</button>
+      </div>
+
+      <!-- Töleg ma'lumotlari (Satyn almak uchun) -->
+      <div class="content" id="buy-payment-section" style="display:none;">
+        <h2>Töleg maglumatlary</h2>
+        
+        <p><strong>⚠️Diňläň!</strong> Tölegiňiz <u>faqat öz nomeriňizden</u> ýerine ýetirilmelidir.</p>
+        
+        <div class="numbers">
+          <p>+993 71 789091</p>
+          <p>+993 64 629487</p>
+          <p>+993 71 234567</p>
+        </div>
+
+        <p>Ýokarydaky nomerlerden birine jemi töleg mukdaryny geçiriň.</p>
+
+        <h3>Tölegi tassyklaň</h3>
+        <div class="radio-group">
+          <div class="radio-option" onclick="handleProofType('screenshot')">
+            <input type="radio" name="proof" id="proof-screenshot" value="screenshot">
+            <label for="proof-screenshot">Skrinshot</label>
+          </div>
+          <div class="radio-option" onclick="handleProofType('sms')">
+            <input type="radio" name="proof" id="proof-sms" value="sms">
+            <label for="proof-sms">SMS habary</label>
+          </div>
+        </div>
+
+        <!-- SMS uchun matn maydoni -->
+        <div id="sms-input-section" style="display:none; margin-top:20px;">
+          <p><strong>SMS habary nusgalap goýuň ýa-da töleg geçen wagtyny ýazyň:</strong></p>
+          <textarea id="sms-text" rows="3" placeholder="SMS matnini shu ýere ýazyň..."></textarea>
+        </div>
+
+        <!-- Skrinshot uchun xabar -->
+        <div id="screenshot-warning" style="display:none; margin-top:20px; background:#fef3c7; padding:15px; border-radius:10px;">
+          <strong>⚠️ Bu funksiýa häli goşulmadyk.</strong> Häzirçe diňe SMS habary kabul edilýär.
+        </div>
+
+        <div class="loading" id="buy-loading">
+          <div class="spinner"></div>
+          <p>Ýüklenýär...</p>
+        </div>
+        <div class="error-message" id="buy-error"></div>
+
+        <button class="btn" id="buy-submit-btn">Göýbermek we tassyklamak</button>
+      </div>
+
+      <!-- Töleg ma'lumotlari (Satmak uchun) -->
+      <div class="content" id="sell-payment-section" style="display:none;">
+        <h2>Töleg ma'lumotlary</h2>
+        
+        <div class="note">
+          <p><strong>Siz aşakdäki ID adrese pul ýollamalysyňyz:</strong></p>
+          <p id="sell-admin-address">P1115509057</p>
+          <p>Mukdary: <span id="sell-send-amount"></span> $</p>
+        </div>
+
+        <h3>Tölegi tassyklaň</h3>
+        <div class="radio-group">
+          <div class="radio-option" onclick="handleProofTypeSell('screenshot')">
+            <input type="radio" name="sell-proof" id="sell-proof-screenshot" value="screenshot">
+            <label for="sell-proof-screenshot">Skrinshot</label>
+          </div>
+          <div class="radio-option" onclick="handleProofTypeSell('sms')">
+            <input type="radio" name="sell-proof" id="sell-proof-sms" value="sms">
+            <label for="sell-proof-sms">SMS habary</label>
+          </div>
+        </div>
+
+        <!-- SMS uchun matn maydoni (Satmak) -->
+        <div id="sms-input-section-sell" style="display:none; margin-top:20px;">
+          <p><strong>SMS habary nusgalap goýuň ýa-da töleg geçen wagtyny ýazyň:</strong></p>
+          <textarea id="sms-text-sell" rows="3" placeholder="SMS matnini shu ýere ýazyň..."></textarea>
+        </div>
+
+        <!-- Skrinshot uchun xabar (Satmak) -->
+        <div id="screenshot-warning-sell" style="display:none; margin-top:20px; background:#fef3c7; padding:15px; border-radius:10px;">
+          <strong>⚠️ Bu funksiýa häli goşulmadyk.</strong> Häzirçe diňe SMS habary kabul edilýär.
+        </div>
+
+        <div class="loading" id="sell-loading">
+          <div class="spinner"></div>
+          <p>Ýüklenýär...</p>
+        </div>
+        <div class="error-message" id="sell-error"></div>
+
+        <button class="btn" id="sell-submit-btn">Tassyklamak we ibermek</button>
+      </div>
+
+      <!-- Muvaffaqiyatli xabar -->
+      <div class="content" id="success-section" style="display:none;">
+        <div class="success-message">
+          <h2>🎉 Üstünlik!</h2>
+          <p>Iň tiz wagtda Ýakyn siz bilen baglanar we size bron kody we bilet nusgasy berer.</p>
+          <p>Baş sahypa gaýtmagyňyz mümkin.</p>
+        </div>
+        <a href="index.html" class="btn">Baş sahypa</a>
+      </div>
+
+      <footer>
+        © 2025 Ýeňil. Hemme hukuklar goralandyr.
+      </footer>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    // Firebase konfiguratsiyasi
+    const firebaseConfig = {
+      apiKey: "AIzaSyCc3EeDkk_Bhvw8TphLj60aJSXtyWwWpZw",
+      authDomain: "yenil-app.firebaseapp.com",
+      databaseURL: "https://yenil-app-default-rtdb.firebaseio.com",
+      projectId: "yenil-app",
+      storageBucket: "yenil-app.firebasestorage.app",
+      messagingSenderId: "55580105205",
+      appId: "1:55580105205:web:0b3cce1b76596c5097e8bc"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Qora/oq rejim
+    const saved = localStorage.getItem('theme') || 'light-mode';
+    document.body.className = saved;
+    document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      document.body.classList.toggle('light-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark-mode' : 'light-mode');
+      document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
+    });
+
+    // Mobil menyu
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+      document.getElementById('nav-menu').classList.toggle('active');
+    });
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        document.getElementById('nav-menu').classList.remove('active');
+      });
+    });
+
+    // === ASOSIY FUNKSIYALAR ===
+
+    // "Satyn almak" tugmasi
+    document.getElementById('buy-btn').addEventListener('click', function() {
+      document.getElementById('buy-section').style.display = 'block';
+    });
+
+    // "Satmak" tugmasi
+    document.getElementById('sell-btn').addEventListener('click', function() {
+      document.getElementById('sell-section').style.display = 'block';
+    });
+
+    // Platforma tanlovi — Satyn almak
+    document.getElementById('buy-crypto').addEventListener('change', function() {
+      const v = this.value;
+      document.getElementById('buy-payeer-fields').style.display = v === 'payeer' ? 'block' : 'none';
+      document.getElementById('buy-perfect-fields').style.display = v === 'perfect' ? 'block' : 'none';
+      document.getElementById('buy-webmoney-fields').style.display = v === 'webmoney' ? 'block' : 'none';
+      updateBuyLabels();
+    });
+
+    // Platforma tanlovi — Satmak
+    document.getElementById('sell-crypto').addEventListener('change', function() {
+      const v = this.value;
+      document.getElementById('sell-payeer-fields').style.display = v === 'payeer' ? 'block' : 'none';
+      document.getElementById('sell-perfect-fields').style.display = v === 'perfect' ? 'block' : 'none';
+      document.getElementById('sell-webmoney-fields').style.display = v === 'webmoney' ? 'block' : 'none';
+      document.getElementById('sell-crypto-warning').style.display = v === 'crypto' ? 'block' : 'none';
+      updateSellLabels();
+    });
+
+    // Label o'zgarishi — Satyn almak
+    function updateBuyLabels() {
+      const crypto = document.getElementById('buy-crypto').value;
+      if (crypto !== 'payeer') return;
+      
+      const currency = document.getElementById('buy-currency').value;
+      const label = document.getElementById('buy-amount-label');
+      const amountInput = document.getElementById('buy-amount');
+      
+      if (currency === 'usd') {
+        label.textContent = 'Näçe USD almakçysyňyz? ';
+        amountInput.min = '1';
+      } else if (currency === 'rub') {
+        label.textContent = 'Näçe RUB almakçysyňyz? ';
+        amountInput.min = '90';
+      }
+      calculateBuyPrice();
+    }
+
+    // Label o'zgarishi — Satmak
+    function updateSellLabels() {
+      const crypto = document.getElementById('sell-crypto').value;
+      if (crypto !== 'payeer') return;
+      
+      const currency = document.getElementById('sell-currency').value;
+      const label = document.getElementById('sell-amount-label');
+      
+      if (currency === 'usd') {
+        label.textContent = 'Näçe USD satmak isleýändigiňiz? ';
+      } else if (currency === 'rub') {
+        label.textContent = 'Näçe RUB satmak isleýändigiňiz? ';
+      }
+      calculateSellPrice();
+    }
+
+    document.getElementById('buy-currency')?.addEventListener('change', updateBuyLabels);
+    document.getElementById('sell-currency')?.addEventListener('change', updateSellLabels);
+
+    // Hisoblash — Satyn almak (19 TMT)
+    function calculateBuyPrice() {
+      const crypto = document.getElementById('buy-crypto').value;
+      let amount = 0;
+      
+      if (crypto === 'payeer') {
+        amount = parseFloat(document.getElementById('buy-amount').value) || 0;
+        const currency = document.getElementById('buy-currency').value;
+        const min = currency === 'usd' ? 1 : 90;
+        if (amount >= min) {
+          const total = amount * (currency === 'usd' ? 19 : 0.21);
+          document.getElementById('buy-total').textContent = total.toFixed(2);
+        } else {
+          document.getElementById('buy-total').textContent = '0.00';
+        }
+      } else if (crypto === 'perfect') {
+        amount = parseFloat(document.getElementById('buy-perfect-amount').value) || 0;
+        if (amount >= 1) {
+          document.getElementById('buy-total').textContent = (amount * 19).toFixed(2);
+        } else {
+          document.getElementById('buy-total').textContent = '0.00';
+        }
+      } else if (crypto === 'webmoney') {
+        amount = parseFloat(document.getElementById('buy-webmoney-amount').value) || 0;
+        if (amount >= 1) {
+          document.getElementById('buy-total').textContent = (amount * 19).toFixed(2);
+        } else {
+          document.getElementById('buy-total').textContent = '0.00';
+        }
+      }
+    }
+
+    // Hisoblash — Satmak (19 TMT)
+    function calculateSellPrice() {
+  const crypto = document.getElementById('sell-crypto').value;
+  let amount = 0;
+  
+  if (crypto === 'payeer') {
+    amount = parseFloat(document.getElementById('sell-amount').value) || 0;
+    const currency = document.getElementById('sell-currency').value;
+    // 1 USD = 19 TMT
+    const tmtValue = amount * (currency === 'usd' ? 19 : 0.21); // 1 RUB = 0.21 TMT
+    if (tmtValue >= 10) {
+      document.getElementById('sell-total').textContent = tmtValue.toFixed(2);
+      document.getElementById('sell-send-amount').textContent = amount.toFixed(2) + (currency === 'usd' ? ' USD' : ' RUB');
+    } else {
+      document.getElementById('sell-total').textContent = '0.00';
+    }
+  } else if (crypto === 'perfect') {
+    amount = parseFloat(document.getElementById('sell-perfect-amount').value) || 0;
+    const tmtValue = amount * 19;
+    if (tmtValue >= 10) {
+      document.getElementById('sell-total').textContent = tmtValue.toFixed(2);
+      document.getElementById('sell-send-amount').textContent = amount.toFixed(2) + ' USD';
+    } else {
+      document.getElementById('sell-total').textContent = '0.00';
+    }
+  } else if (crypto === 'webmoney') {
+    amount = parseFloat(document.getElementById('sell-webmoney-amount').value) || 0;
+    const tmtValue = amount * 19; // WMZ ham 19 TMT
+    if (tmtValue >= 10) {
+      document.getElementById('sell-total').textContent = tmtValue.toFixed(2);
+      document.getElementById('sell-send-amount').textContent = amount.toFixed(2) + ' WMZ';
+    } else {
+      document.getElementById('sell-total').textContent = '0.00';
+    }
+  }
+}
+
+    document.querySelectorAll('#buy-amount, #buy-perfect-amount, #buy-webmoney-amount').forEach(el => {
+      el.addEventListener('input', calculateBuyPrice);
+    });
+    document.querySelectorAll('#sell-amount, #sell-perfect-amount, #sell-webmoney-amount').forEach(el => {
+      el.addEventListener('input', calculateSellPrice);
+    });
+
+    // "Tasdiqlaň we töleg etmek"
+    document.getElementById('buy-confirm-btn').addEventListener('click', function() {
+      const crypto = document.getElementById('buy-crypto').value;
+      let valid = false;
+      
+      if (crypto === 'payeer') {
+        valid = document.getElementById('buy-payeer-id').value && parseFloat(document.getElementById('buy-amount').value) >= (document.getElementById('buy-currency').value === 'usd' ? 1 : 90);
+      } else if (crypto === 'perfect') {
+        valid = document.getElementById('buy-perfect-id').value && parseFloat(document.getElementById('buy-perfect-amount').value) >= 1;
+      } else if (crypto === 'webmoney') {
+        valid = document.getElementById('buy-webmoney-id').value && parseFloat(document.getElementById('buy-webmoney-amount').value) >= 1;
+      }
+
+      if (!valid || !document.getElementById('buy-phone').value) {
+        alert('⚠️, ähli meýdançalary dolduryň!');
+        return;
+      }
+
+      document.getElementById('buy-section').style.display = 'none';
+      document.getElementById('buy-payment-section').style.display = 'block';
+    });
+
+    // "Töleg etmek" (Satmak)
+    document.getElementById('sell-confirm-btn').addEventListener('click', function() {
+      const crypto = document.getElementById('sell-crypto').value;
+      if (crypto === 'crypto') {
+        alert('Bu usul häzirçe işlemeýär. Ýakyn wagtda goşular!');
+        return;
+      }
+
+      let valid = false;
+      let amount = 0, userId = "", adminAddress = "", sendAmount = 0, currencyType = "";
+
+      if (crypto === 'payeer') {
+        amount = parseFloat(document.getElementById('sell-amount').value) || 0;
+        const currency = document.getElementById('sell-currency').value;
+        const tmtValue = amount * (currency === 'usd' ? 19 : 0.21);
+        userId = document.getElementById('sell-payeer-id').value;
+        adminAddress = "P1115509057";
+        sendAmount = amount;
+        currencyType = currency === 'usd' ? 'USD' : 'RUB';
+        valid = tmtValue >= 10 && userId;
+      } else if (crypto === 'perfect') {
+        amount = parseFloat(document.getElementById('sell-perfect-amount').value) || 0;
+        const tmtValue = amount * 19;
+        userId = document.getElementById('sell-perfect-id').value;
+        adminAddress = "U1234567";
+        sendAmount = amount;
+        currencyType = 'USD';
+        valid = tmtValue >= 10 && userId;
+      } else if (crypto === 'webmoney') {
+        amount = parseFloat(document.getElementById('sell-webmoney-amount').value) || 0;
+        const tmtValue = amount * 19;
+        userId = document.getElementById('sell-webmoney-id').value;
+        adminAddress = "Z123456789012";
+        sendAmount = amount;
+        currencyType = 'WMZ';
+        valid = tmtValue >= 10 && userId;
+      }
+
+      if (!valid || !document.getElementById('secret-code').value) {
+        alert('⚠️, ähli meýdançalary dolduryň!');
+        return;
+      }
+
+      document.getElementById('sell-admin-address').textContent = adminAddress;
+      document.getElementById('sell-send-amount').textContent = sendAmount.toFixed(2) + ' ' + currencyType;
+      
+      document.getElementById('sell-section').style.display = 'none';
+      document.getElementById('sell-payment-section').style.display = 'block';
+    });
+
+    // Töleg tassyklama turini boshqarish — Satyn almak
+    function handleProofType(type) {
+      document.getElementById('proof-screenshot').checked = (type === 'screenshot');
+      document.getElementById('proof-sms').checked = (type === 'sms');
+      
+      const smsSection = document.getElementById('sms-input-section');
+      const screenshotWarning = document.getElementById('screenshot-warning');
+      
+      if (type === 'sms') {
+        smsSection.style.display = 'block';
+        screenshotWarning.style.display = 'none';
+      } else if (type === 'screenshot') {
+        smsSection.style.display = 'none';
+        screenshotWarning.style.display = 'block';
+      }
+    }
+
+    // Töleg tassyklama turini boshqarish — Satmak
+    function handleProofTypeSell(type) {
+      document.getElementById('sell-proof-screenshot').checked = (type === 'screenshot');
+      document.getElementById('sell-proof-sms').checked = (type === 'sms');
+      
+      const smsSection = document.getElementById('sms-input-section-sell');
+      const screenshotWarning = document.getElementById('screenshot-warning-sell');
+      
+      if (type === 'sms') {
+        smsSection.style.display = 'block';
+        screenshotWarning.style.display = 'none';
+      } else if (type === 'screenshot') {
+        smsSection.style.display = 'none';
+        screenshotWarning.style.display = 'block';
+      }
+    }
+
+    // Radio tugmalar
+    document.querySelectorAll('.radio-option').forEach(option => {
+      option.addEventListener('click', function() {
+        const radio = this.querySelector('input[type="radio"]');
+        if (radio) {
+          radio.checked = true;
+        }
+      });
+    });
+
+    // "Göýbermek we tassyklamak" (Satyn almak)
+    document.getElementById('buy-submit-btn').addEventListener('click', function() {
+      const proofType = document.querySelector('input[name="proof"]:checked');
+      if (!proofType) {
+        alert('⚠️, töleg tassyklamasyny saýlaň!');
+        return;
+      }
+
+      // Agar skrinshot tanlangan bo'lsa
+      if (proofType.value === 'screenshot') {
+        alert('Bu funksiýa häli goşulmadyk. Häzirçe diňe SMS habary kabul edilýär.');
+        return;
+      }
+
+      // Agar SMS tanlangan bo'lsa
+      if (proofType.value === 'sms') {
+        const smsText = document.getElementById('sms-text').value.trim();
+        if (!smsText) {
+          alert('⚠️, SMS habar nusgasyny giriziň!');
+          return;
+        }
+      }
+
+      const crypto = document.getElementById('buy-crypto').value;
+      let orderData = {
+        type: 'buy',
+        crypto: crypto,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      };
+
+      if (crypto === 'payeer') {
+        orderData.payeerId = document.getElementById('buy-payeer-id').value;
+        orderData.currency = document.getElementById('buy-currency').value;
+        orderData.amount = document.getElementById('buy-amount').value;
+      } else if (crypto === 'perfect') {
+        orderData.perfectId = document.getElementById('buy-perfect-id').value;
+        orderData.amount = document.getElementById('buy-perfect-amount').value;
+      } else if (crypto === 'webmoney') {
+        orderData.webmoneyId = document.getElementById('buy-webmoney-id').value;
+        orderData.amount = document.getElementById('buy-webmoney-amount').value;
+      }
+
+      orderData.total = document.getElementById('buy-total').textContent;
+      orderData.phone = document.getElementById('buy-phone').value;
+      orderData.proofType = proofType.value;
+      if (proofType.value === 'sms') {
+        orderData.smsText = document.getElementById('sms-text').value;
+      }
+
+      if (!orderData.phone || !orderData.amount || !orderData.total) {
+        alert('⚠️, ähli meýdançalary dolduryň!');
+        return;
+      }
+
+      // Yuklanishni ko'rsatish
+      const loading = document.getElementById('buy-loading');
+      const error = document.getElementById('buy-error');
+      const btn = document.getElementById('buy-submit-btn');
+      
+      loading.style.display = 'block';
+      error.style.display = 'none';
+      btn.disabled = true;
+
+      database.ref('orders').push(orderData)
+        .then(() => {
+          loading.style.display = 'none';
+          document.getElementById('buy-payment-section').style.display = 'none';
+          document.getElementById('success-section').style.display = 'block';
+        })
+        .catch((err) => {
+          loading.style.display = 'none';
+          error.textContent = 'Ýalňyşlyk: ' + err.message;
+          error.style.display = 'block';
+          btn.disabled = false;
+        });
+    });
+
+    // "Tassyklamak we ibermek" (Satmak)
+    document.getElementById('sell-submit-btn').addEventListener('click', function() {
+      const proofType = document.querySelector('input[name="sell-proof"]:checked');
+      if (!proofType) {
+        alert('⚠️, töleg tassyklama saýlaň!');
+        return;
+      }
+
+      // Agar skrinshot tanlangan bo'lsa
+      if (proofType.value === 'screenshot') {
+        alert('Bu funksiýa häli goşulmadyk. Häzirçe diňe SMS habary kabul edilýär.');
+        return;
+      }
+
+      // Agar SMS tanlangan bo'lsa
+      if (proofType.value === 'sms') {
+        const smsText = document.getElementById('sms-text-sell').value.trim();
+        if (!smsText) {
+          alert('⚠️, SMS habary nusgasy giriziň!');
+          return;
+        }
+      }
+
+      const crypto = document.getElementById('sell-crypto').value;
+      let orderData = {
+        type: 'sell',
+        crypto: crypto,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      };
+
+      if (crypto === 'payeer') {
+        orderData.payeerId = document.getElementById('sell-payeer-id').value;
+        orderData.currency = document.getElementById('sell-currency').value;
+        orderData.amount = document.getElementById('sell-amount').value;
+      } else if (crypto === 'perfect') {
+        orderData.perfectId = document.getElementById('sell-perfect-id').value;
+        orderData.amount = document.getElementById('sell-perfect-amount').value;
+      } else if (crypto === 'webmoney') {
+        orderData.webmoneyId = document.getElementById('sell-webmoney-id').value;
+        orderData.amount = document.getElementById('sell-webmoney-amount').value;
+      }
+
+      orderData.total = document.getElementById('sell-total').textContent;
+      orderData.secretCode = document.getElementById('secret-code').value;
+      orderData.proofType = proofType.value;
+      if (proofType.value === 'sms') {
+        orderData.smsText = document.getElementById('sms-text-sell').value;
+      }
+
+      if (!orderData.amount || !orderData.total || !orderData.secretCode) {
+        alert('⚠️, ähli meýdançalary dolduryň!');
+        return;
+      }
+
+      // Yuklanishni ko'rsatish
+      const loading = document.getElementById('sell-loading');
+      const error = document.getElementById('sell-error');
+      const btn = document.getElementById('sell-submit-btn');
+      
+      loading.style.display = 'block';
+      error.style.display = 'none';
+      btn.disabled = true;
+
+      database.ref('orders').push(orderData)
+        .then(() => {
+          loading.style.display = 'none';
+          document.getElementById('sell-payment-section').style.display = 'none';
+          document.getElementById('success-section').style.display = 'block';
+        })
+        .catch((err) => {
+          loading.style.display = 'none';
+          error.textContent = 'Ýalňyşlyk: ' + err.message;
+          error.style.display = 'block';
+          btn.disabled = false;
+        });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="tk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kömek — Ýeňil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+  /* Ortadagi logotip */
+.logo-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 15px;
+  z-index: 99;
+}
+.logo-img {
+  height: 40px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+.logo-img:hover {
+  transform: scale(1.1);
+}
+body.dark-mode .logo-img {
+  filter: brightness(0.9);
+}
+/* Mobil uchun logotip */
+@media (max-width: 768px) {
+  .logo-center {
+    top: -113px;
+  }
+  .logo-img {
+    height: 300px;
+  }
+}
+
+/* Header uchun tuzatish */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  background: var(--light-bg);
+  z-index: 100;
+  position: relative;
+}
+body.dark-mode .header {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  background: var(--dark-bg);
+}
+
+    .faq-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .faq-item {
+      margin-bottom: 15px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .faq-question {
+      width: 100%;
+      padding: 18px 20px;
+      background: var(--card-light);
+      border: none;
+      text-align: left;
+      font-weight: 600;
+      color: var(--primary);
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    body.dark-mode .faq-question {
+      background: var(--card-dark);
+    }
+    .faq-answer {
+      display: none;
+      padding: 20px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+    }
+    body.dark-mode .faq-answer {
+      background: #1e293b;
+      border-top-color: #334155;
+    }
+    .form-group {
+      margin: 20px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 1rem;
+      background: white;
+    }
+    body.dark-mode input,
+    body.dark-mode textarea {
+      background: #1e293b;
+      border-color: #334155;
+      color: white;
+    }
+  </style>
+</head>
+<body class="light-mode">
+  <!-- Menyu — Ortada logotip -->
+<header class="header">
+  <div class="container">
+    <nav class="navbar">
+      <div class="menu-toggle" id="menu-toggle">☰</div>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="index.html">Bosh sahifa</a></li>
+        <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
+        <li><a href="pay.html">Ýeňil pay</a></li>
+        <li><a href="about.html">Biz barada</a></li>
+        <li><a href="help.html">Kömek</a></li>
+        <li><button class="theme-toggle" id="theme-toggle">🌓</button></li>
+      </ul>
+    </nav>
+    <div class="logo-center">
+      <img src="images/logo-header.png" alt="Ýeňil" class="logo-img" onclick="window.location='index.html'">
+    </div>
+  </div>
+</header>
+
+  <div class="container" style="padding: 40px 20px;">
+    <h1 style="text-align:center; margin-bottom:40px;">Ýeňil barada sorag joagap</h1>
+
+    <div class="faq-container">
+      <!-- Savol 1 -->
+      <div class="faq-item">
+        <button class="faq-question">1. Siz tölegi öňünden alýaňyzmy ýa-da tölegi soň etsem hem bolýamy ?</button>
+        <div class="faq-answer">
+          <p>Howa biz tölegi öňünden alýas iş ýerine ýetirilenden soň däl. Biz töleg edilenden soň işe başlaýarys.</p>
+        </div>
+      </div>
+
+      <!-- Savol 2 -->
+      <div class="faq-item">
+        <button class="faq-question">2. Ýeňil demirýollaryna ýa-da Ýeňil pay-a ýüz tutsam ol näçe wagt içinde ýerine ýetirilýär?</button>
+        <div class="faq-answer">
+          <p>Siz bize ýüz tutsaňyz biz 24 sagadyň içinde siziň işiňiz barada maglymat berilýär we biz 7/24 işleýäs.</p>
+        </div>
+      </div>
+
+      <!-- Savol 3 -->
+      <div class="faq-item">
+        <button class="faq-question">3. Eger näsazlyk bolan ýagdaýynda tölän pulymy yzyna alyp bilerinmi?</button>
+        <div class="faq-answer">
+          <p>Howa eger biz tarapda näsazlyk bolsa töleg edilen pul doly yzyna geçirilýär. Egerde siz töleg edenden soň pulyňyzy yzyna sorasaňyz we biz hem işe başlamadyk bolsak pul doly yzyna geçirilip berilýär. Eger de biz siziň işiňize ýerine ýetirenden soň pul yzyna soralsa tölenen pulyň 50% yzyna geçirilýä, galan 50% bolsa işlenen iş üçin tutulýar. Şuny ýatdan çykarmaň.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="content" style="margin-top: 40px;">
+      <h2>Sözüňiz barmy?</h2>
+      <p>Agar yuqarydaky soraglarga jogap tapmasaňyz, öz soragyňyzy yozyp beriň:</p>
+      
+      <div class="form-group">
+        <label for="user-name">Adyňyz</label>
+        <input type="text" id="user-name" placeholder="Adyňyz">
+      </div>
+
+      <div class="form-group">
+        <label for="user-phone">Nomeriňiz (Siz bilen baglanmak üçin)</label>
+        <input type="tel" id="user-phone" placeholder="+993 XX XXXXXXX">
+      </div>
+
+      <div class="form-group">
+        <label for="user-question">Soragyňyz</label>
+        <textarea id="user-question" rows="4" placeholder="Soragyňyzy bu ýere ýazyň..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="user-file">Faýl goşmak (ixtiýari)</label>
+        <input type="file" id="user-file">
+        <p style="font-size:0.85rem; margin-top:5px; opacity:0.7;">(Hozircha faýl yuborish qo'llab-quvvatlanmayar, faqat matn)</p>
+      </div>
+
+      <button class="btn" id="submit-question">Soragy göýber</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK (compat versiyasi) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    // Sizning Firebase konfiguratsiyangiz
+    const firebaseConfig = {
+      apiKey: "AIzaSyCc3EeDkk_Bhvw8TphLj60aJSXtyWwWpZw",
+      authDomain: "yenil-app.firebaseapp.com",
+      databaseURL: "https://yenil-app-default-rtdb.firebaseio.com", // ⚠️ Majburiy!
+      projectId: "yenil-app",
+      storageBucket: "yenil-app.firebasestorage.app",
+      messagingSenderId: "55580105205",
+      appId: "1:55580105205:web:0b3cce1b76596c5097e8bc"
+    };
+
+    // Firebase ni ishga tushirish
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Qora/oq rejim
+    const saved = localStorage.getItem('theme') || 'light-mode';
+    document.body.className = saved;
+    document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      document.body.classList.toggle('light-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark-mode' : 'light-mode');
+      document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
+    });
+
+    // Mobil menyu
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+      document.getElementById('nav-menu').classList.toggle('active');
+    });
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        document.getElementById('nav-menu').classList.remove('active');
+      });
+    });
+
+    // FAQ animatsiyasi
+    document.querySelectorAll('.faq-question').forEach(button => {
+      button.addEventListener('click', () => {
+        const answer = button.nextElementSibling;
+        answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+      });
+    });
+
+    // Sorag yuborish
+    document.getElementById('submit-question').addEventListener('click', function() {
+      const name = document.getElementById('user-name').value;
+      const phone = document.getElementById('user-phone').value;
+      const question = document.getElementById('user-question').value;
+      
+      if (!name.trim() || !phone.trim() || !question.trim()) {
+        alert('⚠️, ähli meýdançalary dolduryň!');
+        return;
+      }
+      
+      const questionData = {
+        name: name,
+        phone: phone,
+        question: question,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      };
+
+      // Firebase ga yuborish
+      database.ref('questions').push(questionData)
+        .then(() => {
+          alert('Soragyňyz üstünlikli göýberildi! Tez orada jogap beriler.');
+          // Formani tozalash
+          document.getElementById('user-name').value = '';
+          document.getElementById('user-phone').value = '';
+          document.getElementById('user-question').value = '';
+        })
+        .catch((error) => {
+          alert('Xatolik yuz berdi: ' + error.message);
+        });
+    });
+  </script>
+</body>
+</html>

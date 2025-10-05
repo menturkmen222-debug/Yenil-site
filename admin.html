@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="tk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Ýeňil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --success: #06d6a0;
+      --danger: #ef476f;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --card-light: #ffffff;
+      --card-dark: #1e293b;
+      --text-light: #333;
+      --text-dark: #f1f5f9;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-dark: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f5f7fb;
+      color: var(--text-light);
+      transition: background-color 0.3s, color 0.3s;
+      line-height: 1.6;
+    }
+
+    body.dark-mode {
+      background-color: #0f172a;
+      color: var(--text-dark);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .header {
+      background: white;
+      box-shadow: var(--shadow);
+      padding: 15px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    body.dark-mode .header {
+      background: #1e293b;
+      box-shadow: var(--shadow-dark);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .theme-toggle:hover {
+      background: #f1f5f9;
+    }
+
+    body.dark-mode .theme-toggle:hover {
+      background: #334155;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 16px;
+      margin: 30px 0;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      position: relative;
+      background: var(--card-light);
+      border: none;
+      padding: 14px 24px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    body.dark-mode .tab-btn {
+      background: var(--card-dark);
+      box-shadow: var(--shadow-dark);
+    }
+
+    .tab-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(67, 97, 238, 0.2);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--danger);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    /* Content area */
+    .content-area {
+      margin-top: 20px;
+      min-height: 300px;
+    }
+
+    .order-item, .question-item {
+      background: var(--card-light);
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.4s ease-out;
+      position: relative;
+    }
+
+    body.dark-mode .order-item,
+    body.dark-mode .question-item {
+      background: var(--card-dark);
+    }
+
+    .priority-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--danger);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .priority-badge.checked {
+      background: var(--success);
+    }
+
+    .priority-badge input {
+      display: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 71, 111, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 71, 111, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 71, 111, 0); }
+    }
+
+    .priority-badge.pulse {
+      animation: pulse 1.5s infinite;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #64748b;
+      font-style: italic;
+    }
+
+    .order-detail, .question-detail {
+      margin: 5px 0;
+      font-size: 0.95rem;
+    }
+
+    .order-header, .question-header {
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body class="light-mode">
+  <header class="header">
+    <div class="container navbar">
+      <div class="logo">Ýeňil Admin</div>
+      <button class="theme-toggle" id="theme-toggle">🌓</button>
+    </div>
+  </header>
+
+  <div class="container" style="padding: 40px 20px;">
+    <h1 style="text-align:center; margin-bottom:40px;">Hoş geldiň!</h1>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="rail">
+        Ýeňil demirýollary
+        <span class="badge" id="badge-rail">0</span>
+      </button>
+      <button class="tab-btn" data-tab="pay">
+        Ýeňil Pay
+        <span class="badge" id="badge-pay">0</span>
+      </button>
+      <button class="tab-btn" data-tab="help">
+        Kömek bo'limi
+        <span class="badge" id="badge-help">0</span>
+      </button>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area" id="content-area">
+      <div class="empty-state">Bo'limni tanlaň</div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCc3EeDkk_Bhvw8TphLj60aJSXtyWwWpZw",
+      authDomain: "yenil-app.firebaseapp.com",
+      databaseURL: "https://yenil-app-default-rtdb.firebaseio.com",
+      projectId: "yenil-app",
+      storageBucket: "yenil-app.firebasestorage.app",
+      messagingSenderId: "55580105205",
+      appId: "1:55580105205:web:0b3cce1b76596c5097e8bc"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Theme
+    const savedTheme = localStorage.getItem('theme') || 'light-mode';
+    document.body.className = savedTheme;
+    document.getElementById('theme-toggle').textContent = savedTheme === 'dark-mode' ? '☀️' : '🌙';
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      document.body.classList.toggle('light-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark-mode' : 'light-mode');
+      document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
+    });
+
+    // Tab switching
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const contentArea = document.getElementById('content-area');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        loadTabContent(tab);
+      });
+    });
+
+    // Data stores
+    let allOrders = {};
+    let allQuestions = {};
+
+    database.ref('orders').on('value', (snapshot) => {
+      allOrders = snapshot.val() || {};
+      updateBadges();
+      const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+      if (activeTab === 'rail' || activeTab === 'pay') {
+        loadTabContent(activeTab);
+      }
+    });
+
+    database.ref('questions').on('value', (snapshot) => {
+      allQuestions = snapshot.val() || {};
+      updateBadges();
+      if (document.querySelector('.tab-btn.active')?.dataset.tab === 'help') {
+        loadTabContent('help');
+      }
+    });
+
+    function updateBadges() {
+      const railCount = Object.values(allOrders).filter(o => 
+        o.type === 'demiryol' && !o.priorityChecked
+      ).length;
+      document.getElementById('badge-rail').textContent = railCount > 0 ? railCount : '';
+
+      const payCount = Object.values(allOrders).filter(o => 
+        (o.type === 'buy' || o.type === 'sell') && !o.priorityChecked
+      ).length;
+      document.getElementById('badge-pay').textContent = payCount > 0 ? payCount : '';
+
+      const helpCount = Object.values(allQuestions).filter(q => !q.priorityChecked).length;
+      document.getElementById('badge-help').textContent = helpCount > 0 ? helpCount : '';
+    }
+
+    function loadTabContent(tab) {
+      let html = '';
+
+      if (tab === 'rail') {
+        const railOrders = Object.entries(allOrders)
+          .filter(([key, order]) => order.type === 'demiryol')
+          .sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+
+        if (railOrders.length === 0) {
+          contentArea.innerHTML = `<div class="empty-state">Demirýol buyurtmasy ýok.</div>`;
+          return;
+        }
+
+        html = railOrders.map(([key, order]) => {
+          const isExpired = order.priorityExpiresAt && Date.now() > order.priorityExpiresAt;
+          if (isExpired && order.priorityChecked) {
+            database.ref(`orders/${key}`).remove();
+            return '';
+          }
+
+          // Format birthdate if exists
+          const birthDate = order.birthdate 
+            ? new Date(order.birthdate).toLocaleDateString('tk-TM') 
+            : '—';
+
+          return `
+            <div class="order-item">
+              <div class="order-header">Demirýol — ${order.route || '—'}</div>
+              <div class="order-detail"><strong>Ady/Familýa:</strong> ${order.name || ''} ${order.surname || ''}</div>
+              <div class="order-detail"><strong>Doglan kuni:</strong> ${birthDate}</div>
+              <div class="order-detail"><strong>Passport ID:</strong> ${order.passport || '—'}</div>
+              <div class="order-detail"><strong>Sapar senesi:</strong> ${order.travelDate || '—'}</div>
+              <div class="order-detail"><strong>Jemi:</strong> ${order.totalPrice || '0'} TMT</div>
+              <div class="order-detail"><strong>Nomer:</strong> ${order.clientPhone || '—'}</div>
+              <div class="order-detail"><strong>Tassyklama:</strong> ${order.proofType === 'screenshot' ? 'Skrinshot' : 'SMS habary'}</div>
+              ${order.smsText ? `<div class="order-detail"><strong>SMS:</strong> ${order.smsText}</div>` : ''}
+              <div class="order-detail"><strong>Wagt:</strong> ${order.timestamp ? new Date(order.timestamp).toLocaleString('tk-TM') : '—'}</div>
+              
+              <div class="priority-badge ${order.priorityChecked ? 'checked' : ''} ${!order.priorityChecked ? 'pulse' : ''}" 
+                   data-id="${key}" data-type="orders">
+                <input type="checkbox" ${order.priorityChecked ? 'checked' : ''}>
+                Üstünlikli
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      else if (tab === 'pay') {
+        const payOrders = Object.entries(allOrders)
+          .filter(([key, order]) => order.type === 'buy' || order.type === 'sell')
+          .sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+
+        if (payOrders.length === 0) {
+          contentArea.innerHTML = `<div class="empty-state">Ýeňil Pay buyurtmasy ýok.</div>`;
+          return;
+        }
+
+        html = payOrders.map(([key, order]) => {
+          const isExpired = order.priorityExpiresAt && Date.now() > order.priorityExpiresAt;
+          if (isExpired && order.priorityChecked) {
+            database.ref(`orders/${key}`).remove();
+            return '';
+          }
+
+          if (order.type === 'buy') {
+            return `
+              <div class="order-item">
+                <div class="order-header">Satyn almak — ${order.crypto || 'Kripto'}</div>
+                <div class="order-detail"><strong>Miqdary:</strong> ${order.amount || '0'}</div>
+                <div class="order-detail"><strong>Jemi:</strong> ${order.total || '0'} TMT</div>
+                <div class="order-detail"><strong>Nomer:</strong> ${order.phone || '—'}</div>
+                ${order.payeerId ? `<div class="order-detail"><strong>Payeer ID:</strong> ${order.payeerId}</div>` : ''}
+                ${order.perfectId ? `<div class="order-detail"><strong>Perfect ID:</strong> ${order.perfectId}</div>` : ''}
+                ${order.webmoneyId ? `<div class="order-detail"><strong>WebMoney ID:</strong> ${order.webmoneyId}</div>` : ''}
+                <div class="order-detail"><strong>Tassyklama:</strong> ${order.proofType === 'screenshot' ? 'Skrinshot' : 'SMS habary'}</div>
+                <div class="order-detail"><strong>Wagt:</strong> ${order.timestamp ? new Date(order.timestamp).toLocaleString('tk-TM') : '—'}</div>
+                
+                <div class="priority-badge ${order.priorityChecked ? 'checked' : ''} ${!order.priorityChecked ? 'pulse' : ''}" 
+                     data-id="${key}" data-type="orders">
+                  <input type="checkbox" ${order.priorityChecked ? 'checked' : ''}>
+                  Üstünlikli
+                </div>
+              </div>
+            `;
+          } else if (order.type === 'sell') {
+            return `
+              <div class="order-item">
+                <div class="order-header">Satmak — ${order.crypto || 'Kripto'}</div>
+                <div class="order-detail"><strong>Miqdary:</strong> ${order.amount || '0'}</div>
+                <div class="order-detail"><strong>Jemi:</strong> ${order.total || '0'} $</div>
+                <div class="order-detail"><strong>Maxfiy söz:</strong> ${order.secretCode || '—'}</div>
+                ${order.payeerId ? `<div class="order-detail"><strong>Payeer ID:</strong> ${order.payeerId}</div>` : ''}
+                ${order.perfectId ? `<div class="order-detail"><strong>Perfect ID:</strong> ${order.perfectId}</div>` : ''}
+                ${order.webmoneyId ? `<div class="order-detail"><strong>WebMoney ID:</strong> ${order.webmoneyId}</div>` : ''}
+                <div class="order-detail"><strong>Tassyklama:</strong> ${order.proofType === 'screenshot' ? 'Skrinshot' : 'SMS habary'}</div>
+                <div class="order-detail"><strong>Wagt:</strong> ${order.timestamp ? new Date(order.timestamp).toLocaleString('tk-TM') : '—'}</div>
+                
+                <div class="priority-badge ${order.priorityChecked ? 'checked' : ''} ${!order.priorityChecked ? 'pulse' : ''}" 
+                     data-id="${key}" data-type="orders">
+                  <input type="checkbox" ${order.priorityChecked ? 'checked' : ''}>
+                  Üstünlikli
+                </div>
+              </div>
+            `;
+          }
+        }).join('');
+      }
+
+      else if (tab === 'help') {
+        const questions = Object.entries(allQuestions)
+          .sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+
+        if (questions.length === 0) {
+          contentArea.innerHTML = `<div class="empty-state">Sorag ýok.</div>`;
+          return;
+        }
+
+        html = questions.map(([key, q]) => {
+          const isExpired = q.priorityExpiresAt && Date.now() > q.priorityExpiresAt;
+          if (isExpired && q.priorityChecked) {
+            database.ref(`questions/${key}`).remove();
+            return '';
+          }
+
+          return `
+            <div class="question-item">
+              <div class="question-header">${q.name || 'Anonim'}</div>
+              <div class="question-detail"><strong>Nomer:</strong> ${q.phone || '—'}</div>
+              <div class="question-detail"><strong>Sorag:</strong> ${q.question || '—'}</div>
+              <div class="question-detail"><small>${q.timestamp ? new Date(q.timestamp).toLocaleString('tk-TM') : '—'}</small></div>
+              
+              <div class="priority-badge ${q.priorityChecked ? 'checked' : ''} ${!q.priorityChecked ? 'pulse' : ''}" 
+                   data-id="${key}" data-type="questions">
+                <input type="checkbox" ${q.priorityChecked ? 'checked' : ''}>
+                Üstünlikli
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      contentArea.innerHTML = html || `<div class="empty-state">Ma'lumot ýok.</div>`;
+
+      // Add event listeners to priority badges
+      document.querySelectorAll('.priority-badge').forEach(badge => {
+        badge.addEventListener('click', togglePriority);
+      });
+    }
+
+    function togglePriority(e) {
+      const badge = e.currentTarget;
+      const id = badge.dataset.id;
+      const type = badge.dataset.type;
+      const isChecked = badge.classList.contains('checked');
+
+      const ref = database.ref(`${type}/${id}`);
+
+      if (isChecked) {
+        ref.update({ priorityChecked: null, priorityExpiresAt: null });
+      } else {
+        const expiresAt = Date.now() + 3 * 24 * 60 * 60 * 1000;
+        ref.update({ 
+          priorityChecked: true, 
+          priorityExpiresAt: expiresAt 
+        });
+      }
+    }
+
+    // Initialize
+    loadTabContent('rail');
+  </script>
+</body>
+</html>
