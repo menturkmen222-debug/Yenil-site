@@ -2,7 +2,7 @@
 <html lang="tk" dir="ltr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.5"/>
   <title>Ýeňil Demirýollary</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -551,14 +551,17 @@ body.dark-mode .route-select {
         <button class="btn" id="continue-btn">Dowam et</button>
       </div>
       
+    
       <!-- Yangi qo'shilgan qism -->
 <div class="note" style="margin-top: 30px; background: #ecfdf5; border-left: 4px solid #10b981;">
   <p style="font-weight: 600; color: #065f46;">📝 Online zaýawka berip bilmeýänler üçin ýeňillik</p>        
 </div>
 
-<button class="btn" style="background: #10b981; margin-top: 20px;" onclick="window.location='sms.html'">
+<button class="btn" id="sms-btn" style="background: #10b981; margin-top: 20px; border-radius: 50px; padding: 12px 30px; font-size: 1rem;" onclick="window.location='sms.html'">
   📱 SMS zaýawka
 </button>
+
+
 
 <!-- Chegirma qismi -->
 <div class="note" style="margin-top: 30px; background: #fffbeb; border-left: 4px solid #f59e0b;">
@@ -635,19 +638,27 @@ body.dark-mode .route-select {
           <label for="travel-date">Sapar senesi (15 günden artyk bolmaz)</label>
           <input type="date" id="travel-date" required>
         </div>
+        
+        <!-- 1-gat töleg -->
+<div class="addon">
+  <input type="checkbox" id="first-class">
+  <label for="first-class">1-nji gat</label>
+</div>
 
-        <div class="addon">
-          <input type="checkbox" id="media">
-          <label for="media">Media portal gerekmi? (+5 TMT)</label>
-        </div>
+        <!-- 2-gat töleg -->
+<div class="addon">
+  <input type="checkbox" id="second-class">
+  <label for="second-class">2-nji gat</label>
+</div>
 
-        <div class="addon">
-          <input type="checkbox" id="first-class">
-          <label for="first-class">1-nji gat töleg (diňe 1-3 günler üçin)? (+10 TMT)</label>
-        </div>
+<!-- Media portal -->
+<div class="addon">
+  <input type="checkbox" id="media">
+  <label for="media">Media portal</label>
+</div>
 
         <div class="price-display">
-          Jemi töleg: <span id="total-price">60</span> TMT
+          Jemi töleg: <span id="total-price">0.00</span> TMT
         </div>
 
         <button class="btn" id="pay-btn">Töleg etmek</button>
@@ -657,7 +668,7 @@ body.dark-mode .route-select {
       <div class="content" id="payment-section" style="display:none;">
         <h2>Töleg ma'lumotlary</h2>
         
-        <p><strong>Esasy!</strong> Tölegiňiz <u>faqat öz nomeriňizden</u> ýerine ýetirilmelidir.</p>
+        <p><strong>Esasy!</strong> Tölegiňiz <u>diňe öz nomeriňizden</u> ýerine ýetirilmelidir.</p>
         
         <div class="form-group">
           <label for="client-phone">Siziň nomeriňiz (Töleg ediljek nomer)</label>
@@ -665,13 +676,11 @@ body.dark-mode .route-select {
         </div>
 
         <p>Bizniň töleg nomerlerimiz:</p>
-        <div class="numbers">
-          <p>+993 71 789091</p>
-          <p>+993 64 629487</p>
-          <p>+993 71 234567</p>
+        <div class="numbers" id="payment-amount-display">
+          <!-- Töleg mukdary bu ýerde dinamik usulda görkezilýär -->
         </div>
 
-        <p>Ýokardaky nomerlaryň birine hasaplanan töleg mukdaryny geçirmeli .</p>
+        <p>Ýokardaky nomerlaryň birine hasaplanan töleg mukdaryny geçirmeli .</p> 
 
         <h3>Tölegi tassyklaň</h3>
         <div class="radio-group">
@@ -696,12 +705,6 @@ body.dark-mode .route-select {
           <strong>⚠️ Bu funksiýa häli goşulmadyk.</strong> Häzirlikçe diňe SMS habary kabul edilýär.
         </div>
 
-        <div class="loading" id="loading">
-          <div class="spinner"></div>
-          <p>Ýüklenýär...</p>
-        </div>
-        <div class="error-message" id="error"></div>
-
         <button class="btn" id="submit-btn">Göýbermek we tassyklamak</button>
       </div>
 
@@ -721,6 +724,12 @@ body.dark-mode .route-select {
         </div>
 
         <p><strong>Tasyklaýamyň?</strong> Eger ähli maglumatlar dogry bolsa, "Hawa" düwmesine basyň.</p>
+        
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>Ýüklenýär...</p>
+        </div>
+        <div class="error-message" id="error"></div>
 
         <button class="btn" id="confirm-yes">Hawa, tassyklaýyn</button>
         <button class="btn" style="background:#94a3b8;" id="confirm-no">Ýok, özgertmek gerek</button>
@@ -737,7 +746,7 @@ body.dark-mode .route-select {
       </div>
 
       <footer>
-        © 2025 Ýeňil. Hemme hukuklar goralandyr.
+        © 2025 Ýeňil. Hemma hukuklar goralan.
       </footer>
     </div>
   </div>
@@ -755,7 +764,8 @@ body.dark-mode .route-select {
       projectId: "yenil-app",
       storageBucket: "yenil-app.firebasestorage.app",
       messagingSenderId: "55580105205",
-      appId: "1:55580105205:web:0b3cce1b76596c5097e8bc"
+      appId: "1:55580105205:web:0b3cce1b76596c5097e8bc",
+      measurementId: "G-P4DP3ZSWZD"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -796,14 +806,31 @@ body.dark-mode .route-select {
     });
 
     // "Dowam et"
-    document.getElementById('continue-btn').addEventListener('click', function() {
-      if (document.getElementById('read-info').checked) {
-        document.getElementById('form-section').style.display = 'block';
-        calculatePrice();
-      } else {
-        alert('Ýalňyş, "Maglumatlary okap çykdym we razy" ketegine belgi goýuň!');
-      }
-    });
+    // "Dowam et"
+document.getElementById('continue-btn').addEventListener('click', function() {
+  if (document.getElementById('read-info').checked) {
+    document.getElementById('form-section').style.display = 'block'; // Bu ishlashi kerak
+    // ... boshqa kodlar ...
+ // 👇 Pastdagi barcha yozuvlarni yashirish
+    const notes = document.querySelectorAll('.note, .highlight, .checkbox-group');
+    notes.forEach(note => {
+      note.style.display = 'none';
+    })
+    
+     // 👇 SMS knopkasini ham yashirish
+    const smsButton = document.getElementById('sms-btn');
+    if (smsButton) {
+      smsButton.style.display = 'none';
+    }
+    
+    calculatePrice();
+    updateAddonPrices();
+  } else {
+    alert('Ýalňyş, "Maglumatlary okap çykdym we razy" ketegine belgi goýuň!');
+  }
+});
+    
+    
 
     // Sanani cheklash
     const today = new Date();
@@ -816,29 +843,131 @@ body.dark-mode .route-select {
     travelDateInput.max = maxDateStr;
 
     // Hisoblash
-    function calculatePrice() {
-      const travelDate = new Date(document.getElementById('travel-date').value);
-      const today = new Date();
-      const diffTime = travelDate - today;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      let basePrice = 60;
-      if (diffDays <= 1) basePrice = 80;
-      else if (diffDays <= 3) basePrice = 70;
+// Hisoblash funksiyasi
+// Hisoblash funksiyasi
+function calculatePrice() {
+  const travelDateInput = document.getElementById('travel-date');
+  if (!travelDateInput || !travelDateInput.value) return;
 
-      let total = basePrice;
-      if (document.getElementById('media').checked) total += 5;
-      if (document.getElementById('first-class').checked && diffDays <= 3) total += 10;
+  const travelDate = new Date(travelDateInput.value);
+  const today = new Date();
+  const diffTime = travelDate - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  // Asosiy bahalar
+  let basePrice = 60;
+  if (diffDays <= 1) basePrice = 80;
+  else if (diffDays <= 3) basePrice = 70;
 
-      document.getElementById('total-price').textContent = total;
+  // Checkbox larni tekshirish
+  let addons = 0;
+
+  // 2-nji gat töleg (+10 TMT agar 1-4 kun, +5 TMT agar 4-15 kun)
+  if (document.getElementById('second-class')?.checked) {
+    if (diffDays <= 4) {
+      addons += 10; // 1-4 kun
+    } else {
+      addons += 5; // 4-15 kun
     }
+  }
 
-    document.getElementById('travel-date').addEventListener('change', calculatePrice);
-    document.getElementById('media').addEventListener('change', calculatePrice);
-    document.getElementById('first-class').addEventListener('change', calculatePrice);
+  // Media portal (+5 TMT)
+  if (document.getElementById('media')?.checked) {
+    addons += 5;
+  }
+
+  // 1-nji gat töleg (faqat 1-3 gün üçin) (+15 TMT agar 1-4 kun, +10 TMT agar 4-15 kun)
+  if (document.getElementById('first-class')?.checked) {
+    if (diffDays <= 4) {
+      addons += 15; // 1-4 kun
+    } else {
+      addons += 10; // 4-15 kun
+    }
+  }
+
+  // Jami narx
+  let total = basePrice + addons;
+
+  // Minimal narxni tekshirish
+  if (total < 0) total = 0;
+
+  const priceDisplay = document.getElementById('total-price');
+  if (priceDisplay) {
+    priceDisplay.textContent = total.toFixed(2);
+  }
+
+  // To'lov bo'limiga jami narxni yuborish
+  updatePaymentAmountDisplay(total, diffDays);
+
+  return total; // Jami narxni qaytaramiz
+}
+
+// Töleg mukdaryni yangilash funksiyasi
+function updatePaymentAmountDisplay(total, diffDays) {
+  const paymentSection = document.getElementById('payment-section');
+  const paymentDisplay = document.getElementById('payment-amount-display');
+  
+  if (paymentDisplay) {
+    let priceBreakdown = `<p></p>`;
+    
+    // Asosiy baha
+    let basePrice = 60;
+    if (diffDays <= 1) basePrice = 80;
+    else if (diffDays <= 3) basePrice = 70;
+    priceBreakdown += `<p><strong>Bilediň bahasy : ${basePrice} TMT</strong></p>`;
+    
+    // 1-nji gat
+    if (document.getElementById('first-class')?.checked) {
+      const firstClassPrice = (diffDays <= 4) ? 15 : 10;
+      priceBreakdown += `<p>1-nji gat: +${firstClassPrice} TMT</p>`;
+    }
+    // 2-nji gat
+    if (document.getElementById('second-class')?.checked) {
+      const secondClassPrice = (diffDays <= 4) ? 10 : 5;
+      priceBreakdown += `<p>2-nji gat: +${secondClassPrice} TMT</p>`;
+    }
+    // Media
+    if (document.getElementById('media')?.checked) {
+      priceBreakdown += `<p>Media portal: +5 TMT</p>`;
+    }
+    
+    
+    
+    priceBreakdown += `<p><strong>Jemi töleg: ${total.toFixed(2)} TMT</strong></p>`;
+    priceBreakdown += `<p>+993 71 789091</p><p>+993 64 629487</p><p>+993 71 234567</p>`;
+    
+    paymentDisplay.innerHTML = priceBreakdown;
+  }
+}
+
+    // Checkbox o'zgarishida hisoblash
+    // Checkbox o'zgarishida hisoblash
+// Checkbox larni mutual exclusive qilish
+document.getElementById('first-class')?.addEventListener('change', function() {
+  if (this.checked) {
+    document.getElementById('second-class').checked = false;
+  }
+});
+
+document.getElementById('second-class')?.addEventListener('change', function() {
+  if (this.checked) {
+    document.getElementById('first-class').checked = false;
+  }
+});
+
+// Checkbox o'zgarishida hisoblash
+// Sanani tanlaganda real vaqtda hisoblash
+document.getElementById('travel-date')?.addEventListener('change', function() {
+  calculatePrice();
+  updateAddonPrices(); // Qo'shimcha xizmatlar narxini yangilash
+});
+document.getElementById('second-class')?.addEventListener('change', calculatePrice);
+document.getElementById('media')?.addEventListener('change', calculatePrice);
+document.getElementById('first-class')?.addEventListener('change', calculatePrice);
 
     // "Töleg etmek"
-    document.getElementById('pay-btn').addEventListener('click', function() {
+    
+document.getElementById('pay-btn').addEventListener('click', function() {
       const name = document.getElementById('name').value;
       const surname = document.getElementById('surname').value;
       const travelDate = document.getElementById('travel-date').value;
@@ -847,6 +976,10 @@ body.dark-mode .route-select {
         alert('Ýalňyş, ähli meýdançalary doldurylmaly!');
         return;
       }
+
+      // Töleg mukdaryni yangilash
+      const total = calculatePrice();
+      updatePaymentAmountDisplay(total, Math.ceil((new Date(travelDate) - new Date()) / (1000 * 60 * 60 * 24)));
 
       document.getElementById('payment-section').style.display = 'block';
       document.getElementById('form-section').style.display = 'none';
@@ -877,6 +1010,11 @@ body.dark-mode .route-select {
         const type = radio.id.includes('screenshot') ? 'screenshot' : 'sms';
         handleProofType(type);
       });
+    });
+
+    // Pasport ID kiritganda katta harp qilish
+    document.getElementById('passport').addEventListener('input', function() {
+      this.value = this.value.toUpperCase();
     });
 
     // "Göýbermek we tassyklamak"
@@ -931,11 +1069,14 @@ document.getElementById('confirm-yes').addEventListener('click', function() {
   const name = document.getElementById('name').value;
   const surname = document.getElementById('surname').value;
   const passport = document.getElementById('passport').value;
-  const birthdate = document.getElementById('birthdate').value; // ✅ QO'SHILDI
+  const birthdate = document.getElementById('birthdate').value;
   const route = document.getElementById('route').value;
   const travelDate = document.getElementById('travel-date').value;
   const totalPrice = document.getElementById('total-price').textContent;
   const clientPhone = document.getElementById('client-phone').value;
+  const firstClass = document.getElementById('first-class').checked;
+const secondClass = document.getElementById('second-class').checked;
+const mediaPortal = document.getElementById('media').checked;
   const proofType = document.querySelector('input[name="proof"]:checked').value;
   const smsText = proofType === 'sms' ? document.getElementById('sms-text').value : null;
 
@@ -945,20 +1086,24 @@ document.getElementById('confirm-yes').addEventListener('click', function() {
     return;
   }
 
-  const orderData = {
-    type: 'demiryol',
-    name: name,
-    surname: surname,
-    passport: passport,
-    birthdate: birthdate, // ✅ QO'SHILDI
-    route: route,
-    travelDate: travelDate,
-    totalPrice: totalPrice,
-    clientPhone: clientPhone,
-    proofType: proofType,
-    smsText: smsText,
-    timestamp: firebase.database.ServerValue.TIMESTAMP
-  };
+ const orderData = {
+  type: 'demiryol',
+  name: name,
+  surname: surname,
+  passport: passport,
+  birthdate: birthdate,
+  route: route,
+  travelDate: travelDate,
+  totalPrice: parseFloat(totalPrice),
+  clientPhone: clientPhone,
+  proofType: proofType,
+  smsText: smsText,
+  // ✅ Yangi maydonlar qo'shildi:
+  firstClass: firstClass,
+  secondClass: secondClass,
+  mediaPortal: mediaPortal,
+  timestamp: firebase.database.ServerValue.TIMESTAMP
+};
 
   // Yuklanishni ko'rsatish
   const loading = document.getElementById('loading');

@@ -2,7 +2,7 @@
 <html lang="tk">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.5"/>
   <title>Admin — Ýeňil</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -366,25 +366,28 @@
             : '—';
 
           return `
-            <div class="order-item">
-              <div class="order-header">Demirýol — ${order.route || '—'}</div>
-              <div class="order-detail"><strong>Ady/Familýa:</strong> ${order.name || ''} ${order.surname || ''}</div>
-              <div class="order-detail"><strong>Doglan kuni:</strong> ${birthDate}</div>
-              <div class="order-detail"><strong>Passport ID:</strong> ${order.passport || '—'}</div>
-              <div class="order-detail"><strong>Sapar senesi:</strong> ${order.travelDate || '—'}</div>
-              <div class="order-detail"><strong>Jemi:</strong> ${order.totalPrice || '0'} TMT</div>
-              <div class="order-detail"><strong>Nomer:</strong> ${order.clientPhone || '—'}</div>
-              <div class="order-detail"><strong>Tassyklama:</strong> ${order.proofType === 'screenshot' ? 'Skrinshot' : 'SMS habary'}</div>
-              ${order.smsText ? `<div class="order-detail"><strong>SMS:</strong> ${order.smsText}</div>` : ''}
-              <div class="order-detail"><strong>Wagt:</strong> ${order.timestamp ? new Date(order.timestamp).toLocaleString('tk-TM') : '—'}</div>
-              
-              <div class="priority-badge ${order.priorityChecked ? 'checked' : ''} ${!order.priorityChecked ? 'pulse' : ''}" 
-                   data-id="${key}" data-type="orders">
-                <input type="checkbox" ${order.priorityChecked ? 'checked' : ''}>
-                Üstünlikli
-              </div>
-            </div>
-          `;
+  <div class="order-item">
+    <div class="order-header">Demirýol — ${order.route || '—'}</div>
+    <div class="order-detail"><strong>Ady/Familýa:</strong> ${order.name || ''} ${order.surname || ''}</div>
+    <div class="order-detail"><strong>Doglan kuni:</strong> ${birthDate}</div>
+    <div class="order-detail"><strong>Passport ID:</strong> ${order.passport || '—'}</div>
+    <div class="order-detail"><strong>Sapar senesi:</strong> ${order.travelDate || '—'}</div>
+    <div class="order-detail"><strong>Jemi:</strong> ${order.totalPrice || '0'} TMT</div>
+    <div class="order-detail"><strong>Nomer:</strong> ${order.clientPhone || '—'}</div>
+    ${order.firstClass ? '<div class="order-detail"><strong>1-nji gat:</strong> ✅</div>' : ''}
+    ${order.secondClass ? '<div class="order-detail"><strong>2-nji gat:</strong> ✅</div>' : ''}
+    ${order.mediaPortal ? '<div class="order-detail"><strong>Media portal:</strong> ✅</div>' : ''}
+    <div class="order-detail"><strong>Tassyklama:</strong> ${order.proofType === 'screenshot' ? 'Skrinshot' : 'SMS habary'}</div>
+    ${order.smsText ? `<div class="order-detail"><strong>SMS:</strong> ${order.smsText}</div>` : ''}
+    <div class="order-detail"><strong>Wagt:</strong> ${order.timestamp ? new Date(order.timestamp).toLocaleString('tk-TM') : '—'}</div>
+    
+    <div class="priority-badge ${order.priorityChecked ? 'checked' : ''} ${!order.priorityChecked ? 'pulse' : ''}" 
+         data-id="${key}" data-type="orders">
+      <input type="checkbox" ${order.priorityChecked ? 'checked' : ''}>
+      Üstünlikli
+    </div>
+  </div>
+`;
         }).join('');
       }
 

@@ -233,7 +233,7 @@ body.dark-mode .service-card {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230d9488' fill-opacity='0.08'%3E%3Cpath d='M30 0 L30 60 M0 30 L60 30'/%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230d9488' fill-opacity='0.08'%3E%3Cpath d='M30 0 L30 60 M0 30 L60 30'/%3E%3Ccircle cx='30' cy='30' r='2'/%3C/g%3E%3C/g%3E%3C/svg%3E");
   z-index: 0;
 }
 .service-card > * {
@@ -245,8 +245,8 @@ body.dark-mode .service-card {
   box-shadow: 0 12px 24px rgba(13, 148, 136, 0.25);
 }
 .service-icon {
-  width: 500px;
-  height: 500px;
+  width: 80px;
+  height: 80px;
   margin: 0 auto 20px;
   display: flex;
   align-items: center;
@@ -544,4 +544,77 @@ footer {
   opacity: 0.7;
   font-size: 0.9rem;
   margin-top: auto;
+}
+
+/* Route selector */
+.route-selector {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+.route-option {
+  flex: 1;
+  min-width: 200px;
+  padding: 15px;
+  background: var(--card-light);
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+body.dark-mode .route-option {
+  background: var(--card-dark);
+  border-color: #334155;
+}
+.route-option:hover {
+  border-color: var(--primary);
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(13, 148, 136, 0.2);
+}
+.route-option.active {
+  border-color: var(--primary);
+  background: rgba(13, 148, 136, 0.05);
+}
+.route-arrow {
+  font-size: 1.5rem;
+  margin: 10px 0;
+  color: var(--primary);
+}
+
+/* Loading spinner */
+.loading {
+  display: none;
+  text-align: center;
+  padding: 20px;
+}
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error message */
+.error-message {
+  display: none;
+  background: #fee;
+  color: #c33;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
+  text-align: center;
+}
+body.dark-mode .error-message {
+  background: #4a1a03;
+  color: #fcd34d;
 }

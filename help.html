@@ -2,7 +2,7 @@
 <html lang="tk">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.5"/>
   <title>Kömek — Ýeňil</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -119,11 +119,11 @@ body.dark-mode .header {
     <nav class="navbar">
       <div class="menu-toggle" id="menu-toggle">☰</div>
       <ul class="nav-menu" id="nav-menu">
-        <li><a href="index.html">Bosh sahifa</a></li>
+        <li><a href="index.html">Baş sahipa</a></li>
         <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
         <li><a href="pay.html">Ýeňil pay</a></li>
         <li><a href="about.html">Biz barada</a></li>
-        <li><a href="help.html">Kömek</a></li>
+        <li><a href="help.html">Ýardam</a></li>
         <li><button class="theme-toggle" id="theme-toggle">🌓</button></li>
       </ul>
     </nav>
@@ -134,7 +134,7 @@ body.dark-mode .header {
 </header>
 
   <div class="container" style="padding: 40px 20px;">
-    <h1 style="text-align:center; margin-bottom:40px;">Ýeňil barada sorag joagap</h1>
+    <h1 style="text-align:center; margin-bottom:40px;">Ýeňil barada sorag-jogap</h1>
 
     <div class="faq-container">
       <!-- Savol 1 -->
@@ -163,8 +163,8 @@ body.dark-mode .header {
     </div>
 
     <div class="content" style="margin-top: 40px;">
-      <h2>Sözüňiz barmy?</h2>
-      <p>Agar yuqarydaky soraglarga jogap tapmasaňyz, öz soragyňyzy yozyp beriň:</p>
+      <h2>Soragyňyz barmy?</h2>
+      <p>Eger ýokardaky soraglara jogap tapmasaňyz, öz soragyňyzy ýazyp ýollaň:</p>
       
       <div class="form-group">
         <label for="user-name">Adyňyz</label>
@@ -173,7 +173,7 @@ body.dark-mode .header {
 
       <div class="form-group">
         <label for="user-phone">Nomeriňiz (Siz bilen baglanmak üçin)</label>
-        <input type="tel" id="user-phone" placeholder="+993 XX XXXXXXX">
+        <input type="tel" id="user-phone" placeholder="+993 XX XXXXXX">
       </div>
 
       <div class="form-group">
@@ -182,10 +182,16 @@ body.dark-mode .header {
       </div>
 
       <div class="form-group">
-        <label for="user-file">Faýl goşmak (ixtiýari)</label>
+        <label for="user-file">Faýl goşmak (isleseňiz)</label>
         <input type="file" id="user-file">
-        <p style="font-size:0.85rem; margin-top:5px; opacity:0.7;">(Hozircha faýl yuborish qo'llab-quvvatlanmayar, faqat matn)</p>
+        <p style="font-size:0.85rem; margin-top:5px; opacity:0.7;">(Häzirlikçe faýl ýollamak işlemeýär, diňe hat)</p>
       </div>
+      
+      <div class="loading" id="sell-loading">
+          <div class="spinner"></div>
+          <p>Ýüklenýär...</p>
+        </div>
+        <div class="error-message" id="sell-error"></div>
 
       <button class="btn" id="submit-question">Soragy göýber</button>
     </div>
@@ -263,14 +269,14 @@ body.dark-mode .header {
       // Firebase ga yuborish
       database.ref('questions').push(questionData)
         .then(() => {
-          alert('Soragyňyz üstünlikli göýberildi! Tez orada jogap beriler.');
+          alert('✅Soragyňyz üstünlikli göýberildi! Tiz wagtda jogap beriler.');
           // Formani tozalash
           document.getElementById('user-name').value = '';
           document.getElementById('user-phone').value = '';
           document.getElementById('user-question').value = '';
         })
         .catch((error) => {
-          alert('Xatolik yuz berdi: ' + error.message);
+          alert('Ýalňyşlyk yüz berdi: ' + error.message);
         });
     });
   </script>

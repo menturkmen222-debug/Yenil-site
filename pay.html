@@ -2,7 +2,7 @@
 <html lang="tk" dir="ltr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.5"/>
   <title>Ýeňil Pay</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -469,7 +469,7 @@ body.dark-mode .header {
 
   <div class="main-content">
     <div class="container">
-      <a href="index.html" class="back-btn">← Yza</a>
+      <a href="index.html" class="back-btn">⬅️ Yza</a>
       <div class="logo-page">Ýeňil Pay</div>
 
       <div class="content">
@@ -504,9 +504,9 @@ body.dark-mode .header {
         <h3>Satyn almak bahasy (min 1$)</h3>
         <table class="price-table">
           <tr><th>Platforma</th><th>Baha</th></tr>
-          <tr><td>Payeer</td><td>1$ = 19 TMT</td></tr>
-          <tr><td>Perfect Money</td><td>1$ = 19 TMT</td></tr>
-          <tr><td>Webmoney WMZ</td><td>1 WMZ = 19 TMT</td></tr>
+          <tr><td>Payeer</td><td>1$ = 29 TMT</td></tr>
+          <tr><td>Perfect Money</td><td>1$ = 29 TMT</td></tr>
+          <tr><td>Webmoney WMZ</td><td>1 WMZ = 29 TMT</td></tr>
         </table>
 
         <h3>Bize satmak bahasy (min 10 TMT)</h3>
@@ -658,7 +658,7 @@ body.dark-mode .header {
         </div>
 
         <div class="price-display">
-          Siz alarsyňyz: <span id="sell-total"></span>$
+          Siz alarsyňyz: <span id="sell-total"></span>TMT
         </div>
 
         <div class="form-group">
@@ -674,7 +674,7 @@ body.dark-mode .header {
       <div class="content" id="buy-payment-section" style="display:none;">
         <h2>Töleg maglumatlary</h2>
         
-        <p><strong>⚠️Diňläň!</strong> Tölegiňiz <u>faqat öz nomeriňizden</u> ýerine ýetirilmelidir.</p>
+        <p><strong>⚠️Diňläň!</strong> Tölegiňiz <u>diňe öz nomeriňizden</u> ýerine ýetirilmelidir.</p>
         
         <div class="numbers">
           <p>+993 71 789091</p>
@@ -682,8 +682,10 @@ body.dark-mode .header {
           <p>+993 71 234567</p>
         </div>
 
-        <p>Ýokarydaky nomerlerden birine jemi töleg mukdaryny geçiriň.</p>
 
+        <p>Ýokarydaky nomerlerden birine jemi töleg mukdaryny geçiriň.</p>
+    
+        
         <h3>Tölegi tassyklaň</h3>
         <div class="radio-group">
           <div class="radio-option" onclick="handleProofType('screenshot')">
@@ -723,7 +725,7 @@ body.dark-mode .header {
         <div class="note">
           <p><strong>Siz aşakdäki ID adrese pul ýollamalysyňyz:</strong></p>
           <p id="sell-admin-address">P1115509057</p>
-          <p>Mukdary: <span id="sell-send-amount"></span> $</p>
+          <p>Mukdary: <span id="sell-send-amount"></span> </p>
         </div>
 
         <h3>Tölegi tassyklaň</h3>
@@ -895,7 +897,7 @@ body.dark-mode .header {
         const currency = document.getElementById('buy-currency').value;
         const min = currency === 'usd' ? 1 : 90;
         if (amount >= min) {
-          const total = amount * (currency === 'usd' ? 19 : 0.21);
+          const total = amount * (currency === 'usd' ? 29 : 0.31);
           document.getElementById('buy-total').textContent = total.toFixed(2);
         } else {
           document.getElementById('buy-total').textContent = '0.00';
@@ -903,7 +905,7 @@ body.dark-mode .header {
       } else if (crypto === 'perfect') {
         amount = parseFloat(document.getElementById('buy-perfect-amount').value) || 0;
         if (amount >= 1) {
-          document.getElementById('buy-total').textContent = (amount * 19).toFixed(2);
+          document.getElementById('buy-total').textContent = (amount * 29).toFixed(2);
         } else {
           document.getElementById('buy-total').textContent = '0.00';
         }
