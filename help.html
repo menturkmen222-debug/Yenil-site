@@ -7,52 +7,65 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <style>
-  /* Ortadagi logotip */
-.logo-center {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 15px;
-  z-index: 99;
-}
-.logo-img {
-  height: 40px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-.logo-img:hover {
-  transform: scale(1.1);
-}
-body.dark-mode .logo-img {
-  filter: brightness(0.9);
-}
-/* Mobil uchun logotip */
-@media (max-width: 768px) {
+    /* Kompyuter uchun — chap tomonda, left: 15% */
+@media (min-width: 769px) {
   .logo-center {
+    position: absolute;
+    left: 0%; /* Chap tomonda joylashadi */
     top: -113px;
+    transform: none; /* Markazga tushirmaydi */
+    z-index: 99;
   }
+
   .logo-img {
     height: 300px;
   }
 }
 
-/* Header uchun tuzatish */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.1);
-  position: sticky;
-  top: 0;
-  background: var(--light-bg);
-  z-index: 100;
-  position: relative;
+/* Mobil uchun — markazda, left: 50% */
+@media (max-width: 768px) {
+  .logo-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -113px; /* Agar kerak bo'lsa, mobil uchun yuqoriroq */
+    z-index: 99;
+  }
+
+  .logo-img {
+    height: 300px; /* Agar siz bu o'lchamni istasangiz */
+  }
 }
-body.dark-mode .header {
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  background: var(--dark-bg);
-}
+    .logo-img:hover {
+      transform: scale(1.1);
+    }
+    body.dark-mode .logo-img {
+      filter: brightness(0.9);
+    }
+
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      font-size: 20px;
+      line-height: 1.6;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      background: var(--light-bg);
+      z-index: 100;
+      position: relative;
+    }
+    body.dark-mode .header {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      background: var(--dark-bg);
+    }
 
     .faq-container {
       max-width: 800px;
@@ -67,6 +80,7 @@ body.dark-mode .header {
     .faq-question {
       width: 100%;
       padding: 18px 20px;
+      font-size: 20px;
       background: var(--card-light);
       border: none;
       text-align: left;
@@ -75,19 +89,28 @@ body.dark-mode .header {
       cursor: pointer;
       transition: background 0.3s;
     }
+
+    /* ✅ Tuzatilgan: 5px → 18px + zoom oldini olish */
+    .faq-answer {
+      font-size: 18px;
+      display: none;
+      padding: 18px 20px;
+      background: #f8fafc;
+      border-top: 10px solid #e2e8f0;
+      line-height: 1.6;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
     body.dark-mode .faq-question {
       background: var(--card-dark);
     }
-    .faq-answer {
-      display: none;
-      padding: 20px;
-      background: #f8fafc;
-      border-top: 1px solid #e2e8f0;
-    }
+
     body.dark-mode .faq-answer {
       background: #1e293b;
       border-top-color: #334155;
     }
+
     .form-group {
       margin: 20px 0;
     }
@@ -96,6 +119,8 @@ body.dark-mode .header {
       margin-bottom: 8px;
       font-weight: 600;
     }
+
+    /* ✅ Tuzatilgan: faqat 1rem, zoom oldini olish */
     input, textarea {
       width: 100%;
       padding: 12px;
@@ -103,7 +128,10 @@ body.dark-mode .header {
       border-radius: 10px;
       font-size: 1rem;
       background: white;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
     }
+
     body.dark-mode input,
     body.dark-mode textarea {
       background: #1e293b;
@@ -114,27 +142,27 @@ body.dark-mode .header {
 </head>
 <body class="light-mode">
   <!-- Menyu — Ortada logotip -->
-<header class="header">
-  <div class="container">
-    <nav class="navbar">
-      <div class="menu-toggle" id="menu-toggle">☰</div>
-      <ul class="nav-menu" id="nav-menu">
-        <li><a href="index.html">Baş sahipa</a></li>
-        <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
-        <li><a href="pay.html">Ýeňil pay</a></li>
-        <li><a href="about.html">Biz barada</a></li>
-        <li><a href="help.html">Ýardam</a></li>
-        <li><button class="theme-toggle" id="theme-toggle">🌓</button></li>
-      </ul>
-    </nav>
-    <div class="logo-center">
-      <img src="images/logo-header.png" alt="Ýeňil" class="logo-img" onclick="window.location='index.html'">
+  <header class="header">
+    <div class="container">
+      <nav class="navbar">
+        <div class="menu-toggle" id="menu-toggle">☰</div>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="index.html">Bosh sahifa</a></li>
+          <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
+          <li><a href="pay.html">Ýeňil pay</a></li>
+          <li><a href="about.html">Biz barada</a></li>
+          <li><a href="help.html">Kömek</a></li>
+          <li><button class="theme-toggle" id="theme-toggle">🌓</button></li>
+        </ul>
+      </nav>
+      <div class="logo-center">
+        <img src="images/logo-header.png" alt="Ýeňil" class="logo-img" onclick="window.location='index.html'">
+      </div>
     </div>
-  </div>
-</header>
+  </header>
 
   <div class="container" style="padding: 40px 20px;">
-    <h1 style="text-align:center; margin-bottom:40px;">Ýeňil barada sorag-jogap</h1>
+    <h1 style="text-align:center; margin-bottom:40px;">Ýeňil barada sorag joagap</h1>
 
     <div class="faq-container">
       <!-- Savol 1 -->
@@ -163,8 +191,8 @@ body.dark-mode .header {
     </div>
 
     <div class="content" style="margin-top: 40px;">
-      <h2>Soragyňyz barmy?</h2>
-      <p>Eger ýokardaky soraglara jogap tapmasaňyz, öz soragyňyzy ýazyp ýollaň:</p>
+      <h2>Sözüňiz barmy?</h2>
+      <p>Agar yuqarydaky soraglarga jogap tapmasaňyz, öz soragyňyzy yozyp beriň:</p>
       
       <div class="form-group">
         <label for="user-name">Adyňyz</label>
@@ -173,7 +201,7 @@ body.dark-mode .header {
 
       <div class="form-group">
         <label for="user-phone">Nomeriňiz (Siz bilen baglanmak üçin)</label>
-        <input type="tel" id="user-phone" placeholder="+993 XX XXXXXX">
+        <input type="tel" id="user-phone" placeholder="+993 XX XXXXXXX">
       </div>
 
       <div class="form-group">
@@ -182,38 +210,30 @@ body.dark-mode .header {
       </div>
 
       <div class="form-group">
-        <label for="user-file">Faýl goşmak (isleseňiz)</label>
+        <label for="user-file">Faýl goşmak (ixtiýari)</label>
         <input type="file" id="user-file">
-        <p style="font-size:0.85rem; margin-top:5px; opacity:0.7;">(Häzirlikçe faýl ýollamak işlemeýär, diňe hat)</p>
+        <p style="font-size:0.85rem; margin-top:5px; opacity:0.7;">(Hozircha faýl yuborish qo'llab-quvvatlanmayar, faqat matn)</p>
       </div>
-      
-      <div class="loading" id="sell-loading">
-          <div class="spinner"></div>
-          <p>Ýüklenýär...</p>
-        </div>
-        <div class="error-message" id="sell-error"></div>
 
       <button class="btn" id="submit-question">Soragy göýber</button>
     </div>
   </div>
 
-  <!-- Firebase SDK (compat versiyasi) -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <script>
-    // Sizning Firebase konfiguratsiyangiz
     const firebaseConfig = {
       apiKey: "AIzaSyCc3EeDkk_Bhvw8TphLj60aJSXtyWwWpZw",
       authDomain: "yenil-app.firebaseapp.com",
-      databaseURL: "https://yenil-app-default-rtdb.firebaseio.com", // ⚠️ Majburiy!
+      databaseURL: "https://yenil-app-default-rtdb.firebaseio.com",
       projectId: "yenil-app",
       storageBucket: "yenil-app.firebasestorage.app",
       messagingSenderId: "55580105205",
       appId: "1:55580105205:web:0b3cce1b76596c5097e8bc"
     };
 
-    // Firebase ni ishga tushirish
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
@@ -266,17 +286,15 @@ body.dark-mode .header {
         timestamp: firebase.database.ServerValue.TIMESTAMP
       };
 
-      // Firebase ga yuborish
       database.ref('questions').push(questionData)
         .then(() => {
-          alert('✅Soragyňyz üstünlikli göýberildi! Tiz wagtda jogap beriler.');
-          // Formani tozalash
+          alert('Soragyňyz üstünlikli göýberildi! Tez orada jogap beriler.');
           document.getElementById('user-name').value = '';
           document.getElementById('user-phone').value = '';
           document.getElementById('user-question').value = '';
         })
         .catch((error) => {
-          alert('Ýalňyşlyk yüz berdi: ' + error.message);
+          alert('Xatolik yuz berdi: ' + error.message);
         });
     });
   </script>

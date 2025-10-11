@@ -16,17 +16,14 @@
       --card-dark: #1e293b;
       --shadow: 0 6px 16px rgba(0,0,0,0.1);
     }
-
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
     html, body {
       overflow-x: hidden;
     }
-
     body {
       font-family: 'Poppins', sans-serif;
       background: var(--light-bg);
@@ -37,31 +34,43 @@
       display: flex;
       flex-direction: column;
     }
-
     body.dark-mode {
       background: var(--dark-bg);
       color: var(--dark-text);
     }
-
     .container {
-      width: 90%;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0 20px;
+      width: 100%;
+      margin: 0;
+      padding: 0;
     }
+/* Kompyuter uchun — chap tomonda, left: 15% */
+@media (min-width: 769px) {
+  .logo-center {
+    position: absolute;
+    left: 0%; /* Chap tomonda joylashadi */
+    top: -113px;
+    transform: none; /* Markazga tushirmaydi */
+    z-index: 99;
+  }
 
-/* Ortadagi logotip */
-.logo-center {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 15px;
-  z-index: 99;
+  .logo-img {
+    height: 300px;
+  }
 }
-.logo-img {
-  height: 40px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
+
+/* Mobil uchun — markazda, left: 50% */
+@media (max-width: 768px) {
+  .logo-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -113px; /* Agar kerak bo'lsa, mobil uchun yuqoriroq */
+    z-index: 99;
+  }
+
+  .logo-img {
+    height: 300px; /* Agar siz bu o'lchamni istasangiz */
+  }
 }
 .logo-img:hover {
   transform: scale(1.1);
@@ -70,22 +79,12 @@ body.dark-mode .logo-img {
   filter: brightness(0.9);
 }
 
-/* Mobil uchun logotip */
-@media (max-width: 768px) {
-  .logo-center {
-    top: -113px;
-  }
-  .logo-img {
-    height: 300px;
-  }
-}
-    /* Menyu — CHAPDA */
     /* Header uchun tuzatish */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 0;
+  padding: 15px 20px; /* Chap va o'ng tomonda 20px qoldirildi */
   border-bottom: 1px solid rgba(0,0,0,0.1);
   position: sticky;
   top: 0;
@@ -159,7 +158,6 @@ body.dark-mode .header {
     body.dark-mode .menu-toggle {
       color: var(--dark-text);
     }
-
     @media (max-width: 768px) {
       .menu-toggle {
         display: block;
@@ -184,55 +182,47 @@ body.dark-mode .header {
         display: flex;
       }
     }
-
     .main-content {
       flex: 1;
-      padding: 20px 0;
+      padding: 0;
     }
-
     .logo-page {
       font-size: 2.2rem;
       color: var(--primary);
       text-align: center;
-      margin: 20px 0 40px;
+      margin: 20px 0 20px;
     }
-
     .back-btn {
       display: inline-block;
       color: var(--primary);
       text-decoration: none;
-      margin-bottom: 20px;
+      margin: 0 20px 20px;
       font-weight: 600;
     }
-
     .content {
       background: var(--card-light);
       border-radius: 20px;
-      padding: 30px;
+      padding: 20px;
       box-shadow: var(--shadow);
-      margin-bottom: 30px;
+      margin: 0 20px 20px; /* Chap va o'ng tomonda 20px margin */
     }
     body.dark-mode .content {
       background: var(--card-dark);
     }
-
     h1, h2, h3 {
       color: var(--primary);
       margin: 20px 0 15px;
     }
-
     p {
       margin-bottom: 15px;
     }
-
     .highlight {
       background: rgba(13, 148, 136, 0.08);
-      padding: 20px;
+      padding: 15px;
       border-radius: 12px;
-      margin: 25px 0;
+      margin: 20px 0;
       border-left: 4px solid var(--primary);
     }
-
     .crypto-list {
       display: flex;
       flex-wrap: wrap;
@@ -249,7 +239,6 @@ body.dark-mode .header {
     body.dark-mode .crypto-item {
       background: rgba(13, 148, 136, 0.1);
     }
-
     .price-table {
       width: 100%;
       border-collapse: collapse;
@@ -257,14 +246,13 @@ body.dark-mode .header {
     }
     .price-table th, .price-table td {
       border: 1px solid #ddd;
-      padding: 12px;
+      padding: 10px;
       text-align: left;
     }
     body.dark-mode .price-table th,
     body.dark-mode .price-table td {
       border-color: #334155;
     }
-
     .action-buttons {
       display: flex;
       gap: 20px;
@@ -283,21 +271,21 @@ body.dark-mode .header {
     .buy-btn { background: #0d9488; color: white; }
     .sell-btn { background: #dc2626; color: white; }
     .action-btn:hover { opacity: 0.9; }
-
     .form-group {
-      margin: 25px 0;
+      margin: 20px 0;
     }
     label {
       display: block;
       margin-bottom: 8px;
       font-weight: 600;
     }
+    /* ✅ Kiritish kataklari kattalashtirilgan */
     input, select, textarea {
       width: 100%;
       padding: 12px;
       border: 1px solid #ddd;
       border-radius: 10px;
-      font-size: 1rem;
+      font-size: 1rem; /* 0.85rem → 1rem */
       background: white;
     }
     body.dark-mode input,
@@ -307,18 +295,16 @@ body.dark-mode .header {
       border-color: #334155;
       color: white;
     }
-
     .price-display {
       text-align: center;
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: 700;
       color: var(--primary);
-      margin: 30px 0;
-      padding: 20px;
+      margin: 20px 0;
+      padding: 15px;
       background: rgba(13, 148, 136, 0.08);
       border-radius: 16px;
     }
-
     .btn {
       display: block;
       width: 100%;
@@ -338,31 +324,28 @@ body.dark-mode .header {
       opacity: 0.6;
       cursor: not-allowed;
     }
-
     .note {
       background: #fef3c7;
       color: #92400e;
-      padding: 15px;
+      padding: 12px;
       border-radius: 12px;
-      margin: 20px 0;
+      margin: 15px 0;
       font-size: 0.95rem;
     }
     body.dark-mode .note {
       background: #451a03;
       color: #fcd34d;
     }
-
     .numbers {
       background: #f0fdfa;
-      padding: 15px;
+      padding: 12px;
       border-radius: 12px;
-      margin: 20px 0;
+      margin: 15px 0;
       border: 1px dashed var(--primary);
     }
     body.dark-mode .numbers {
       background: rgba(13, 148, 136, 0.1);
     }
-
     .radio-group {
       display: flex;
       gap: 20px;
@@ -372,7 +355,7 @@ body.dark-mode .header {
     .radio-option {
       flex: 1;
       min-width: 200px;
-      padding: 15px;
+      padding: 12px;
       background: var(--card-light);
       border-radius: 12px;
       border: 2px solid #e2e8f0;
@@ -389,20 +372,18 @@ body.dark-mode .header {
       accent-color: var(--primary);
       margin-right: 10px;
     }
-
     .success-message {
       text-align: center;
-      padding: 30px;
+      padding: 20px;
       background: #f0fdf4;
       border-radius: 20px;
-      margin: 30px 0;
+      margin: 20px 20px 40px;
       color: #065f46;
     }
     body.dark-mode .success-message {
       background: rgba(6, 95, 70, 0.2);
       color: #bbf7d0;
     }
-
     /* Yuklanish animatsiyasi */
     .loading {
       display: none;
@@ -422,13 +403,12 @@ body.dark-mode .header {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
     /* Xato xabari */
     .error-message {
       display: none;
       background: #fee;
       color: #c33;
-      padding: 15px;
+      padding: 12px;
       border-radius: 10px;
       margin: 20px 0;
       text-align: center;
@@ -437,16 +417,14 @@ body.dark-mode .header {
       background: #4a1a1a;
       color: #f87171;
     }
-
     footer {
       text-align: center;
-      margin-top: 40px;
+      margin-top: 20px;
       opacity: 0.7;
     }
   </style>
 </head>
 <body class="light-mode">
-  <!-- Menyu — CHAPDA -->
  <!-- Menyu — Ortada logotip -->
 <header class="header">
   <div class="container">
@@ -466,24 +444,18 @@ body.dark-mode .header {
     </div>
   </div>
 </header>
-
   <div class="main-content">
     <div class="container">
       <a href="index.html" class="back-btn">⬅️ Yza</a>
       <div class="logo-page">Ýeňil Pay</div>
-
       <div class="content">
         <h1>Ýeňil Pay bilen doly tanyşyň</h1>
-        
         <p>Online işlerde pul soralýamy?</p>
         <p>Treding we birjalar we Forex bazary bilen işlemekde daşary ýurt puly tapylanokmy?</p>
         <p>Pul geçirmekde maşeniklardan ýadadyňyzmy?</p>
-        
         <p class="highlight">Ýeňil pay indi daşary ýurt pullaryny alyş çalyş hem etýär arzan we ynamly.<br>
         Bize doly 100% ynam berişiňiz mümkin — biz eden işimize doly dakazady bilen jogap bere bilýäs.</p>
-
         <h2>Biz aşakda belläp geçilenler bilen alyş çalyş edip bilýäs:</h2>
-        
         <div class="crypto-list">
           <div class="crypto-item">Payeer</div>
           <div class="crypto-item">Web Money</div>
@@ -498,9 +470,7 @@ body.dark-mode .header {
           <div class="crypto-item">Dogecoin</div>
           <div class="crypto-item">Tron</div>
         </div>
-
         <h2>Alyş çalyş bahalary</h2>
-        
         <h3>Satyn almak bahasy (min 1$)</h3>
         <table class="price-table">
           <tr><th>Platforma</th><th>Baha</th></tr>
@@ -508,7 +478,6 @@ body.dark-mode .header {
           <tr><td>Perfect Money</td><td>1$ = 29 TMT</td></tr>
           <tr><td>Webmoney WMZ</td><td>1 WMZ = 29 TMT</td></tr>
         </table>
-
         <h3>Bize satmak bahasy (min 10 TMT)</h3>
         <table class="price-table">
           <tr><th>Platforma</th><th>Baha</th></tr>
@@ -516,17 +485,14 @@ body.dark-mode .header {
           <tr><td>Perfect Money</td><td>10 TMT = 0.53$</td></tr>
           <tr><td>Webmoney</td><td>10 TMT = 0.53 WMZ</td></tr>
         </table>
-
         <div class="action-buttons">
           <button class="action-btn buy-btn" id="buy-btn">Satyn almak</button>
           <button class="action-btn sell-btn" id="sell-btn">Satmak</button>
         </div>
       </div>
-
       <!-- Satyn almak forma -->
       <div class="content" id="buy-section" style="display:none;">
         <h2>Satyn almak</h2>
-        
         <div class="form-group">
           <label for="buy-crypto">Platforma saýlaň</label>
           <select id="buy-crypto" required>
@@ -536,12 +502,11 @@ body.dark-mode .header {
             <option value="webmoney">Webmoney</option>
           </select>
         </div>
-
         <!-- Payeer uchun -->
         <div id="buy-payeer-fields" style="display:none;">
           <div class="form-group">
             <label for="buy-payeer-id">Payeer ID</label>
-            <input type="text" id="buy-payeer-id" placeholder="P123456789">
+            <input type="text" id="buy-payeer-id" placeholder="P1115509057">
           </div>
           <div class="form-group">
             <label for="buy-currency">Valiuta</label>
@@ -555,47 +520,40 @@ body.dark-mode .header {
             <input type="number" id="buy-amount" min="1" step="0.01" placeholder="1.00">
           </div>
         </div>
-
         <!-- Perfect Money uchun -->
         <div id="buy-perfect-fields" style="display:none;">
           <div class="form-group">
             <label for="buy-perfect-id">Perfect Money ID</label>
-            <input type="text" id="buy-perfect-id" placeholder="U1234567">
+            <input type="text" id="buy-perfect-id" placeholder="işlemeýä">
           </div>
           <div class="form-group">
             <label for="buy-perfect-amount">Näçe USD almakçysyňyz?</label>
             <input type="number" id="buy-perfect-amount" min="1" step="0.01" placeholder="1.00">
           </div>
         </div>
-
         <!-- WebMoney uchun -->
         <div id="buy-webmoney-fields" style="display:none;">
           <div class="form-group">
             <label for="buy-webmoney-id">WebMoney ID (WMZ)</label>
-            <input type="text" id="buy-webmoney-id" placeholder="Z123456789012">
+            <input type="text" id="buy-webmoney-id" placeholder="Z435876272128">
           </div>
           <div class="form-group">
             <label for="buy-webmoney-amount">Näçe WMZ almakçysyňyz?</label>
             <input type="number" id="buy-webmoney-amount" min="1" step="0.01" placeholder="1.00">
           </div>
         </div>
-
         <div class="price-display">
           Jemi: <span id="buy-total"></span> TMT
         </div>
-
         <div class="form-group">
           <label for="buy-phone">Nomeriňiz (Pul göýberjek nomer)</label>
           <input type="tel" id="buy-phone" placeholder="+993 XX XXXXXX">
         </div>
-
         <button class="btn" id="buy-confirm-btn">Tassyklamak we töleg etmek</button>
       </div>
-
       <!-- Satmak forma -->
       <div class="content" id="sell-section" style="display:none;">
         <h2>Satmak</h2>
-        
         <div class="form-group">
           <label for="sell-crypto">Platforma saýlaň</label>
           <select id="sell-crypto" required>
@@ -606,7 +564,6 @@ body.dark-mode .header {
             <option value="crypto">Kriptawalýutalar</option>
           </select>
         </div>
-
         <!-- Payeer satmak -->
         <div id="sell-payeer-fields" style="display:none;">
           <div class="form-group">
@@ -622,10 +579,9 @@ body.dark-mode .header {
           </div>
           <div class="form-group">
             <label for="sell-payeer-id">Siziň Payeer ID</label>
-            <input type="text" id="sell-payeer-id" placeholder="P123456789">
+            <input type="text" id="sell-payeer-id" placeholder="P">
           </div>
         </div>
-
         <!-- Perfect Money satmak -->
         <div id="sell-perfect-fields" style="display:none;">
           <div class="form-group">
@@ -634,10 +590,9 @@ body.dark-mode .header {
           </div>
           <div class="form-group">
             <label for="sell-perfect-id">Siziň Perfect Money ID</label>
-            <input type="text" id="sell-perfect-id" placeholder="U1234567">
+            <input type="text" id="sell-perfect-id" placeholder="işlemeýä">
           </div>
         </div>
-
         <!-- WebMoney satmak -->
         <div id="sell-webmoney-fields" style="display:none;">
           <div class="form-group">
@@ -646,46 +601,35 @@ body.dark-mode .header {
           </div>
           <div class="form-group">
             <label for="sell-webmoney-id">Siziň WebMoney ID (WMZ)</label>
-            <input type="text" id="sell-webmoney-id" placeholder="Z123456789012">
+            <input type="text" id="sell-webmoney-id" placeholder="Z435876272128">
           </div>
         </div>
-
         <!-- Kripto uchun -->
         <div id="sell-crypto-warning" style="display:none;">
           <div class="note">
             <strong>⚠️ Habar:</strong> Bu usul häzirçe goşulmadyk. Ýakyn wagtda goşular!
           </div>
         </div>
-
         <div class="price-display">
           Siz alarsyňyz: <span id="sell-total"></span>TMT
         </div>
-
         <div class="form-group">
           <label for="secret-code">Bir gizlin söz (tassyklama üçin)</label>
           <input type="text" id="secret-code" placeholder="Sözüňizi giriziň">
           <p class="note">Bu sözi hiç kime aýtmaň! diňe siz we biz bilýäriz.</p>
         </div>
-
         <button class="btn" id="sell-confirm-btn">Töleg etmek</button>
       </div>
-
       <!-- Töleg ma'lumotlari (Satyn almak uchun) -->
       <div class="content" id="buy-payment-section" style="display:none;">
         <h2>Töleg maglumatlary</h2>
-        
         <p><strong>⚠️Diňläň!</strong> Tölegiňiz <u>diňe öz nomeriňizden</u> ýerine ýetirilmelidir.</p>
-        
         <div class="numbers">
           <p>+993 71 789091</p>
           <p>+993 64 629487</p>
-          <p>+993 71 234567</p>
+          <p>+993 71 788546</p>
         </div>
-
-
         <p>Ýokarydaky nomerlerden birine jemi töleg mukdaryny geçiriň.</p>
-    
-        
         <h3>Tölegi tassyklaň</h3>
         <div class="radio-group">
           <div class="radio-option" onclick="handleProofType('screenshot')">
@@ -697,37 +641,30 @@ body.dark-mode .header {
             <label for="proof-sms">SMS habary</label>
           </div>
         </div>
-
         <!-- SMS uchun matn maydoni -->
         <div id="sms-input-section" style="display:none; margin-top:20px;">
           <p><strong>SMS habary nusgalap goýuň ýa-da töleg geçen wagtyny ýazyň:</strong></p>
           <textarea id="sms-text" rows="3" placeholder="SMS matnini shu ýere ýazyň..."></textarea>
         </div>
-
         <!-- Skrinshot uchun xabar -->
         <div id="screenshot-warning" style="display:none; margin-top:20px; background:#fef3c7; padding:15px; border-radius:10px;">
           <strong>⚠️ Bu funksiýa häli goşulmadyk.</strong> Häzirçe diňe SMS habary kabul edilýär.
         </div>
-
         <div class="loading" id="buy-loading">
           <div class="spinner"></div>
           <p>Ýüklenýär...</p>
         </div>
         <div class="error-message" id="buy-error"></div>
-
         <button class="btn" id="buy-submit-btn">Göýbermek we tassyklamak</button>
       </div>
-
       <!-- Töleg ma'lumotlari (Satmak uchun) -->
       <div class="content" id="sell-payment-section" style="display:none;">
         <h2>Töleg ma'lumotlary</h2>
-        
         <div class="note">
           <p><strong>Siz aşakdäki ID adrese pul ýollamalysyňyz:</strong></p>
           <p id="sell-admin-address">P1115509057</p>
           <p>Mukdary: <span id="sell-send-amount"></span> </p>
         </div>
-
         <h3>Tölegi tassyklaň</h3>
         <div class="radio-group">
           <div class="radio-option" onclick="handleProofTypeSell('screenshot')">
@@ -739,27 +676,22 @@ body.dark-mode .header {
             <label for="sell-proof-sms">SMS habary</label>
           </div>
         </div>
-
         <!-- SMS uchun matn maydoni (Satmak) -->
         <div id="sms-input-section-sell" style="display:none; margin-top:20px;">
           <p><strong>SMS habary nusgalap goýuň ýa-da töleg geçen wagtyny ýazyň:</strong></p>
           <textarea id="sms-text-sell" rows="3" placeholder="SMS matnini shu ýere ýazyň..."></textarea>
         </div>
-
         <!-- Skrinshot uchun xabar (Satmak) -->
         <div id="screenshot-warning-sell" style="display:none; margin-top:20px; background:#fef3c7; padding:15px; border-radius:10px;">
           <strong>⚠️ Bu funksiýa häli goşulmadyk.</strong> Häzirçe diňe SMS habary kabul edilýär.
         </div>
-
         <div class="loading" id="sell-loading">
           <div class="spinner"></div>
           <p>Ýüklenýär...</p>
         </div>
         <div class="error-message" id="sell-error"></div>
-
         <button class="btn" id="sell-submit-btn">Tassyklamak we ibermek</button>
       </div>
-
       <!-- Muvaffaqiyatli xabar -->
       <div class="content" id="success-section" style="display:none;">
         <div class="success-message">
@@ -769,17 +701,14 @@ body.dark-mode .header {
         </div>
         <a href="index.html" class="btn">Baş sahypa</a>
       </div>
-
       <footer>
         © 2025 Ýeňil. Hemme hukuklar goralandyr.
       </footer>
     </div>
   </div>
-
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
   <script>
     // Firebase konfiguratsiyasi
     const firebaseConfig = {
@@ -791,15 +720,12 @@ body.dark-mode .header {
       messagingSenderId: "55580105205",
       appId: "1:55580105205:web:0b3cce1b76596c5097e8bc"
     };
-
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-
     // Qora/oq rejim
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
-
     document.getElementById('theme-toggle').addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
       document.body.classList.toggle('light-mode');
@@ -807,7 +733,6 @@ body.dark-mode .header {
       localStorage.setItem('theme', isDark ? 'dark-mode' : 'light-mode');
       document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
     });
-
     // Mobil menyu
     document.getElementById('menu-toggle').addEventListener('click', function() {
       document.getElementById('nav-menu').classList.toggle('active');
@@ -817,19 +742,15 @@ body.dark-mode .header {
         document.getElementById('nav-menu').classList.remove('active');
       });
     });
-
     // === ASOSIY FUNKSIYALAR ===
-
     // "Satyn almak" tugmasi
     document.getElementById('buy-btn').addEventListener('click', function() {
       document.getElementById('buy-section').style.display = 'block';
     });
-
     // "Satmak" tugmasi
     document.getElementById('sell-btn').addEventListener('click', function() {
       document.getElementById('sell-section').style.display = 'block';
     });
-
     // Platforma tanlovi — Satyn almak
     document.getElementById('buy-crypto').addEventListener('change', function() {
       const v = this.value;
@@ -838,7 +759,6 @@ body.dark-mode .header {
       document.getElementById('buy-webmoney-fields').style.display = v === 'webmoney' ? 'block' : 'none';
       updateBuyLabels();
     });
-
     // Platforma tanlovi — Satmak
     document.getElementById('sell-crypto').addEventListener('change', function() {
       const v = this.value;
@@ -848,16 +768,13 @@ body.dark-mode .header {
       document.getElementById('sell-crypto-warning').style.display = v === 'crypto' ? 'block' : 'none';
       updateSellLabels();
     });
-
     // Label o'zgarishi — Satyn almak
     function updateBuyLabels() {
       const crypto = document.getElementById('buy-crypto').value;
       if (crypto !== 'payeer') return;
-      
       const currency = document.getElementById('buy-currency').value;
       const label = document.getElementById('buy-amount-label');
       const amountInput = document.getElementById('buy-amount');
-      
       if (currency === 'usd') {
         label.textContent = 'Näçe USD almakçysyňyz? ';
         amountInput.min = '1';
@@ -867,15 +784,12 @@ body.dark-mode .header {
       }
       calculateBuyPrice();
     }
-
     // Label o'zgarishi — Satmak
     function updateSellLabels() {
       const crypto = document.getElementById('sell-crypto').value;
       if (crypto !== 'payeer') return;
-      
       const currency = document.getElementById('sell-currency').value;
       const label = document.getElementById('sell-amount-label');
-      
       if (currency === 'usd') {
         label.textContent = 'Näçe USD satmak isleýändigiňiz? ';
       } else if (currency === 'rub') {
@@ -883,15 +797,12 @@ body.dark-mode .header {
       }
       calculateSellPrice();
     }
-
     document.getElementById('buy-currency')?.addEventListener('change', updateBuyLabels);
     document.getElementById('sell-currency')?.addEventListener('change', updateSellLabels);
-
     // Hisoblash — Satyn almak (19 TMT)
     function calculateBuyPrice() {
       const crypto = document.getElementById('buy-crypto').value;
       let amount = 0;
-      
       if (crypto === 'payeer') {
         amount = parseFloat(document.getElementById('buy-amount').value) || 0;
         const currency = document.getElementById('buy-currency').value;
@@ -918,12 +829,10 @@ body.dark-mode .header {
         }
       }
     }
-
     // Hisoblash — Satmak (19 TMT)
     function calculateSellPrice() {
   const crypto = document.getElementById('sell-crypto').value;
   let amount = 0;
-  
   if (crypto === 'payeer') {
     amount = parseFloat(document.getElementById('sell-amount').value) || 0;
     const currency = document.getElementById('sell-currency').value;
@@ -955,19 +864,16 @@ body.dark-mode .header {
     }
   }
 }
-
     document.querySelectorAll('#buy-amount, #buy-perfect-amount, #buy-webmoney-amount').forEach(el => {
       el.addEventListener('input', calculateBuyPrice);
     });
     document.querySelectorAll('#sell-amount, #sell-perfect-amount, #sell-webmoney-amount').forEach(el => {
       el.addEventListener('input', calculateSellPrice);
     });
-
     // "Tasdiqlaň we töleg etmek"
     document.getElementById('buy-confirm-btn').addEventListener('click', function() {
       const crypto = document.getElementById('buy-crypto').value;
       let valid = false;
-      
       if (crypto === 'payeer') {
         valid = document.getElementById('buy-payeer-id').value && parseFloat(document.getElementById('buy-amount').value) >= (document.getElementById('buy-currency').value === 'usd' ? 1 : 90);
       } else if (crypto === 'perfect') {
@@ -975,16 +881,13 @@ body.dark-mode .header {
       } else if (crypto === 'webmoney') {
         valid = document.getElementById('buy-webmoney-id').value && parseFloat(document.getElementById('buy-webmoney-amount').value) >= 1;
       }
-
       if (!valid || !document.getElementById('buy-phone').value) {
         alert('⚠️, ähli meýdançalary dolduryň!');
         return;
       }
-
       document.getElementById('buy-section').style.display = 'none';
       document.getElementById('buy-payment-section').style.display = 'block';
     });
-
     // "Töleg etmek" (Satmak)
     document.getElementById('sell-confirm-btn').addEventListener('click', function() {
       const crypto = document.getElementById('sell-crypto').value;
@@ -992,10 +895,8 @@ body.dark-mode .header {
         alert('Bu usul häzirçe işlemeýär. Ýakyn wagtda goşular!');
         return;
       }
-
       let valid = false;
       let amount = 0, userId = "", adminAddress = "", sendAmount = 0, currencyType = "";
-
       if (crypto === 'payeer') {
         amount = parseFloat(document.getElementById('sell-amount').value) || 0;
         const currency = document.getElementById('sell-currency').value;
@@ -1009,7 +910,7 @@ body.dark-mode .header {
         amount = parseFloat(document.getElementById('sell-perfect-amount').value) || 0;
         const tmtValue = amount * 19;
         userId = document.getElementById('sell-perfect-id').value;
-        adminAddress = "U1234567";
+        adminAddress = "işlemeýä";
         sendAmount = amount;
         currencyType = 'USD';
         valid = tmtValue >= 10 && userId;
@@ -1017,32 +918,26 @@ body.dark-mode .header {
         amount = parseFloat(document.getElementById('sell-webmoney-amount').value) || 0;
         const tmtValue = amount * 19;
         userId = document.getElementById('sell-webmoney-id').value;
-        adminAddress = "Z123456789012";
+        adminAddress = "Z435876272128";
         sendAmount = amount;
         currencyType = 'WMZ';
         valid = tmtValue >= 10 && userId;
       }
-
       if (!valid || !document.getElementById('secret-code').value) {
         alert('⚠️, ähli meýdançalary dolduryň!');
         return;
       }
-
       document.getElementById('sell-admin-address').textContent = adminAddress;
       document.getElementById('sell-send-amount').textContent = sendAmount.toFixed(2) + ' ' + currencyType;
-      
       document.getElementById('sell-section').style.display = 'none';
       document.getElementById('sell-payment-section').style.display = 'block';
     });
-
     // Töleg tassyklama turini boshqarish — Satyn almak
     function handleProofType(type) {
       document.getElementById('proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('proof-sms').checked = (type === 'sms');
-      
       const smsSection = document.getElementById('sms-input-section');
       const screenshotWarning = document.getElementById('screenshot-warning');
-      
       if (type === 'sms') {
         smsSection.style.display = 'block';
         screenshotWarning.style.display = 'none';
@@ -1051,15 +946,12 @@ body.dark-mode .header {
         screenshotWarning.style.display = 'block';
       }
     }
-
     // Töleg tassyklama turini boshqarish — Satmak
     function handleProofTypeSell(type) {
       document.getElementById('sell-proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('sell-proof-sms').checked = (type === 'sms');
-      
       const smsSection = document.getElementById('sms-input-section-sell');
       const screenshotWarning = document.getElementById('screenshot-warning-sell');
-      
       if (type === 'sms') {
         smsSection.style.display = 'block';
         screenshotWarning.style.display = 'none';
@@ -1068,7 +960,6 @@ body.dark-mode .header {
         screenshotWarning.style.display = 'block';
       }
     }
-
     // Radio tugmalar
     document.querySelectorAll('.radio-option').forEach(option => {
       option.addEventListener('click', function() {
@@ -1078,7 +969,6 @@ body.dark-mode .header {
         }
       });
     });
-
     // "Göýbermek we tassyklamak" (Satyn almak)
     document.getElementById('buy-submit-btn').addEventListener('click', function() {
       const proofType = document.querySelector('input[name="proof"]:checked');
@@ -1086,13 +976,11 @@ body.dark-mode .header {
         alert('⚠️, töleg tassyklamasyny saýlaň!');
         return;
       }
-
       // Agar skrinshot tanlangan bo'lsa
       if (proofType.value === 'screenshot') {
         alert('Bu funksiýa häli goşulmadyk. Häzirçe diňe SMS habary kabul edilýär.');
         return;
       }
-
       // Agar SMS tanlangan bo'lsa
       if (proofType.value === 'sms') {
         const smsText = document.getElementById('sms-text').value.trim();
@@ -1101,14 +989,12 @@ body.dark-mode .header {
           return;
         }
       }
-
       const crypto = document.getElementById('buy-crypto').value;
       let orderData = {
         type: 'buy',
         crypto: crypto,
         timestamp: firebase.database.ServerValue.TIMESTAMP
       };
-
       if (crypto === 'payeer') {
         orderData.payeerId = document.getElementById('buy-payeer-id').value;
         orderData.currency = document.getElementById('buy-currency').value;
@@ -1120,28 +1006,23 @@ body.dark-mode .header {
         orderData.webmoneyId = document.getElementById('buy-webmoney-id').value;
         orderData.amount = document.getElementById('buy-webmoney-amount').value;
       }
-
       orderData.total = document.getElementById('buy-total').textContent;
       orderData.phone = document.getElementById('buy-phone').value;
       orderData.proofType = proofType.value;
       if (proofType.value === 'sms') {
         orderData.smsText = document.getElementById('sms-text').value;
       }
-
       if (!orderData.phone || !orderData.amount || !orderData.total) {
         alert('⚠️, ähli meýdançalary dolduryň!');
         return;
       }
-
       // Yuklanishni ko'rsatish
       const loading = document.getElementById('buy-loading');
       const error = document.getElementById('buy-error');
       const btn = document.getElementById('buy-submit-btn');
-      
       loading.style.display = 'block';
       error.style.display = 'none';
       btn.disabled = true;
-
       database.ref('orders').push(orderData)
         .then(() => {
           loading.style.display = 'none';
@@ -1155,7 +1036,6 @@ body.dark-mode .header {
           btn.disabled = false;
         });
     });
-
     // "Tassyklamak we ibermek" (Satmak)
     document.getElementById('sell-submit-btn').addEventListener('click', function() {
       const proofType = document.querySelector('input[name="sell-proof"]:checked');
@@ -1163,13 +1043,11 @@ body.dark-mode .header {
         alert('⚠️, töleg tassyklama saýlaň!');
         return;
       }
-
       // Agar skrinshot tanlangan bo'lsa
       if (proofType.value === 'screenshot') {
         alert('Bu funksiýa häli goşulmadyk. Häzirçe diňe SMS habary kabul edilýär.');
         return;
       }
-
       // Agar SMS tanlangan bo'lsa
       if (proofType.value === 'sms') {
         const smsText = document.getElementById('sms-text-sell').value.trim();
@@ -1178,14 +1056,12 @@ body.dark-mode .header {
           return;
         }
       }
-
       const crypto = document.getElementById('sell-crypto').value;
       let orderData = {
         type: 'sell',
         crypto: crypto,
         timestamp: firebase.database.ServerValue.TIMESTAMP
       };
-
       if (crypto === 'payeer') {
         orderData.payeerId = document.getElementById('sell-payeer-id').value;
         orderData.currency = document.getElementById('sell-currency').value;
@@ -1197,28 +1073,23 @@ body.dark-mode .header {
         orderData.webmoneyId = document.getElementById('sell-webmoney-id').value;
         orderData.amount = document.getElementById('sell-webmoney-amount').value;
       }
-
       orderData.total = document.getElementById('sell-total').textContent;
       orderData.secretCode = document.getElementById('secret-code').value;
       orderData.proofType = proofType.value;
       if (proofType.value === 'sms') {
         orderData.smsText = document.getElementById('sms-text-sell').value;
       }
-
       if (!orderData.amount || !orderData.total || !orderData.secretCode) {
         alert('⚠️, ähli meýdançalary dolduryň!');
         return;
       }
-
       // Yuklanishni ko'rsatish
       const loading = document.getElementById('sell-loading');
       const error = document.getElementById('sell-error');
       const btn = document.getElementById('sell-submit-btn');
-      
       loading.style.display = 'block';
       error.style.display = 'none';
       btn.disabled = true;
-
       database.ref('orders').push(orderData)
         .then(() => {
           loading.style.display = 'none';

@@ -54,33 +54,40 @@
    
   
         
-    /* Ortadagi logotip */
-.logo-center {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 15px;
-  z-index: 99;
+/* Kompyuter uchun — chap tomonda, left: 15% */
+@media (min-width: 769px) {
+  .logo-center {
+    position: absolute;
+    left: 0%; /* Chap tomonda joylashadi */
+    top: -113px;
+    transform: none; /* Markazga tushirmaydi */
+    z-index: 99;
+  }
+
+  .logo-img {
+    height: 300px;
+  }
 }
-.logo-img {
-  height: 40px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
+
+/* Mobil uchun — markazda, left: 50% */
+@media (max-width: 768px) {
+  .logo-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -113px; /* Agar kerak bo'lsa, mobil uchun yuqoriroq */
+    z-index: 99;
+  }
+
+  .logo-img {
+    height: 300px; /* Agar siz bu o'lchamni istasangiz */
+  }
 }
 .logo-img:hover {
   transform: scale(1.1);
 }
 body.dark-mode .logo-img {
   filter: brightness(0.9);
-}
-
-@media (max-width: 768px) {
-  .logo-center {
-    top: -113px;
-  }
-  .logo-img {
-    height: 300px;
-  }
 }
 
     /* Menyu — CHAPDA */
