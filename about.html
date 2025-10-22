@@ -7,8 +7,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
+    /* ✅ :root va umumiy stil qoidalarini saqlash */
     :root {
       --primary: #0d9488;
+      --accent: #059669;
       --light-bg: #ffffff;
       --light-text: #1e293b;
       --dark-bg: #0f172a;
@@ -16,19 +18,15 @@
       --card-light: #f8fafc;
       --card-dark: #1e293b;
       --shadow: 0 6px 16px rgba(0,0,0,0.1);
-      --accent: #059669;
     }
-
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
     html, body {
       overflow-x: hidden;
     }
-
     body {
       font-family: 'Poppins', sans-serif;
       background: var(--light-bg);
@@ -39,215 +37,402 @@
       display: flex;
       flex-direction: column;
     }
-
     body.dark-mode {
       background: var(--dark-bg);
       color: var(--dark-text);
     }
-
     .container {
       width: 90%;
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px;
     }
-   
-  
-        
-/* Kompyuter uchun — chap tomonda, left: 15% */
-@media (min-width: 769px) {
-  .logo-center {
-    position: absolute;
-    left: 0%; /* Chap tomonda joylashadi */
-    top: -113px;
-    transform: none; /* Markazga tushirmaydi */
-    z-index: 99;
-  }
 
-  .logo-img {
-    height: 300px;
-  }
-}
-
-/* Mobil uchun — markazda, left: 50% */
-@media (max-width: 768px) {
-  .logo-center {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    top: -113px; /* Agar kerak bo'lsa, mobil uchun yuqoriroq */
-    z-index: 99;
-  }
-
-  .logo-img {
-    height: 300px; /* Agar siz bu o'lchamni istasangiz */
-  }
-}
-.logo-img:hover {
-  transform: scale(1.1);
-}
-body.dark-mode .logo-img {
-  filter: brightness(0.9);
-}
-
-    /* Menyu — CHAPDA */
-    /* Mobil uchun logotip */
-
-/* Header uchun tuzatish */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.1);
-  position: sticky;
-  top: 0;
-  background: var(--light-bg);
-  z-index: 100;
-  position: relative;
-}
-body.dark-mode .header {
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  background: var(--dark-bg);
-}
-
-    .logo-header {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--primary);
-      margin-right: 20px;
+    /* =============== YANGI MENYU VA LOGO STILI (index.html/style.css dan olingan) =============== */
+    .header {
+      padding: 10px 0;
+      position: sticky;
+      top: 0;
+      background: var(--light-bg);
+      z-index: 100;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
     }
-    /* Nav menyu uchun tuzatish */
-.navbar {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  width: 100%;
-  justify-content: space-between;
-}
-.nav-menu {
-  display: flex;
-  list-style: none;
-  gap: 25px;
-  margin: 0;
-  padding: 0;
-  flex: 1;
-}
-.nav-menu:first-child {
-  justify-content: flex-start;
-}
-.nav-menu:last-child {
-  justify-content: flex-end;
-}
-    .nav-menu a {
+    body.dark-mode .header {
+      background: var(--dark-bg);
+    }
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 40px;
+    }
+    .nav-menu-left {
+      display: flex;
+      list-style: none;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+    }
+    .nav-menu-left a {
       text-decoration: none;
       color: var(--light-text);
       font-weight: 600;
-      transition: color 0.3s;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      position: relative;
     }
-    body.dark-mode .nav-menu a {
+    .nav-menu-left a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 1px;
+      bottom: -2px;
+      left: 0;
+      background-color: var(--primary);
+      transition: width 0.3s ease;
+    }
+    .nav-menu-left a:hover::after {
+      width: 50%;
+    }
+    body.dark-mode .nav-menu-left a {
       color: var(--dark-text);
     }
-    .nav-menu a:hover {
+    .nav-menu-left a:hover {
       color: var(--primary);
+    }
+    .nav-menu-right {
+      display: flex;
+      list-style: none;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+      align-items: center;
+    }
+    .nav-menu-right a {
+      text-decoration: none;
+      color: var(--light-text);
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    body.dark-mode .nav-menu-right a {
+      color: var(--dark-text);
+    }
+    .nav-menu-right a:hover {
+      color: var(--primary);
+    }
+    .nav-menu-right a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 1px;
+      bottom: -2px;
+      left: 0;
+      background-color: var(--primary);
+      transition: width 0.3s ease;
+    }
+    .nav-menu-right a:hover::after {
+      width: 50%;
     }
     .theme-toggle {
       background: var(--primary);
       color: white;
       border: none;
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      font-size: 16px;
+      font-size: 14px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: all 0.3s ease;
+    }
+    .theme-toggle:hover {
+      background: #6ee7b7;
+      transform: rotate(180deg);
     }
     .menu-toggle {
       display: none;
-      font-size: 1.5rem;
+      width: 30px;
+      height: 24px;
       cursor: pointer;
-      color: var(--light-text);
+      background: none;
+      border: none;
+      position: relative;
+      transition: all 0.3s ease;
     }
-    body.dark-mode .menu-toggle {
-      color: var(--dark-text);
+    .menu-toggle span {
+      display: block;
+      height: 3px;
+      background: var(--light-text);
+      border-radius: 3px;
+      transition: all 0.3s ease;
+      position: absolute;
+      width: 100%;
+    }
+    .menu-toggle span:nth-child(1) { top: 0; }
+    .menu-toggle span:nth-child(2) { top: 10px; }
+    .menu-toggle span:nth-child(3) { top: 20px; }
+    body.dark-mode .menu-toggle span {
+      background: var(--dark-text);
+    }
+    .menu-toggle.active span:nth-child(1) {
+      transform: rotate(45deg) translate(6px, 6px);
+    }
+    .menu-toggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .menu-toggle.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -7px);
+    }
+    /* Logo markazda (index.html dagidek) */
+    .logo-center {
+      position: absolute;
+      left: 50%;
+      top: -100px;
+      transform: translateX(-50%);
+      z-index: 99;
+      animation: logoFloat 3s ease-in-out infinite;
+    }
+    @keyframes logoFloat {
+      0%, 100% { transform: translateX(-50%) translateY(0px); }
+      50% { transform: translateX(-50%) translateY(-3px); }
+    }
+    .logo-img {
+      height: 265px;
+      width: auto;
+      transition: all 0.3s ease;
+    }
+    .logo-img:hover {
+      transform: translateX(-50%) scale(1.1);
+    }
+    body.dark-mode .logo-img {
+      filter: brightness(0.9);
     }
 
+    /* MOBIL MENYU — INDEX DAGIDEK */
     @media (max-width: 768px) {
       .menu-toggle {
         display: block;
       }
-      .nav-menu {
-        position: absolute;
-        top: 70px;
-        left: 0;
-        width: 100%;
-        background: var(--light-bg);
-        flex-direction: column;
-        padding: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      .nav-menu-left,
+      .nav-menu-right {
         display: none;
-        border-top: 1px solid rgba(0,0,0,0.1);
+      }
+      .nav-menu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 40%;
+        height: 27vh;
+        background: linear-gradient(135deg, var(--light-bg) 80%, rgba(13,148,136,0.05) 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 0;
+        padding: 0;
+        z-index: 999;
+        transform: translateY(-100%);
+        transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        overflow: hidden;
+        border-radius: 0 0 20px 20px;
       }
       body.dark-mode .nav-menu {
-        background: var(--dark-bg);
-        border-top: 1px solid rgba(255,255,255,0.1);
+        background: linear-gradient(135deg, var(--dark-bg) 80%, rgba(13,148,136,0.1) 100%);
       }
       .nav-menu.active {
-        display: flex;
+        transform: translateY(0);
+      }
+      .nav-menu li {
+        width: 100%;
+        margin: 0;
+        position: relative;
+        overflow: hidden;
+      }
+      .nav-menu a {
+        display: block;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--primary) !important;
+        padding: 10px 20px;
+        width: 100%;
+        text-align: center;
+        text-decoration: none;
+        position: relative;
+        background: transparent;
+        transform: translateX(-50px);
+        opacity: 0;
+        animation: slideInMenu 0.6s ease forwards;
+        border-radius: 10px;
+        margin: 2px 0;
+      }
+      .nav-menu li:nth-child(1) a { animation-delay: 0.1s; }
+      .nav-menu li:nth-child(2) a { animation-delay: 0.2s; }
+      .nav-menu li:nth-child(3) a { animation-delay: 0.3s; }
+      .nav-menu li:nth-child(4) a { animation-delay: 0.4s; }
+      .nav-menu li:nth-child(5) a { animation-delay: 0.5s; }
+      .nav-menu li:nth-child(6) button { animation-delay: 0.6s; }
+      @keyframes slideInMenu {
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      .nav-menu a::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(13,148,136,0.2), transparent);
+        transition: left 0.5s ease;
+      }
+      .nav-menu a:hover::before {
+        left: 100%;
+      }
+      .nav-menu a:hover {
+        color: #6ee7b7 !important;
+        transform: scale(1.02);
+      }
+      .nav-menu button {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--primary) !important;
+        padding: 5px 15px;
+        width: 100%;
+        text-align: center;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transform: translateX(-50px);
+        opacity: 0;
+        animation: slideInMenu 0.6s ease forwards;
+        border-radius: 10px;
+        margin: 2px 0;
+      }
+      .nav-menu button:hover {
+        color: #6ee7b7 !important;
+        transform: scale(1.02);
+      }
+      .nav-menu::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 10px;
+        background: var(--light-bg);
+        z-index: 1000;
+      }
+      body.dark-mode .nav-menu::after {
+        background: var(--dark-bg);
       }
     }
-    
+    .menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+      z-index: 998;
+    }
+    .nav-menu.active + .menu-overlay {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* =============== BIZ BARADA SAHIFASI QOLGAN STILI (SAQLANIB QOLDI) =============== */
     .main-content {
       flex: 1;
-      padding: 20px 0;
+      padding: 40px 0;
+      background: url('images/about-bg-light.jpg') no-repeat center/cover;
+      animation: fadeIn 1s ease;
     }
-
+    body.dark-mode .main-content {
+      background: url('images/about-bg-dark.jpg') no-repeat center/cover;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
     .logo-page {
-      font-size: 2.2rem;
+      font-size: 2.5rem;
       color: var(--primary);
       text-align: center;
-      margin: 20px 0 40px;
+      margin: 20px 0 25px;
+      animation: pulseText 2s infinite;
     }
-
+    @keyframes pulseText {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
     .back-btn {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
       color: var(--primary);
       text-decoration: none;
-      margin-bottom: 20px;
+      margin: 0 20px 20px;
       font-weight: 600;
+      transition: transform 0.3s ease;
     }
-
+    .back-btn:hover {
+      transform: translateX(-5px);
+    }
     .content {
       background: var(--card-light);
-      border-radius: 20px;
-      padding: 30px;
+      border-radius: 24px;
+      padding: 25px;
       box-shadow: var(--shadow);
-      margin-bottom: 30px;
+      margin: 0 20px 25px;
+      animation: slideUp 0.6s ease;
+      overflow: hidden;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
     body.dark-mode .content {
       background: var(--card-dark);
     }
-
     h1, h2, h3 {
       color: var(--primary);
-      margin: 20px 0 15px;
+      margin: 25px 0 18px;
+      position: relative;
     }
-
+    h1::after, h2::after, h3::after {
+      content: '';
+      display: block;
+      width: 50px;
+      height: 3px;
+      background: var(--gradient);
+      margin-top: 8px;
+    }
     p {
       margin-bottom: 15px;
-      line-height: 1.7;
+      font-size: 1.05rem;
     }
-
     .highlight {
-      background: rgba(13, 148, 136, 0.08);
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.1), rgba(13, 148, 136, 0.05));
       padding: 20px;
-      border-radius: 12px;
+      border-radius: 16px;
       margin: 25px 0;
-      border-left: 4px solid var(--primary);
+      border-left: 5px solid var(--primary);
+      font-size: 1.05rem;
+      animation: highlightGlow 2s infinite alternate;
     }
-
+    @keyframes highlightGlow {
+      from { box-shadow: 0 0 10px rgba(13, 148, 136, 0.1); }
+      to { box-shadow: 0 0 20px rgba(13, 148, 136, 0.3); }
+    }
     .mission {
       background: #f0fdfa;
       padding: 30px;
@@ -259,7 +444,6 @@ body.dark-mode .header {
       background: rgba(6, 95, 70, 0.1);
       border-color: #4ade80;
     }
-
     .team-member {
       display: flex;
       align-items: center;
@@ -294,31 +478,6 @@ body.dark-mode .header {
       opacity: 0.8;
       font-size: 0.95rem;
     }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin: 40px 0;
-    }
-    .stat-item {
-      background: #f0fdfa;
-      padding: 20px;
-      border-radius: 16px;
-      text-align: center;
-      box-shadow: var(--shadow);
-    }
-    body.dark-mode .stat-item {
-      background: rgba(13, 148, 136, 0.1);
-      box-shadow: var(--shadow-dark);
-    }
-    .stat-number {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--primary);
-      margin: 10px 0;
-    }
-
     .values {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -345,7 +504,6 @@ body.dark-mode .header {
       color: var(--primary);
       margin-bottom: 15px;
     }
-
     .contact-box {
       background: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%);
       padding: 30px;
@@ -360,11 +518,6 @@ body.dark-mode .header {
       color: var(--primary);
       margin-bottom: 20px;
     }
-    .contact-box p {
-      opacity: 0.9;
-      margin-bottom: 20px;
-    }
-
     .btn {
       display: inline-block;
       background: var(--primary);
@@ -379,57 +532,57 @@ body.dark-mode .header {
       background: #0a7a6f;
       transform: scale(1.05);
     }
-
     footer {
       text-align: center;
       padding: 20px;
       opacity: 0.7;
       font-size: 0.9rem;
+      margin-top: auto;
     }
   </style>
 </head>
 <body class="light-mode">
-  <!-- Menyu — CHAPDA -->
+  <!-- ✅ YANGI MENYU: index.html dagidek -->
   <header class="header">
-  <div class="container">
-    <nav class="navbar">
-      <div class="menu-toggle" id="menu-toggle">☰</div>
-      <ul class="nav-menu" id="nav-menu">
-        <li><a href="index.html">Baş sahipa</a></li>
-        <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
-        <li><a href="pay.html">Ýeňil pay</a></li>
-        <li><a href="about.html">Biz barada</a></li>
-        <li><a href="help.html">Ýardam</a></li>
-        <li><button class="theme-toggle" id="theme-toggle">🌓</button></li>
-      </ul>
-    </nav>
-    <div class="logo-center">
-      <img src="images/logo-header.png" alt="Ýeňil" class="logo-img" onclick="window.location='index.html'">
+    <div class="container">
+      <nav class="navbar">
+        <ul class="nav-menu-left">
+          <li><a href="index.html">Baş Sahipa</a></li>
+          <li><a href="demiryol.html">Demirýollar</a></li>
+          <li><a href="pay.html">Pay</a></li>
+        </ul>
+        <button class="menu-toggle" id="menu-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <ul class="nav-menu-right">
+          <li><a href="about.html">Biz Barada</a></li>
+          <li><a href="help.html">Ýardam</a></li>
+          <li><button class="theme-toggle" id="theme-toggle">🌓</button></li>
+        </ul>
+      </nav>
+      <div class="logo-center">
+        <img src="images/logo-header.png" alt="Ýeňil" class="logo-img" onclick="window.location='index.html'">
+      </div>
     </div>
-  </div>
-</header>
+  </header>
 
   <div class="main-content">
     <div class="container">
-      <a href="index.html" class="back-btn">⬅️Yza</a>
+      <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Yza</a>
       <div class="logo-page">Biz barada</div>
-
       <div class="content">
         <h1>Ýeňil bilen— Hemme zat ýeňil</h1>
-        
         <p>Ýeňil — 2025-yilda döwletiň ykdysady we tehnologik ösmegi üçin işe başlan innovatsion platformadyr. Biz Türkmenistanda Daşary onlayn tölegler, poyuz biletlary satyn almak we sizi üstünliklere ýetirmek üçin ýaradylan.</p>
-        
         <div class="mission">
           <h2>Ýeňil inýektiwimiz</h2>
           <p><strong>"Hemme zat ýeňil"</strong> — bu biziň esasy şyýarymyz. Biz her bir eden işimiziň dakazady bilen jogap berip bilýäs we biz bilen eden işleriňiz barada komentariýa goýmany ýatdan çykarmaň — bu biziň ösmegimize täze ýeňilliklere eden kömegiňiz bolar.</p>
         </div>
-
         <h2>Biz kim?</h2>
         <p>Ýeňil — Türkmenistanda ykdysatlaşan, ynamly we tiz işleýän web-platformadyr. Biz 2025-ýilda türkmen gurluşlarynyň, kiçi biznesleriň we şahslaryň onlaýn töleglerde, biletlary satyn almakda we pul göçürmelerde ýeňilleşmesine kömek etmek üçin ýaradylan.</p>
-
         <h2>Taryhymyz</h2>
         <p>2025-ýilda “Ýeňil” adyndaky prog 3 adamlyk komanda işini başlaýar. Birinji orunda — biletlary satyn almak we pul göçürmek. 2025-ýil oktýabr aýyna 500-den artyk ulanyjymyz bar.</p>
-
         <h2>Biziň komandamyz</h2>
         <div class="team-member">
           <div class="team-photo">E</div>
@@ -455,7 +608,6 @@ body.dark-mode .header {
             <p>Logistika we töleg sistemalari boýunça muhandis</p>
           </div>
         </div>
-
         <h2>Biziň gymmatlyklarymyz</h2>
         <div class="values">
           <div class="value-card">
@@ -474,41 +626,69 @@ body.dark-mode .header {
             <p>Biz arzan bahadan hyzmatlarymyzyň hemme zadyny teklip ederis. Sizde kart ýokmy? Hiç gynanmaň, biz kart tölegsiz işleýäris.</p>
           </div>
         </div>
-
         <div class="contact-box">
-          <h3>Biz bilen baglanşyk</h3>
-          <p>Eger siz biz bilen iş birlik isleseňiz, ýa-da biziň platformamyz haýsy işlere ýardam berýänini bilmek isleseňiz — biz bilen habarlaşyp bilersiňiz.</p>
-          <a href="menturkmen111@gmail.com" class="btn">Email ýollamak</a>
-          <a href="tel:+99371789091" class="btn" style="margin-left:10px;">SMS ýollamak</a>
+          <h3>Biz bilen habarlaşmak</h3>
+          <p>Eger mesele dörän bolsa, biz bilen e-poçta ýada telefon arkaly habarlaşyp bilersiňiz.</p>
+          <p>Email: <a href="mailto:info@yenil.tm">info@yenil.tm</a></p>
+          <p>Telefon: <a href="tel:+99371789091">+993 71 789091</a></p>
         </div>
-
+      </div>
       <footer>
-        © 2025 Ýeňil. Hemme hukuklar goralandyr.
+        © 2025 Ýeňil. Hemme hukuklar goralan.
       </footer>
     </div>
   </div>
 
+  <!-- MOBIL MENYU -->
+  <ul class="nav-menu" id="nav-menu">
+    <li><a href="index.html">Baş Sahypa</a></li>
+    <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
+    <li><a href="pay.html">Ýeňil Pay</a></li>
+    <li><a href="about.html">Biz Barada</a></li>
+    <li><a href="help.html">Ýardam</a></li>
+    <li><button class="theme-toggle" id="mobile-theme-toggle">🌓</button></li>
+  </ul>
+  <div class="menu-overlay" id="menu-overlay"></div>
+
+  <!-- Skriptlar — about.txt dagidek saqlangan -->
   <script>
-    // Qora/oq rejim
+    // ✅ Tema sozlamalari
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
+    document.getElementById('mobile-theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
 
-    document.getElementById('theme-toggle').addEventListener('click', () => {
+    function toggleTheme() {
       document.body.classList.toggle('dark-mode');
       document.body.classList.toggle('light-mode');
       const isDark = document.body.classList.contains('dark-mode');
       localStorage.setItem('theme', isDark ? 'dark-mode' : 'light-mode');
       document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
+      document.getElementById('mobile-theme-toggle').textContent = isDark ? '☀️' : '🌙';
+    }
+
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
+
+    // ✅ Mobil menyu
+    const menuToggle = document.getElementById('menu-toggle');
+    const navMenu = document.getElementById('nav-menu');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    menuToggle.addEventListener('click', () => {
+      menuToggle.classList.toggle('active');
+      navMenu.classList.toggle('active');
     });
 
-    // Mobil menyu
-    document.getElementById('menu-toggle').addEventListener('click', function() {
-      document.getElementById('nav-menu').classList.toggle('active');
+    menuOverlay.addEventListener('click', () => {
+      menuToggle.classList.remove('active');
+      navMenu.classList.remove('active');
     });
-    document.querySelectorAll('.nav-menu a').forEach(link => {
-      link.addEventListener('click', () => {
-        document.getElementById('nav-menu').classList.remove('active');
+
+    document.querySelectorAll('.nav-menu a, .nav-menu button').forEach(item => {
+      item.addEventListener('click', () => {
+        menuToggle.classList.remove('active');
+        navMenu.classList.remove('active');
       });
     });
   </script>
