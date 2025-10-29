@@ -1,10 +1,15 @@
 {
+  "redirects": [
+    { "source": "/demiryol.html", "destination": "/demiryol", "permanent": true },
+    { "source": "/pay.html", "destination": "/pay", "permanent": true },
+    { "source": "/about.html", "destination": "/about", "permanent": true },
+    { "source": "/help.html", "destination": "/help", "permanent": true }
+  ],
   "rewrites": [
-    { "source": "/", "destination": "/index.html" },
     { "source": "/demiryol", "destination": "/demiryol.html" },
     { "source": "/pay", "destination": "/pay.html" },
-    { "source": "/help", "destination": "/help.html" },
     { "source": "/about", "destination": "/about.html" },
-    { "source": "/sms", "destination": "/sms.html" }
+    { "source": "/help", "destination": "/help.html" },
+    { "source": "/", "destination": "/index.html" }
   ]
 }
