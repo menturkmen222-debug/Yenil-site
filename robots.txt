@@ -1,4 +1,4 @@
 User-agent: *
-Disallow: /33ortamekdep.html
+Disallow: /33ortamekdep
 Allow: /
 Sitemap: https://yenil.ru/sitemap.xml
