@@ -19,10 +19,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.5"/>
   <meta name="description" content="Ýeňil Demirýollary arkaly biletleri kart tölegsiz, arzan we tiz satyn alyň.">
   <title>Ýeňil Demirýollary — Onlayn bilet satyn almak, TMCELL bilen</title>
-  <meta name="keywords" content="demirýol bileti, Aşgabat-Daşoguz, biletlary satyn almak, petek bron etmek, Ýeňil demirýollary, onlayn bilet, Türkmenistan demiryollary, kart tölegsiz bilet, biletlary arzan satyn almak, poyyz bileti, otly, petek">
+  <meta name="keywords" content="Ýeňil demirýollary, demirýol bileti, Aşgabat-Daşoguz, biletlary satyn almak, petek bron etmek, onlayn bilet, Türkmenistan demiryollary, kart tölegsiz bilet, biletlary arzan satyn almak, poyyz bileti, otly, petek">
   <link href="https://fonts.googleapis.co00m/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
+    /* =============== YANGI MENYU STILI (index.html dagidek) =============== */
     :root {
       --primary: #0d9488;
       --accent: #14b8a6;
@@ -65,8 +66,6 @@
       margin: 0 auto;
       padding: 0 20px;
     }
-
-    /* =============== YANGI MENYU STILI (index.html dagidek) =============== */
     .header {
       padding: 10px 0;
       position: sticky;
@@ -206,7 +205,6 @@
     .menu-toggle.active span:nth-child(3) {
       transform: rotate(-45deg) translate(7px, -7px);
     }
-    /* LOGO — INDEX DAGIDEK MARKAZDA */
     .logo-center {
       position: absolute;
       left: 50%;
@@ -230,8 +228,6 @@
     body.dark-mode .logo-img {
       filter: brightness(0.9);
     }
-
-    /* MOBIL MENYU — INDEX DAGIDEK */
     @media (max-width: 768px) {
       .menu-toggle {
         display: block;
@@ -367,7 +363,6 @@
       opacity: 1;
       pointer-events: auto;
     }
-
     /* =============== DEMIRYOL SAHIFASI QOLGAN STILI (SAQLANGAN) =============== */
     .main-content {
       flex: 1;
@@ -756,7 +751,6 @@
       </div>
     </div>
   </header>
-
   <div class="main-content">
     <div class="container">
       <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Yza</a>
@@ -935,8 +929,6 @@
       </footer>
     </div>
   </div>
-
-  <!-- MOBIL MENYU -->
   <ul class="nav-menu" id="nav-menu">
     <li><a href="index.html">Baş Sahypa</a></li>
     <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
@@ -946,24 +938,57 @@
     <li><button class="theme-toggle" id="mobile-theme-toggle">🌓</button></li>
   </ul>
   <div class="menu-overlay" id="menu-overlay"></div>
-
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <!-- ❌ Firebase yo'q — faqat Backendless -->
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCc3EeDkk_Bhvw8TphLj60aJSXtyWwWpZw",
-      authDomain: "yenil-app.firebaseapp.com",
-      databaseURL: "https://yenil-app-default-rtdb.firebaseio.com",
-      projectId: "yenil-app",
-      storageBucket: "yenil-app.firebasestorage.app",
-      messagingSenderId: "55580105205",
-      appId: "1:55580105205:web:0b3cce1b76596c5097e8bc",
-      measurementId: "G-P4DP3ZSWZD"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    // === Backendless konfiguratsiyasi ===
+    const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
+    const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
+    const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
 
-    // Theme
+    // === Yangi: To'liq validatsiya funksiyasi ===
+    function validateAllFields() {
+      const requiredFields = [
+        { id: 'name', label: 'Adyňyz' },
+        { id: 'surname', label: 'Familýaňyz' },
+        { id: 'birthdate', label: 'Doglan aýy güni' },
+        { id: 'passport', label: 'Pasport ID' },
+        { id: 'travel-date', label: 'Sapar senesi' },
+        { id: 'client-phone', label: 'Siziň nomeriňiz' }
+      ];
+
+      for (const field of requiredFields) {
+        const el = document.getElementById(field.id);
+        if (!el || !el.value.trim()) {
+          alert(`⚠️ "${field.label}" meýdançasy doldurylmaly!`);
+          return false;
+        }
+      }
+
+      const fromCity = document.getElementById('from-city').value;
+      const toCity = document.getElementById('to-city').value;
+      if (fromCity === toCity) {
+        alert('⚠️ "Nirden" we "Nira" bir birinden tapawutly bolmaly!');
+        return false;
+      }
+
+      const proofType = document.querySelector('input[name="proof"]:checked');
+      if (!proofType) {
+        alert('⚠️ Töleg tassyklamasyny saýlaň!');
+        return false;
+      }
+
+      if (proofType.value === 'sms') {
+        const smsText = document.getElementById('sms-text').value.trim();
+        if (!smsText) {
+          alert('⚠️ SMS habary nusgasyny giriziň!');
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    // === Theme ===
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
@@ -978,7 +1003,6 @@
     }
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
-
     // Mobil menyu
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
@@ -997,7 +1021,6 @@
         navMenu.classList.remove('active');
       });
     });
-
     // "Davom et" tugmasi
     document.getElementById('continue-btn').addEventListener('click', function() {
       if (document.getElementById('read-info').checked) {
@@ -1011,8 +1034,7 @@
         alert('Ýalňyş, "Maglumatlary okap çykdym we razy" ketegine belgi goýuň!');
       }
     });
-
-    // "Töleg etmek" tugmasi — ✅ ISHLAYDI
+    // "Töleg etmek" tugmasi
     document.getElementById('pay-btn').addEventListener('click', function() {
       const name = document.getElementById('name').value;
       const surname = document.getElementById('surname').value;
@@ -1027,7 +1049,6 @@
       document.getElementById('payment-section').style.display = 'block';
       document.getElementById('form-section').style.display = 'none';
     });
-
     // Qolgan funksiyalar
     const today = new Date();
     const maxDate = new Date();
@@ -1037,7 +1058,6 @@
     const maxDateStr = maxDate.toISOString().split('T')[0];
     travelDateInput.min = todayStr;
     travelDateInput.max = maxDateStr;
-
     function calculatePrice() {
       const travelDateInput = document.getElementById('travel-date');
       if (!travelDateInput?.value) return 0;
@@ -1064,7 +1084,6 @@
       if (priceDisplay) priceDisplay.textContent = total.toFixed(2);
       return total;
     }
-
     function updatePaymentAmountDisplay(total, diffDays) {
       const paymentDisplay = document.getElementById('payment-amount-display');
       if (!paymentDisplay) return;
@@ -1079,7 +1098,6 @@
       html += `<p>+993 71 789091</p><p>+993 64 629487</p><p>+993 71 788546</p>`;
       paymentDisplay.innerHTML = html;
     }
-
     document.getElementById('first-class')?.addEventListener('change', function() {
       if (this.checked) document.getElementById('second-class').checked = false;
     });
@@ -1090,7 +1108,6 @@
       const el = document.getElementById(id);
       if (el) el.addEventListener('change', calculatePrice);
     });
-
     function handleProofType(type) {
       document.getElementById('proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('proof-sms').checked = (type === 'sms');
@@ -1104,7 +1121,6 @@
         screenshotWarning.style.display = 'block';
       }
     }
-
     document.querySelectorAll('.radio-option').forEach(option => {
       option.addEventListener('click', function() {
         const radio = this.querySelector('input[type="radio"]');
@@ -1113,11 +1129,9 @@
         handleProofType(type);
       });
     });
-
     document.getElementById('passport').addEventListener('input', function() {
       this.value = this.value.toUpperCase();
     });
-
     document.getElementById('submit-btn').addEventListener('click', function() {
       const clientPhone = document.getElementById('client-phone').value;
       const proofType = document.querySelector('input[name="proof"]:checked');
@@ -1154,59 +1168,71 @@
       document.getElementById('confirmation-section').style.display = 'block';
     });
 
-    document.getElementById('confirm-yes').addEventListener('click', function() {
+    // ✅ Backendless orqali buyurtma yuborish — yangilangan
+    document.getElementById('confirm-yes').addEventListener('click', async function() {
+      if (!validateAllFields()) return; // ⬅️ To'liq validatsiya
+
       const name = document.getElementById('name').value;
       const surname = document.getElementById('surname').value;
       const passport = document.getElementById('passport').value;
       const birthdate = document.getElementById('birthdate').value;
       const route = document.getElementById('route').value;
       const travelDate = document.getElementById('travel-date').value;
-      const totalPrice = document.getElementById('total-price').textContent;
+      const totalPrice = parseFloat(document.getElementById('total-price').textContent);
       const clientPhone = document.getElementById('client-phone').value;
       const firstClass = document.getElementById('first-class').checked;
       const secondClass = document.getElementById('second-class').checked;
       const mediaPortal = document.getElementById('media').checked;
       const proofType = document.querySelector('input[name="proof"]:checked').value;
       const smsText = proofType === 'sms' ? document.getElementById('sms-text').value : null;
-      if (!name || !surname || !passport || !birthdate || !travelDate || !totalPrice || !clientPhone || !proofType) {
-        alert('⚠️, Ähli meýdançalary dolduryň!');
-        return;
-      }
-      const orderData = {
-        type: 'demiryol',
-        name: name,
-        surname: surname,
-        passport: passport,
-        birthdate: birthdate,
-        route: route,
-        travelDate: travelDate,
-        totalPrice: parseFloat(totalPrice),
-        clientPhone: clientPhone,
-        proofType: proofType,
-        smsText: smsText,
-        firstClass: firstClass,
-        secondClass: secondClass,
-        mediaPortal: mediaPortal,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-      };
+
       const loading = document.getElementById('loading');
       const error = document.getElementById('error');
       const btn = document.getElementById('confirm-yes');
       loading.style.display = 'block';
       error.style.display = 'none';
       btn.disabled = true;
-      database.ref('orders').push(orderData)
-        .then(() => {
-          loading.style.display = 'none';
-          document.getElementById('confirmation-section').style.display = 'none';
-          document.getElementById('success-section').style.display = 'block';
-        })
-        .catch((err) => {
-          loading.style.display = 'none';
-          error.textContent = 'Ýalňyşlyk: ' + err.message;
-          error.style.display = 'block';
-          btn.disabled = false;
+
+      try {
+        const response = await fetch(`${BASE_URL}/data/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            type: 'demiryol',
+            name: name,
+            surname: surname,
+            passport: passport,
+            birthdate: birthdate,
+            route: route,
+            travelDate: travelDate,
+            totalPrice: totalPrice,
+            clientPhone: clientPhone,
+            proofType: proofType,
+            smsText: smsText,
+            firstClass: firstClass,
+            secondClass: secondClass,
+            mediaPortal: mediaPortal,
+            timestamp: new Date().toISOString(),
+            created: new Date().toISOString(),
+            updated: new Date().toISOString()
+          })
         });
+
+        if (!response.ok) {
+          throw new Error(`Status: ${response.status}`);
+        }
+
+        loading.style.display = 'none';
+        document.getElementById('confirmation-section').style.display = 'none';
+        document.getElementById('success-section').style.display = 'block';
+      } catch (err) {
+        loading.style.display = 'none';
+        error.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nomaʼlum xato');
+        error.style.display = 'block';
+        btn.disabled = false;
+      }
     });
 
     document.getElementById('confirm-no').addEventListener('click', function() {

@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <style>
+    /* ... (barcha CSS o'zgarmaydi) ... */
     /* Kompyuter uchun — chap tomonda, left: 15% */
     @media (min-width: 769px) {
       .logo-center {
@@ -21,7 +22,6 @@
         height: 300px;
       }
     }
-
     /* Mobil uchun — markazda, left: 50% */
     @media (max-width: 768px) {
       .logo-center {
@@ -41,7 +41,6 @@
     body.dark-mode .logo-img {
       filter: brightness(0.9);
     }
-    
     body {
       font-family: 'Poppins', sans-serif;
       font-size: 20px;
@@ -171,28 +170,22 @@
       </div>
     </div>
   </header>
-
   <div class="container" style="padding: 40px 20px;">
     <h1 style="text-align:center; margin-bottom:40px;">Ýeňil barada sorag joagap</h1>
-
     <div class="faq-container">
-      <!-- Savol 1 -->
+      <!-- Savollar (o'zgarmaydi) -->
       <div class="faq-item">
         <button class="faq-question">1. Siz tölegi öňünden alýaňyzmy ýa-da tölegi soň etsem hem bolýamy ?</button>
         <div class="faq-answer">
           <p>Howa biz tölegi öňünden alýas iş ýerine ýetirilenden soň däl. Biz töleg edilenden soň işe başlaýarys.</p>
         </div>
       </div>
-
-      <!-- Savol 2 -->
       <div class="faq-item">
         <button class="faq-question">2. Ýeňil demirýollaryna ýa-da Ýeňil pay-a ýüz tutsam ol näçe wagt içinde ýerine ýetirilýär?</button>
         <div class="faq-answer">
           <p>Siz bize ýüz tutsaňyz biz 24 sagadyň içinde siziň işiňiz barada maglymat berilýär we biz 7/24 işleýäs.</p>
         </div>
       </div>
-
-      <!-- Savol 3 -->
       <div class="faq-item">
         <button class="faq-question">3. Eger näsazlyk bolan ýagdaýynda tölän pulymy yzyna alyp bilerinmi?</button>
         <div class="faq-answer">
@@ -200,26 +193,21 @@
         </div>
       </div>
     </div>
-
     <div class="content" style="margin-top: 40px;">
       <h2>Sözüňiz barmy?</h2>
       <p>Agar yuqarydaky soraglarga jogap tapmasaňyz, öz soragyňyzy yozyp beriň:</p>
-      
       <div class="form-group">
         <label for="user-name">Adyňyz</label>
         <input type="text" id="user-name" placeholder="Adyňyz">
       </div>
-
       <div class="form-group">
         <label for="user-phone">Nomeriňiz (Siz bilen baglanmak üçin)</label>
         <input type="tel" id="user-phone" placeholder="+993 XX XXXXXXX">
       </div>
-
       <div class="form-group">
         <label for="user-question">Soragyňyz</label>
         <textarea id="user-question" rows="4" placeholder="Soragyňyzy bu ýere ýazyň..."></textarea>
       </div>
-
       <div class="form-group">
         <label for="user-file">Faýl goşmak (isleseňiz)</label>
         <input type="file" id="user-file">
@@ -234,29 +222,73 @@
     </div>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
+  <!-- ❌ Appwrite yoki Firebase yo'q — faqat Backendless -->
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCc3EeDkk_Bhvw8TphLj60aJSXtyWwWpZw",
-      authDomain: "yenil-app.firebaseapp.com",
-      databaseURL: "https://yenil-app-default-rtdb.firebaseio.com",
-      projectId: "yenil-app",
-      storageBucket: "yenil-app.firebasestorage.app",
-      messagingSenderId: "55580105205",
-      appId: "1:55580105205:web:0b3cce1b76596c5097e8bc"
-    };
+    // === Backendless konfiguratsiyasi ===
+    const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
+    const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
+    const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
 
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    // === Sorov yuborish funksiyasi ===
+    async function submitQuestion() {
+      const name = document.getElementById('user-name').value.trim();
+      const phone = document.getElementById('user-phone').value.trim();
+      const question = document.getElementById('user-question').value.trim();
+      const loading = document.getElementById('loading');
+      const error = document.getElementById('error');
+      const submitButton = document.getElementById('submit-question');
 
-    // Qora/oq rejim
+      if (!name || !phone || !question) {
+        error.style.display = 'block';
+        error.textContent = '⚠️ Ähli meýdançalary dolduryň!';
+        return;
+      }
+      error.style.display = 'none';
+
+      loading.style.display = 'block';
+      submitButton.disabled = true;
+      submitButton.textContent = 'Ýüklenýär...';
+
+      try {
+        const response = await fetch(`${BASE_URL}/data/questions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: name,
+            phone: phone,
+            question: question,
+            timestamp: new Date().toISOString()
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        alert('Soragyňyz üstünlikli göýberildi! Tez wagtda jogap beriler.');
+        document.getElementById('user-name').value = '';
+        document.getElementById('user-phone').value = '';
+        document.getElementById('user-question').value = '';
+      } catch (err) {
+        error.style.display = 'block';
+        error.textContent = 'Ýalňyşlyk ýüz berdi: ' + (err.message || 'Nomaʼlum xato');
+      } finally {
+        loading.style.display = 'none';
+        submitButton.disabled = false;
+        submitButton.textContent = 'Soragy göýber';
+      }
+    }
+
+    // === Event listeners ===
+    document.getElementById('submit-question').addEventListener('click', submitQuestion);
+
+    // Qora/oq rejim (o'zgarmaydi)
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
-
     document.getElementById('theme-toggle').addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
       document.body.classList.toggle('light-mode');
@@ -281,57 +313,6 @@
         const answer = button.nextElementSibling;
         answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
       });
-    });
-
-    // Sorag yuborish we loading funksiýasy
-    document.getElementById('submit-question').addEventListener('click', function() {
-      const name = document.getElementById('user-name').value;
-      const phone = document.getElementById('user-phone').value;
-      const question = document.getElementById('user-question').value;
-      const loading = document.getElementById('loading');
-      const error = document.getElementById('error');
-      const submitButton = document.getElementById('submit-question');
-
-      // Meýdançalaryň doly doldurylandygyny barlaň
-      if (!name.trim() || !phone.trim() || !question.trim()) {
-        error.style.display = 'block';
-        error.textContent = '⚠️ Ähli meýdançalary dolduryň!';
-        return;
-      } else {
-        error.style.display = 'none';
-      }
-
-      // Loading spinnerini görkez we düwmäni ýapyň
-      loading.style.display = 'block';
-      submitButton.disabled = true;
-      submitButton.textContent = 'Ýüklenýär...';
-
-      const questionData = {
-        name: name,
-        phone: phone,
-        question: question,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-      };
-
-      database.ref('questions').push(questionData)
-        .then(() => {
-          // Üstünlikli ýagdaý
-          loading.style.display = 'none';
-          submitButton.disabled = false;
-          submitButton.textContent = 'Soragy göýber';
-          alert('Soragyňyz üstünlikli göýberildi! Tez wagtda jogap beriler.');
-          document.getElementById('user-name').value = '';
-          document.getElementById('user-phone').value = '';
-          document.getElementById('user-question').value = '';
-        })
-        .catch((error) => {
-          // Ýalňyşlyk ýagdaýy
-          loading.style.display = 'none';
-          submitButton.disabled = false;
-          submitButton.textContent = 'Soragy göýber';
-          error.style.display = 'block';
-          error.textContent = 'Ýalňyşlyk ýüz berdi: ' + error.message;
-        });
     });
   </script>
 </body>

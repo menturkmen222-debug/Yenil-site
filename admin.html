@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.5" />
   <title>Admin — Ýeňil</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>">
+  <link rel="icon" href="image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>">
   <style>
     :root {
       --primary: #4361ee;
@@ -237,7 +237,6 @@
     .priority-badge.checked::before {
       content: "✅";
     }
-
     /* SMS Action Buttons */
     .action-buttons {
       margin-top: 16px;
@@ -268,7 +267,6 @@
     body.dark-mode .action-btn:hover {
       background: var(--primary);
     }
-
     /* Footer */
     footer {
       text-align: center;
@@ -276,14 +274,6 @@
       opacity: 0.7;
       font-size: 0.9rem;
       margin-top: auto;
-    }
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
     }
     /* Responsive */
     @media (max-width: 600px) {
@@ -340,23 +330,13 @@
   <footer>
     © 2025 Ýeňil. Hemma hukuklar goralan.
   </footer>
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <script>
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyCc3EeDkk_Bhvw8TphLj60aJSXtyWwWpZw",
-      authDomain: "yenil-app.firebaseapp.com",
-      databaseURL: "https://yenil-app-default-rtdb.firebaseio.com",
-      projectId: "yenil-app",
-      storageBucket: "yenil-app.firebasestorage.app",
-      messagingSenderId: "55580105205",
-      appId: "1:55580105205:web:0b3cce1b76596c5097e8bc"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    // Theme
+    // Backendless ma'lumotlari
+    const appId = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
+    const apiKey = '9A8CACA4-5889-4D47-903E-BF12F059E175';
+
+    // Tema sozlamalari
     const savedTheme = localStorage.getItem('theme') || 'light-mode';
     document.body.className = savedTheme;
     const themeToggle = document.getElementById('theme-toggle');
@@ -368,7 +348,8 @@
       localStorage.setItem('theme', isDark ? 'dark-mode' : 'light-mode');
       themeToggle.textContent = isDark ? '☀️' : '🌙';
     });
-    // Tab switching
+
+    // Tab o'tish
     const tabButtons = document.querySelectorAll('.tab-btn');
     const contentArea = document.getElementById('content-area');
     tabButtons.forEach(btn => {
@@ -378,63 +359,82 @@
         loadTabContent(btn.dataset.tab);
       });
     });
-    // Data
-    let allOrders = {};
-    let allQuestions = {};
-    database.ref('orders').on('value', (snapshot) => {
-      allOrders = snapshot.val() || {};
-      updateBadges();
-      if (document.querySelector('.tab-btn.active')?.dataset.tab !== 'help') {
+
+    // Ma'lumotlarni yuklash
+    let allOrders = [];
+    let allQuestions = [];
+
+    async function fetchAllData() {
+      try {
+        // Buyurtmalarni olish
+        const ordersRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/orders`);
+        allOrders = await ordersRes.json();
+
+        // Sorovlarni olish
+        const questionsRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/questions`);
+        allQuestions = await questionsRes.json();
+
+        updateBadges();
         loadActiveTab();
+      } catch (err) {
+        console.error('Ma\'lumot yuklanmadi:', err);
       }
-    });
-    database.ref('questions').on('value', (snapshot) => {
-      allQuestions = snapshot.val() || {};
-      updateBadges();
-      if (document.querySelector('.tab-btn.active')?.dataset.tab === 'help') {
-        loadActiveTab();
-      }
-    });
+    }
+
     function updateBadges() {
-      const railCount = Object.values(allOrders).filter(o => o.type === 'demiryol' && !o.priorityChecked).length;
-      const payCount = Object.values(allOrders).filter(o => (o.type === 'buy' || o.type === 'sell') && !o.priorityChecked).length;
-      const helpCount = Object.values(allQuestions).filter(q => !q.priorityChecked).length;
+      const railCount = allOrders.filter(o => o.type === 'demiryol' && !o.priorityChecked).length;
+      const payCount = allOrders.filter(o => (o.type === 'buy' || o.type === 'sell') && !o.priorityChecked).length;
+      const helpCount = allQuestions.filter(q => !q.priorityChecked).length;
+
       document.getElementById('badge-rail').textContent = railCount || '';
       document.getElementById('badge-pay').textContent = payCount || '';
       document.getElementById('badge-help').textContent = helpCount || '';
     }
+
     function loadActiveTab() {
       const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
       if (activeTab) loadTabContent(activeTab);
     }
+
     function loadTabContent(tab) {
       let html = '';
       const now = Date.now();
+
       if (tab === 'rail') {
-        const railOrders = Object.entries(allOrders)
-          .filter(([_, o]) => o.type === 'demiryol')
-          .sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+        const railOrders = allOrders
+          .filter(o => o.type === 'demiryol')
+          .sort((a, b) => (b.created || 0) - (a.created || 0));
+
         if (railOrders.length === 0) {
           contentArea.innerHTML = `<div class="empty-state">Demirýol buyurtmasy ýok.</div>`;
           return;
         }
-        html = railOrders.map(([key, order]) => {
-          if (order.priorityExpiresAt && now > order.priorityExpiresAt && order.priorityChecked) {
-            database.ref(`orders/${key}`).remove();
-            return '';
-          }
-          const birthDate = order.birthdate
-            ? new Date(order.birthdate).toLocaleDateString('tk-TM')
-            : '—';
+
+        html = railOrders.map(order => {
+          const birthDate = order.birthdate ? new Date(order.birthdate).toLocaleDateString('tk-TM') : '—';
           const route = order.route || '—';
-          const travelDate = order.travelDate || '01-01-2025';
+          let travelDate = '01-01-2025';
+if (order.travelDate) {
+  if (typeof order.travelDate === 'number') {
+    travelDate = new Date(order.travelDate).toLocaleDateString('tk-TM');
+  } else if (typeof order.travelDate === 'string') {
+    // Agar "YYYY-MM-DD" formatda bo'lsa
+    const dateObj = new Date(order.travelDate);
+    if (!isNaN(dateObj)) {
+      travelDate = dateObj.toLocaleDateString('tk-TM');
+    } else {
+      travelDate = order.travelDate; // original string
+    }
+  } else {
+    travelDate = order.travelDate;
+  }
+}
           const totalPrice = order.totalPrice || '00';
           const phone = order.clientPhone || '';
 
-          // SMS mazmunlary
-          const sms1 = `✅ Salam gadyrly müşderi siziň ${travelDate} ${route} ugry boýunça sargydyňyz üstünlikli kabul edildi we işlenýär iň tiz wagtda Ýeňil size bron kody we ýer baradaky maglumatlary berer\n\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
-          const sms2 = `🎉Salam gadyrly müşderi siziň\n${travelDate} ${route} eden sargydyňyz üstünlikli ýerine ýetirildi Bron kody 000000 Ugraýan wagty 00:00 Wagon 0. Ýer 0.\n\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
-          const sms3 = `✅ Salam hormatly müşderi ${travelDate} ${route} ugry boýunça sargydyňyz üstünlikli kabul edildi indi tölegi doly etmegiňizi haýyş edýäris edilmeli töleg ${totalPrice} TMT biz siz töleg edenden soň işe başlaýas\n\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
+          const sms1 = `✅ Salam gadyrly müşderi siziň ${travelDate} ${route} ugry boýunça sargydyňyz üstünlikli kabul edildi we işlenýär iň tiz wagtda Ýeňil size bron kody we ýer baradaky maglumatlary berer\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
+          const sms2 = `🎉Salam gadyrly müşderi siziň\n${travelDate} ${route} eden sargydyňyz üstünlikli ýerine ýetirildi Bron kody 000000 Ugraýan wagty 00:00 Wagon 0. Ýer 0.\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
+          const sms3 = `✅ Salam hormatly müşderi ${travelDate} ${route} ugry boýunça sargydyňyz üstünlikli kabul edildi indi tölegi doly etmegiňizi haýyş edýäris edilmeli töleg ${totalPrice} TMT biz siz töleg edenden soň işe başlaýas\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
 
           return `
             <div class="order-item">
@@ -450,8 +450,8 @@
               ${order.mediaPortal ? '<div class="order-detail"><strong>Media portal:</strong> ✅</div>' : ''}
               <div class="order-detail"><strong>Tassyklama:</strong> ${order.proofType === 'screenshot' ? 'Skrinshot' : 'SMS habary'}</div>
               ${order.smsText ? `<div class="order-detail"><strong>SMS:</strong> ${order.smsText}</div>` : ''}
-              <div class="order-detail"><strong>Wagt:</strong> ${order.timestamp ? new Date(order.timestamp).toLocaleString('tk-TM') : '—'}</div>
-              <div class="priority-badge ${order.priorityChecked ? 'checked' : ''}" data-id="${key}" data-type="orders">
+              <div class="order-detail"><strong>Wagt:</strong> ${order.created ? new Date(order.created).toLocaleString('tk-TM') : '—'}</div>
+              <div class="priority-badge ${order.priorityChecked ? 'checked' : ''}" data-id="${order.objectId}" data-type="orders">
                 Üstünlikli
               </div>
               <div class="action-buttons">
@@ -463,27 +463,26 @@
           `;
         }).join('');
       }
+
       else if (tab === 'pay') {
-        const payOrders = Object.entries(allOrders)
-          .filter(([_, o]) => o.type === 'buy' || o.type === 'sell')
-          .sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+        const payOrders = allOrders
+          .filter(o => o.type === 'buy' || o.type === 'sell')
+          .sort((a, b) => (b.created || 0) - (a.created || 0));
+
         if (payOrders.length === 0) {
           contentArea.innerHTML = `<div class="empty-state">Ýeňil Pay buyurtmasy ýok.</div>`;
           return;
         }
-        html = payOrders.map(([key, order]) => {
-          if (order.priorityExpiresAt && now > order.priorityExpiresAt && order.priorityChecked) {
-            database.ref(`orders/${key}`).remove();
-            return '';
-          }
+
+        html = payOrders.map(order => {
           const typeText = order.type === 'buy' ? 'Satyn almak' : 'Satmak';
           const crypto = order.crypto || 'Kripto';
           const amount = order.amount || '0';
           const total = order.total || '00';
           const phone = order.clientPhone || '';
 
-          const paySms1 = `🎉Salam gadyrly müşderi siziň\n${typeText} — ${amount} ${crypto} eden sargydyňyz üstünlikli ýerine ýetirildi\n\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
-          const paySms2 = `✅ Salam hormatly müşderi sargydyňyz üstünlikli kabul edildi indi tölegi doly etmegiňizi haýyş edýäris edilmeli töleg ${total} TMT biz siz töleg edenden soň işe başlaýas\n\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
+          const paySms1 = `🎉Salam gadyrly müşderi siziň\n${typeText} — ${amount} ${crypto} eden sargydyňyz üstünlikli ýerine ýetirildi\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
+          const paySms2 = `✅ Salam hormatly müşderi sargydyňyz üstünlikli kabul edildi indi tölegi doly etmegiňizi haýyş edýäris edilmeli töleg ${total} TMT biz siz töleg edenden soň işe başlaýas\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
 
           return `
             <div class="order-item">
@@ -497,8 +496,8 @@
               ${order.webmoneyId ? `<div class="order-detail"><strong>WebMoney ID:</strong> ${order.webmoneyId}</div>` : ''}
               <div class="order-detail"><strong>Tassyklama:</strong> ${order.proofType === 'screenshot' ? 'Skrinshot' : 'SMS habary'}</div>
               ${order.smsText ? `<div class="order-detail"><strong>SMS:</strong> ${order.smsText}</div>` : ''}
-              <div class="order-detail"><strong>Wagt:</strong> ${order.timestamp ? new Date(order.timestamp).toLocaleString('tk-TM') : '—'}</div>
-              <div class="priority-badge ${order.priorityChecked ? 'checked' : ''}" data-id="${key}" data-type="orders">
+              <div class="order-detail"><strong>Wagt:</strong> ${order.created ? new Date(order.created).toLocaleString('tk-TM') : '—'}</div>
+              <div class="priority-badge ${order.priorityChecked ? 'checked' : ''}" data-id="${order.objectId}" data-type="orders">
                 Üstünlikli
               </div>
               <div class="action-buttons">
@@ -509,54 +508,83 @@
           `;
         }).join('');
       }
+
       else if (tab === 'help') {
-        const questions = Object.entries(allQuestions)
-          .sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+        const questions = allQuestions
+          .sort((a, b) => (b.created || 0) - (a.created || 0));
+
         if (questions.length === 0) {
           contentArea.innerHTML = `<div class="empty-state">Sorag ýok.</div>`;
           return;
         }
-        html = questions.map(([key, q]) => {
-          if (q.priorityExpiresAt && now > q.priorityExpiresAt && q.priorityChecked) {
-            database.ref(`questions/${key}`).remove();
-            return '';
-          }
-          return `
-            <div class="question-item">
-              <div class="question-header">${q.name || 'Anonim'}</div>
-              <div class="question-detail"><strong>Nomer:</strong> ${q.phone || '—'}</div>
-              <div class="question-detail"><strong>Sorag:</strong> ${q.question || '—'}</div>
-              <div class="question-detail"><small>${q.timestamp ? new Date(q.timestamp).toLocaleString('tk-TM') : '—'}</small></div>
-              <div class="priority-badge ${q.priorityChecked ? 'checked' : ''}" data-id="${key}" data-type="questions">
-                Üstünlikli
-              </div>
+
+        html = questions.map(q => `
+          <div class="question-item">
+            <div class="question-header">${q.name || 'Anonim'}</div>
+            <div class="question-detail"><strong>Nomer:</strong> ${q.phone || '—'}</div>
+            <div class="question-detail"><strong>Sorag:</strong> ${q.question || '—'}</div>
+            <div class="question-detail"><small>${q.created ? new Date(q.created).toLocaleString('tk-TM') : '—'}</small></div>
+            <div class="priority-badge ${q.priorityChecked ? 'checked' : ''}" data-id="${q.objectId}" data-type="questions">
+              Üstünlikli
             </div>
-          `;
-        }).join('');
+          </div>
+        `).join('');
       }
+
       contentArea.innerHTML = html || `<div class="empty-state">Ma'lumot ýok.</div>`;
       document.querySelectorAll('.priority-badge').forEach(badge => {
         badge.addEventListener('click', togglePriority);
       });
     }
-    function togglePriority(e) {
+
+    // === Prioritetni o'zgartirish (Backendlessda yangilash) ===
+    async function togglePriority(e) {
       const badge = e.currentTarget;
-      const id = badge.dataset.id;
-      const type = badge.dataset.type;
+      const objectId = badge.dataset.id;
+      const type = badge.dataset.type; // 'orders' yoki 'questions'
       const isChecked = badge.classList.contains('checked');
-      const ref = database.ref(`${type}/${id}`);
-      if (isChecked) {
-        ref.update({ priorityChecked: null, priorityExpiresAt: null });
-      } else {
-        const expiresAt = Date.now() + 3 * 24 * 60 * 60 * 1000;
-        ref.update({
-          priorityChecked: true,
-          priorityExpiresAt: expiresAt
+
+      const url = `https://api.backendless.com/${appId}/${apiKey}/data/${type}/${objectId}`;
+      const updateData = isChecked
+        ? { priorityChecked: null, priorityExpiresAt: null }
+        : {
+            priorityChecked: true,
+            priorityExpiresAt: Date.now() + 3 * 24 * 60 * 60 * 1000
+          };
+
+      try {
+        const response = await fetch(url, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updateData)
         });
+        if (response.ok) {
+          // Mahalliy keshni yangilash
+          if (type === 'orders') {
+            const idx = allOrders.findIndex(o => o.objectId === objectId);
+            if (idx !== -1) {
+              allOrders[idx] = { ...allOrders[idx], ...updateData };
+            }
+          } else {
+            const idx = allQuestions.findIndex(q => q.objectId === objectId);
+            if (idx !== -1) {
+              allQuestions[idx] = { ...allQuestions[idx], ...updateData };
+            }
+          }
+          updateBadges();
+          loadActiveTab();
+        }
+      } catch (err) {
+        console.error('Prioritet yangilanmadi:', err);
       }
     }
-    // Init
+
+    // Dastlabki yuklash
+    fetchAllData();
     loadTabContent('rail');
+
+    // Har 30 soniyada yangilash
+    setInterval(fetchAllData, 30000);
   </script>
 </body>
 </html>

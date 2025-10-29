@@ -987,7 +987,7 @@
         <a href="index.html" class="btn">Baş sahypa</a>
       </div>
       <footer>
-        © 2025 Ýeňil. Hemme hukuklar goralan.
+        © 2025 Ýeňil. Hemma hukuklar goralan.
       </footer>
     </div>
   </div>
@@ -1000,21 +1000,15 @@
     <li><button class="theme-toggle" id="mobile-theme-toggle">🌓</button></li>
   </ul>
   <div class="menu-overlay" id="menu-overlay"></div>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <!-- ❌ Firebase yo'q — faqat Backendless -->
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCc3EeDkk_Bhvw8TphLj60aJSXtyWwWpZw",
-      authDomain: "yenil-app.firebaseapp.com",
-      databaseURL: "https://yenil-app-default-rtdb.firebaseio.com",
-      projectId: "yenil-app",
-      storageBucket: "yenil-app.firebasestorage.app",
-      messagingSenderId: "55580105205",
-      appId: "1:55580105205:web:0b3cce1b76596c5097e8bc",
-      measurementId: "G-P4DP3ZSWZD"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    // === Backendless konfiguratsiyasi ===
+    const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
+    const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
+    const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
+
+    // === Theme ===
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
@@ -1029,6 +1023,8 @@
     }
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
+
+    // Mobil menyu
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
     const menuOverlay = document.getElementById('menu-overlay');
@@ -1046,6 +1042,67 @@
         navMenu.classList.remove('active');
       });
     });
+
+    // Dinamik valyuta labelini o'zgartirish
+    function updateBuyAmountLabel() {
+      const crypto = document.getElementById('buy-crypto').value;
+      const currency = document.getElementById('buy-currency').value;
+      const label = document.getElementById('buy-amount-label');
+      if (crypto === 'payeer' && currency === 'rub') {
+        label.textContent = 'Näçe RUBL almakçysyňyz?';
+      } else if (crypto === 'payeer' && currency === 'usd') {
+        label.textContent = 'Näçe USD almakçysyňyz?';
+      } else if (crypto === 'perfect') {
+        label.textContent = 'Näçe USD almakçysyňyz?';
+      } else if (crypto === 'webmoney') {
+        label.textContent = 'Näçe WMZ almakçysyňyz?';
+      }
+    }
+
+    function updateSellAmountLabel() {
+      const crypto = document.getElementById('sell-crypto').value;
+      const currency = document.getElementById('sell-currency').value;
+      const label = document.getElementById('sell-amount-label');
+      if (crypto === 'payeer' && currency === 'rub') {
+        label.textContent = 'Näçe RUBL satmak isleýändigiňiz?';
+      } else if (crypto === 'payeer' && currency === 'usd') {
+        label.textContent = 'Näçe USD satmak isleýändigiňiz?';
+      } else if (crypto === 'perfect') {
+        label.textContent = 'Näçe USD satmak isleýändigiňiz?';
+      } else if (crypto === 'webmoney') {
+        label.textContent = 'Näçe WMZ satmak isleýändigiňiz?';
+      }
+    }
+
+    // Platforma va valyutani tanlaganda labelni yangilash
+    document.getElementById('buy-crypto').addEventListener('change', function() {
+      const value = this.value;
+      document.getElementById('buy-payeer-fields').style.display = value === 'payeer' ? 'block' : 'none';
+      document.getElementById('buy-perfect-fields').style.display = value === 'perfect' ? 'block' : 'none';
+      document.getElementById('buy-webmoney-fields').style.display = value === 'webmoney' ? 'block' : 'none';
+      calculateBuyPrice();
+      updateBuyAmountLabel(); // Yangilash
+    });
+
+    document.getElementById('buy-currency').addEventListener('change', function() {
+      updateBuyAmountLabel(); // Yangilash
+    });
+
+    document.getElementById('sell-crypto').addEventListener('change', function() {
+      const value = this.value;
+      document.getElementById('sell-payeer-fields').style.display = value === 'payeer' ? 'block' : 'none';
+      document.getElementById('sell-perfect-fields').style.display = value === 'perfect' ? 'block' : 'none';
+      document.getElementById('sell-webmoney-fields').style.display = value === 'webmoney' ? 'block' : 'none';
+      document.getElementById('sell-crypto-warning').style.display = value === 'crypto' ? 'block' : 'none';
+      calculateSellPrice();
+      updateSellAmountLabel(); // Yangilash
+    });
+
+    document.getElementById('sell-currency').addEventListener('change', function() {
+      updateSellAmountLabel(); // Yangilash
+    });
+
+    // Qiymatlarni hisoblash
     function calculateBuyPrice() {
       const crypto = document.getElementById('buy-crypto').value;
       let total = 0;
@@ -1062,6 +1119,7 @@
       }
       document.getElementById('buy-total').textContent = total.toFixed(2);
     }
+
     function calculateSellPrice() {
       const crypto = document.getElementById('sell-crypto').value;
       let receive = 0;
@@ -1078,21 +1136,8 @@
       }
       document.getElementById('sell-total').textContent = receive.toFixed(2);
     }
-    document.getElementById('buy-crypto').addEventListener('change', function() {
-      const value = this.value;
-      document.getElementById('buy-payeer-fields').style.display = value === 'payeer' ? 'block' : 'none';
-      document.getElementById('buy-perfect-fields').style.display = value === 'perfect' ? 'block' : 'none';
-      document.getElementById('buy-webmoney-fields').style.display = value === 'webmoney' ? 'block' : 'none';
-      calculateBuyPrice();
-    });
-    document.getElementById('sell-crypto').addEventListener('change', function() {
-      const value = this.value;
-      document.getElementById('sell-payeer-fields').style.display = value === 'payeer' ? 'block' : 'none';
-      document.getElementById('sell-perfect-fields').style.display = value === 'perfect' ? 'block' : 'none';
-      document.getElementById('sell-webmoney-fields').style.display = value === 'webmoney' ? 'block' : 'none';
-      document.getElementById('sell-crypto-warning').style.display = value === 'crypto' ? 'block' : 'none';
-      calculateSellPrice();
-    });
+
+    // Inputlarga o'zgarishni kuzatish
     ['buy-currency', 'buy-amount', 'buy-perfect-amount', 'buy-webmoney-amount'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', calculateBuyPrice);
@@ -1101,12 +1146,16 @@
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', calculateSellPrice);
     });
+
+    // Tugmalar
     document.getElementById('buy-btn').addEventListener('click', function() {
       document.getElementById('buy-section').style.display = 'block';
     });
     document.getElementById('sell-btn').addEventListener('click', function() {
       document.getElementById('sell-section').style.display = 'block';
     });
+
+    // Töleg ma'lumotlarini ko'rsatish
     document.getElementById('buy-confirm-btn').addEventListener('click', function() {
       const crypto = document.getElementById('buy-crypto').value;
       if (!crypto) {
@@ -1140,6 +1189,7 @@
       document.getElementById('buy-payment-section').style.display = 'block';
       document.getElementById('buy-section').style.display = 'none';
     });
+
     document.getElementById('sell-confirm-btn').addEventListener('click', function() {
       const crypto = document.getElementById('sell-crypto').value;
       if (!crypto || crypto === 'crypto') {
@@ -1171,7 +1221,9 @@
       document.getElementById('sell-payment-section').style.display = 'block';
       document.getElementById('sell-section').style.display = 'none';
     });
-    document.getElementById('buy-submit-btn').addEventListener('click', function() {
+
+    // ✅ Backendless orqali buyurtma yuborish — Satyn almak
+    document.getElementById('buy-submit-btn').addEventListener('click', async function() {
       const crypto = document.getElementById('buy-crypto').value;
       const phone = document.getElementById('buy-phone').value;
       const total = parseFloat(document.getElementById('buy-total').textContent) || 0;
@@ -1194,24 +1246,21 @@
       const orderData = {
         type: 'buy',
         crypto: crypto,
-        total: total,
+        total: total, // ✅ DOUBLE
         clientPhone: phone,
         proofType: proofType.value,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
+        smsText: proofType.value === 'sms' ? document.getElementById('sms-text').value.trim() : ""
       };
       if (crypto === 'payeer') {
         orderData.payeerId = document.getElementById('buy-payeer-id').value;
         orderData.currency = document.getElementById('buy-currency').value;
-        orderData.amount = document.getElementById('buy-amount').value;
+        orderData.amount = parseFloat(document.getElementById('buy-amount').value); // ✅ DOUBLE
       } else if (crypto === 'perfect') {
         orderData.perfectId = document.getElementById('buy-perfect-id').value;
-        orderData.amount = document.getElementById('buy-perfect-amount').value;
+        orderData.amount = parseFloat(document.getElementById('buy-perfect-amount').value); // ✅ DOUBLE
       } else if (crypto === 'webmoney') {
         orderData.webmoneyId = document.getElementById('buy-webmoney-id').value;
-        orderData.amount = document.getElementById('buy-webmoney-amount').value;
-      }
-      if (proofType.value === 'sms') {
-        orderData.smsText = document.getElementById('sms-text').value.trim();
+        orderData.amount = parseFloat(document.getElementById('buy-webmoney-amount').value); // ✅ DOUBLE
       }
       const loading = document.getElementById('buy-loading');
       const errorDiv = document.getElementById('buy-error');
@@ -1219,20 +1268,30 @@
       loading.style.display = 'block';
       errorDiv.style.display = 'none';
       btn.disabled = true;
-      database.ref('orders').push(orderData)
-        .then(() => {
-          loading.style.display = 'none';
-          document.getElementById('buy-payment-section').style.display = 'none';
-          document.getElementById('success-section').style.display = 'block';
-        })
-        .catch((err) => {
-          loading.style.display = 'none';
-          errorDiv.textContent = 'Ýalňyşlyk: ' + err.message;
-          errorDiv.style.display = 'block';
-          btn.disabled = false;
+      try {
+        const response = await fetch(`${BASE_URL}/data/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(orderData)
         });
+        if (!response.ok) {
+          throw new Error(`Status: ${response.status}`);
+        }
+        loading.style.display = 'none';
+        document.getElementById('buy-payment-section').style.display = 'none';
+        document.getElementById('success-section').style.display = 'block';
+      } catch (err) {
+        loading.style.display = 'none';
+        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nomaʼlum xato');
+        errorDiv.style.display = 'block';
+        btn.disabled = false;
+      }
     });
-    document.getElementById('sell-submit-btn').addEventListener('click', function() {
+
+    // ✅ Backendless orqali buyurtma yuborish — Satmak
+    document.getElementById('sell-submit-btn').addEventListener('click', async function() {
       const crypto = document.getElementById('sell-crypto').value;
       const phone = document.getElementById('sell-phone').value;
       const total = parseFloat(document.getElementById('sell-total').textContent) || 0;
@@ -1256,25 +1315,22 @@
       const orderData = {
         type: 'sell',
         crypto: crypto,
-        total: total,
+        total: total, // ✅ DOUBLE
         clientPhone: phone,
         secretCode: secretCode,
         proofType: proofType.value,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
+        smsText: proofType.value === 'sms' ? document.getElementById('sms-text-sell').value.trim() : ""
       };
       if (crypto === 'payeer') {
         orderData.payeerId = document.getElementById('sell-payeer-id').value;
         orderData.currency = document.getElementById('sell-currency').value;
-        orderData.amount = document.getElementById('sell-amount').value;
+        orderData.amount = parseFloat(document.getElementById('sell-amount').value); // ✅ DOUBLE
       } else if (crypto === 'perfect') {
         orderData.perfectId = document.getElementById('sell-perfect-id').value;
-        orderData.amount = document.getElementById('sell-perfect-amount').value;
+        orderData.amount = parseFloat(document.getElementById('sell-perfect-amount').value); // ✅ DOUBLE
       } else if (crypto === 'webmoney') {
         orderData.webmoneyId = document.getElementById('sell-webmoney-id').value;
-        orderData.amount = document.getElementById('sell-webmoney-amount').value;
-      }
-      if (proofType.value === 'sms') {
-        orderData.smsText = document.getElementById('sms-text-sell').value.trim();
+        orderData.amount = parseFloat(document.getElementById('sell-webmoney-amount').value); // ✅ DOUBLE
       }
       const loading = document.getElementById('sell-loading');
       const errorDiv = document.getElementById('sell-error');
@@ -1282,19 +1338,28 @@
       loading.style.display = 'block';
       errorDiv.style.display = 'none';
       btn.disabled = true;
-      database.ref('orders').push(orderData)
-        .then(() => {
-          loading.style.display = 'none';
-          document.getElementById('sell-payment-section').style.display = 'none';
-          document.getElementById('success-section').style.display = 'block';
-        })
-        .catch((err) => {
-          loading.style.display = 'none';
-          errorDiv.textContent = 'Ýalňyşlyk: ' + err.message;
-          errorDiv.style.display = 'block';
-          btn.disabled = false;
+      try {
+        const response = await fetch(`${BASE_URL}/data/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(orderData)
         });
+        if (!response.ok) {
+          throw new Error(`Status: ${response.status}`);
+        }
+        loading.style.display = 'none';
+        document.getElementById('sell-payment-section').style.display = 'none';
+        document.getElementById('success-section').style.display = 'block';
+      } catch (err) {
+        loading.style.display = 'none';
+        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nomaʼlum xato');
+        errorDiv.style.display = 'block';
+        btn.disabled = false;
+      }
     });
+
     function handleProofType(type) {
       document.getElementById('proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('proof-sms').checked = (type === 'sms');
@@ -1308,6 +1373,7 @@
         screenshotWarning.style.display = 'block';
       }
     }
+
     function handleProofTypeSell(type) {
       document.getElementById('sell-proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('sell-proof-sms').checked = (type === 'sms');
@@ -1321,6 +1387,7 @@
         screenshotWarning.style.display = 'block';
       }
     }
+
     document.querySelectorAll('.radio-option').forEach(option => {
       option.addEventListener('click', function() {
         const radio = this.querySelector('input[type="radio"]');
