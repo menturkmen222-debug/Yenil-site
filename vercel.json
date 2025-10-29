@@ -1,9 +1,11 @@
 {
   "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true }
     { "source": "/demiryol.html", "destination": "/demiryol", "permanent": true },
     { "source": "/pay.html", "destination": "/pay", "permanent": true },
     { "source": "/about.html", "destination": "/about", "permanent": true },
     { "source": "/help.html", "destination": "/help", "permanent": true }
+    { "source": "/sms.html", "destination": "/sms", "permanent": true }
   ],
   "rewrites": [
     { "source": "/demiryol", "destination": "/demiryol.html" },
