@@ -57,60 +57,6 @@
     @keyframes logoFloat {
       0%, 100% { transform: translateX(-50%) translateY(0px); }
       50% { transform: translateX(-50%) translateY(-3px); }
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Sayt nomi (faqat bitta) -->
-  <title>Ýeňil — Hemme zat ýeňil! | Türkmenistanda onlayn tölegler we biletler bilen işleýär</title>
-
-  <!-- Meta Description -->
-  <meta name="description" content="Ýeňil — Biz türkmenistanyň kiçi biznesleriň we şahslaryň onlaýn töleglerde, biletlary satyn almakda we pul göçürmelerde ýeňilleşmesine kömek etmek üçin ýaradylan.">
-  <meta name="keywords" content="Ýeňil, Türkmenistan, onlayn töleg, bilet satyn almak, demirýol bileti, pul göçürmek, Ýeňil demirýollary, Ýeňil Pay, TMCELL bileti, onlayn hyzmatlar">
-  <link rel="canonical" href="https://yenil.ru">
-
-  <!-- Favicon (brauzer tab’i uchun) -->
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-  <meta name="msapplication-TileColor" content="#0d9488">
-  <meta name="msapplication-TileImage" content="/mstile-150x150.png">
-  <link rel="manifest" href="/site.webmanifest">
-  <meta name="theme-color" content="#ffffff">
-
-  <!-- Open Graph (Google, Facebook, LinkedIn uchun) -->
-  <meta property="og:title" content="Ýeňil — Hemme zat ýeňil!">
-  <meta property="og:description" content="Türkmenistanda onlayn töleg, demirýol bileti we pul göçürmeler uchun eng ýeňil platforma.">
-  <meta property="og:image" content="https://yenil.ru/images/logo-headr.png">
-  <meta property="og:url" content="https://yenil.ru">
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="tk_TM">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Ýeňil — Hemme zat ýeňil!">
-  <meta name="twitter:description" content="Türkmenistanda onlayn töleg, demirýol bileti we pul göçürmeler uchun eng ýeňil platforma.">
-  <meta name="twitter:image" content="https://yenil.ru/images/logo-headr.png">
-
-  <!-- CSS -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
-
-  <!-- Inline CSS (sizniki) -->
-  <style>
-    .logo-center {
-      position: absolute;
-      left: 50%;
-      top: -100px;
-      transform: translateX(-50%);
-      z-index: 99;
-      animation: logoFloat 3s ease-in-out infinite;
-    }
-    @keyframes logoFloat {
-      0%, 100% { transform: translateX(-50%) translateY(0px); }
-      50% { transform: translateX(-50%) translateY(-3px); }
     }
     .logo-img {
       height: 265px;
@@ -123,6 +69,7 @@
     body.dark-mode .logo-img {
       filter: brightness(0.9);
     }
+
     /* Reviews Section */
     .reviews .review-slider {
       display: flex;
@@ -132,8 +79,8 @@
       padding-bottom: 20px;
     }
     .reviews .review-item {
-      flex: 0 0 250px;
-      height: 200px;
+      flex: 0 0 250px; /* Fixed width for each review card */
+      height: 200px; /* Fixed height for each review card */
       background: #f9f9f9;
       border-radius: 10px;
       padding: 15px;
@@ -154,9 +101,9 @@
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
-      -webkit-line-clamp: 6;
+      -webkit-line-clamp: 6; /* Limit text to 6 lines */
       -webkit-box-orient: vertical;
-      word-wrap: break-word;
+      word-wrap: break-word; /* Ensure text wraps within the card */
     }
     body.dark-mode .reviews .review-item {
       background: #333;
