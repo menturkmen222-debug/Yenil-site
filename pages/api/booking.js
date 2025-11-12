@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  const bookingNumber = req.query.booking || "QUAPWZ"; // default booking
+  const bookingNumber = req.query.booking || "QUAPWZ";
   try {
     const response = await fetch(`https://railway.gov.tm/railway-api/bookings/${bookingNumber}`, {
       method: 'GET',
