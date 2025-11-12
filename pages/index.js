@@ -1,31 +1,39 @@
-import { useEffect, useState } from 'react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Info</title>
+</head>
+<body>
+  <h1>Booking Info</h1>
+  <div id="booking">Loading...</div>
 
-export default function Home() {
-  const [booking, setBooking] = useState(null);
+  <script>
+    async function getBooking() {
+      try {
+        const res = await fetch('/api/booking?booking=QUAPWZ');
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
 
-  useEffect(() => {
-    fetch('/api/booking?booking=QUAPWZ')
-      .then(res => res.json())
-      .then(data => setBooking(data))
-      .catch(err => console.error(err));
-  }, []);
+        const booking = data.data.booking;
+        const container = document.getElementById('booking');
 
-  if (!booking) return <div>Loading...</div>;
+        container.innerHTML = `
+          <p>Name: ${booking.main_contact}</p>
+          <p>Phone: ${booking.phone}</p>
+          <p>Total Price: ${booking.total_price} USD</p>
+          <p>Tickets:</p>
+          <ul>
+            ${booking.tickets.map(t => `<li>${t.passenger.name} ${t.passenger.surname} - ${t.pnrs[0].source} → ${t.pnrs[0].destination}</li>`).join('')}
+          </ul>
+        `;
+      } catch (err) {
+        document.getElementById('booking').innerText = 'Error: ' + err.message;
+      }
+    }
 
-  return (
-    <div>
-      <h1>Booking Info</h1>
-      <p>Name: {booking.data.booking.main_contact}</p>
-      <p>Phone: {booking.data.booking.phone}</p>
-      <p>Total Price: {booking.data.booking.total_price} USD</p>
-      <p>Tickets:</p>
-      <ul>
-        {booking.data.booking.tickets.map((t, i) => (
-          <li key={i}>
-            {t.passenger.name} - {t.passenger.surname} - {t.pnrs[0].source} → {t.pnrs[0].destination}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+    getBooking();
+  </script>
+</body>
+</html>
