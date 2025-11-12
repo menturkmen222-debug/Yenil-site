@@ -1,8 +1,33 @@
-<script>
-async function getBooking() {
-  const res = await fetch('pages/api/booking.js?booking=QUAPWZ');
-  const data = await res.json();
-  console.log(data);
-}
-getBooking();
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Booking Info</title>
+</head>
+<body>
+  <h1>Booking Info</h1>
+  <div id="booking">Loading...</div>
+
+  <script>
+    async function getBooking() {
+      try {
+        // Shu yerga to'g'ri API URL qo'yiladi
+        const res = await fetch('pages/api/booking.js?booking=QUAPWZ');
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+
+        const booking = data.data.booking;
+        document.getElementById('booking').innerHTML = `
+          <p>Name: ${booking.main_contact}</p>
+          <p>Phone: ${booking.phone}</p>
+          <p>Total Price: ${booking.total_price} USD</p>
+        `;
+      } catch (err) {
+        document.getElementById('booking').innerText = 'Error: ' + err.message;
+      }
+    }
+
+    getBooking();
+  </script>
+</body>
+</html>
