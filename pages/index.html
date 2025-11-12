@@ -1,1 +1,8 @@
-const res = await fetch('/api/booking?booking=QUAPWZ');
+<script>
+async function getBooking() {
+  const res = await fetch('pages/api/booking.js?booking=QUAPWZ');
+  const data = await res.json();
+  console.log(data);
+}
+getBooking();
+</script>
