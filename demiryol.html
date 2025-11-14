@@ -187,9 +187,6 @@ body.dark-mode .nav-menu-right a {
   position: absolute;
   width: 100%;
 }
-.menu-toggle span:nth-child(1) { top: 0; }
-.menu-toggle span:nth-child(2) { top: 10px; }
-.menu-toggle span:nth-child(3) { top: 20px; }
 body.dark-mode .menu-toggle span {
   background: var(--dark-text);
 }
@@ -705,6 +702,7 @@ body.dark-mode .error-message {
   background: #4a1a1a;
   color: #f87171;
 }
+/* ============== YANGI: Floating tugma va modal ============== */
 .floating-btn {
   position: fixed;
   bottom: 20px;
@@ -813,6 +811,7 @@ body.dark-mode #booking-code {
     <div class="container">
       <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Yza</a>
       <div class="logo-page">Ýeňil demirýollary</div>
+      <!-- Asosiy sahifa tarkibi -->
       <div class="content" id="info-section">
         <h1>Ýeňil demirýollary bilen doly tanyşyň</h1>
         <p>Bilet almak üçin her gezek wagzala baryp terminala oçurda durmakdan ýadadyňyzmy? ýada her gezek taksa pul bermek bulardan ýadadyňyzmy?</p>
@@ -856,6 +855,7 @@ body.dark-mode #booking-code {
           Ol reklama azyndan 500 adam gören bolmaly<br>
         <p>Şu şerti ýerine ýetirenden soň bize ýazyň ýa-da SMS ugradyň.</p>
       </div>
+      <!-- Qolgan formalar (o'zgarmaydi) -->
       <div class="content" id="form-section" style="display:none;">
         <h2>Saparyňyz üçin maglumat</h2>
         <div class="form-group">
@@ -987,6 +987,7 @@ body.dark-mode #booking-code {
       </footer>
     </div>
   </div>
+  <!-- ============== YANGI: Floating tugma va modal HTML ============== -->
   <button id="print-ticket-btn" class="floating-btn">🎫 Bilet çap etmek</button>
   <div id="ticket-modal" class="modal">
     <div class="modal-content">
@@ -1000,10 +1001,12 @@ body.dark-mode #booking-code {
       </div>
       <div id="ticket-error" class="error-message"></div>
       <div id="ticket-result" style="display:none; margin-top:20px; padding:20px; background:#f0fdf4; border-radius:16px; color:#065f46;">
+        <!-- Natija dinamik ravishda qo'shiladi -->
       </div>
     </div>
   </div>
   <div id="modal-overlay" class="modal-overlay"></div>
+  <!-- MOBIL MENYU -->
   <ul class="nav-menu" id="nav-menu">
     <li><a href="index.html">Baş Sahypa</a></li>
     <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
@@ -1013,21 +1016,8 @@ body.dark-mode #booking-code {
     <li><button class="theme-toggle" id="mobile-theme-toggle">🌓</button></li>
   </ul>
   <div class="menu-overlay" id="menu-overlay"></div>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCc3EeDkk_Bhvw8TphLj60aJSXtyWwWpZw",
-      authDomain: "yenil-app.firebaseapp.com",
-      databaseURL: "https://yenil-app-default-rtdb.firebaseio.com",
-      projectId: "yenil-app",
-      storageBucket: "yenil-app.firebasestorage.app",
-      messagingSenderId: "55580105205",
-      appId: "1:55580105205:web:0b3cce1b76596c5097e8bc",
-      measurementId: "G-P4DP3ZSWZD"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    // Theme
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
@@ -1042,6 +1032,7 @@ body.dark-mode #booking-code {
     }
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
+    // Mobil menyu
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
     const menuOverlay = document.getElementById('menu-overlay');
@@ -1059,6 +1050,7 @@ body.dark-mode #booking-code {
         navMenu.classList.remove('active');
       });
     });
+    // Asosiy formalar (o'zgarmaydi)
     document.getElementById('continue-btn').addEventListener('click', function() {
       if (document.getElementById('read-info').checked) {
         document.getElementById('form-section').style.display = 'block';
@@ -1235,7 +1227,7 @@ body.dark-mode #booking-code {
         firstClass: firstClass,
         secondClass: secondClass,
         mediaPortal: mediaPortal,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
+        timestamp: Date.now()
       };
       const loading = document.getElementById('loading');
       const error = document.getElementById('error');
@@ -1243,8 +1235,16 @@ body.dark-mode #booking-code {
       loading.style.display = 'block';
       error.style.display = 'none';
       btn.disabled = true;
-      database.ref('orders').push(orderData)
-        .then(() => {
+      // Firebase emas, bepul serverless function (Vercel) orqali ma'lumot yuborish
+      fetch('https://yenil.ru/api/demiryol', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      })
+        .then(response => response.json())
+        .then(data => {
           loading.style.display = 'none';
           document.getElementById('confirmation-section').style.display = 'none';
           document.getElementById('success-section').style.display = 'block';
@@ -1260,8 +1260,7 @@ body.dark-mode #booking-code {
       document.getElementById('confirmation-section').style.display = 'none';
       document.getElementById('payment-section').style.display = 'block';
     });
-
-    /* ============== YANGI: BILET IZLASH — PIPEDREAM ORQALI ============== */
+    /* ============== YANGI: BILET IZLASH — VERCEL SERVERLESS FUNCTION ORQALI ============== */
     document.addEventListener('DOMContentLoaded', () => {
       const printBtn = document.getElementById('print-ticket-btn');
       const modal = document.getElementById('ticket-modal');
@@ -1286,8 +1285,8 @@ body.dark-mode #booking-code {
       });
       searchBtn.addEventListener('click', async () => {
         const code = document.getElementById('booking-code').value.trim().toUpperCase();
-        if (!code || code.length !== 6 || !/^[A-Z0-9]{6}$/.test(code)) {
-          alert('⚠️ Bron kodi 6 ta katta harf yoki raqamdan iborat bo‘lishi kerak (masalan: QUAPWZ)');
+        if (!code || code.length !== 6) {
+          alert('⚠️ Bron kodi 6 harfli bo‘lishi kerak (masalan: QUAPWZ)');
           return;
         }
         const loadingEl = document.getElementById('ticket-loading');
@@ -1297,16 +1296,16 @@ body.dark-mode #booking-code {
         errorEl.style.display = 'none';
         resultEl.style.display = 'none';
         try {
-          // 🔗 SIZNING PIPEDREAM URLINGIZ
-          const PIPEDREAM_URL = `https://eornv91itnkkgmq.m.pipedream.net?id=${code}`;
-          const response = await fetch(PIPEDREAM_URL);
+          // 🔑 SIZNING VERCEL API URL'INGIZNI QO'YISH KERAK!
+          const vercelApiUrl = `https://yenil.ru/api/demiryol?id=${code}`;
+          const response = await fetch(vercelApiUrl);
           if (!response.ok) {
             const err = await response.json().catch(() => ({}));
             throw new Error(err.error || 'Server javob bermadi');
           }
           const data = await response.json();
           if (!data.success || !data.data?.booking) {
-            throw new Error('Bron kodi topilmadi yoki muddati tugagan');
+            throw new Error('Bron kodi topilmadi yoki amal qilish muddati tugagan');
           }
           const booking = data.data.booking;
           const ticket = booking.tickets[0];
@@ -1317,31 +1316,29 @@ body.dark-mode #booking-code {
           }
           let pdfHtml = '';
           if (ticket.pdf_url) {
-            pdfHtml = `<a href="${ticket.pdf_url}" target="_blank" class="btn" style="background:#10b981; margin:10px 0; display:inline-block;">🖨️ PDF-ni yuklab olyň</a>`;
+            pdfHtml = `<a href="${ticket.pdf_url}" target="_blank" class="btn" style="background:#10b881; margin:10px 0; display:inline-block;">🖨️ PDF-ni yuklab olyň</a>`;
           }
-          const depTime = pnr.departure_time.split('T')[1].slice(0, 5);
-          const arrTime = pnr.arrival_time.split('T')[1].slice(0, 5);
-          const depDate = new Date(pnr.departure_time).toLocaleDateString('tk', {
-            weekday: 'long',
+          const formattedDate = new Date(pnr.departure_time).toLocaleDateString('tk', {
             year: 'numeric',
             month: 'long',
-            day: 'numeric'
+            day: 'numeric',
+            weekday: 'long'
           });
           resultEl.innerHTML = `
             <h3 style="color:var(--primary); margin-bottom:15px;">✅ Bilet topuldy!</h3>
             <p><strong>Mijoz:</strong> ${booking.main_contact}</p>
             <p><strong>Telefon:</strong> ${booking.phone}</p>
             <p><strong>Ugratma:</strong> ${pnr.source} → ${pnr.destination}</p>
-            <p><strong>Sapar senesi:</strong> ${depDate} (${depTime} → ${arrTime})</p>
+            <p><strong>Sapar senesi:</strong> ${formattedDate} (${pnr.departure_time.split('T')[1].slice(0,5)} → ${pnr.arrival_time.split('T')[1].slice(0,5)})</p>
             <p><strong>Vagon:</strong> ${pnr.wagon_type_title} (№${pnr.wagon_number}), Orun: ${pnr.seat_label}</p>
-            <p><strong>Jemi töleg:</strong> ${Number(booking.total_price).toFixed(2)} TMT</p>
+            <p><strong>Jemi töleg:</strong> ${booking.total_price.toFixed(2)} TMT</p>
             ${qrHtml}
             ${pdfHtml}
             <p style="font-size:0.85rem; margin-top:15px; color:#64748b;">ℹ️ Bu bilet bron qilinganidan 30 minut ichida amal qiladi.</p>
           `;
           resultEl.style.display = 'block';
         } catch (err) {
-          errorEl.textContent = '❌ ' + (err.message || 'Xatolik yuz berdi');
+          errorEl.textContent = '❌ ' + (err.message || 'Nätanyş ýalňyşlyk');
           errorEl.style.display = 'block';
         } finally {
           loadingEl.style.display = 'none';
