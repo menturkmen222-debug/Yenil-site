@@ -1261,7 +1261,7 @@ body.dark-mode #booking-code {
       document.getElementById('payment-section').style.display = 'block';
     });
 
-    /* ============== YANGI: BILET IZLASH — DENOPROXY ORQALI ============== */
+    /* ============== YANGI: BILET IZLASH — PIPEDREAM ORQALI ============== */
     document.addEventListener('DOMContentLoaded', () => {
       const printBtn = document.getElementById('print-ticket-btn');
       const modal = document.getElementById('ticket-modal');
@@ -1297,9 +1297,9 @@ body.dark-mode #booking-code {
         errorEl.style.display = 'none';
         resultEl.style.display = 'none';
         try {
-          // 🔗 SIZNING DENOPROXY URLINGIZ
-          const DENO_PROXY_URL = `https://yenil-site-sg5tjrxscn4r.menturkmen222-debug.deno.net/?id=${code}`;
-          const response = await fetch(DENO_PROXY_URL);
+          // 🔗 SIZNING PIPEDREAM URLINGIZ
+          const PIPEDREAM_URL = `https://eornv91itnkkgmq.m.pipedream.net?id=${code}`;
+          const response = await fetch(PIPEDREAM_URL);
           if (!response.ok) {
             const err = await response.json().catch(() => ({}));
             throw new Error(err.error || 'Server javob bermadi');
@@ -1350,4 +1350,4 @@ body.dark-mode #booking-code {
     });
   </script>
 </body>
-</html>
+  </html>
