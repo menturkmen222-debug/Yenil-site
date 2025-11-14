@@ -705,7 +705,7 @@ body.dark-mode .error-message {
   background: #4a1a1a;
   color: #f87171;
 }
-/* ============== YANGI: Floating tugma va modal ============== */
+/* ============== Floating bilet tugmasi ============== */
 .floating-btn {
   position: fixed;
   bottom: 20px;
@@ -814,7 +814,6 @@ body.dark-mode #booking-code {
     <div class="container">
       <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Yza</a>
       <div class="logo-page">Ýeňil demirýollary</div>
-      <!-- Asosiy sahifa tarkibi -->
       <div class="content" id="info-section">
         <h1>Ýeňil demirýollary bilen doly tanyşyň</h1>
         <p>Bilet almak üçin her gezek wagzala baryp terminala oçurda durmakdan ýadadyňyzmy? ýada her gezek taksa pul bermek bulardan ýadadyňyzmy?</p>
@@ -858,7 +857,6 @@ body.dark-mode #booking-code {
           Ol reklama azyndan 500 adam gören bolmaly<br>
         <p>Şu şerti ýerine ýetirenden soň bize ýazyň ýa-da SMS ugradyň.</p>
       </div>
-      <!-- Qolgan formalar (o'zgarmaydi) -->
       <div class="content" id="form-section" style="display:none;">
         <h2>Saparyňyz üçin maglumat</h2>
         <div class="form-group">
@@ -990,7 +988,7 @@ body.dark-mode #booking-code {
       </footer>
     </div>
   </div>
-  <!-- ============== YANGI: Floating tugma va modal HTML ============== -->
+  <!-- Floating bilet tugmasi -->
   <button id="print-ticket-btn" class="floating-btn">🎫 Bilet çap etmek</button>
   <div id="ticket-modal" class="modal">
     <div class="modal-content">
@@ -1003,22 +1001,21 @@ body.dark-mode #booking-code {
         <p>So'rov yuborilmoqda...</p>
       </div>
       <div id="ticket-error" class="error-message"></div>
-      <div id="ticket-result" style="display:none; margin-top:20px; padding:20px; background:#f0fdf4; border-radius:16px; color:#065f46;">
-        <!-- Natija dinamik ravishda qo'shiladi -->
-      </div>
+      <div id="ticket-result" style="display:none; margin-top:20px; padding:20px; background:#f0fdf4; border-radius:16px; color:#065f46;"></div>
     </div>
   </div>
   <div id="modal-overlay" class="modal-overlay"></div>
-  <!-- MOBIL MENYU -->
+  <!-- Mobil menyu -->
   <ul class="nav-menu" id="nav-menu">
     <li><a href="index.html">Baş Sahypa</a></li>
-    <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
+    <li><a href="demiryol.html">Ýeňil demirýollar</a></li>
     <li><a href="pay.html">Ýeňil Pay</a></li>
     <li><a href="about.html">Biz Barada</a></li>
     <li><a href="help.html">Ýardam</a></li>
     <li><button class="theme-toggle" id="mobile-theme-toggle">🌓</button></li>
   </ul>
   <div class="menu-overlay" id="menu-overlay"></div>
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script>
@@ -1067,14 +1064,12 @@ body.dark-mode #booking-code {
         navMenu.classList.remove('active');
       });
     });
-    // Form logic
+    // Form logic (o'zgarmaydi)
     document.getElementById('continue-btn').addEventListener('click', function() {
       if (document.getElementById('read-info').checked) {
         document.getElementById('form-section').style.display = 'block';
-        const notes = document.querySelectorAll('.note, .highlight, .checkbox-group');
-        notes.forEach(note => note.style.display = 'none');
-        const smsButton = document.getElementById('sms-btn');
-        if (smsButton) smsButton.style.display = 'none';
+        document.querySelectorAll('.note, .highlight, .checkbox-group').forEach(el => el.style.display = 'none');
+        document.getElementById('sms-btn').style.display = 'none';
         calculatePrice();
       } else {
         alert('Ýalňyş, "Maglumatlary okap çykdym we razy" ketegine belgi goýuň!');
@@ -1269,8 +1264,7 @@ body.dark-mode #booking-code {
       document.getElementById('confirmation-section').style.display = 'none';
       document.getElementById('payment-section').style.display = 'block';
     });
-
-    /* ============== YANGI: BILET IZLASH — VERCEL ORQALI ============== */
+    // ✅ BILET IZLASH — VERCEL API ORQALI
     document.addEventListener('DOMContentLoaded', () => {
       const printBtn = document.getElementById('print-ticket-btn');
       const modal = document.getElementById('ticket-modal');
@@ -1314,15 +1308,16 @@ body.dark-mode #booking-code {
         resultEl.style.display = 'none';
 
         try {
-          const vercelApiUrl = `https://yenil.ru/api/demiryol?id=${code}`;
-          const response = await fetch(vercelApiUrl, {
+          // ✅ TO'G'RI API MANZILI — VERCEL ORQALI
+          const apiUrl = `https://yenil.ru/api/demiryol?id=${encodeURIComponent(code)}`;
+          const response = await fetch(apiUrl, {
             method: 'GET',
             headers: { 'Accept': 'application/json' }
           });
 
           if (!response.ok) {
             const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.error || `Status ${response.status}`);
+            throw new Error(errData.error || `Server xatosi: ${response.status}`);
           }
 
           const result = await response.json();
@@ -1375,7 +1370,7 @@ body.dark-mode #booking-code {
           resultEl.style.display = 'block';
 
         } catch (err) {
-          console.error('Bilet izlash xatosi:', err);
+          console.error('Xatolik:', err);
           errorEl.textContent = '❌ ' + (err.message || 'Nätanyş ýalňyşlyk');
           errorEl.style.display = 'block';
         } finally {
