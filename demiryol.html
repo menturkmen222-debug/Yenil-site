@@ -1309,7 +1309,7 @@ body.dark-mode #booking-code {
 
         try {
           // ✅ TO'G'RI API MANZILI — VERCEL ORQALI
-          const apiUrl = `https://yenil.ru/api/demiryol?id=${encodeURIComponent(code)}`;
+          const apiUrl = `https://yenil.ru/api/demiryol?id={encodeURIComponent(code)}`;
           const response = await fetch(apiUrl, {
             method: 'GET',
             headers: { 'Accept': 'application/json' }
