@@ -1,0 +1,66 @@
+<!-- upload.html -->
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skrinshot Yuklash</title>
+  <style>
+    body { font-family: system-ui; padding: 20px; background: #f9f9f9; }
+    .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #333; }
+    input, button { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+    button { background: #0070f3; color: white; cursor: pointer; }
+    button:hover { background: #0059c2; }
+    #status { margin-top: 10px; text-align: center; }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🖼️ Skrinshot Yuboring</h2>
+    <form id="form">
+      <input type="file" id="fileInput" accept="image/*" required />
+      <button type="submit">📤 Yuklab Yuborish</button>
+    </form>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const file = document.getElementById('fileInput').files[0];
+      const status = document.getElementById('status');
+
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        status.innerHTML = '<p class="error">Fayl 5 MB dan katta!</p>';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      status.innerHTML = '<p>Yuklanmoqda...</p>';
+
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          status.innerHTML = '<p class="success">✅ Muvaffaqiyatli yuborildi!</p>';
+          document.getElementById('fileInput').value = '';
+        } else {
+          status.innerHTML = `<p class="error">❌ Xato: ${data.error || 'Noma’lum'}</p>`;
+        }
+      } catch (err) {
+        status.innerHTML = `<p class="error">❌ Tarmoq xatosi: ${err.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
