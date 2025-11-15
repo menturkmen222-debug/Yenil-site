@@ -7,7 +7,6 @@
 <meta property="og:image" content="https://yenil.ru/images/logo-1.png">
 <meta property="og:url" content="https://yenil.ru">
 <meta property="og:type" content="website">
-
 <!-- Twitter uchun meta teglar -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Ýeňil — Biz barada">
@@ -29,20 +28,19 @@
 <meta name="theme-color" content="#ffffff">
   <!-- Sayt nomi -->
 <title>Ýeňil — Biz barada</title>
-
 <!-- Sayt haqida qisqa izoh (Meta Description) -->
 <meta name="description" content="Ýeňil — Biz türkmenistanyň kiçi biznesleriň we şahslaryň onlaýn töleglerde, biletlary satyn almakda we pul göçürmelerde ýeňilleşmesine kömek etmek üçin ýaradylan.">
-
 <!-- Kalit so'zlar (Meta Keywords) - Hozirgi kunda kam muhim, lekin qo'shib qo'yish mumkin -->
 <meta name="keywords" content="Ýeňil, Türkmenistan, onlayn töleg, bilet satyn almak, demirýol bileti, pul göçürmek, Ýeňil demirýollary, Ýeňil Pay, kart tölegsiz töleg, TMCELL bileti, onlayn hyzmatlar, Türkmenistanyň onlayn platformasy">
-
 <!-- Ochilgan sahifaning URL manzili (Agar saytning asosiy sahifasi bo'lsa) -->
 <link rel="canonical" href="https://yenil.ru">
   <meta charset="UTF-8" /> 
   <meta name="viewport" content="width=device-width, initial-scale=0.5"/>
   <title>Ýeňil — Hemme zat ýeňil! | Türkmenistanda onlayn tölegler we biletler bilen işleýär </title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/all.min.css">
+  <!-- Font Awesome — faqat ikonalar uchun -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Asosiy stil — sizning style.css -->
   <link rel="stylesheet" href="style.css">
   <style>
     /* LOGO — INDEX DAGIDEK MARKAZDA */
@@ -69,7 +67,6 @@
     body.dark-mode .logo-img {
       filter: brightness(0.9);
     }
-
     /* Reviews Section */
     .reviews .review-slider {
       display: flex;
@@ -115,11 +112,11 @@
   <header class="header">
     <div class="container">
       <nav class="navbar">
-        <!-- CHAP TOMON -->
+        <!-- CHAP TOMON — IKONLAR QO'SHILDI -->
         <ul class="nav-menu-left">
-          <li><a href="index.html">Baş Sahipa</a></li>
-          <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
-          <li><a href="pay.html">Ýeňil Pay</a></li>
+          <li><a href="index.html"><i class="fas fa-home"></i> Baş Sahypa</a></li>
+          <li><a href="demiryol.html"><i class="fas fa-train"></i> Ýeňil demirýollary</a></li>
+          <li><a href="pay.html"><i class="fas fa-wallet"></i> Ýeňil Pay</a></li>
         </ul>
         <!-- MOBIL TUGMA - ANIMASIONLI -->
         <button class="menu-toggle" id="menu-toggle">
@@ -127,10 +124,10 @@
           <span></span>
           <span></span>
         </button>
-        <!-- O'NG TOMON -->
+        <!-- O'NG TOMON — IKONLAR QO'SHILDI -->
         <ul class="nav-menu-right">
-          <li><a href="about.html">Biz Barada</a></li>
-          <li><a href="help.html">Ýardam</a></li>
+          <li><a href="about.html"><i class="fas fa-info-circle"></i> Biz Barada</a></li>
+          <li><a href="help.html"><i class="fas fa-headset"></i> Ýardam</a></li>
           <li><button class="theme-toggle" id="theme-toggle">🌓</button></li>
         </ul>
       </nav>
@@ -140,7 +137,6 @@
       </div>
     </div>
   </header>
-
   <main style="flex: 1;">
     <section class="hero">
       <div class="container">
@@ -148,7 +144,6 @@
         <p>Bize 100% ynam berşiňiz mümkin. Biz her bir eden işimiziň dakazady bilen jogap bere bilýäs we biz barada eden işiňiz barada komentariýa goýmany ýatdan çykarmaň — bu biziň ösmegimize taze ýeňilliklere eden kömegiňiz bolar.</p>
       </div>
     </section>
-
     <section class="services">
       <div class="service-card demiryol" onclick="window.location='demiryol.html'">
         <div class="service-icon">
@@ -165,7 +160,6 @@
         <div class="service-info">Pul göçürmek, töleg amala aşyrmak</div>
       </div>
     </section>
-
     <section class="socials">
   <div class="container">
     <h3>Biziň sahypalarymyz:</h3>
@@ -177,7 +171,6 @@
     </div>
   </div>
 </section>
-
     <section class="reviews">
       <div class="container">
         <h3>Müşderilerimiziň pikirleri</h3>
@@ -214,24 +207,20 @@
       </div>
     </section>
   </main>
-
   <footer>
     © 2025 Ýeňil. Hemme hukuklar goralan.
   </footer>
-
-  <!-- PREMIUM MOBIL MENYU -->
+  <!-- PREMIUM MOBIL MENYU — IKONLAR QO'SHILDI -->
   <ul class="nav-menu" id="nav-menu">
-    <li><a href="index.html">Baş Sahypa</a></li>
-    <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
-    <li><a href="pay.html">Ýeňil Pay</a></li>
-    <li><a href="about.html">Biz Barada</a></li>
-    <li><a href="help.html">Ýardam</a></li>
+    <li><a href="index.html"><i class="fas fa-home"></i> Baş Sahypa</a></li>
+    <li><a href="demiryol.html"><i class="fas fa-train"></i> Ýeňil demirýollary</a></li>
+    <li><a href="pay.html"><i class="fas fa-wallet"></i> Ýeňil Pay</a></li>
+    <li><a href="about.html"><i class="fas fa-info-circle"></i> Biz Barada</a></li>
+    <li><a href="help.html"><i class="fas fa-headset"></i> Ýardam</a></li>
     <li><button class="theme-toggle" id="mobile-theme-toggle">🌓</button></li>
   </ul>
-
   <!-- Sal yopiq fon -->
   <div class="menu-overlay" id="menu-overlay"></div>
-
   <!-- Skriptlar -->
   <script>
     // Qora/oq rejim
@@ -249,7 +238,6 @@
     }
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
-
     // Mobil menyu
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
@@ -268,7 +256,6 @@
         navMenu.classList.remove('active');
       });
     });
-
     // Randomize review order
     function shuffleReviews() {
       const slider = document.getElementById('reviewSlider');
@@ -282,7 +269,6 @@
       slider.innerHTML = '';
       reviews.forEach(review => slider.appendChild(review));
     }
-
     // Run shuffle on page load
     window.addEventListener('load', shuffleReviews);
   </script>
