@@ -1,0 +1,45 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Panel</title>
+  <style>
+    body { font-family: system-ui; padding: 20px; background: #f0f0f0; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h2 { text-align: center; color: #333; }
+    input, button { padding: 10px; margin: 10px 5px; border: 1px solid #ccc; border-radius: 4px; }
+    #images { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; justify-content: center; }
+    img { width: 200px; border: 1px solid #ddd; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🔒 Admin: Yuklangan Skrinshotlar</h2>
+    <input type="password" id="pass" placeholder="Parol" />
+    <button onclick="loadImages()">Ko'rsatish</button>
+    <div id="images"></div>
+  </div>
+
+  <script>
+    async function loadImages() {
+      const pass = document.getElementById('pass').value;
+      const res = await fetch('/api/list', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass })
+      });
+      const data = await res.json();
+      const div = document.getElementById('images');
+      if (res.ok && data.images) {
+        div.innerHTML = data.images.length > 0
+          ? data.images.map(img => `<img src="${img.url}" loading="lazy">`).join('')
+          : '<p>Hech narsa topilmadi.</p>';
+      } else {
+        div.innerHTML = `<p style="color:red">Xato: ${data.error || 'Parol noto‘g‘ri'}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
