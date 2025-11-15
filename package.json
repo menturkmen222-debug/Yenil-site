@@ -6,7 +6,7 @@
     "dev": "vercel dev"
   },
   "dependencies": {
-    "cloudinary": "^1.48.0",
+    "cloudinary": "^2.5.0",
     "busboy": "^1.6.0"
   }
 }
