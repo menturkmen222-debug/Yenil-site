@@ -2,11 +2,8 @@
   "name": "yenil-ru",
   "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "dev": "vercel dev"
-  },
   "dependencies": {
-    "cloudinary": "^2.5.0",
-    "busboy": "^1.6.0"
+    "cloudinary": "1.51.0",
+    "busboy": "1.6.0"
   }
 }
