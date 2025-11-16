@@ -9,7 +9,7 @@ cloudinary.config({
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Faqat POST so‘rov' });
+    return res.status(405).json({ error: 'Faqat POST so‘rov qabul qilinadi' });
   }
 
   let body = '';
@@ -24,21 +24,33 @@ module.exports = async (req, res) => {
         return res.status(403).json({ error: 'Parol noto‘g‘ri' });
       }
 
-      // Rasmlarni asosiy papkadan olish (agar folder belgilanmagan bo'lsa)
+      // Faqat "mijoz_skrinshotlari" papkasidagi rasmlarni olish
       const result = await cloudinary.api.resources({
         type: 'upload',
-        // prefix: 'mijoz_skrinshotlari',  ← agar papka yo'q bo'lsa, bu satrni olib tashlang
+        prefix: 'mijoz_skrinshotlari', // ← faqat shu papkani olib keladi
         max_results: 100,
         sort_by: 'created_at',
         direction: 'desc'
       });
 
-      const images = result.resources.map(r => ({ url: r.secure_url }));
+      // Agar hech narsa topilmasa
+      if (!result.resources || result.resources.length === 0) {
+        return res.status(200).json({ images: [] });
+      }
+
+      // Rasmlarning URL larini tayyorlash
+      const images = result.resources.map(r => ({
+        url: r.secure_url, // HTTPS orqali ochiladi
+        public_id: r.public_id,
+        created_at: r.created_at
+      }));
+
       res.setHeader('Content-Type', 'application/json');
       res.status(200).json({ images });
+
     } catch (err) {
-      console.error('Ro‘yxat xatosi:', err);
-      res.status(500).json({ error: 'Serverda xato' });
+      console.error('Cloudinary ro‘yxat xatosi:', err);
+      res.status(500).json({ error: 'Serverda xato yuz berdi' });
     }
   });
 };
