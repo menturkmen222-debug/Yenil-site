@@ -24,9 +24,10 @@ module.exports = async (req, res) => {
         return res.status(403).json({ error: 'Parol noto‘g‘ri' });
       }
 
+      // Rasmlarni asosiy papkadan olish (agar folder belgilanmagan bo'lsa)
       const result = await cloudinary.api.resources({
         type: 'upload',
-        prefix: 'mijoz_skrinshotlari',
+        // prefix: 'mijoz_skrinshotlari',  ← agar papka yo'q bo'lsa, bu satrni olib tashlang
         max_results: 100,
         sort_by: 'created_at',
         direction: 'desc'
