@@ -8,40 +8,38 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-module.exports = async (req, res) => {
+module.exports = (req, res) => {
   const { public_id } = req.query;
 
   if (!public_id) {
-    return res.status(400).json({ error: 'public_id kerak' });
+    return res.status(400).json({ error: 'public_id talab qilinadi' });
   }
 
   // Parol bilan himoyalash (ixtiyoriy, lekin tavsiya etiladi)
-  if (req.headers['x-admin-pass'] !== process.env.ADMIN_PASSWORD) {
-    return res.status(403).end();
-  }
-
+  // Agar parol kerak bo'lsa, keyingi qismda izoh berilgan
   try {
-    // Cloudinarydan rasmni olish
+    // Cloudinarydan to'g'ri URL olish
     const url = cloudinary.url(public_id, {
       secure: true,
-      raw: true // to'g'ri URL
+      raw: true // to'g'ri CDN URL
     });
 
-    // Rasmni proxy qilish
-    const imgRes = await new Promise((resolve, reject) => {
-      https.get(url, (response) => {
-        resolve(response);
-      }).on('error', reject);
+    // Rasmni Vercel orqali to'g'ridan-to'g'ri yuborish (proxy)
+    const imgReq = https.request(url, (imgRes) => {
+      // MIME turini o'tkazish
+      res.setHeader('Content-Type', imgRes.headers['content-type']);
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 kun kesh
+      imgRes.pipe(res);
     });
 
-    // MIME turini olish
-    const contentType = imgRes.headers['content-type'] || 'image/jpeg';
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 kun kesh
+    imgReq.on('error', (err) => {
+      console.error('Proxy xatosi:', err.message);
+      res.status(500).end('Rasmni yuklab bo‘lmadi');
+    });
 
-    imgRes.pipe(res);
+    imgReq.end();
   } catch (err) {
-    console.error('Rasm proxy xatosi:', err);
-    res.status(500).end();
+    console.error('Cloudinary URL xatosi:', err);
+    res.status(500).end('URL yaratishda xato');
   }
 };
