@@ -679,81 +679,23 @@
       background: rgba(6, 95, 70, 0.25);
       color: #bbf7d0;
     }
-    /* === YANGI STIL: Premium Loading Spinner === */
-    .premium-spinner {
-      position: relative;
-      width: 50px;
-      height: 50px;
-      margin: 0 auto;
-      animation: spin 1.2s linear infinite;
-    }
-    .spinner-circle {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: 4px solid transparent;
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1.2s linear infinite;
-      z-index: 1;
-    }
-    .spinner-dot {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background-color: var(--primary);
-      border-radius: 50%;
-      animation: pulse 1.2s ease-in-out infinite;
-    }
-    .spinner-dot:nth-child(2) {
-      top: 50%;
-      left: 0;
-      transform: translateY(-50%);
-      animation-delay: 0.3s;
-    }
-    .spinner-dot:nth-child(3) {
-      top: 50%;
-      right: 0;
-      transform: translateY(-50%);
-      animation-delay: 0.6s;
-    }
-    .spinner-dot:nth-child(4) {
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      animation-delay: 0.9s;
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.5); opacity: 0.7; }
-    }
-    /* QARA MOD ÜÇIN */
-    body.dark-mode .premium-spinner .spinner-circle {
-      border-top-color: #6ee7b7;
-    }
-    body.dark-mode .premium-spinner .spinner-dot {
-      background-color: #6ee7b7;
-    }
     .loading {
       display: none;
       text-align: center;
       padding: 25px;
     }
-    .loading p {
-      color: #64748b;
-      font-size: 0.9rem;
-      margin-top: 10px;
-      font-weight: 500;
-      text-align: center;
+    .spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid var(--primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
     }
-    body.dark-mode .loading p {
-      color: #94a3b8;
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     .error-message {
       display: none;
@@ -844,6 +786,10 @@
       background: var(--card-dark);
       color: var(--dark-text);
     }
+    body.dark-mode #ticket-modal .modal-content input {
+  background: #ffffff; /* Fon rangi - oq */
+  color: #333; /* Matn rangi - qora */
+}
     #ticket-modal .close-btn {
       position: absolute;
       top: 15px;
@@ -858,6 +804,32 @@
     #confirmation-section {
       display: none;
     }
+    #confirmation-section .content {
+      background: #f0fdfa;
+      border-color: #a7f3d0;
+      margin-bottom: 15px;
+      padding: 15px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(16,185,128,0.1);
+    }
+    #confirmation-section p {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      margin-bottom: 8px;
+    }
+    #confirmation-section p strong {
+      font-weight: 600;
+    }
+    #confirmation-section p i {
+      color: var(--primary);
+    }
+
+    
     #confirmation-section .content {
       background: var(--card-light);
       border: 2px solid var(--accent);
@@ -944,6 +916,7 @@
     body.dark-mode #confirmation-section .btn.no {
       background: #64748b;
     }
+
     /* === YANGI STIL: Skrinshot yuklash paneli === */
     #screenshot-upload-section {
       display: none;
@@ -1042,13 +1015,13 @@
             <i class="fas fa-tags" style="color: #10b981;"></i> Bahalar
           </h2>
           <ul style="padding-left: 20px; margin: 15px 0 0; list-style-type: none; font-size: 1.05rem;">
-            <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+            <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: white; border-radius: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.07);">
               <span style="color: #10b981; font-weight: 700;"><i class="fas fa-clock"></i> 4-15 gün galandaky baha:</span> <span style="font-weight: 700; color: #065f46;">60 TMT</span>
             </li>
-            <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+            <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: white; border-radius: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.07);">
               <span style="color: #10b981; font-weight: 700;"><i class="fas fa-clock"></i> 2-3 gün galandaky baha:</span> <span style="font-weight: 700; color: #065f46;">70 TMT</span>
             </li>
-            <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+            <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: white; border-radius: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.07);">
               <span style="color: #10b981; font-weight: 700;"><i class="fas fa-clock"></i> 1 gün galandaky baha:</span> <span style="font-weight: 700; color: #065f46;">80 TMT</span>
             </li>
           </ul>
@@ -1192,6 +1165,7 @@
           <p><strong><i class="fas fa-sms"></i> SMS habary nusxalap goýuň ýada töleg geçen wagtyny ýazyň:</strong></p>
           <textarea id="sms-text" rows="3" placeholder="SMS haty şu ýere ýazyň..."></textarea>
         </div>
+        
         <div id="screenshot-upload-section">
           <h3 style="color: var(--primary); text-align:center; margin-bottom:15px; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <i class="fas fa-cloud-upload-alt"></i> Skrinshoty ýagny ekran suratyny ýükläň
@@ -1231,14 +1205,8 @@
         <div class="info-box">
           <i class="fas fa-question-circle"></i> <strong>Tasyklaýamyň?</strong> Eger ähli maglumatlar dogry bolsa, "Hawa" düwmesine basyň.
         </div>
-        <!-- PREMIUM LOADING ANIMASIÝASY -->
         <div class="loading" id="loading">
-          <div class="premium-spinner">
-            <div class="spinner-circle"></div>
-            <div class="spinner-dot"></div>
-            <div class="spinner-dot"></div>
-            <div class="spinner-dot"></div>
-          </div>
+          <div class="spinner"></div>
           <p>Ýüklenýär...</p>
         </div>
         <div class="error-message" id="error"></div>
@@ -1272,12 +1240,7 @@
         <i class="fas fa-search"></i> Gözle
       </button>
       <div id="ticket-loading" style="display:none; text-align: center; padding: 20px; background: var(--card-light); border-radius: 14px; margin-top: 15px;">
-        <div class="premium-spinner" style="width:40px; height:40px; margin:0 auto;">
-          <div class="spinner-circle"></div>
-          <div class="spinner-dot" style="animation-delay:0.3s;"></div>
-          <div class="spinner-dot" style="animation-delay:0.6s;"></div>
-          <div class="spinner-dot" style="animation-delay:0.9s;"></div>
-        </div>
+        <div class="spinner" style="width:40px; height:40px; margin:0 auto;"></div>
         <p style="margin-top:10px; font-size: 0.9rem; color: #64748b;">Gözlenýär garaşyň...</p>
       </div>
       <div id="ticket-error" style="display:none; background: #fee; color: #c33; padding: 15px; border-radius: 14px; margin-top: 15px; text-align: center; font-size: 0.95rem; border-left: 4px solid #f59e0b;">
@@ -1336,38 +1299,47 @@
     const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
     const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
     const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
+    
+   
     function setupScreenshotUploader() {
       const dropArea = document.getElementById('drop-area');
       const fileInput = document.getElementById('screenshot-file');
       const previewContainer = document.getElementById('preview-container');
       const previewImg = document.getElementById('preview-img');
       const errorDiv = document.getElementById('file-error');
+
       dropArea.addEventListener('click', () => fileInput.click());
       fileInput.addEventListener('change', (e) => {
         handleFile(e.target.files[0]);
       });
+
       ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, preventDefaults, false);
       });
+
       function preventDefaults(e) {
         e.preventDefault();
         e.stopPropagation();
       }
+
       ['dragenter', 'dragover'].forEach(eventName => {
         dropArea.addEventListener(eventName, () => {
           dropArea.style.borderColor = '#38bdf8';
         }, false);
       });
+
       ['dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, () => {
           dropArea.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--accent');
         }, false);
       });
+
       dropArea.addEventListener('drop', (e) => {
         const dt = e.dataTransfer;
         const file = dt.files[0];
         handleFile(file);
       });
+
       function handleFile(file) {
         errorDiv.style.display = 'none';
         if (!file) return;
@@ -1390,6 +1362,7 @@
         reader.readAsDataURL(file);
       }
     }
+
     function handleProofType(type) {
       document.getElementById('proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('proof-sms').checked = (type === 'sms');
@@ -1409,6 +1382,7 @@
         }
       }
     }
+
     function validateAllFields() {
       const requiredFields = [
         { id: 'name', label: 'Adyňyz' },
@@ -1451,10 +1425,13 @@
       }
       return true;
     }
+
+    
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
     document.getElementById('mobile-theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
+
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
       document.body.classList.toggle('light-mode');
@@ -1465,6 +1442,7 @@
     }
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
+
     // Mobil menýu
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
@@ -1483,6 +1461,7 @@
         navMenu.classList.remove('active');
       });
     });
+
     // Form önü
     document.getElementById('continue-btn').addEventListener('click', function() {
       if (document.getElementById('read-info').checked) {
@@ -1496,6 +1475,7 @@
         alert('Maglumatlary okap çykdym we razy ketegine belgi goýuň!');
       }
     });
+
     document.getElementById('pay-btn').addEventListener('click', function() {
       const name = document.getElementById('name').value;
       const surname = document.getElementById('surname').value;
@@ -1510,6 +1490,8 @@
       document.getElementById('payment-section').style.display = 'block';
       document.getElementById('form-section').style.display = 'none';
     });
+
+   
     const today = new Date();
     const maxDate = new Date();
     maxDate.setDate(today.getDate() + 15);
@@ -1518,6 +1500,8 @@
     const maxDateStr = maxDate.toISOString().split('T')[0];
     travelDateInput.min = todayStr;
     travelDateInput.max = maxDateStr;
+
+    
     function calculatePrice() {
       const travelDateInput = document.getElementById('travel-date');
       if (!travelDateInput?.value) return 0;
@@ -1544,6 +1528,7 @@
       if (priceDisplay) priceDisplay.textContent = total.toFixed(2);
       return total;
     }
+
     function updatePaymentAmountDisplay(total, diffDays) {
       const paymentDisplay = document.getElementById('payment-amount-display');
       if (!paymentDisplay) return;
@@ -1558,6 +1543,7 @@
       html += `<p><i class="fas fa-phone"></i> +993 71 789091</p><p><i class="fas fa-phone"></i> +993 64 629487</p><p><i class="fas fa-phone"></i> +993 71 788546</p>`;
       paymentDisplay.innerHTML = html;
     }
+
     // Gatlary özi bir birinden çykarma
     document.getElementById('first-class')?.addEventListener('change', function() {
       if (this.checked) document.getElementById('second-class').checked = false;
@@ -1565,10 +1551,13 @@
     document.getElementById('second-class')?.addEventListener('change', function() {
       if (this.checked) document.getElementById('first-class').checked = false;
     });
+
     ['travel-date', 'first-class', 'second-class', 'media'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('change', calculatePrice);
     });
+
+    
     document.querySelectorAll('.radio-option').forEach(option => {
       option.addEventListener('click', function() {
         const radio = this.querySelector('input[type="radio"]');
@@ -1577,13 +1566,18 @@
         handleProofType(type);
       });
     });
+
     document.getElementById('passport').addEventListener('input', function() {
       this.value = this.value.toUpperCase();
     });
+
+   
     document.getElementById('submit-btn').addEventListener('click', async function() {
       if (!validateAllFields()) return;
       const clientPhone = document.getElementById('client-phone').value;
       const proofType = document.querySelector('input[name="proof"]:checked').value;
+
+      
       const name = document.getElementById('name').value;
       const surname = document.getElementById('surname').value;
       const passport = document.getElementById('passport').value;
@@ -1592,6 +1586,7 @@
       const routeText = `${cityNames[fromCity] || fromCity} → ${cityNames[toCity] || toCity}`;
       const travelDate = document.getElementById('travel-date').value;
       const totalPrice = document.getElementById('total-price').textContent;
+
       document.getElementById('conf-name').textContent = name;
       document.getElementById('conf-surname').textContent = surname;
       document.getElementById('conf-passport').textContent = passport;
@@ -1600,14 +1595,19 @@
       document.getElementById('conf-price').textContent = totalPrice;
       document.getElementById('conf-phone').textContent = clientPhone;
       document.getElementById('conf-proof').textContent = proofType === 'screenshot' ? 'Skrinshot' : 'SMS habary';
+
+      
       if (proofType === 'screenshot') {
         window.tempScreenshotFile = window.selectedScreenshotFile;
       } else {
         delete window.tempScreenshotFile;
       }
+
       document.getElementById('payment-section').style.display = 'none';
       document.getElementById('confirmation-section').style.display = 'block';
     });
+
+    
     document.getElementById('confirm-yes').addEventListener('click', async function() {
       if (!validateAllFields()) return;
       const name = document.getElementById('name').value;
@@ -1623,12 +1623,15 @@
       const mediaPortal = document.getElementById('media').checked;
       const proofType = document.querySelector('input[name="proof"]:checked').value;
       const smsText = proofType === 'sms' ? document.getElementById('sms-text').value : null;
+
       const loading = document.getElementById('loading');
       const error = document.getElementById('error');
       const btn = document.getElementById('confirm-yes');
+
       loading.style.display = 'block';
       error.style.display = 'none';
       btn.disabled = true;
+
       try {
         let screenshotUrl = null;
         if (proofType === 'screenshot' && window.tempScreenshotFile) {
@@ -1646,6 +1649,7 @@
           const data = await res.json();
           screenshotUrl = data.secure_url;
         }
+
         const response = await fetch(`${BASE_URL}/data/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1683,10 +1687,13 @@
         btn.disabled = false;
       }
     });
+
     document.getElementById('confirm-no').addEventListener('click', function() {
       document.getElementById('confirmation-section').style.display = 'none';
       document.getElementById('payment-section').style.display = 'block';
     });
+
+   
     document.addEventListener('DOMContentLoaded', () => {
       const printBtn = document.getElementById('print-ticket-btn');
       const modal = document.getElementById('ticket-modal');
@@ -1781,20 +1788,23 @@
         }
       });
     });
+
     const cityNames = {
       ashgabat: 'Aşgabat',
       dashoguz: 'Daşoguz',
       balkanabat: 'Balkanabat',
       mary: 'Mary'
     };
+
     function updateRoute() {
       const from = document.getElementById('from-city').value;
       const to = document.getElementById('to-city').value;
       document.getElementById('route').value = `${from}-${to}`;
     }
+
     document.getElementById('from-city').addEventListener('change', updateRoute);
     document.getElementById('to-city').addEventListener('change', updateRoute);
     updateRoute();
   </script>
 </body>
-                                               </html>
+  </html>
