@@ -1191,7 +1191,6 @@
         <div class="content">
           <p><strong><i class="fas fa-user"></i> Adyňyz:</strong> <span id="conf-name">—</span></p>
           <p><strong><i class="fas fa-user"></i> Familýaňyz:</strong> <span id="conf-surname">—</span></p>
-          <p><strong><i class="fas fa-calendar-alt"></i> Doglan güni:</strong> <span id="conf-birthdate">—</span></p>
           <p><strong><i class="fas fa-passport"></i> Passport ID:</strong> <span id="conf-passport">—</span></p>
           <p><strong><i class="fas fa-route"></i> Ugratma:</strong> <span id="conf-route">—</span></p>
           <p><strong><i class="fas fa-calendar-day"></i> Sapar senesi:</strong> <span id="conf-date">—</span></p>
@@ -1568,52 +1567,24 @@
       this.value = this.value.toUpperCase();
     });
 
-    // Ugratma ýoluny täzelemek
-    function updateRoute() {
-      const from = document.getElementById('from-city').value;
-      const to = document.getElementById('to-city').value;
-      document.getElementById('route').value = `${from}-${to}`;
-    }
-    document.getElementById('from-city').addEventListener('change', updateRoute);
-    document.getElementById('to-city').addEventListener('change', updateRoute);
    
     document.getElementById('submit-btn').addEventListener('click', async function() {
       if (!validateAllFields()) return;
       const clientPhone = document.getElementById('client-phone').value;
       const proofType = document.querySelector('input[name="proof"]:checked').value;
-      let screenshotUrl = null;
-
-      
-      if (proofType === 'screenshot') {
-        const file = window.selectedScreenshotFile;
-        if (!file) {
-          alert('Skrinshot saýlamadyňyz!');
-          return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-          alert('Surat 5 MB dan uly!');
-          return;
-        }
-      }
 
       
       const name = document.getElementById('name').value;
       const surname = document.getElementById('surname').value;
-      const birthdate = document.getElementById('birthdate').value;
       const passport = document.getElementById('passport').value;
       const route = document.getElementById('route').value;
-      const [from, to] = route.split('-');
-      function getCityName(city) {
-        return city.charAt(0).toUpperCase() + city.slice(1);
-      }
-      const routeText = `${getCityName(from)} → ${getCityName(to)}`;
+      const [fromCity, toCity] = route.split('-');
+      const routeText = `${cityNames[fromCity] || fromCity} → ${cityNames[toCity] || toCity}`;
       const travelDate = document.getElementById('travel-date').value;
       const totalPrice = document.getElementById('total-price').textContent;
-      const smsText = proofType === 'sms' ? document.getElementById('sms-text').value.trim() : null;
 
       document.getElementById('conf-name').textContent = name;
       document.getElementById('conf-surname').textContent = surname;
-      document.getElementById('conf-birthdate').textContent = birthdate;
       document.getElementById('conf-passport').textContent = passport;
       document.getElementById('conf-route').textContent = routeText;
       document.getElementById('conf-date').textContent = travelDate;
@@ -1649,33 +1620,32 @@
       const proofType = document.querySelector('input[name="proof"]:checked').value;
       const smsText = proofType === 'sms' ? document.getElementById('sms-text').value : null;
 
-      let screenshotUrl = null;
-      if (proofType === 'screenshot' && window.tempScreenshotFile) {
-        const file = window.tempScreenshotFile;
-        const formData = new FormData();
-        formData.append('screenshot', file);
-        try {
-          const res = await fetch('/api/upload-screenshot', {
-            method: 'POST',
-            body: formData
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Yüklemekde ýalňyşlyk');
-          screenshotUrl = data.secure_url;
-        } catch (err) {
-          alert('Skrinshot admina ýollanmady: ' + err.message);
-          return;
-        }
-      }
-
       const loading = document.getElementById('loading');
       const error = document.getElementById('error');
       const btn = document.getElementById('confirm-yes');
+
       loading.style.display = 'block';
       error.style.display = 'none';
       btn.disabled = true;
 
       try {
+        let screenshotUrl = null;
+        if (proofType === 'screenshot' && window.tempScreenshotFile) {
+          const file = window.tempScreenshotFile;
+          const formData = new FormData();
+          formData.append('screenshot', file);
+          const res = await fetch('/api/upload-screenshot', {
+            method: 'POST',
+            body: formData
+          });
+          if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.error || 'Yüklemekde ýalňyşlyk');
+          }
+          const data = await res.json();
+          screenshotUrl = data.secure_url;
+        }
+
         const response = await fetch(`${BASE_URL}/data/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1703,13 +1673,13 @@
         if (!response.ok) {
           throw new Error(`Status: ${response.status}`);
         }
-        loading.style.display = 'none';
         document.getElementById('confirmation-section').style.display = 'none';
         document.getElementById('success-section').style.display = 'block';
       } catch (err) {
-        loading.style.display = 'none';
         error.textContent = 'Ýalňyşlyk: ' + (err.message || '⛔ Bilinmeýän ýalňyşlyk');
         error.style.display = 'block';
+      } finally {
+        loading.style.display = 'none';
         btn.disabled = false;
       }
     });
@@ -1814,6 +1784,23 @@
         }
       });
     });
+
+    const cityNames = {
+      ashgabat: 'Aşgabat',
+      dashoguz: 'Daşoguz',
+      balkanabat: 'Balkanabat',
+      mary: 'Mary'
+    };
+
+    function updateRoute() {
+      const from = document.getElementById('from-city').value;
+      const to = document.getElementById('to-city').value;
+      document.getElementById('route').value = `${from}-${to}`;
+    }
+
+    document.getElementById('from-city').addEventListener('change', updateRoute);
+    document.getElementById('to-city').addEventListener('change', updateRoute);
+    updateRoute();
   </script>
 </body>
-  </html>
+</html>
