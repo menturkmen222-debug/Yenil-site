@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tk" dir="ltr">
 <head>
-  <!-- Sosial tarmoqlarda ulanish uchun Open Graph teglari (Facebook, LinkedIn) -->
+  <!-- Open Graph teglari (Facebook, LinkedIn) -->
   <meta property="og:title" content="Ýeňil — Pay">
   <meta property="og:description" content="Ýeňil Pay – Daşary ýurt pullaryny arzan alyş çalyş etmek">
   <meta property="og:image" content="https://yenil.ru/images/logo-1.png">
@@ -12,27 +12,27 @@
   <meta name="twitter:title" content="Ýeňil — Pay">
   <meta name="twitter:description" content="Ýeňil Paý – Daşary ýurt pullaryny arzan alyş çalyş etmek">
   <meta name="twitter:image" content="https://yenil.ru/images/logo-twitter.png">
-<!-- Favicon -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<!-- Apple Touch Icon -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<!-- Android Chrome Icons -->
-<link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-<!-- Microsoft Edge -->
-<meta name="msapplication-TileColor" content="#0d9488">
-<meta name="msapplication-TileImage" content="/mstile-150x150.png">
-<!-- Manifest File -->
-<link rel="manifest" href="/site.webmanifest">
-<!-- Theme Color -->
-<meta name="theme-color" content="#ffffff">
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <!-- Android Chrome Icons -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+  <!-- Microsoft Edge -->
+  <meta name="msapplication-TileColor" content="#0d9488">
+  <meta name="msapplication-TileImage" content="/mstile-150x150.png">
+  <!-- Manifest File -->
+  <link rel="manifest" href="/site.webmanifest">
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#ffffff">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=0.5"/>
   <meta name="description" content="Ýeňil Pay — Payeer, Perfect Money, WebMoney arkaly dollar, rubl we kriptovalyutalarni arzan alyş çalyş etmek.">
   <title>Ýeňil Pay — Daşary ýurt pullaryny arzan alyş çalyş etmek</title>
   <meta name="keywords" content="Ýeňil Pay, dollar töleg, rubl töleg, Payeer, Perfect Money, WebMoney, kriptovalyuta, Tether, Bitcoin, Toncoin, daşary ýurt töleg, pul alyş çalyş, 1 dollar = 29 TMT, onlayn walyuta almashtyrmak, Türkmenistanda dollar satyn almak">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="css/all.min.css">
   <style>
     :root {
       --primary: #0d9488;
@@ -468,6 +468,9 @@
       font-size: 0.95rem;
       font-weight: 600;
       transition: transform 0.3s ease, background 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     body.dark-mode .crypto-item {
       background: rgba(13, 148, 136, 0.15);
@@ -518,6 +521,10 @@
       font-weight: 600;
       cursor: pointer;
       transition: transform 0.3s ease, opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
     .action-btn:hover {
       transform: translateY(-3px);
@@ -593,6 +600,10 @@
       cursor: pointer;
       transition: transform 0.3s ease, opacity 0.3s ease;
       margin-top: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
     .btn:hover {
       transform: translateY(-3px);
@@ -725,6 +736,71 @@
       background: var(--dark-bg);
       border-top: 1px solid rgba(255,255,255,0.1);
     }
+    /* ✅ TÄZE: Skrinshot yuklash paneli (oq we gara režimleri üçin) */
+    #screenshot-upload-section,
+    #screenshot-upload-section-sell {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 16px;
+      border: 2px dashed var(--primary);
+      background: var(--light-bg);
+    }
+    body.dark-mode #screenshot-upload-section,
+    body.dark-mode #screenshot-upload-section-sell {
+      background: var(--dark-bg);
+    }
+    #drop-area,
+    #drop-area-sell {
+      border: 2px dashed var(--accent);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      background: var(--light-bg);
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    body.dark-mode #drop-area,
+    body.dark-mode #drop-area-sell {
+      background: var(--dark-bg);
+    }
+    #file-error,
+    #file-error-sell {
+      display: none;
+      color: #ef4444;
+      margin-top: 10px;
+      text-align: center;
+      font-weight: 600;
+      background: #fee;
+      padding: 8px;
+      border-radius: 8px;
+      border-left: 4px solid #f59e0b;
+    }
+    body.dark-mode #file-error,
+    body.dark-mode #file-error-sell {
+      background: #4a1a1a;
+      color: #f87171;
+    }
+    #preview-container,
+    #preview-container-sell {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+    #preview-img,
+    #preview-img-sell {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border: 2px solid var(--accent);
+    }
+    body.dark-mode #preview-img,
+    body.dark-mode #preview-img-sell {
+      border-color: var(--accent);
+    }
   </style>
 </head>
 <body class="light-mode">
@@ -732,9 +808,9 @@
     <div class="container">
       <nav class="navbar">
         <ul class="nav-menu-left">
-          <li><a href="index.html">Baş Sahypa</a></li>
-          <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
-          <li><a href="pay.html">Ýeňil Pay</a></li>
+          <li><a href="index.html"><i class="fas fa-home"></i> Baş Sahypa</a></li>
+          <li><a href="demiryol.html"><i class="fas fa-train"></i> Ýeňil demirýollary</a></li>
+          <li><a href="pay.html"><i class="fas fa-wallet"></i> Ýeňil Pay</a></li>
         </ul>
         <button class="menu-toggle" id="menu-toggle">
           <span></span>
@@ -742,8 +818,8 @@
           <span></span>
         </button>
         <ul class="nav-menu-right">
-          <li><a href="about.html">Biz Barada</a></li>
-          <li><a href="help.html">Ýardam</a></li>
+          <li><a href="about.html"><i class="fas fa-info-circle"></i> Biz Barada</a></li>
+          <li><a href="help.html"><i class="fas fa-headset"></i> Ýardam</a></li>
           <li><button class="theme-toggle" id="theme-toggle">🌓</button></li>
         </ul>
       </nav>
@@ -755,15 +831,15 @@
   <div class="main-content">
     <div class="container">
       <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Yza</a>
-      <div class="logo-page">Ýeňil Pay</div>
+      <div class="logo-page"><i class="fas fa-coins"></i> Ýeňil Pay</div>
       <div class="content">
-        <h1>Ýeňil Pay bilen doly tanyşyň</h1>
-        <p>Online işlerde pul soralýamy?</p>
-        <p>Treding we birjalar we Forex bazary bilen işlemekde daşary ýurt puly tapylanokmy?</p>
-        <p>Pul geçirmekde maşeniklardan ýadadyňyzmy?</p>
-        <p class="highlight">Ýeňil pay indi daşary ýurt pullaryny alyş çalyş hem etýär arzan we ynamly.<br>
-        Bize doly 100% ynam berişiňiz mümkin — biz eden işimize doly dakazady bilen jogap bere bilýäs.</p>
-        <h2>Biz aşakda belläp geçilenler bilen alyş çalyş edip bilýäs:</h2>
+        <h1><i class="fas fa-handshake"></i> Ýeňil Pay bilen doly tanyşyň</h1>
+        <p><i class="fas fa-question-circle"></i> Online işlerde pul soralýamy?</p>
+        <p><i class="fas fa-chart-line"></i> Treding we birjalar we Forex bazary bilen işlemekde daşary ýurt puly tapylanokmy?</p>
+        <p><i class="fas fa-money-check-alt"></i> Pul geçirmekde maşeniklardan ýadadyňyzmy?</p>
+        <p class="highlight"><i class="fas fa-shield-alt"></i> Ýeňil pay indi daşary ýurt pullaryny alyş çalyş hem etýär arzan we ynamly.<br>
+        <i class="fas fa-lock"></i> Bize doly 100% ynam berişiňiz mümkin — biz eden işimize doly dakazady bilen jogap bere bilýäs.</p>
+        <h2><i class="fas fa-exchange-alt"></i> Biz aşakda belläp geçilenler bilen alyş çalyş edip bilýäs:</h2>
         <div class="crypto-list">
           <div class="crypto-item">Payeer</div>
           <div class="crypto-item">Web Money</div>
@@ -778,31 +854,30 @@
           <div class="crypto-item">Dogecoin</div>
           <div class="crypto-item">Tron</div>
         </div>
-        <h2>Alyş çalyş bahalary</h2>
-        <h3>Satyn almak bahasy (min 1$)</h3>
+        <h2><i class="fas fa-tags"></i> Alyş çalyş bahalary</h2>
+        <h3><i class="fas fa-shopping-cart"></i> Satyn almak bahasy (min 1$)</h3>
         <table class="price-table">
-          <tr><th>Platforma</th><th>Baha</th></tr>
+          <tr><th><i class="fas fa-wallet"></i> Platforma</th><th><i class="fas fa-money-bill-wave"></i> Baha</th></tr>
           <tr><td>Payeer</td><td>1$ = 29 TMT</td></tr>
           <tr><td>Perfect Money</td><td>1$ = 29 TMT</td></tr>
           <tr><td>Webmoney WMZ</td><td>1 WMZ = 29 TMT</td></tr>
         </table>
-        <h3>Bize satmak bahasy (min 10 TMT)</h3>
+        <h3><i class="fas fa-store"></i> Bize satmak bahasy (min 10 TMT)</h3>
         <table class="price-table">
-          <tr><th>Platforma</th><th>Baha</th></tr>
+          <tr><th><i class="fas fa-wallet"></i> Platforma</th><th><i class="fas fa-receipt"></i> Baha</th></tr>
           <tr><td>Payeer</td><td>10 TMT = 0.53$</td></tr>
           <tr><td>Perfect Money</td><td>10 TMT = 0.53$</td></tr>
           <tr><td>Webmoney</td><td>10 TMT = 0.53 WMZ</td></tr>
         </table>
         <div class="action-buttons">
-          <button class="action-btn buy-btn" id="buy-btn">Satyn almak</button>
-          <button class="action-btn sell-btn" id="sell-btn">Satmak</button>
+          <button class="action-btn buy-btn" id="buy-btn"><i class="fas fa-cart-plus"></i> Satyn almak</button>
+          <button class="action-btn sell-btn" id="sell-btn"><i class="fas fa-store"></i> Satmak</button>
         </div>
       </div>
-      <!-- Satyn almak forma -->
       <div class="content" id="buy-section" style="display:none;">
-        <h2>Satyn almak</h2>
+        <h2><i class="fas fa-shopping-bag"></i> Satyn almak</h2>
         <div class="form-group">
-          <label for="buy-crypto">Platforma saýlaň</label>
+          <label for="buy-crypto"><i class="fas fa-wallet"></i> Platforma saýlaň</label>
           <select id="buy-crypto" required>
             <option value="">Saýlaň...</option>
             <option value="payeer">Payeer</option>
@@ -812,55 +887,54 @@
         </div>
         <div id="buy-payeer-fields" style="display:none;">
           <div class="form-group">
-            <label for="buy-payeer-id">Payeer ID</label>
+            <label for="buy-payeer-id"><i class="fas fa-id-card"></i> Payeer ID</label>
             <input type="text" id="buy-payeer-id" placeholder="P1115509057">
           </div>
           <div class="form-group">
-            <label for="buy-currency">Valiuta</label>
+            <label for="buy-currency"><i class="fas fa-coins"></i> Valiuta</label>
             <select id="buy-currency">
               <option value="usd">USD ($)</option>
               <option value="rub">RUB (₽)</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="buy-amount" id="buy-amount-label">Näçe USD almakçysyňyz?</label>
+            <label for="buy-amount" id="buy-amount-label"><i class="fas fa-calculator"></i> Näçe USD almakçysyňyz?</label>
             <input type="number" id="buy-amount" min="1" step="0.01" placeholder="1.00">
           </div>
         </div>
         <div id="buy-perfect-fields" style="display:none;">
           <div class="form-group">
-            <label for="buy-perfect-id">Perfect Money ID</label>
+            <label for="buy-perfect-id"><i class="fas fa-id-card"></i> Perfect Money ID</label>
             <input type="text" id="buy-perfect-id" placeholder="işlemeýä">
           </div>
           <div class="form-group">
-            <label for="buy-perfect-amount">Näçe USD almakçysyňyz?</label>
+            <label for="buy-perfect-amount"><i class="fas fa-calculator"></i> Näçe USD almakçysyňyz?</label>
             <input type="number" id="buy-perfect-amount" min="1" step="0.01" placeholder="1.00">
           </div>
         </div>
         <div id="buy-webmoney-fields" style="display:none;">
           <div class="form-group">
-            <label for="buy-webmoney-id">WebMoney ID (WMZ)</label>
+            <label for="buy-webmoney-id"><i class="fas fa-id-card"></i> WebMoney ID (WMZ)</label>
             <input type="text" id="buy-webmoney-id" placeholder="Z435876272128">
           </div>
           <div class="form-group">
-            <label for="buy-webmoney-amount">Näçe WMZ almakçysyňyz?</label>
+            <label for="buy-webmoney-amount"><i class="fas fa-calculator"></i> Näçe WMZ almakçysyňyz?</label>
             <input type="number" id="buy-webmoney-amount" min="1" step="0.01" placeholder="1.00">
           </div>
         </div>
         <div class="price-display">
-          Jemi: <span id="buy-total">0.00</span> TMT
+          <i class="fas fa-money-bill-wave"></i> Jemi: <span id="buy-total">0.00</span> TMT
         </div>
         <div class="form-group">
-          <label for="buy-phone">Nomeriňiz (Pul göýberjek nomer)</label>
+          <label for="buy-phone"><i class="fas fa-phone"></i> Nomeriňiz (Pul göýberjek nomer)</label>
           <input type="tel" id="buy-phone" placeholder="+993 XX XXXXXX">
         </div>
-        <button class="btn" id="buy-confirm-btn">Tassyklamak we töleg etmek</button>
+        <button class="btn" id="buy-confirm-btn"><i class="fas fa-check-circle"></i> Tassyklamak we töleg etmek</button>
       </div>
-      <!-- Satmak forma -->
       <div class="content" id="sell-section" style="display:none;">
-        <h2>Satmak</h2>
+        <h2><i class="fas fa-store"></i> Satmak</h2>
         <div class="form-group">
-          <label for="sell-crypto">Platforma saýlaň</label>
+          <label for="sell-crypto"><i class="fas fa-wallet"></i> Platforma saýlaň</label>
           <select id="sell-crypto" required>
             <option value="">Saýlaň...</option>
             <option value="payeer">Payeer</option>
@@ -871,155 +945,416 @@
         </div>
         <div id="sell-payeer-fields" style="display:none;">
           <div class="form-group">
-            <label for="sell-currency">Walýuta</label>
+            <label for="sell-currency"><i class="fas fa-coins"></i> Walýuta</label>
             <select id="sell-currency">
               <option value="usd">USD ($)</option>
               <option value="rub">RUB (₽)</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="sell-amount" id="sell-amount-label">Näçe USD satmak isleýändigiňiz?</label>
+            <label for="sell-amount" id="sell-amount-label"><i class="fas fa-calculator"></i> Näçe USD satmak isleýändigiňiz?</label>
             <input type="number" id="sell-amount" min="0.53" step="0.01" placeholder="1.00">
           </div>
           <div class="form-group">
-            <label for="sell-payeer-id">Siziň Payeer ID</label>
+            <label for="sell-payeer-id"><i class="fas fa-id-card"></i> Siziň Payeer ID</label>
             <input type="text" id="sell-payeer-id" placeholder="P">
           </div>
         </div>
         <div id="sell-perfect-fields" style="display:none;">
           <div class="form-group">
-            <label for="sell-perfect-amount">Näçe USD satmak isleýändigiňiz?</label>
+            <label for="sell-perfect-amount"><i class="fas fa-calculator"></i> Näçe USD satmak isleýändigiňiz?</label>
             <input type="number" id="sell-perfect-amount" min="0.53" step="0.01" placeholder="1.00">
           </div>
           <div class="form-group">
-            <label for="sell-perfect-id">Siziň Perfect Money ID</label>
+            <label for="sell-perfect-id"><i class="fas fa-id-card"></i> Siziň Perfect Money ID</label>
             <input type="text" id="sell-perfect-id" placeholder="işlemeýä">
           </div>
         </div>
         <div id="sell-webmoney-fields" style="display:none;">
           <div class="form-group">
-            <label for="sell-webmoney-amount">Näçe WMZ satmak isleýändigiňiz?</label>
+            <label for="sell-webmoney-amount"><i class="fas fa-calculator"></i> Näçe WMZ satmak isleýändigiňiz?</label>
             <input type="number" id="sell-webmoney-amount" min="0.53" step="0.01" placeholder="1.00">
           </div>
           <div class="form-group">
-            <label for="sell-webmoney-id">Siziň WebMoney ID (WMZ)</label>
+            <label for="sell-webmoney-id"><i class="fas fa-id-card"></i> Siziň WebMoney ID (WMZ)</label>
             <input type="text" id="sell-webmoney-id" placeholder="Z435876272128">
           </div>
         </div>
         <div id="sell-crypto-warning" style="display:none;">
           <div class="note">
-            <strong>⚠️ Habar:</strong> Bu usul häzirçe goşulmadyk. Ýakyn wagtda goşular!
+            <strong><i class="fas fa-exclamation-triangle"></i> Habar:</strong> Bu usul häzirçe goşulmadyk. Ýakyn wagtda goşular!
           </div>
         </div>
         <div class="price-display">
-          Siz alarsyňyz: <span id="sell-total">0.00</span> TMT
+          <i class="fas fa-hand-holding-usd"></i> Siz alarsyňyz: <span id="sell-total">0.00</span> TMT
         </div>
         <div class="form-group">
-          <label for="secret-code">Bir gizlin söz (tassyklama üçin)</label>
+          <label for="secret-code"><i class="fas fa-key"></i> Bir gizlin söz (tassyklama üçin)</label>
           <input type="text" id="secret-code" placeholder="Sözüňizi giriziň">
-          <p class="note">Bu sözi hiç kime aýtmaň! diňe siz we biz bilýäriz.</p>
+          <p class="note"><i class="fas fa-lock"></i> Bu sözi hiç kime aýtmaň! diňe siz we biz bilýäriz.</p>
         </div>
         <div class="form-group">
-          <label for="sell-phone">Öz nomeriňiz (Pul geçirmek üçin)</label>
+          <label for="sell-phone"><i class="fas fa-phone"></i> Öz nomeriňiz (Pul geçirmek üçin)</label>
           <input type="tel" id="sell-phone" placeholder="+993 XX XXXXXX">
         </div>
-        <button class="btn" id="sell-confirm-btn">Töleg etmek</button>
+        <button class="btn" id="sell-confirm-btn"><i class="fas fa-paper-plane"></i> Töleg etmek</button>
       </div>
-      <!-- Töleg ma'lumotlari -->
       <div class="content" id="buy-payment-section" style="display:none;">
-        <h2>Töleg ma'lumotlary</h2>
-        <p><strong>⚠️Diňläň!</strong> Tölegiňiz <u>diňe öz nomeriňizden</u> ýerine ýetirilmelidir.</p>
-        <p>Bizniň töleg nomerlerimiz:</p>
+        <h2><i class="fas fa-credit-card"></i> Töleg ma'lumotlary</h2>
+        <p><strong><i class="fas fa-exclamation-triangle"></i> Diňläň!</strong> Tölegiňiz <u>diňe öz nomeriňizden</u> ýerine ýetirilmelidir.</p>
+        <p><i class="fas fa-mobile-alt"></i> Bizniň töleg nomerlerimiz:</p>
         <div class="numbers" id="payment-amount-display"></div>
-        <p>Ýokardaky nomerlerden birine jemi töleg mukdaryny geçirmeli .</p>
-        <h3>Tölegi tassyklaň</h3>
+        <p><i class="fas fa-arrow-down"></i> Ýokardaky nomerlerden birine jemi töleg mukdaryny geçirmeli .</p>
+        <h3><i class="fas fa-check-circle"></i> Tölegi tassyklaň</h3>
         <div class="radio-group">
           <div class="radio-option" onclick="handleProofType('screenshot')">
             <input type="radio" name="proof" id="proof-screenshot" value="screenshot">
-            <label for="proof-screenshot">Skrinshot</label>
+            <label for="proof-screenshot"><i class="fas fa-camera"></i> Skrinshot</label>
           </div>
           <div class="radio-option" onclick="handleProofType('sms')">
             <input type="radio" name="proof" id="proof-sms" value="sms">
-            <label for="proof-sms">SMS habary</label>
+            <label for="proof-sms"><i class="fas fa-sms"></i> SMS habary</label>
           </div>
         </div>
         <div id="sms-input-section" style="display:none; margin-top:15px;">
-          <p><strong>SMS habary nusxalap goýuň ýada töleg geçen wagtyny ýazyň:</strong></p>
+          <p><strong><i class="fas fa-sms"></i> SMS habary nusxalap goýuň ýada töleg geçen wagtyny ýazyň:</strong></p>
           <textarea id="sms-text" rows="3" placeholder="SMS haty şu ýere ýazyň..."></textarea>
         </div>
-        <div id="screenshot-warning" style="display:none; margin-top:15px; background:#fef3c7; padding:12px; border-radius:10px;">
-          <strong>⚠️ Bu funksiýa häli goşulmadyk.</strong> Häzirlikçe diňe SMS habary kabul edilýär.
+        <!-- ✅ TÄZE: Buy uchun skrinshot paneli -->
+        <div id="screenshot-upload-section">
+          <h3 style="color: var(--primary); text-align:center; margin-bottom:15px; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fas fa-cloud-upload-alt"></i> Skrinshotni yuklaň
+          </h3>
+          <div id="drop-area">
+            <i class="fas fa-image" style="font-size:3rem; color:var(--primary); margin-bottom:12px;"></i>
+            <p style="font-size:1.1rem; color:var(--primary); margin-bottom:12px; font-weight: 600;">
+              Suraty ýüklemek üçin üstünden basyň
+            </p>
+            <p style="color:var(--light-text); font-size:0.95rem; opacity: 0.8;">
+              JPG, PNG, GIF (maksimum 5 MB)
+            </p>
+            <input type="file" id="screenshot-file" accept="image/*" style="display:none;" />
+          </div>
+          <div id="preview-container">
+            <img id="preview-img" src="" alt="Öňünden görmek" style="max-width: 100%; max-height: 300px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid var(--accent);">
+            <p style="margin-top:10px; color:var(--primary); font-weight:600;">Taýyn!</p>
+          </div>
+          <div id="file-error"></div>
         </div>
         <div class="loading" id="buy-loading">
           <div class="spinner"></div>
           <p>Ýüklenýär...</p>
         </div>
         <div class="error-message" id="buy-error"></div>
-        <button class="btn" id="buy-submit-btn">Göýbermek we tassyklamak</button>
+        <button class="btn" id="buy-submit-btn"><i class="fas fa-paper-plane"></i> Göýbermek we tassyklamak</button>
       </div>
       <div class="content" id="sell-payment-section" style="display:none;">
-        <h2>Töleg ma'lumotlary</h2>
+        <h2><i class="fas fa-credit-card"></i> Töleg ma'lumotlary</h2>
         <div class="note">
-          <p><strong>Siz aşakdäki ID adrese pul ýollamalysyňyz:</strong></p>
+          <p><strong><i class="fas fa-paper-plane"></i> Siz aşakdäki ID adrese pul ýollamalysyňyz:</strong></p>
           <p id="sell-admin-address">P1115509057</p>
-          <p>Mukdary: <span id="sell-send-amount"></span> </p>
+          <p><i class="fas fa-money-bill-wave"></i> Mukdary: <span id="sell-send-amount"></span> </p>
         </div>
-        <h3>Tölegi tassyklaň</h3>
+        <h3><i class="fas fa-check-circle"></i> Tölegi tassyklaň</h3>
         <div class="radio-group">
           <div class="radio-option" onclick="handleProofTypeSell('screenshot')">
             <input type="radio" name="sell-proof" id="sell-proof-screenshot" value="screenshot">
-            <label for="sell-proof-screenshot">Skrinshot</label>
+            <label for="sell-proof-screenshot"><i class="fas fa-camera"></i> Skrinshot</label>
           </div>
           <div class="radio-option" onclick="handleProofTypeSell('sms')">
             <input type="radio" name="sell-proof" id="sell-proof-sms" value="sms">
-            <label for="sell-proof-sms">SMS habary</label>
+            <label for="sell-proof-sms"><i class="fas fa-sms"></i> SMS habary</label>
           </div>
         </div>
         <div id="sms-input-section-sell" style="display:none; margin-top:15px;">
-          <p><strong>SMS habary nusgalap goýuň ýada töleg geçen wagtyny ýazyň:</strong></p>
+          <p><strong><i class="fas fa-sms"></i> SMS habary nusgalap goýuň ýada töleg geçen wagtyny ýazyň:</strong></p>
           <textarea id="sms-text-sell" rows="3" placeholder="SMS haty şu ýere ýazyň..."></textarea>
         </div>
-        <div id="screenshot-warning-sell" style="display:none; margin-top:15px; background:#fef3c7; padding:12px; border-radius:10px;">
-          <strong>⚠️ Bu funksiýa häli goşulmadyk.</strong> Häzirlikçe diňe SMS habary kabul edilýär.
+        <!-- ✅ TÄZE: Sell uchun skrinshot paneli -->
+        <div id="screenshot-upload-section-sell">
+          <h3 style="color: var(--primary); text-align:center; margin-bottom:15px; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fas fa-cloud-upload-alt"></i> Skrinshotni yuklaň
+          </h3>
+          <div id="drop-area-sell">
+            <i class="fas fa-image" style="font-size:3rem; color:var(--primary); margin-bottom:12px;"></i>
+            <p style="font-size:1.1rem; color:var(--primary); margin-bottom:12px; font-weight: 600;">
+              Suraty ýüklemek üçin üstünden basyň
+            </p>
+            <p style="color:var(--light-text); font-size:0.95rem; opacity: 0.8;">
+              JPG, PNG, GIF (maksimum 5 MB)
+            </p>
+            <input type="file" id="screenshot-file-sell" accept="image/*" style="display:none;" />
+          </div>
+          <div id="preview-container-sell">
+            <img id="preview-img-sell" src="" alt="Öňünden görmek" style="max-width: 100%; max-height: 300px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid var(--accent);">
+            <p style="margin-top:10px; color:var(--primary); font-weight:600;">Taýyn!</p>
+          </div>
+          <div id="file-error-sell"></div>
         </div>
         <div class="loading" id="sell-loading">
           <div class="spinner"></div>
           <p>Ýüklenýär...</p>
         </div>
         <div class="error-message" id="sell-error"></div>
-        <button class="btn" id="sell-submit-btn">Tassyklamak we ibermek</button>
+        <button class="btn" id="sell-submit-btn"><i class="fas fa-check"></i> Tassyklamak we ibermek</button>
       </div>
       <div class="content" id="success-section" style="display:none;">
         <div class="success-message">
-          <h2>🎉 Üstünlik!</h2>
-          <p>Iň tiz wagtda Ýakyn siz bilen baglanar we size bron kody we bilet nusgasy berer.</p>
-          <p>Baş sahypa gaýtmagyňyz mümkin.</p>
+          <h2><i class="fas fa-trophy"></i> 🎉 Üstünlik!</h2>
+          <p><i class="fas fa-clock"></i> Iň tiz wagtda Ýakyn siz bilen baglanar we size bron kody we bilet nusgasy berer.</p>
+          <p><i class="fas fa-home"></i> Baş sahypa gaýtmagyňyz mümkin.</p>
         </div>
-        <a href="index.html" class="btn">Baş sahypa</a>
+        <a href="index.html" class="btn"><i class="fas fa-home"></i> Baş sahypa</a>
       </div>
       <footer>
-        © 2025 Ýeňil. Hemma hukuklar goralan.
+        <i class="far fa-copyright"></i> 2025 Ýeňil. Hemma hukuklar goralan.
       </footer>
     </div>
   </div>
   <ul class="nav-menu" id="nav-menu">
-    <li><a href="index.html">Baş Sahypa</a></li>
-    <li><a href="demiryol.html">Ýeňil demirýollary</a></li>
-    <li><a href="pay.html">Ýeňil Pay</a></li>
-    <li><a href="about.html">Biz Barada</a></li>
-    <li><a href="help.html">Ýardam</a></li>
+    <li><a href="index.html"><i class="fas fa-home"></i> Baş Sahypa</a></li>
+    <li><a href="demiryol.html"><i class="fas fa-train"></i> Ýeňil demirýollary</a></li>
+    <li><a href="pay.html"><i class="fas fa-wallet"></i> Ýeňil Pay</a></li>
+    <li><a href="about.html"><i class="fas fa-info-circle"></i> Biz Barada</a></li>
+    <li><a href="help.html"><i class="fas fa-headset"></i> Ýardam</a></li>
     <li><button class="theme-toggle" id="mobile-theme-toggle">🌓</button></li>
   </ul>
   <div class="menu-overlay" id="menu-overlay"></div>
-
-  <!-- ❌ Firebase yo'q — faqat Backendless -->
   <script>
-    // === Backendless konfiguratsiyasi ===
     const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
     const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
     const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
-
-    // === Theme ===
+    // ✅ TÄZE: Skrinshot yuklaw interfeisi — hem oq, hem gara režim ücin
+    function setupScreenshotUploader(isSell = false) {
+      const dropArea = document.getElementById(isSell ? 'drop-area-sell' : 'drop-area');
+      const fileInput = document.getElementById(isSell ? 'screenshot-file-sell' : 'screenshot-file');
+      const previewContainer = document.getElementById(isSell ? 'preview-container-sell' : 'preview-container');
+      const previewImg = document.getElementById(isSell ? 'preview-img-sell' : 'preview-img');
+      const errorDiv = document.getElementById(isSell ? 'file-error-sell' : 'file-error');
+      dropArea.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (e) => {
+        handleFile(e.target.files[0], isSell);
+      });
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+      });
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => {
+          dropArea.style.borderColor = '#38bdf8';
+        }, false);
+      });
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => {
+          dropArea.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+        }, false);
+      });
+      dropArea.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        handleFile(dt.files[0], isSell);
+      });
+      function handleFile(file, isSell) {
+        errorDiv.style.display = 'none';
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+          errorDiv.textContent = '⚠️ Surat 5 MB dan uly!';
+          errorDiv.style.display = 'block';
+          return;
+        }
+        if (!file.type.match('image.*')) {
+          errorDiv.textContent = '⚠️ Diňe ekran suraty (JPG, PNG, GIF)';
+          errorDiv.style.display = 'block';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previewImg.src = e.target.result;
+          previewContainer.style.display = 'block';
+          if (isSell) {
+            window.selectedScreenshotFileSell = file;
+          } else {
+            window.selectedScreenshotFile = file;
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    async function uploadScreenshot(file) {
+      const formData = new FormData();
+      formData.append('screenshot', file);
+      const res = await fetch('/api/upload-screenshot', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Yuklashda xatolik');
+      return data.secure_url;
+    }
+    function handleProofType(type) {
+      document.getElementById('proof-screenshot').checked = (type === 'screenshot');
+      document.getElementById('proof-sms').checked = (type === 'sms');
+      const smsSection = document.getElementById('sms-input-section');
+      const screenshotSection = document.getElementById('screenshot-upload-section');
+      const sellSection = document.getElementById('screenshot-upload-section-sell');
+      if (type === 'sms') {
+        smsSection.style.display = 'block';
+        screenshotSection.style.display = 'none';
+        if (sellSection) sellSection.style.display = 'none';
+        delete window.selectedScreenshotFile;
+      } else {
+        smsSection.style.display = 'none';
+        screenshotSection.style.display = 'block';
+        if (sellSection) sellSection.style.display = 'none';
+        if (!window.screenshotUploaderInitialized) {
+          setupScreenshotUploader(false);
+          window.screenshotUploaderInitialized = true;
+        }
+      }
+    }
+    function handleProofTypeSell(type) {
+      document.getElementById('sell-proof-screenshot').checked = (type === 'screenshot');
+      document.getElementById('sell-proof-sms').checked = (type === 'sms');
+      const smsSection = document.getElementById('sms-input-section-sell');
+      const screenshotSection = document.getElementById('screenshot-upload-section-sell');
+      const buySection = document.getElementById('screenshot-upload-section');
+      if (type === 'sms') {
+        smsSection.style.display = 'block';
+        screenshotSection.style.display = 'none';
+        if (buySection) buySection.style.display = 'none';
+        delete window.selectedScreenshotFileSell;
+      } else {
+        smsSection.style.display = 'none';
+        screenshotSection.style.display = 'block';
+        if (buySection) buySection.style.display = 'none';
+        if (!window.screenshotUploaderInitializedSell) {
+          setupScreenshotUploader(true);
+          window.screenshotUploaderInitializedSell = true;
+        }
+      }
+    }
+    // === Buy yuborish ===
+    document.getElementById('buy-submit-btn').addEventListener('click', async function() {
+      const crypto = document.getElementById('buy-crypto').value;
+      const phone = document.getElementById('buy-phone').value;
+      const total = parseFloat(document.getElementById('buy-total').textContent) || 0;
+      const proofType = document.querySelector('input[name="proof"]:checked');
+      if (!phone || !proofType) {
+        alert('⚠️, ähli meýdançalary dolduryň!');
+        return;
+      }
+      let screenshotUrl = null;
+      if (proofType.value === 'screenshot') {
+        const file = window.selectedScreenshotFile;
+        if (!file) {
+          alert('Skrinshot tanlanmady!');
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Rasm 5 MB dan katta!');
+          return;
+        }
+        try {
+          screenshotUrl = await uploadScreenshot(file);
+        } catch (err) {
+          alert('Skrinshot yuklanmady: ' + err.message);
+          return;
+        }
+      }
+      const smsText = proofType.value === 'sms' ? document.getElementById('sms-text').value.trim() : "";
+      // Ma'lumotlar Backendless'ga yuborulýar...
+      const orderData = {
+        type: 'pay-buy',
+        crypto: crypto,
+        phone: phone,
+        total: total,
+        proofType: proofType.value,
+        smsText: smsText,
+        screenshotUrl: screenshotUrl,
+        timestamp: new Date().toISOString()
+      };
+      const loading = document.getElementById('buy-loading');
+      const errorDiv = document.getElementById('buy-error');
+      loading.style.display = 'block';
+      errorDiv.style.display = 'none';
+      try {
+        const response = await fetch(`${BASE_URL}/data/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+        if (!response.ok) throw new Error(`Status: ${response.status}`);
+        loading.style.display = 'none';
+        document.getElementById('buy-payment-section').style.display = 'none';
+        document.getElementById('success-section').style.display = 'block';
+      } catch (err) {
+        loading.style.display = 'none';
+        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nomaʼlum xato');
+        errorDiv.style.display = 'block';
+      }
+    });
+    // === Sell yuborish ===
+    document.getElementById('sell-submit-btn').addEventListener('click', async function() {
+      const crypto = document.getElementById('sell-crypto').value;
+      const phone = document.getElementById('sell-phone').value;
+      const secretCode = document.getElementById('secret-code').value;
+      const proofType = document.querySelector('input[name="sell-proof"]:checked');
+      if (!phone || !secretCode || !proofType) {
+        alert('⚠️, ähli meýdançalary dolduryň!');
+        return;
+      }
+      let screenshotUrl = null;
+      if (proofType.value === 'screenshot') {
+        const file = window.selectedScreenshotFileSell;
+        if (!file) {
+          alert('Skrinshot tanlanmady!');
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Rasm 5 MB dan katta!');
+          return;
+        }
+        try {
+          screenshotUrl = await uploadScreenshot(file);
+        } catch (err) {
+          alert('Skrinshot yuklanmady: ' + err.message);
+          return;
+        }
+      }
+      const smsText = proofType.value === 'sms' ? document.getElementById('sms-text-sell').value.trim() : "";
+      const orderData = {
+        type: 'pay-sell',
+        crypto: crypto,
+        phone: phone,
+        secretCode: secretCode,
+        proofType: proofType.value,
+        smsText: smsText,
+        screenshotUrl: screenshotUrl,
+        timestamp: new Date().toISOString()
+      };
+      const loading = document.getElementById('sell-loading');
+      const errorDiv = document.getElementById('sell-error');
+      loading.style.display = 'block';
+      errorDiv.style.display = 'none';
+      try {
+        const response = await fetch(`${BASE_URL}/data/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+        if (!response.ok) throw new Error(`Status: ${response.status}`);
+        loading.style.display = 'none';
+        document.getElementById('sell-payment-section').style.display = 'none';
+        document.getElementById('success-section').style.display = 'block';
+      } catch (err) {
+        loading.style.display = 'none';
+        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nomaʼlum xato');
+        errorDiv.style.display = 'block';
+      }
+    });
+    // Qolgan funksionallyk saklanýar (theme, nav, kalkulyator, etc.)
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
@@ -1034,8 +1369,6 @@
     }
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
-
-    // Mobil menyu
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
     const menuOverlay = document.getElementById('menu-overlay');
@@ -1053,52 +1386,45 @@
         navMenu.classList.remove('active');
       });
     });
-
-    // Dinamik valyuta labelini o'zgartirish
     function updateBuyAmountLabel() {
       const crypto = document.getElementById('buy-crypto').value;
       const currency = document.getElementById('buy-currency').value;
       const label = document.getElementById('buy-amount-label');
       if (crypto === 'payeer' && currency === 'rub') {
-        label.textContent = 'Näçe RUBL almakçysyňyz?';
+        label.innerHTML = '<i class="fas fa-calculator"></i> Näçe RUBL almakçysyňyz?';
       } else if (crypto === 'payeer' && currency === 'usd') {
-        label.textContent = 'Näçe USD almakçysyňyz?';
+        label.innerHTML = '<i class="fas fa-calculator"></i> Näçe USD almakçysyňyz?';
       } else if (crypto === 'perfect') {
-        label.textContent = 'Näçe USD almakçysyňyz?';
+        label.innerHTML = '<i class="fas fa-calculator"></i> Näçe USD almakçysyňyz?';
       } else if (crypto === 'webmoney') {
-        label.textContent = 'Näçe WMZ almakçysyňyz?';
+        label.innerHTML = '<i class="fas fa-calculator"></i> Näçe WMZ almakçysyňyz?';
       }
     }
-
     function updateSellAmountLabel() {
       const crypto = document.getElementById('sell-crypto').value;
       const currency = document.getElementById('sell-currency').value;
       const label = document.getElementById('sell-amount-label');
       if (crypto === 'payeer' && currency === 'rub') {
-        label.textContent = 'Näçe RUBL satmak isleýändigiňiz?';
+        label.innerHTML = '<i class="fas fa-calculator"></i> Näçe RUBL satmak isleýändigiňiz?';
       } else if (crypto === 'payeer' && currency === 'usd') {
-        label.textContent = 'Näçe USD satmak isleýändigiňiz?';
+        label.innerHTML = '<i class="fas fa-calculator"></i> Näçe USD satmak isleýändigiňiz?';
       } else if (crypto === 'perfect') {
-        label.textContent = 'Näçe USD satmak isleýändigiňiz?';
+        label.innerHTML = '<i class="fas fa-calculator"></i> Näçe USD satmak isleýändigiňiz?';
       } else if (crypto === 'webmoney') {
-        label.textContent = 'Näçe WMZ satmak isleýändigiňiz?';
+        label.innerHTML = '<i class="fas fa-calculator"></i> Näçe WMZ satmak isleýändigiňiz?';
       }
     }
-
-    // Platforma va valyutani tanlaganda labelni yangilash
     document.getElementById('buy-crypto').addEventListener('change', function() {
       const value = this.value;
       document.getElementById('buy-payeer-fields').style.display = value === 'payeer' ? 'block' : 'none';
       document.getElementById('buy-perfect-fields').style.display = value === 'perfect' ? 'block' : 'none';
       document.getElementById('buy-webmoney-fields').style.display = value === 'webmoney' ? 'block' : 'none';
       calculateBuyPrice();
-      updateBuyAmountLabel(); // Yangilash
+      updateBuyAmountLabel(); 
     });
-
     document.getElementById('buy-currency').addEventListener('change', function() {
-      updateBuyAmountLabel(); // Yangilash
+      updateBuyAmountLabel(); 
     });
-
     document.getElementById('sell-crypto').addEventListener('change', function() {
       const value = this.value;
       document.getElementById('sell-payeer-fields').style.display = value === 'payeer' ? 'block' : 'none';
@@ -1106,14 +1432,11 @@
       document.getElementById('sell-webmoney-fields').style.display = value === 'webmoney' ? 'block' : 'none';
       document.getElementById('sell-crypto-warning').style.display = value === 'crypto' ? 'block' : 'none';
       calculateSellPrice();
-      updateSellAmountLabel(); // Yangilash
+      updateSellAmountLabel(); 
     });
-
     document.getElementById('sell-currency').addEventListener('change', function() {
-      updateSellAmountLabel(); // Yangilash
+      updateSellAmountLabel(); 
     });
-
-    // Qiymatlarni hisoblash
     function calculateBuyPrice() {
       const crypto = document.getElementById('buy-crypto').value;
       let total = 0;
@@ -1130,7 +1453,6 @@
       }
       document.getElementById('buy-total').textContent = total.toFixed(2);
     }
-
     function calculateSellPrice() {
       const crypto = document.getElementById('sell-crypto').value;
       let receive = 0;
@@ -1147,8 +1469,6 @@
       }
       document.getElementById('sell-total').textContent = receive.toFixed(2);
     }
-
-    // Inputlarga o'zgarishni kuzatish
     ['buy-currency', 'buy-amount', 'buy-perfect-amount', 'buy-webmoney-amount'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', calculateBuyPrice);
@@ -1157,16 +1477,12 @@
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', calculateSellPrice);
     });
-
-    // Tugmalar
     document.getElementById('buy-btn').addEventListener('click', function() {
       document.getElementById('buy-section').style.display = 'block';
     });
     document.getElementById('sell-btn').addEventListener('click', function() {
       document.getElementById('sell-section').style.display = 'block';
     });
-
-    // Töleg ma'lumotlarini ko'rsatish
     document.getElementById('buy-confirm-btn').addEventListener('click', function() {
       const crypto = document.getElementById('buy-crypto').value;
       if (!crypto) {
@@ -1193,14 +1509,13 @@
       const total = parseFloat(document.getElementById('buy-total').textContent) || 0;
       const paymentDisplay = document.getElementById('payment-amount-display');
       if (paymentDisplay) {
-        let html = `<p><strong>Jemi töleg: ${total.toFixed(2)} TMT</strong></p>`;
-        html += `<p>+993 71 789091</p><p>+993 64 629487</p><p>+993 71 788546</p>`;
+        let html = `<p><strong><i class="fas fa-money-bill-wave"></i> Jemi töleg: ${total.toFixed(2)} TMT</strong></p>`;
+        html += `<p><i class="fas fa-phone"></i> +993 71 789091</p><p><i class="fas fa-phone"></i> +993 64 629487</p><p><i class="fas fa-phone"></i> +993 71 788546</p>`;
         paymentDisplay.innerHTML = html;
       }
       document.getElementById('buy-payment-section').style.display = 'block';
       document.getElementById('buy-section').style.display = 'none';
     });
-
     document.getElementById('sell-confirm-btn').addEventListener('click', function() {
       const crypto = document.getElementById('sell-crypto').value;
       if (!crypto || crypto === 'crypto') {
@@ -1232,173 +1547,6 @@
       document.getElementById('sell-payment-section').style.display = 'block';
       document.getElementById('sell-section').style.display = 'none';
     });
-
-    // ✅ Backendless orqali buyurtma yuborish — Satyn almak
-    document.getElementById('buy-submit-btn').addEventListener('click', async function() {
-      const crypto = document.getElementById('buy-crypto').value;
-      const phone = document.getElementById('buy-phone').value;
-      const total = parseFloat(document.getElementById('buy-total').textContent) || 0;
-      const proofType = document.querySelector('input[name="proof"]:checked');
-      if (!phone || !proofType) {
-        alert('⚠️, ähli meýdançalary dolduryň!');
-        return;
-      }
-      if (proofType.value === 'screenshot') {
-        alert('Bu funksiýa häli goşulmadyk. Häzirlikçe diňe SMS habary kabul edilýär.');
-        return;
-      }
-      if (proofType.value === 'sms') {
-        const smsText = document.getElementById('sms-text').value.trim();
-        if (!smsText) {
-          alert('⚠️, SMS habary nusgasyny giriziň!');
-          return;
-        }
-      }
-      const orderData = {
-        type: 'buy',
-        crypto: crypto,
-        total: total, // ✅ DOUBLE
-        clientPhone: phone,
-        proofType: proofType.value,
-        smsText: proofType.value === 'sms' ? document.getElementById('sms-text').value.trim() : ""
-      };
-      if (crypto === 'payeer') {
-        orderData.payeerId = document.getElementById('buy-payeer-id').value;
-        orderData.currency = document.getElementById('buy-currency').value;
-        orderData.amount = parseFloat(document.getElementById('buy-amount').value); // ✅ DOUBLE
-      } else if (crypto === 'perfect') {
-        orderData.perfectId = document.getElementById('buy-perfect-id').value;
-        orderData.amount = parseFloat(document.getElementById('buy-perfect-amount').value); // ✅ DOUBLE
-      } else if (crypto === 'webmoney') {
-        orderData.webmoneyId = document.getElementById('buy-webmoney-id').value;
-        orderData.amount = parseFloat(document.getElementById('buy-webmoney-amount').value); // ✅ DOUBLE
-      }
-      const loading = document.getElementById('buy-loading');
-      const errorDiv = document.getElementById('buy-error');
-      const btn = this;
-      loading.style.display = 'block';
-      errorDiv.style.display = 'none';
-      btn.disabled = true;
-      try {
-        const response = await fetch(`${BASE_URL}/data/orders`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(orderData)
-        });
-        if (!response.ok) {
-          throw new Error(`Status: ${response.status}`);
-        }
-        loading.style.display = 'none';
-        document.getElementById('buy-payment-section').style.display = 'none';
-        document.getElementById('success-section').style.display = 'block';
-      } catch (err) {
-        loading.style.display = 'none';
-        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nomaʼlum xato');
-        errorDiv.style.display = 'block';
-        btn.disabled = false;
-      }
-    });
-
-    // ✅ Backendless orqali buyurtma yuborish — Satmak
-    document.getElementById('sell-submit-btn').addEventListener('click', async function() {
-      const crypto = document.getElementById('sell-crypto').value;
-      const phone = document.getElementById('sell-phone').value;
-      const total = parseFloat(document.getElementById('sell-total').textContent) || 0;
-      const secretCode = document.getElementById('secret-code').value;
-      const proofType = document.querySelector('input[name="sell-proof"]:checked');
-      if (!phone || !secretCode || !proofType) {
-        alert('⚠️, ähli meýdançalary dolduryň!');
-        return;
-      }
-      if (proofType.value === 'screenshot') {
-        alert('Bu funksiýa häli goşulmadyk. Häzirlikçe diňe SMS habary kabul edilýär.');
-        return;
-      }
-      if (proofType.value === 'sms') {
-        const smsText = document.getElementById('sms-text-sell').value.trim();
-        if (!smsText) {
-          alert('⚠️, SMS habary nusgasyny giriziň!');
-          return;
-        }
-      }
-      const orderData = {
-        type: 'sell',
-        crypto: crypto,
-        total: total, // ✅ DOUBLE
-        clientPhone: phone,
-        secretCode: secretCode,
-        proofType: proofType.value,
-        smsText: proofType.value === 'sms' ? document.getElementById('sms-text-sell').value.trim() : ""
-      };
-      if (crypto === 'payeer') {
-        orderData.payeerId = document.getElementById('sell-payeer-id').value;
-        orderData.currency = document.getElementById('sell-currency').value;
-        orderData.amount = parseFloat(document.getElementById('sell-amount').value); // ✅ DOUBLE
-      } else if (crypto === 'perfect') {
-        orderData.perfectId = document.getElementById('sell-perfect-id').value;
-        orderData.amount = parseFloat(document.getElementById('sell-perfect-amount').value); // ✅ DOUBLE
-      } else if (crypto === 'webmoney') {
-        orderData.webmoneyId = document.getElementById('sell-webmoney-id').value;
-        orderData.amount = parseFloat(document.getElementById('sell-webmoney-amount').value); // ✅ DOUBLE
-      }
-      const loading = document.getElementById('sell-loading');
-      const errorDiv = document.getElementById('sell-error');
-      const btn = this;
-      loading.style.display = 'block';
-      errorDiv.style.display = 'none';
-      btn.disabled = true;
-      try {
-        const response = await fetch(`${BASE_URL}/data/orders`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(orderData)
-        });
-        if (!response.ok) {
-          throw new Error(`Status: ${response.status}`);
-        }
-        loading.style.display = 'none';
-        document.getElementById('sell-payment-section').style.display = 'none';
-        document.getElementById('success-section').style.display = 'block';
-      } catch (err) {
-        loading.style.display = 'none';
-        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nomaʼlum xato');
-        errorDiv.style.display = 'block';
-        btn.disabled = false;
-      }
-    });
-
-    function handleProofType(type) {
-      document.getElementById('proof-screenshot').checked = (type === 'screenshot');
-      document.getElementById('proof-sms').checked = (type === 'sms');
-      const smsSection = document.getElementById('sms-input-section');
-      const screenshotWarning = document.getElementById('screenshot-warning');
-      if (type === 'sms') {
-        smsSection.style.display = 'block';
-        screenshotWarning.style.display = 'none';
-      } else {
-        smsSection.style.display = 'none';
-        screenshotWarning.style.display = 'block';
-      }
-    }
-
-    function handleProofTypeSell(type) {
-      document.getElementById('sell-proof-screenshot').checked = (type === 'screenshot');
-      document.getElementById('sell-proof-sms').checked = (type === 'sms');
-      const smsSection = document.getElementById('sms-input-section-sell');
-      const screenshotWarning = document.getElementById('screenshot-warning-sell');
-      if (type === 'sms') {
-        smsSection.style.display = 'block';
-        screenshotWarning.style.display = 'none';
-      } else {
-        smsSection.style.display = 'none';
-        screenshotWarning.style.display = 'block';
-      }
-    }
-
     document.querySelectorAll('.radio-option').forEach(option => {
       option.addEventListener('click', function() {
         const radio = this.querySelector('input[type="radio"]');
@@ -1414,4 +1562,4 @@
     });
   </script>
 </body>
-</html>
+  </html>
