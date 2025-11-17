@@ -420,10 +420,12 @@
     }
     function renderMediaPreview(url) {
       if (!url) return '';
+      // Vercel orqali proxy qilingan URL
+      const proxyUrl = `/api/proxy-media?url=${encodeURIComponent(url)}`;
       if (isVideo(url)) {
-        return `<div class="media-preview"><video controls poster="https://res.cloudinary.com/daq8wfght/image/upload/q_30,f_jpg/${url.split('/').slice(-2).join('/')}.jpg"><source src="${url}" type="video/mp4">Video ochilmadi.</video></div>`;
+        return `<div class="media-preview"><video controls poster="${proxyUrl}.jpg"><source src="${proxyUrl}" type="video/mp4">Video ochilmadi.</video></div>`;
       } else if (isImage(url)) {
-        return `<div class="media-preview"><img src="${url}" alt="Tassyklama" onerror="this.style.display='none'"></div>`;
+        return `<div class="media-preview"><img src="${proxyUrl}" alt="Tassyklama" onerror="this.style.display='none'"></div>`;
       }
       return '';
     }
