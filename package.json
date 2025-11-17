@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-  "cloudinary": "1.41.0",
+  "cloudinary": "^1.41.0",
     "busboy": "1.6.0"
   }
 }
