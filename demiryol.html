@@ -825,23 +825,119 @@
       color: var(--primary);
     }
 
+    
+    #confirmation-section .content {
+      background: var(--card-light);
+      border: 2px solid var(--accent);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 12px rgba(16,185,128,0.1);
+    }
+    body.dark-mode #confirmation-section .content {
+      background: var(--card-dark);
+      border-color: var(--accent);
+    }
+    #confirmation-section .content p {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      background: var(--light-bg);
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      margin-bottom: 8px;
+      font-size: 1rem;
+      color: var(--light-text);
+    }
+    body.dark-mode #confirmation-section .content p {
+      background: var(--dark-bg);
+      color: var(--dark-text);
+    }
+    #confirmation-section .content p i {
+      color: var(--primary);
+    }
+    #confirmation-section .content p strong {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    #confirmation-section .info-box {
+      background: var(--light-bg);
+      padding: 15px;
+      border-radius: 12px;
+      margin: 15px 0;
+      border-left: 4px solid var(--primary);
+      font-size: 0.95rem;
+      color: var(--light-text);
+    }
+    body.dark-mode #confirmation-section .info-box {
+      background: var(--dark-bg);
+      color: var(--dark-text);
+    }
+    #confirmation-section .info-box i {
+      color: var(--primary);
+    }
+    #confirmation-section .btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 15px;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(13,148,136,0.3);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    #confirmation-section .btn:hover {
+      transform: translateY(-3px);
+      opacity: 0.95;
+    }
+    #confirmation-section .btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+    }
+    #confirmation-section .btn.yes {
+      background: var(--gradient);
+      color: white;
+      border: none;
+    }
+    #confirmation-section .btn.no {
+      background: #94a3b8;
+      color: white;
+      border: none;
+    }
+    body.dark-mode #confirmation-section .btn.yes {
+      background: var(--gradient);
+    }
+    body.dark-mode #confirmation-section .btn.no {
+      background: #64748b;
+    }
+
     /* === YANGI STIL: Skrinshot yuklash paneli === */
     #screenshot-upload-section {
       display: none;
       margin-top: 20px;
-      background: #f0fdfa;
       padding: 20px;
       border-radius: 16px;
       border: 2px dashed var(--primary);
+      background: var(--light-bg);
+    }
+    body.dark-mode #screenshot-upload-section {
+      background: var(--dark-bg);
     }
     #drop-area {
-      border: 2px dashed #a7f3d0;
+      border: 2px dashed var(--accent);
       border-radius: 12px;
       padding: 30px;
       text-align: center;
-      background: #f8fbf9;
+      background: var(--light-bg);
       transition: all 0.3s;
       cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    body.dark-mode #drop-area {
+      background: var(--dark-bg);
     }
     #file-error {
       display: none;
@@ -849,6 +945,14 @@
       margin-top: 10px;
       text-align: center;
       font-weight: 600;
+      background: #fee;
+      padding: 8px;
+      border-radius: 8px;
+      border-left: 4px solid #f59e0b;
+    }
+    body.dark-mode #file-error {
+      background: #4a1a1a;
+      color: #f87171;
     }
     #preview-container {
       display: none;
@@ -860,6 +964,10 @@
       max-height: 300px;
       border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border: 2px solid var(--accent);
+    }
+    body.dark-mode #preview-img {
+      border-color: var(--accent);
     }
   </style>
 </head>
@@ -921,10 +1029,10 @@
           <h3 style="color: #92400e; font-weight: 700; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
             <i class="fas fa-bell" style="color: #f59e0b;"></i> Esasy
           </h3>
-          <p style="color: #92400e; line-height: 1.6; font-size: 0.7rem; margin: 0;">
-            <i class="fas fa-terminal"></i>_     Biz terminaldan töleg kabul edemizok. Öz nomeriňizden töleg etmeli.<br>
-            <i class="fas fa-money-check"></i> .  Töleg edeniňizden soň bize töleg geçendigi baradaky tasyklaýyş skrinshoty ýada SMS habary wagty iberilmeli.<br>
-            <i class="fas fa-play"></i>_   Biz töleg edilenden soň işe başlaýas.
+          <p style="color: #92400e; line-height: 1.6; font-size: 1.0rem; margin: 0;">
+            <span style="display: flex; align-items: center; gap: 4px;"><i class="fas fa-terminal"></i>Biz terminaldan töleg kabul edemizok. Öz nomeriňizden töleg etmeli.</span><br>
+            <span style="display: flex; align-items: center; gap: 4px;"><i class="fas fa-money-check"></i>Töleg edeniňizden soň bize töleg geçendigi baradaky tasyklaýyş skrinshoty ýada SMS habary wagty iberilmeli.</span><br>
+            <span style="display: flex; align-items: center; gap: 4px;"><i class="fas fa-play"></i>Biz töleg edilenden soň işe başlaýas.</span>
           </p>
         </div>
         <p><strong><i class="fas fa-info-circle"></i> Indi Ýeňil Demirýollary bilen tanyşyň:</strong></p>
@@ -1053,29 +1161,27 @@
           <p><strong><i class="fas fa-sms"></i> SMS habary nusxalap goýuň ýada töleg geçen wagtyny ýazyň:</strong></p>
           <textarea id="sms-text" rows="3" placeholder="SMS haty şu ýere ýazyň..."></textarea>
         </div>
-
-        <!-- YANGI: Skrinshot yuklash paneli -->
+        
         <div id="screenshot-upload-section">
-          <h3 style="color:var(--primary); text-align:center; margin-bottom:15px; font-weight:600;">
+          <h3 style="color: var(--primary); text-align:center; margin-bottom:15px; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <i class="fas fa-cloud-upload-alt"></i> Skrinshoty ýagny ekran suratyny ýükläň
           </h3>
           <div id="drop-area">
             <i class="fas fa-image" style="font-size:3rem; color:var(--primary); margin-bottom:12px;"></i>
-            <p style="font-size:1.1rem; color:#065f46; margin-bottom:12px;">
-              <strong>Suraty ýüklemek üçin üstünden basyň</strong>
+            <p style="font-size:1.1rem; color:var(--primary); margin-bottom:12px; font-weight: 600;">
+              Suraty ýüklemek üçin üstünden basyň
             </p>
-            <p style="color:#64748b; font-size:0.95rem;">
+            <p style="color:var(--light-text); font-size:0.95rem; opacity: 0.8;">
               JPG, PNG, GIF (maksimum 5 MB)
             </p>
             <input type="file" id="screenshot-file" accept="image/*" style="display:none;" />
           </div>
           <div id="preview-container">
-            <img id="preview-img" src="" alt="Öňünden görmek">
-            <p style="margin-top:10px; color:#065f46; font-weight:600;">Taýyn!</p>
+            <img id="preview-img" src="" alt="Öňünden görmek" style="max-width: 100%; max-height: 300px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid var(--accent);">
+            <p style="margin-top:10px; color:var(--primary); font-weight:600;">Taýyn!</p>
           </div>
           <div id="file-error"></div>
         </div>
-
         <button class="btn" id="submit-btn"><i class="fas fa-paper-plane"></i> Göýbermek we tassyklamak</button>
       </div>
       <div class="content" id="confirmation-section" style="display:none;">
@@ -1092,18 +1198,18 @@
           <p><strong><i class="fas fa-phone"></i> Nomeriňiz:</strong> <span id="conf-phone">—</span></p>
           <p><strong><i class="fas fa-check-circle"></i> Tassyklama:</strong> <span id="conf-proof">—</span></p>
         </div>
-        <p style="font-size: 0.95rem; color: #64748b; margin: 15px 0; line-height: 1.5;">
+        <div class="info-box">
           <i class="fas fa-question-circle"></i> <strong>Tasyklaýamyň?</strong> Eger ähli maglumatlar dogry bolsa, "Hawa" düwmesine basyň.
-        </p>
+        </div>
         <div class="loading" id="loading">
           <div class="spinner"></div>
           <p>Ýüklenýär...</p>
         </div>
         <div class="error-message" id="error"></div>
-        <button class="btn" id="confirm-yes" style="width:100%; padding:14px; font-size: 1.1rem; font-weight: 600; margin-top: 15px; border-radius: 14px; box-shadow: 0 4px 12px rgba(13,148,136,0.3);">
+        <button class="btn yes" id="confirm-yes">
           <i class="fas fa-check"></i> Hawa, tassyklaýyn
         </button>
-        <button class="btn" style="background:#94a3b8; width:100%; padding:14px; font-size: 1.1rem; font-weight: 600; margin-top: 10px; border-radius: 14px;" id="confirm-no">
+        <button class="btn no" id="confirm-no">
           <i class="fas fa-times"></i> Ýok, özgertmek gerek
         </button>
       </div>
@@ -1189,8 +1295,8 @@
     const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
     const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
     const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
-
-    // === Skrinshot yuklash interfeysi ===
+    
+   
     function setupScreenshotUploader() {
       const dropArea = document.getElementById('drop-area');
       const fileInput = document.getElementById('screenshot-file');
@@ -1199,7 +1305,6 @@
       const errorDiv = document.getElementById('file-error');
 
       dropArea.addEventListener('click', () => fileInput.click());
-
       fileInput.addEventListener('change', (e) => {
         handleFile(e.target.files[0]);
       });
@@ -1215,15 +1320,13 @@
 
       ['dragenter', 'dragover'].forEach(eventName => {
         dropArea.addEventListener(eventName, () => {
-          dropArea.style.backgroundColor = '#e0f2fe';
           dropArea.style.borderColor = '#38bdf8';
         }, false);
       });
 
       ['dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, () => {
-          dropArea.style.backgroundColor = '#f8fbf9';
-          dropArea.style.borderColor = '#a7f3d0';
+          dropArea.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--accent');
         }, false);
       });
 
@@ -1236,19 +1339,16 @@
       function handleFile(file) {
         errorDiv.style.display = 'none';
         if (!file) return;
-
         if (file.size > 5 * 1024 * 1024) {
           errorDiv.textContent = '⚠️ Surat 5 MB dan uly!';
           errorDiv.style.display = 'block';
           return;
         }
-
         if (!file.type.match('image.*')) {
           errorDiv.textContent = '⚠️ Diňe ekran suraty (JPG, PNG, GIF)';
           errorDiv.style.display = 'block';
           return;
         }
-
         const reader = new FileReader();
         reader.onload = (e) => {
           previewImg.src = e.target.result;
@@ -1322,6 +1422,7 @@
       return true;
     }
 
+    
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
@@ -1335,10 +1436,10 @@
       document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
       document.getElementById('mobile-theme-toggle').textContent = isDark ? '☀️' : '🌙';
     }
-
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
 
+    // Mobil menýu
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
     const menuOverlay = document.getElementById('menu-overlay');
@@ -1357,6 +1458,7 @@
       });
     });
 
+    // Form önü
     document.getElementById('continue-btn').addEventListener('click', function() {
       if (document.getElementById('read-info').checked) {
         document.getElementById('form-section').style.display = 'block';
@@ -1366,7 +1468,7 @@
         if (smsButton) smsButton.style.display = 'none';
         calculatePrice();
       } else {
-        alert('Ýalňyş, "Maglumatlary okap çykdym we razy" ketegine belgi goýuň!');
+        alert('Maglumatlary okap çykdym we razy ketegine belgi goýuň!');
       }
     });
 
@@ -1375,7 +1477,7 @@
       const surname = document.getElementById('surname').value;
       const travelDate = document.getElementById('travel-date').value;
       if (!name || !surname || !travelDate) {
-        alert('Ýalňyş, ähli meýdançalary doldurylmaly!');
+        alert('Ähli meýdançalary dolduryň!');
         return;
       }
       const total = calculatePrice();
@@ -1385,6 +1487,7 @@
       document.getElementById('form-section').style.display = 'none';
     });
 
+   
     const today = new Date();
     const maxDate = new Date();
     maxDate.setDate(today.getDate() + 15);
@@ -1394,6 +1497,7 @@
     travelDateInput.min = todayStr;
     travelDateInput.max = maxDateStr;
 
+    
     function calculatePrice() {
       const travelDateInput = document.getElementById('travel-date');
       if (!travelDateInput?.value) return 0;
@@ -1436,17 +1540,20 @@
       paymentDisplay.innerHTML = html;
     }
 
+    // Gatlary özi bir birinden çykarma
     document.getElementById('first-class')?.addEventListener('change', function() {
       if (this.checked) document.getElementById('second-class').checked = false;
     });
     document.getElementById('second-class')?.addEventListener('change', function() {
       if (this.checked) document.getElementById('first-class').checked = false;
     });
+
     ['travel-date', 'first-class', 'second-class', 'media'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('change', calculatePrice);
     });
 
+    
     document.querySelectorAll('.radio-option').forEach(option => {
       option.addEventListener('click', function() {
         const radio = this.querySelector('input[type="radio"]');
@@ -1460,41 +1567,27 @@
       this.value = this.value.toUpperCase();
     });
 
+   
     document.getElementById('submit-btn').addEventListener('click', async function() {
       if (!validateAllFields()) return;
-
       const clientPhone = document.getElementById('client-phone').value;
       const proofType = document.querySelector('input[name="proof"]:checked').value;
       let screenshotUrl = null;
 
+      
       if (proofType === 'screenshot') {
         const file = window.selectedScreenshotFile;
         if (!file) {
           alert('Skrinshot saýlamadyňyz!');
           return;
         }
-
         if (file.size > 5 * 1024 * 1024) {
           alert('Surat 5 MB dan uly!');
           return;
         }
-
-        const formData = new FormData();
-        formData.append('screenshot', file);
-        try {
-          const res = await fetch('/api/upload-screenshot', {
-            method: 'POST',
-            body: formData
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Yüklemekde ýalňyşlyk');
-          screenshotUrl = data.secure_url;
-        } catch (err) {
-          alert('Skrinshot yüklenmedi: ' + err.message);
-          return;
-        }
       }
 
+      
       const name = document.getElementById('name').value;
       const surname = document.getElementById('surname').value;
       const passport = document.getElementById('passport').value;
@@ -1513,15 +1606,20 @@
       document.getElementById('conf-phone').textContent = clientPhone;
       document.getElementById('conf-proof').textContent = proofType === 'screenshot' ? 'Skrinshot' : 'SMS habary';
 
-      window.tempScreenshotUrl = screenshotUrl;
+      
+      if (proofType === 'screenshot') {
+        window.tempScreenshotFile = window.selectedScreenshotFile;
+      } else {
+        delete window.tempScreenshotFile;
+      }
 
       document.getElementById('payment-section').style.display = 'none';
       document.getElementById('confirmation-section').style.display = 'block';
     });
 
+    
     document.getElementById('confirm-yes').addEventListener('click', async function() {
       if (!validateAllFields()) return;
-
       const name = document.getElementById('name').value;
       const surname = document.getElementById('surname').value;
       const passport = document.getElementById('passport').value;
@@ -1535,12 +1633,29 @@
       const mediaPortal = document.getElementById('media').checked;
       const proofType = document.querySelector('input[name="proof"]:checked').value;
       const smsText = proofType === 'sms' ? document.getElementById('sms-text').value : null;
-      const screenshotUrl = window.tempScreenshotUrl || null;
+
+      let screenshotUrl = null;
+      if (proofType === 'screenshot' && window.tempScreenshotFile) {
+        const file = window.tempScreenshotFile;
+        const formData = new FormData();
+        formData.append('screenshot', file);
+        try {
+          const res = await fetch('/api/upload-screenshot', {
+            method: 'POST',
+            body: formData
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Yüklemekde ýalňyşlyk');
+          screenshotUrl = data.secure_url;
+        } catch (err) {
+          alert('Skrinshot admina ýollanmady: ' + err.message);
+          return;
+        }
+      }
 
       const loading = document.getElementById('loading');
       const error = document.getElementById('error');
       const btn = document.getElementById('confirm-yes');
-
       loading.style.display = 'block';
       error.style.display = 'none';
       btn.disabled = true;
@@ -1570,11 +1685,9 @@
             updated: new Date().toISOString()
           })
         });
-
         if (!response.ok) {
           throw new Error(`Status: ${response.status}`);
         }
-
         loading.style.display = 'none';
         document.getElementById('confirmation-section').style.display = 'none';
         document.getElementById('success-section').style.display = 'block';
@@ -1591,6 +1704,7 @@
       document.getElementById('payment-section').style.display = 'block';
     });
 
+   
     document.addEventListener('DOMContentLoaded', () => {
       const printBtn = document.getElementById('print-ticket-btn');
       const modal = document.getElementById('ticket-modal');
@@ -1598,9 +1712,7 @@
       const closeBtn = document.getElementById('close-modal');
       const searchBtn = document.getElementById('search-ticket-btn');
       const codeInput = document.getElementById('booking-code');
-
       if (!printBtn || !modal || !overlay || !closeBtn || !searchBtn) return;
-
       printBtn.addEventListener('click', () => {
         modal.style.display = 'block';
         overlay.style.display = 'block';
@@ -1608,18 +1720,15 @@
         document.getElementById('ticket-result').style.display = 'none';
         document.getElementById('ticket-error').style.display = 'none';
       });
-
       const closeModal = () => {
         modal.style.display = 'none';
         overlay.style.display = 'none';
       };
-
       closeBtn.addEventListener('click', closeModal);
       overlay.addEventListener('click', closeModal);
       codeInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') searchBtn.click();
       });
-
       searchBtn.addEventListener('click', async () => {
         const code = codeInput.value.trim().toUpperCase();
         if (!code || code.length !== 6 || !/^[A-Z0-9]{6}$/.test(code)) {
@@ -1650,7 +1759,6 @@
           const ticket = booking.tickets?.[0];
           const pnr = ticket?.pnrs?.[0];
           if (!pnr) throw new Error('⚠️ Bilet maglumatlary ýeterli däl');
-
           const modalPassenger = document.getElementById('modal-passenger');
           const modalRoute = document.getElementById('modal-route');
           const modalDateTime = document.getElementById('modal-date-time');
@@ -1660,7 +1768,6 @@
           const modalQrImage = document.getElementById('modal-qr-image');
           const modalPdfLink = document.getElementById('modal-pdf-link');
           const modalPdfUrl = document.getElementById('modal-pdf-url');
-
           modalPassenger.textContent = booking.main_contact || '—';
           modalRoute.textContent = `${pnr.source || '—'} → ${pnr.destination || '—'}`;
           const depDate = new Date(pnr.departure_time);
