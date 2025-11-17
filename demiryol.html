@@ -1732,7 +1732,7 @@
       searchBtn.addEventListener('click', async () => {
         const code = codeInput.value.trim().toUpperCase();
         if (!code || code.length !== 6 || !/^[A-Z0-9]{6}$/.test(code)) {
-          alert('⚠️ Bron kody 6 belgi bolmaly (meselem: QUAPWZ)');
+          alert('⚠️ Bron kody 6 belgi bolmaly (meselem: ABC123)');
           return;
         }
         const loadingEl = document.getElementById('ticket-loading');
