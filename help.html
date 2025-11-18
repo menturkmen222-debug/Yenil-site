@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=0.5"/>
   <title>Ýardam — Ýeňil</title>
+  <meta name="description" content="Ýeňil hyzmaty boýunça sorag ýazmak, töleg tassyklamak, FAQ we tez yaradam almak üçin baglanyň.">
   <meta name="keywords" content="Ýeňil ýardam, kömek, töleg nähili ýerine ýetirilýär, bilet nädip alaryn, töleg tassyklamak, ýardam merkez, ynamly hyzmat, ýardam beriş">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/all.min.css">
@@ -61,6 +62,7 @@
       top: 0;
       background: var(--light-bg);
       z-index: 100;
+      position: relative;
     }
     body.dark-mode .header {
       border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -89,6 +91,69 @@
     body.dark-mode .logo-img {
       filter: brightness(0.9);
     }
+
+    /* MOBIL MENÝÜ */
+    .navbar {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .menu-toggle {
+      font-size: 1.8rem;
+      color: #059669;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      margin-right: 10px;
+    }
+    .nav-menu {
+      display: flex;
+      list-style: none;
+      gap: 20px;
+      align-items: center;
+      margin-left: auto;
+    }
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        background: var(--light-bg);
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        display: none;
+      }
+      body.dark-mode .nav-menu {
+        background: var(--dark-bg);
+      }
+      .nav-menu.active {
+        display: flex;
+      }
+      .nav-menu li {
+        width: 100%;
+        text-align: center;
+        margin: 8px 0;
+      }
+      .nav-menu a, .nav-menu button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        color: var(--light-text);
+        text-decoration: none;
+        border: none;
+        background: none;
+        font: inherit;
+        cursor: pointer;
+      }
+      body.dark-mode .nav-menu a,
+      body.dark-mode .nav-menu button {
+        color: var(--dark-text);
+      }
+    }
+
     .faq-container {
       max-width: 800px;
       margin: 0 auto;
@@ -121,8 +186,6 @@
       background: #f8fafc;
       border-top: 10px solid #e2e8f0;
       line-height: 1.6;
-      -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
     }
     body.dark-mode .faq-question {
       background: var(--card-dark);
@@ -131,6 +194,7 @@
       background: #1e293b;
       border-top-color: #334155;
     }
+
     .form-group {
       margin: 20px 0;
     }
@@ -149,8 +213,6 @@
       border-radius: 10px;
       font-size: 1rem;
       background: white;
-      -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
     }
     body.dark-mode input,
     body.dark-mode textarea {
@@ -158,13 +220,13 @@
       border-color: #334155;
       color: white;
     }
-    /* === PREMIUM LOADING SPINNER STILI === */
+
+    /* LOADING SPINNER */
     .premium-spinner {
       position: relative;
       width: 50px;
       height: 50px;
       margin: 0 auto;
-      animation: spin 1.2s linear infinite;
     }
     .spinner-circle {
       position: absolute;
@@ -176,7 +238,6 @@
       border-top: 4px solid var(--primary);
       border-radius: 50%;
       animation: spin 1.2s linear infinite;
-      z-index: 1;
     }
     .spinner-dot {
       position: absolute;
@@ -212,13 +273,13 @@
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.5); opacity: 0.7; }
     }
-    /* QARA MOD ÜÇIN */
     body.dark-mode .premium-spinner .spinner-circle {
       border-top-color: #6ee7b7;
     }
     body.dark-mode .premium-spinner .spinner-dot {
       background-color: #6ee7b7;
     }
+
     .loading {
       display: none;
       text-align: center;
@@ -229,106 +290,20 @@
       font-size: 0.9rem;
       margin-top: 10px;
       font-weight: 500;
-      text-align: center;
     }
     body.dark-mode .loading p {
       color: #94a3b8;
     }
+
     .error-message {
-      color: red;
-      text-align: center;
-      margin-top: 10px;
-      display: none;
-    }
-    /* === MENÝÜNIŇ 3-NUKTA DÜWMESI — KATTA WE ÝAŞYL === */
-    .menu-toggle {
-      font-size: 1.8rem;
-      color: #059669;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 8px 12px;
-      margin-right: 10px;
-    }
-    /* === FAYL ÝÜKLE DÜWMESI — PREMIUM STIL === */
-    .radio-group {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
-    .radio-option[data-type="file"] {
-      background: linear-gradient(135deg, #059669, #047857);
-      border: 2px solid #047857;
-      box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
-      transition: all 0.3s ease;
-      padding: 15px 20px;
-      min-width: 250px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      cursor: pointer;
-      border-radius: 16px;
-      flex: 1;
-    }
-    .radio-option[data-type="file"]:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(4, 120, 87, 0.4);
-    }
-    .radio-option[data-type="file"] input[type="radio"] {
-      display: none;
-    }
-    .radio-option[data-type="file"] label {
-      color: white;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      font-size: 1.1rem;
-    }
-    .radio-option[data-type="file"] i {
-      color: white;
-      font-size: 1.3rem;
-    }
-    /* === Fayl yuklash paneli === */
-    #file-upload-section {
-      display: none;
-      margin-top: 20px;
-      background: var(--card-light);
-      padding: 20px;
-      border-radius: 16px;
-      border: 2px dashed var(--primary);
-    }
-    #drop-area {
-      border: 2px dashed #a7f3d0;
-      border-radius: 12px;
-      padding: 30px;
-      text-align: center;
-      background: #f8fbf9;
-      transition: all 0.3s;
-      cursor: pointer;
-    }
-    #file-error {
-      display: none;
       color: #ef4444;
-      margin-top: 10px;
       text-align: center;
+      margin-top: 10px;
+      display: none;
       font-weight: 600;
     }
-    #preview-container {
-      display: none;
-      margin-top: 20px;
-      text-align: center;
-    }
-    #preview-img, #preview-video {
-      max-width: 100%;
-      max-height: 300px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    /* === TASSYKLAMA BLOKI — PREMIUM STIL === */
+
+    /* FAYL YÜKLE DÜWMESI */
     .proof-section {
       margin-top: 20px;
       padding: 20px;
@@ -360,7 +335,7 @@
       font-size: 1.1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.3s ease, opacity 0.3s ease;
+      transition: transform 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -370,11 +345,55 @@
       transform: translateY(-3px);
       opacity: 0.95;
     }
-    .proof-btn:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-      transform: none;
+
+    /* FAYL YÜKLE PANELI */
+    #file-upload-section {
+      display: none;
+      margin-top: 20px;
+      background: var(--card-light);
+      padding: 20px;
+      border-radius: 16px;
+      border: 2px dashed var(--primary);
     }
+    body.dark-mode #file-upload-section {
+      background: var(--card-dark);
+    }
+    #drop-area {
+      border: 2px dashed #a7f3d0;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      background: #f8fbf9;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    body.dark-mode #drop-area {
+      background: #0f172a;
+      border-color: #0ea5e9;
+      color: #e0f2fe;
+    }
+    body.dark-mode #drop-area p {
+      color: #bae6fd;
+    }
+    #file-error {
+      display: none;
+      color: #ef4444;
+      margin-top: 10px;
+      text-align: center;
+      font-weight: 600;
+    }
+    #preview-container {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+    #preview-img, #preview-video {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
     .submit-btn {
       display: block;
       width: 100%;
@@ -386,7 +405,7 @@
       font-size: 1.1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.3s ease, opacity 0.3s ease;
+      transition: transform 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -423,11 +442,12 @@
       </div>
     </div>
   </header>
+
   <div class="container" style="padding: 40px 20px;">
     <h1 style="text-align:center; margin-bottom:40px;"><i class="fas fa-headset"></i> Ýeňil barada sorag joagap</h1>
     <div class="faq-container">
       <div class="faq-item">
-        <button class="faq-question"><i class="fas fa-question-circle"></i> 1. Siz tölegi öňünden alýaňyzmy ýa-da tölegi soň etsem hem bolýamy ?</button>
+        <button class="faq-question"><i class="fas fa-question-circle"></i> 1. Siz tölegi öňünden alýaňyzmy ýa-da tölegi soň etsem hem bolýamy?</button>
         <div class="faq-answer">
           <p><i class="fas fa-check"></i> Howa biz tölegi öňünden alýas iş ýerine ýetirilenden soň däl. Biz töleg edilenden soň işe başlaýarys.</p>
         </div>
@@ -445,6 +465,7 @@
         </div>
       </div>
     </div>
+
     <div class="content" style="margin-top: 40px;">
       <h2><i class="fas fa-comment-dots"></i> Sözüňiz barmy?</h2>
       <p><i class="fas fa-lightbulb"></i> Agar yuqarydaky soraglarga jogap tapmasaňyz, öz soragyňyzy yozyp beriň:</p>
@@ -460,18 +481,13 @@
         <label for="user-question"><i class="fas fa-comment"></i> Soragyňyz</label>
         <textarea id="user-question" rows="4" placeholder="Soragyňyzy bu ýere ýazyň..."></textarea>
       </div>
-      <!-- === PREMIUM TASSYKLAMA BLOKI === -->
+
       <div class="proof-section">
         <div class="proof-title">
-          <i class="fas fa-check-circle"></i> Töleg tassyklamak (isleseňiz)
+          <i class="fas fa-check-circle"></i> Faýyl goşmak (isleseňiz)
         </div>
-        <div class="radio-group">
-          <div class="radio-option" data-type="file" onclick="handleProofType('file')">
-            <input type="radio" name="proof" id="proof-file" value="file">
-            <label for="proof-file"><i class="fas fa-upload"></i> Fayl yuklash</label>
-          </div>
-        </div>
-        <!-- === Fayl yuklash paneli === -->
+        <button class="proof-btn" onclick="toggleFileUpload()"><i class="fas fa-upload"></i> Fayl yuklash</button>
+
         <div id="file-upload-section">
           <h3 style="color:var(--primary); text-align:center; margin-bottom:15px; font-weight:600;">
             <i class="fas fa-cloud-upload-alt"></i> Fayl yuklash
@@ -494,7 +510,7 @@
           <div id="file-error"></div>
         </div>
       </div>
-      <!-- === PREMIUM YUKLANÝÄR ANIMASIÝA === -->
+
       <div class="loading" id="loading">
         <div class="premium-spinner">
           <div class="spinner-circle"></div>
@@ -505,54 +521,78 @@
         <p>Ýüklenýär...</p>
       </div>
       <div class="error-message" id="error"></div>
-      <!-- === PREMIUM "SORAGY GÖÝBER" DÜWMESI === -->
+
       <button class="submit-btn" id="submit-question"><i class="fas fa-paper-plane"></i> Soragy göýber</button>
     </div>
   </div>
+
   <script>
     const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
     const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
     const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
+
+    function toggleFileUpload() {
+      const section = document.getElementById('file-upload-section');
+      const isVisible = section.style.display === 'block';
+      section.style.display = isVisible ? 'none' : 'block';
+      if (!window.fileUploaderInitialized) {
+        setupFileUploader();
+        window.fileUploaderInitialized = true;
+      }
+    }
+
     function setupFileUploader() {
       const dropArea = document.getElementById('drop-area');
       const fileInput = document.getElementById('file-upload');
       const previewContainer = document.getElementById('preview-container');
       const previewImg = document.getElementById('preview-img');
       const previewVideo = document.getElementById('preview-video');
-      const previewContent = document.getElementById('preview-content');
       const errorDiv = document.getElementById('file-error');
+
       dropArea.addEventListener('click', () => fileInput.click());
       fileInput.addEventListener('change', (e) => {
         handleFile(e.target.files[0]);
       });
+
       ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, preventDefaults, false);
       });
+
       function preventDefaults(e) {
         e.preventDefault();
         e.stopPropagation();
       }
+
       ['dragenter', 'dragover'].forEach(eventName => {
         dropArea.addEventListener(eventName, () => {
           dropArea.style.backgroundColor = '#e0f2fe';
           dropArea.style.borderColor = '#38bdf8';
         }, false);
       });
+
       ['dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, () => {
           dropArea.style.backgroundColor = '#f8fbf9';
           dropArea.style.borderColor = '#a7f3d0';
         }, false);
       });
+
       dropArea.addEventListener('drop', (e) => {
         const dt = e.dataTransfer;
         handleFile(dt.files[0]);
       });
+
       function handleFile(file) {
         errorDiv.style.display = 'none';
         if (!file) return;
         if (file.size > 20 * 1024 * 1024) {
           errorDiv.textContent = '⚠️ Fayl 20 MB dan katta!';
+          errorDiv.style.display = 'block';
+          return;
+        }
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime', 'video/x-msvideo'];
+        if (!validTypes.some(type => file.type.startsWith(type.split('/')[0]))) {
+          errorDiv.textContent = '⚠️ Faqat rasm (JPG, PNG, GIF) ýa-da video (MP4, MOV, AVI) fayllari kabul edilýär.';
           errorDiv.style.display = 'block';
           return;
         }
@@ -562,7 +602,7 @@
             previewImg.src = e.target.result;
             previewImg.style.display = 'block';
             previewVideo.style.display = 'none';
-            previewContent.style.display = 'block';
+            previewContainer.style.display = 'block';
             window.selectedFile = file;
           };
           reader.readAsDataURL(file);
@@ -571,17 +611,14 @@
             previewVideo.src = e.target.result;
             previewVideo.style.display = 'block';
             previewImg.style.display = 'none';
-            previewContent.style.display = 'block';
+            previewContainer.style.display = 'block';
             window.selectedFile = file;
           };
           reader.readAsDataURL(file);
-        } else {
-          errorDiv.textContent = '⚠️ Faqat rasm (JPG, PNG, GIF) ýa-da video (MP4, MOV, AVI) fayllari kabul edilýär.';
-          errorDiv.style.display = 'block';
-          return;
         }
       }
     }
+
     async function uploadFile(file) {
       const formData = new FormData();
       formData.append('file', file);
@@ -593,15 +630,7 @@
       if (!res.ok) throw new Error(data.error || 'Yuklashda xatolik');
       return data.secure_url;
     }
-    function handleProofType(type) {
-      document.getElementById('proof-file').checked = true;
-      const fileSection = document.getElementById('file-upload-section');
-      fileSection.style.display = 'block';
-      if (!window.fileUploaderInitialized) {
-        setupFileUploader();
-        window.fileUploaderInitialized = true;
-      }
-    }
+
     async function submitQuestion() {
       const name = document.getElementById('user-name').value.trim();
       const phone = document.getElementById('user-phone').value.trim();
@@ -609,53 +638,47 @@
       const loading = document.getElementById('loading');
       const error = document.getElementById('error');
       const submitButton = document.getElementById('submit-question');
+
       if (!name || !phone || !question) {
         error.style.display = 'block';
         error.textContent = '⚠️ Ähli meýdançalary dolduryň!';
         return;
       }
+
+      error.style.display = 'none';
       let fileUrl = null;
-      const proofType = 'file';
-      if (proofType === 'file') {
-        const file = window.selectedFile;
-        if (!file) {
-          error.style.display = 'block';
-          error.textContent = '⚠️ Fayl tanlanmady!';
-          return;
-        }
-        if (file.size > 20 * 1024 * 1024) {
+      if (window.selectedFile) {
+        if (window.selectedFile.size > 20 * 1024 * 1024) {
           error.style.display = 'block';
           error.textContent = '⚠️ Fayl 20 MB dan katta!';
           return;
         }
         try {
-          fileUrl = await uploadFile(file);
+          fileUrl = await uploadFile(window.selectedFile);
         } catch (err) {
           error.style.display = 'block';
           error.textContent = '⚠️ Fayl yuklanmady: ' + err.message;
           return;
         }
       }
-      error.style.display = 'none';
+
       loading.style.display = 'block';
       submitButton.disabled = true;
-      submitButton.textContent = 'Ýüklenýär...';
+      submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ýüklenýär...';
+
       try {
         const response = await fetch(`${BASE_URL}/data/questions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            name: name,
-            phone: phone,
-            question: question,
-            proofType: proofType,
-            fileUrl: fileUrl,
+            name,
+            phone,
+            question,
+            fileUrl,
             timestamp: new Date().toISOString()
           })
         });
-        if (!response.ok) {
-          throw new Error(`Status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Status: ${response.status}`);
         alert('Soragyňyz üstünlikli göýberildi! Tez wagtda jogap beriler.');
         document.getElementById('user-name').value = '';
         document.getElementById('user-phone').value = '';
@@ -669,11 +692,14 @@
       } finally {
         loading.style.display = 'none';
         submitButton.disabled = false;
-        submitButton.textContent = 'Soragy göýber';
+        submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Soragy göýber';
       }
     }
+
+    // Initialize
     document.getElementById('submit-question').addEventListener('click', submitQuestion);
-    // Qora/oq rejim
+
+    // Theme toggle
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
@@ -684,8 +710,9 @@
       localStorage.setItem('theme', isDark ? 'dark-mode' : 'light-mode');
       document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
     });
-    // Mobil menyu
-    document.getElementById('menu-toggle').addEventListener('click', function() {
+
+    // Mobile menu
+    document.getElementById('menu-toggle').addEventListener('click', () => {
       document.getElementById('nav-menu').classList.toggle('active');
     });
     document.querySelectorAll('.nav-menu a').forEach(link => {
@@ -693,16 +720,13 @@
         document.getElementById('nav-menu').classList.remove('active');
       });
     });
-    // FAQ animatsiyasi
+
+    // FAQ toggle
     document.querySelectorAll('.faq-question').forEach(button => {
       button.addEventListener('click', () => {
         const answer = button.nextElementSibling;
         answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
       });
-    });
-    // Radio düwmesi (tek fayl)
-    document.querySelector('.radio-option[data-type="file"]').addEventListener('click', () => {
-      handleProofType('file');
     });
   </script>
 </body>
