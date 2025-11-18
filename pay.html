@@ -736,7 +736,7 @@
       background: var(--dark-bg);
       border-top: 1px solid rgba(255,255,255,0.1);
     }
-    /* Skrinshot yuklash paneli */
+    /* ✅ TÄZE: Skrinshot yuklash paneli (oq we gara režimleri üçin) */
     #screenshot-upload-section,
     #screenshot-upload-section-sell {
       display: none;
@@ -1020,6 +1020,7 @@
           <p><strong><i class="fas fa-sms"></i> SMS habary nusxalap goýuň ýada töleg geçen wagtyny ýazyň:</strong></p>
           <textarea id="sms-text" rows="3" placeholder="SMS haty şu ýere ýazyň..."></textarea>
         </div>
+        <!-- ✅ TÄZE: Buy uchun skrinshot paneli -->
         <div id="screenshot-upload-section">
           <h3 style="color: var(--primary); text-align:center; margin-bottom:15px; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <i class="fas fa-cloud-upload-alt"></i> Skrinshotni yuklaň
@@ -1069,6 +1070,7 @@
           <p><strong><i class="fas fa-sms"></i> SMS habary nusgalap goýuň ýada töleg geçen wagtyny ýazyň:</strong></p>
           <textarea id="sms-text-sell" rows="3" placeholder="SMS haty şu ýere ýazyň..."></textarea>
         </div>
+        <!-- ✅ TÄZE: Sell uchun skrinshot paneli -->
         <div id="screenshot-upload-section-sell">
           <h3 style="color: var(--primary); text-align:center; margin-bottom:15px; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <i class="fas fa-cloud-upload-alt"></i> Skrinshotni yuklaň
@@ -1122,7 +1124,6 @@
     const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
     const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
     const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
-
     function setupScreenshotUploader(isSell = false) {
       const dropArea = document.getElementById(isSell ? 'drop-area-sell' : 'drop-area');
       const fileInput = document.getElementById(isSell ? 'screenshot-file-sell' : 'screenshot-file');
@@ -1180,7 +1181,6 @@
         reader.readAsDataURL(file);
       }
     }
-
     async function uploadScreenshot(file) {
       const formData = new FormData();
       formData.append('screenshot', file);
@@ -1192,67 +1192,58 @@
       if (!res.ok) throw new Error(data.error || 'Yuklashda xatolik');
       return data.secure_url;
     }
-
     function handleProofType(type) {
       document.getElementById('proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('proof-sms').checked = (type === 'sms');
       const smsSection = document.getElementById('sms-input-section');
       const screenshotSection = document.getElementById('screenshot-upload-section');
+      const sellSection = document.getElementById('screenshot-upload-section-sell');
       if (type === 'sms') {
         smsSection.style.display = 'block';
         screenshotSection.style.display = 'none';
+        if (sellSection) sellSection.style.display = 'none';
         delete window.selectedScreenshotFile;
       } else {
         smsSection.style.display = 'none';
         screenshotSection.style.display = 'block';
+        if (sellSection) sellSection.style.display = 'none';
         if (!window.screenshotUploaderInitialized) {
           setupScreenshotUploader(false);
           window.screenshotUploaderInitialized = true;
         }
       }
     }
-
     function handleProofTypeSell(type) {
       document.getElementById('sell-proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('sell-proof-sms').checked = (type === 'sms');
       const smsSection = document.getElementById('sms-input-section-sell');
       const screenshotSection = document.getElementById('screenshot-upload-section-sell');
+      const buySection = document.getElementById('screenshot-upload-section');
       if (type === 'sms') {
         smsSection.style.display = 'block';
         screenshotSection.style.display = 'none';
+        if (buySection) buySection.style.display = 'none';
         delete window.selectedScreenshotFileSell;
       } else {
         smsSection.style.display = 'none';
         screenshotSection.style.display = 'block';
+        if (buySection) buySection.style.display = 'none';
         if (!window.screenshotUploaderInitializedSell) {
           setupScreenshotUploader(true);
           window.screenshotUploaderInitializedSell = true;
         }
       }
     }
-
-    // === Buy submit ===
+    // === Buy yuborish (tuzatilgan) ===
     document.getElementById('buy-submit-btn').addEventListener('click', async function() {
       const crypto = document.getElementById('buy-crypto').value;
       const phone = document.getElementById('buy-phone').value;
       const total = parseFloat(document.getElementById('buy-total').textContent) || 0;
       const proofType = document.querySelector('input[name="proof"]:checked');
-      if (!phone || !proofType) {
+      if (!phone || !proofType || !crypto) {
         alert('⚠️, ähli meýdançalary dolduryň!');
         return;
       }
-
-      // MIQDORINI HISOBLASH
-      let amount = 0;
-      if (crypto === 'payeer') {
-        const currency = document.getElementById('buy-currency').value;
-        amount = parseFloat(document.getElementById('buy-amount').value) || 0;
-      } else if (crypto === 'perfect') {
-        amount = parseFloat(document.getElementById('buy-perfect-amount').value) || 0;
-      } else if (crypto === 'webmoney') {
-        amount = parseFloat(document.getElementById('buy-webmoney-amount').value) || 0;
-      }
-
       let screenshotUrl = null;
       if (proofType.value === 'screenshot') {
         const file = window.selectedScreenshotFile;
@@ -1272,19 +1263,29 @@
         }
       }
       const smsText = proofType.value === 'sms' ? document.getElementById('sms-text').value.trim() : "";
-
+      // 🛠️ Tuzatilgan: mijoz ma'lumotlari toliq orderData'ga qo'shildi
       const orderData = {
         type: 'pay-buy',
         crypto: crypto,
         phone: phone,
-        amount: amount,                 // ✅ QO'SHILDI
-        totalPrice: total,              // ✅ to'g'ri nom
+        total: total,
         proofType: proofType.value,
         smsText: smsText,
         screenshotUrl: screenshotUrl,
         timestamp: new Date().toISOString()
       };
-
+      // Platforma ID we amount qoshyldy
+      if (crypto === 'payeer') {
+        orderData.payeerId = document.getElementById('buy-payeer-id').value;
+        orderData.amount = parseFloat(document.getElementById('buy-amount').value) || 0;
+        orderData.currency = document.getElementById('buy-currency').value;
+      } else if (crypto === 'perfect') {
+        orderData.perfectId = document.getElementById('buy-perfect-id').value;
+        orderData.amount = parseFloat(document.getElementById('buy-perfect-amount').value) || 0;
+      } else if (crypto === 'webmoney') {
+        orderData.webmoneyId = document.getElementById('buy-webmoney-id').value;
+        orderData.amount = parseFloat(document.getElementById('buy-webmoney-amount').value) || 0;
+      }
       const loading = document.getElementById('buy-loading');
       const errorDiv = document.getElementById('buy-error');
       loading.style.display = 'block';
@@ -1305,29 +1306,16 @@
         errorDiv.style.display = 'block';
       }
     });
-
-    // === Sell submit ===
+    // === Sell yuborish (tuzatilgan) ===
     document.getElementById('sell-submit-btn').addEventListener('click', async function() {
       const crypto = document.getElementById('sell-crypto').value;
       const phone = document.getElementById('sell-phone').value;
       const secretCode = document.getElementById('secret-code').value;
       const proofType = document.querySelector('input[name="sell-proof"]:checked');
-      if (!phone || !secretCode || !proofType) {
+      if (!phone || !secretCode || !proofType || !crypto) {
         alert('⚠️, ähli meýdançalary dolduryň!');
         return;
       }
-
-      // MIQDORINI HISOBLASH
-      let amount = 0;
-      if (crypto === 'payeer') {
-        const currency = document.getElementById('sell-currency').value;
-        amount = parseFloat(document.getElementById('sell-amount').value) || 0;
-      } else if (crypto === 'perfect') {
-        amount = parseFloat(document.getElementById('sell-perfect-amount').value) || 0;
-      } else if (crypto === 'webmoney') {
-        amount = parseFloat(document.getElementById('sell-webmoney-amount').value) || 0;
-      }
-
       let screenshotUrl = null;
       if (proofType.value === 'screenshot') {
         const file = window.selectedScreenshotFileSell;
@@ -1347,19 +1335,28 @@
         }
       }
       const smsText = proofType.value === 'sms' ? document.getElementById('sms-text-sell').value.trim() : "";
-
       const orderData = {
         type: 'pay-sell',
         crypto: crypto,
         phone: phone,
         secretCode: secretCode,
-        amount: amount,                 // ✅ QO'SHILDI
         proofType: proofType.value,
         smsText: smsText,
         screenshotUrl: screenshotUrl,
         timestamp: new Date().toISOString()
       };
-
+      // Platforma ID we amount qoshyldy
+      if (crypto === 'payeer') {
+        orderData.payeerId = document.getElementById('sell-payeer-id').value;
+        orderData.amount = parseFloat(document.getElementById('sell-amount').value) || 0;
+        orderData.currency = document.getElementById('sell-currency').value;
+      } else if (crypto === 'perfect') {
+        orderData.perfectId = document.getElementById('sell-perfect-id').value;
+        orderData.amount = parseFloat(document.getElementById('sell-perfect-amount').value) || 0;
+      } else if (crypto === 'webmoney') {
+        orderData.webmoneyId = document.getElementById('sell-webmoney-id').value;
+        orderData.amount = parseFloat(document.getElementById('sell-webmoney-amount').value) || 0;
+      }
       const loading = document.getElementById('sell-loading');
       const errorDiv = document.getElementById('sell-error');
       loading.style.display = 'block';
@@ -1380,8 +1377,7 @@
         errorDiv.style.display = 'block';
       }
     });
-
-    // === QOLGAN KODLAR (THEME, NAV, KALKULYATOR) ===
+    // Qolgan funksionallyk...
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
