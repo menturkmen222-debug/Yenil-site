@@ -690,82 +690,23 @@
       background: rgba(6, 95, 70, 0.25);
       color: #bbf7d0;
     }
-
-    /* === PREMIUM LOADING SPINNER STILI === */
-    .premium-spinner {
-      position: relative;
-      width: 50px;
-      height: 50px;
-      margin: 0 auto;
-      animation: spin 1.2s linear infinite;
-    }
-    .spinner-circle {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: 4px solid transparent;
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1.2s linear infinite;
-      z-index: 1;
-    }
-    .spinner-dot {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background-color: var(--primary);
-      border-radius: 50%;
-      animation: pulse 1.2s ease-in-out infinite;
-    }
-    .spinner-dot:nth-child(2) {
-      top: 50%;
-      left: 0;
-      transform: translateY(-50%);
-      animation-delay: 0.3s;
-    }
-    .spinner-dot:nth-child(3) {
-      top: 50%;
-      right: 0;
-      transform: translateY(-50%);
-      animation-delay: 0.6s;
-    }
-    .spinner-dot:nth-child(4) {
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      animation-delay: 0.9s;
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.5); opacity: 0.7; }
-    }
-    /* QARA MOD ÜÇIN */
-    body.dark-mode .premium-spinner .spinner-circle {
-      border-top-color: #6ee7b7;
-    }
-    body.dark-mode .premium-spinner .spinner-dot {
-      background-color: #6ee7b7;
-    }
     .loading {
       display: none;
       text-align: center;
       padding: 25px;
     }
-    .loading p {
-      color: #64748b;
-      font-size: 0.9rem;
-      margin-top: 10px;
-      font-weight: 500;
-      text-align: center;
+    .spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid var(--primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
     }
-    body.dark-mode .loading p {
-      color: #94a3b8;
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     .error-message {
       display: none;
@@ -795,7 +736,7 @@
       background: var(--dark-bg);
       border-top: 1px solid rgba(255,255,255,0.1);
     }
-    /* ✅ Skrinshot yuklash paneli */
+    /* Skrinshot yuklash paneli */
     #screenshot-upload-section,
     #screenshot-upload-section-sell {
       display: none;
@@ -1099,14 +1040,8 @@
           </div>
           <div id="file-error"></div>
         </div>
-        <!-- ✅ PREMIUM LOADING SPINNER -->
         <div class="loading" id="buy-loading">
-          <div class="premium-spinner">
-            <div class="spinner-circle"></div>
-            <div class="spinner-dot"></div>
-            <div class="spinner-dot"></div>
-            <div class="spinner-dot"></div>
-          </div>
+          <div class="spinner"></div>
           <p>Ýüklenýär...</p>
         </div>
         <div class="error-message" id="buy-error"></div>
@@ -1154,14 +1089,8 @@
           </div>
           <div id="file-error-sell"></div>
         </div>
-        <!-- ✅ PREMIUM LOADING SPINNER -->
         <div class="loading" id="sell-loading">
-          <div class="premium-spinner">
-            <div class="spinner-circle"></div>
-            <div class="spinner-dot"></div>
-            <div class="spinner-dot"></div>
-            <div class="spinner-dot"></div>
-          </div>
+          <div class="spinner"></div>
           <p>Ýüklenýär...</p>
         </div>
         <div class="error-message" id="sell-error"></div>
@@ -1193,6 +1122,7 @@
     const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
     const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
     const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
+
     function setupScreenshotUploader(isSell = false) {
       const dropArea = document.getElementById(isSell ? 'drop-area-sell' : 'drop-area');
       const fileInput = document.getElementById(isSell ? 'screenshot-file-sell' : 'screenshot-file');
@@ -1250,6 +1180,7 @@
         reader.readAsDataURL(file);
       }
     }
+
     async function uploadScreenshot(file) {
       const formData = new FormData();
       formData.append('screenshot', file);
@@ -1261,149 +1192,196 @@
       if (!res.ok) throw new Error(data.error || 'Yuklashda xatolik');
       return data.secure_url;
     }
+
     function handleProofType(type) {
       document.getElementById('proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('proof-sms').checked = (type === 'sms');
       const smsSection = document.getElementById('sms-input-section');
       const screenshotSection = document.getElementById('screenshot-upload-section');
-      const sellSection = document.getElementById('screenshot-upload-section-sell');
       if (type === 'sms') {
         smsSection.style.display = 'block';
         screenshotSection.style.display = 'none';
-        if (sellSection) sellSection.style.display = 'none';
         delete window.selectedScreenshotFile;
       } else {
         smsSection.style.display = 'none';
         screenshotSection.style.display = 'block';
-        if (sellSection) sellSection.style.display = 'none';
         if (!window.screenshotUploaderInitialized) {
           setupScreenshotUploader(false);
           window.screenshotUploaderInitialized = true;
         }
       }
     }
+
     function handleProofTypeSell(type) {
       document.getElementById('sell-proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('sell-proof-sms').checked = (type === 'sms');
       const smsSection = document.getElementById('sms-input-section-sell');
       const screenshotSection = document.getElementById('screenshot-upload-section-sell');
-      const buySection = document.getElementById('screenshot-upload-section');
       if (type === 'sms') {
         smsSection.style.display = 'block';
         screenshotSection.style.display = 'none';
-        if (buySection) buySection.style.display = 'none';
         delete window.selectedScreenshotFileSell;
       } else {
         smsSection.style.display = 'none';
         screenshotSection.style.display = 'block';
-        if (buySection) buySection.style.display = 'none';
         if (!window.screenshotUploaderInitializedSell) {
           setupScreenshotUploader(true);
           window.screenshotUploaderInitializedSell = true;
         }
       }
     }
-    // === Buy Submit - DÄRHAL animasiýa başlaýar ===
+
+    // === Buy submit ===
     document.getElementById('buy-submit-btn').addEventListener('click', async function() {
       const crypto = document.getElementById('buy-crypto').value;
       const phone = document.getElementById('buy-phone').value;
       const total = parseFloat(document.getElementById('buy-total').textContent) || 0;
       const proofType = document.querySelector('input[name="proof"]:checked');
-      if (!phone || !proofType || !crypto) {
-        alert('⚠️ Ähli meýdançalary dolduryň!');
+      if (!phone || !proofType) {
+        alert('⚠️, ähli meýdançalary dolduryň!');
         return;
       }
-      if (proofType.value === 'screenshot' && !window.selectedScreenshotFile) {
-        alert('⚠️ Skrinshot tanlanmady!');
-        return;
+
+      // MIQDORINI HISOBLASH
+      let amount = 0;
+      if (crypto === 'payeer') {
+        const currency = document.getElementById('buy-currency').value;
+        amount = parseFloat(document.getElementById('buy-amount').value) || 0;
+      } else if (crypto === 'perfect') {
+        amount = parseFloat(document.getElementById('buy-perfect-amount').value) || 0;
+      } else if (crypto === 'webmoney') {
+        amount = parseFloat(document.getElementById('buy-webmoney-amount').value) || 0;
       }
+
+      let screenshotUrl = null;
+      if (proofType.value === 'screenshot') {
+        const file = window.selectedScreenshotFile;
+        if (!file) {
+          alert('Skrinshot tanlanmady!');
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Rasm 5 MB dan katta!');
+          return;
+        }
+        try {
+          screenshotUrl = await uploadScreenshot(file);
+        } catch (err) {
+          alert('Skrinshot yuklanmady: ' + err.message);
+          return;
+        }
+      }
+      const smsText = proofType.value === 'sms' ? document.getElementById('sms-text').value.trim() : "";
+
+      const orderData = {
+        type: 'pay-buy',
+        crypto: crypto,
+        phone: phone,
+        amount: amount,                 // ✅ QO'SHILDI
+        totalPrice: total,              // ✅ to'g'ri nom
+        proofType: proofType.value,
+        smsText: smsText,
+        screenshotUrl: screenshotUrl,
+        timestamp: new Date().toISOString()
+      };
+
       const loading = document.getElementById('buy-loading');
       const errorDiv = document.getElementById('buy-error');
-      loading.style.display = 'block'; // ✅ DÄRHAL ÇALIŞÝAR
+      loading.style.display = 'block';
       errorDiv.style.display = 'none';
       try {
-        let screenshotUrl = null;
-        if (proofType.value === 'screenshot') {
-          const file = window.selectedScreenshotFile;
-          screenshotUrl = await uploadScreenshot(file);
-        }
-        const smsText = proofType.value === 'sms' ? document.getElementById('sms-text').value.trim() : "";
-        const orderData = {
-          type: 'pay-buy',
-          crypto: crypto,
-          phone: phone,
-          total: total,
-          proofType: proofType.value,
-          smsText: smsText,
-          screenshotUrl: screenshotUrl,
-          timestamp: new Date().toISOString()
-        };
         const response = await fetch(`${BASE_URL}/data/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderData)
         });
         if (!response.ok) throw new Error(`Status: ${response.status}`);
+        loading.style.display = 'none';
         document.getElementById('buy-payment-section').style.display = 'none';
         document.getElementById('success-section').style.display = 'block';
       } catch (err) {
-        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nätanyş xato ýüze çykdy.');
-        errorDiv.style.display = 'block';
-      } finally {
         loading.style.display = 'none';
+        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nomaʼlum xato');
+        errorDiv.style.display = 'block';
       }
     });
-    // === Sell Submit - DÄRHAL animasiýa başlaýar ===
+
+    // === Sell submit ===
     document.getElementById('sell-submit-btn').addEventListener('click', async function() {
       const crypto = document.getElementById('sell-crypto').value;
       const phone = document.getElementById('sell-phone').value;
       const secretCode = document.getElementById('secret-code').value;
       const proofType = document.querySelector('input[name="sell-proof"]:checked');
-      if (!phone || !secretCode || !proofType || !crypto || crypto === 'crypto') {
-        alert('⚠️ Ähli meýdançalary dolduryň!');
+      if (!phone || !secretCode || !proofType) {
+        alert('⚠️, ähli meýdançalary dolduryň!');
         return;
       }
-      if (proofType.value === 'screenshot' && !window.selectedScreenshotFileSell) {
-        alert('⚠️ Skrinshot tanlanmady!');
-        return;
+
+      // MIQDORINI HISOBLASH
+      let amount = 0;
+      if (crypto === 'payeer') {
+        const currency = document.getElementById('sell-currency').value;
+        amount = parseFloat(document.getElementById('sell-amount').value) || 0;
+      } else if (crypto === 'perfect') {
+        amount = parseFloat(document.getElementById('sell-perfect-amount').value) || 0;
+      } else if (crypto === 'webmoney') {
+        amount = parseFloat(document.getElementById('sell-webmoney-amount').value) || 0;
       }
+
+      let screenshotUrl = null;
+      if (proofType.value === 'screenshot') {
+        const file = window.selectedScreenshotFileSell;
+        if (!file) {
+          alert('Skrinshot tanlanmady!');
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Rasm 5 MB dan katta!');
+          return;
+        }
+        try {
+          screenshotUrl = await uploadScreenshot(file);
+        } catch (err) {
+          alert('Skrinshot yuklanmady: ' + err.message);
+          return;
+        }
+      }
+      const smsText = proofType.value === 'sms' ? document.getElementById('sms-text-sell').value.trim() : "";
+
+      const orderData = {
+        type: 'pay-sell',
+        crypto: crypto,
+        phone: phone,
+        secretCode: secretCode,
+        amount: amount,                 // ✅ QO'SHILDI
+        proofType: proofType.value,
+        smsText: smsText,
+        screenshotUrl: screenshotUrl,
+        timestamp: new Date().toISOString()
+      };
+
       const loading = document.getElementById('sell-loading');
       const errorDiv = document.getElementById('sell-error');
-      loading.style.display = 'block'; // ✅ DÄRHAL ÇALIŞÝAR
+      loading.style.display = 'block';
       errorDiv.style.display = 'none';
       try {
-        let screenshotUrl = null;
-        if (proofType.value === 'screenshot') {
-          const file = window.selectedScreenshotFileSell;
-          screenshotUrl = await uploadScreenshot(file);
-        }
-        const smsText = proofType.value === 'sms' ? document.getElementById('sms-text-sell').value.trim() : "";
-        const orderData = {
-          type: 'pay-sell',
-          crypto: crypto,
-          phone: phone,
-          secretCode: secretCode,
-          proofType: proofType.value,
-          smsText: smsText,
-          screenshotUrl: screenshotUrl,
-          timestamp: new Date().toISOString()
-        };
         const response = await fetch(`${BASE_URL}/data/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderData)
         });
         if (!response.ok) throw new Error(`Status: ${response.status}`);
+        loading.style.display = 'none';
         document.getElementById('sell-payment-section').style.display = 'none';
         document.getElementById('success-section').style.display = 'block';
       } catch (err) {
-        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nätanyş xato ýüze çykdy.');
-        errorDiv.style.display = 'block';
-      } finally {
         loading.style.display = 'none';
+        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nomaʼlum xato');
+        errorDiv.style.display = 'block';
       }
     });
-    // Qolgan funksionallyk saklanýar (theme, nav, kalkulyator, etc.)
+
+    // === QOLGAN KODLAR (THEME, NAV, KALKULYATOR) ===
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
@@ -1611,4 +1589,4 @@
     });
   </script>
 </body>
-  </html>
+</html>
