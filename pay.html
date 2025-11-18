@@ -1099,7 +1099,7 @@
           </div>
           <div id="file-error"></div>
         </div>
-        <!-- PREMIUM LOADING -->
+        <!-- ✅ PREMIUM LOADING SPINNER -->
         <div class="loading" id="buy-loading">
           <div class="premium-spinner">
             <div class="spinner-circle"></div>
@@ -1154,7 +1154,7 @@
           </div>
           <div id="file-error-sell"></div>
         </div>
-        <!-- PREMIUM LOADING -->
+        <!-- ✅ PREMIUM LOADING SPINNER -->
         <div class="loading" id="sell-loading">
           <div class="premium-spinner">
             <div class="spinner-circle"></div>
@@ -1193,7 +1193,6 @@
     const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
     const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
     const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
-
     function setupScreenshotUploader(isSell = false) {
       const dropArea = document.getElementById(isSell ? 'drop-area-sell' : 'drop-area');
       const fileInput = document.getElementById(isSell ? 'screenshot-file-sell' : 'screenshot-file');
@@ -1251,7 +1250,6 @@
         reader.readAsDataURL(file);
       }
     }
-
     async function uploadScreenshot(file) {
       const formData = new FormData();
       formData.append('screenshot', file);
@@ -1263,7 +1261,6 @@
       if (!res.ok) throw new Error(data.error || 'Yuklashda xatolik');
       return data.secure_url;
     }
-
     function handleProofType(type) {
       document.getElementById('proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('proof-sms').checked = (type === 'sms');
@@ -1285,7 +1282,6 @@
         }
       }
     }
-
     function handleProofTypeSell(type) {
       document.getElementById('sell-proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('sell-proof-sms').checked = (type === 'sms');
@@ -1307,145 +1303,107 @@
         }
       }
     }
-
-    // === YALŇYŞLYKLARY GÖRKEZMEK ÜÇIN UMUMY FUNKSIÝA ===
-    function showError(message, errorEl) {
-      errorEl.textContent = '⚠️ ' + message;
-      errorEl.style.display = 'block';
-      errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    // === BUY YÜKLEME LOGIKASY (ANI ZAHOTY) ===
+    // === Buy Submit - DÄRHAL animasiýa başlaýar ===
     document.getElementById('buy-submit-btn').addEventListener('click', async function() {
       const crypto = document.getElementById('buy-crypto').value;
       const phone = document.getElementById('buy-phone').value;
       const total = parseFloat(document.getElementById('buy-total').textContent) || 0;
       const proofType = document.querySelector('input[name="proof"]:checked');
-      const errorEl = document.getElementById('buy-error');
-      const loading = document.getElementById('buy-loading');
-
-      // 1. ÝALŇYŞLYKLARY BARLA
-      if (!phone || !proofType) {
-        showError('Ähli meýdançalary dolduryň!', errorEl);
+      if (!phone || !proofType || !crypto) {
+        alert('⚠️ Ähli meýdançalary dolduryň!');
         return;
       }
-
-      let screenshotUrl = null;
-      if (proofType.value === 'screenshot') {
-        const file = window.selectedScreenshotFile;
-        if (!file) {
-          showError('Skrinshot tanlanmady!', errorEl);
-          return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-          showError('Rasm 5 MB dan katta!', errorEl);
-          return;
-        }
-        try {
-          screenshotUrl = await uploadScreenshot(file);
-        } catch (err) {
-          showError('Skrinshot yuklanmady: ' + err.message, errorEl);
-          return;
-        }
+      if (proofType.value === 'screenshot' && !window.selectedScreenshotFile) {
+        alert('⚠️ Skrinshot tanlanmady!');
+        return;
       }
-
-      const smsText = proofType.value === 'sms' ? document.getElementById('sms-text').value.trim() : "";
-
-      // 2. ANI ZAHOTY LOADING ÝÖNÄLDIR
-      loading.style.display = 'block';
-      errorEl.style.display = 'none';
-
-      // 3. BACKEND ÝÜKLE
+      const loading = document.getElementById('buy-loading');
+      const errorDiv = document.getElementById('buy-error');
+      loading.style.display = 'block'; // ✅ DÄRHAL ÇALIŞÝAR
+      errorDiv.style.display = 'none';
       try {
+        let screenshotUrl = null;
+        if (proofType.value === 'screenshot') {
+          const file = window.selectedScreenshotFile;
+          screenshotUrl = await uploadScreenshot(file);
+        }
+        const smsText = proofType.value === 'sms' ? document.getElementById('sms-text').value.trim() : "";
+        const orderData = {
+          type: 'pay-buy',
+          crypto: crypto,
+          phone: phone,
+          total: total,
+          proofType: proofType.value,
+          smsText: smsText,
+          screenshotUrl: screenshotUrl,
+          timestamp: new Date().toISOString()
+        };
         const response = await fetch(`${BASE_URL}/data/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'pay-buy',
-            crypto: crypto,
-            phone: phone,
-            total: total,
-            proofType: proofType.value,
-            smsText: smsText,
-            screenshotUrl: screenshotUrl,
-            timestamp: new Date().toISOString()
-          })
+          body: JSON.stringify(orderData)
         });
         if (!response.ok) throw new Error(`Status: ${response.status}`);
-        loading.style.display = 'none';
         document.getElementById('buy-payment-section').style.display = 'none';
         document.getElementById('success-section').style.display = 'block';
       } catch (err) {
+        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nätanyş xato ýüze çykdy.');
+        errorDiv.style.display = 'block';
+      } finally {
         loading.style.display = 'none';
-        showError(err.message || 'Nomaʼlum xato', errorEl);
       }
     });
-
-    // === SELL YÜKLEME LOGIKASY (ANI ZAHOTY) ===
+    // === Sell Submit - DÄRHAL animasiýa başlaýar ===
     document.getElementById('sell-submit-btn').addEventListener('click', async function() {
       const crypto = document.getElementById('sell-crypto').value;
       const phone = document.getElementById('sell-phone').value;
       const secretCode = document.getElementById('secret-code').value;
       const proofType = document.querySelector('input[name="sell-proof"]:checked');
-      const errorEl = document.getElementById('sell-error');
-      const loading = document.getElementById('sell-loading');
-
-      if (!phone || !secretCode || !proofType) {
-        showError('Ähli meýdançalary dolduryň!', errorEl);
+      if (!phone || !secretCode || !proofType || !crypto || crypto === 'crypto') {
+        alert('⚠️ Ähli meýdançalary dolduryň!');
         return;
       }
-
-      let screenshotUrl = null;
-      if (proofType.value === 'screenshot') {
-        const file = window.selectedScreenshotFileSell;
-        if (!file) {
-          showError('Skrinshot tanlanmady!', errorEl);
-          return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-          showError('Rasm 5 MB dan katta!', errorEl);
-          return;
-        }
-        try {
-          screenshotUrl = await uploadScreenshot(file);
-        } catch (err) {
-          showError('Skrinshot yuklanmady: ' + err.message, errorEl);
-          return;
-        }
+      if (proofType.value === 'screenshot' && !window.selectedScreenshotFileSell) {
+        alert('⚠️ Skrinshot tanlanmady!');
+        return;
       }
-
-      const smsText = proofType.value === 'sms' ? document.getElementById('sms-text-sell').value.trim() : "";
-
-      // ANI ZAHOTY LOADING
-      loading.style.display = 'block';
-      errorEl.style.display = 'none';
-
+      const loading = document.getElementById('sell-loading');
+      const errorDiv = document.getElementById('sell-error');
+      loading.style.display = 'block'; // ✅ DÄRHAL ÇALIŞÝAR
+      errorDiv.style.display = 'none';
       try {
+        let screenshotUrl = null;
+        if (proofType.value === 'screenshot') {
+          const file = window.selectedScreenshotFileSell;
+          screenshotUrl = await uploadScreenshot(file);
+        }
+        const smsText = proofType.value === 'sms' ? document.getElementById('sms-text-sell').value.trim() : "";
+        const orderData = {
+          type: 'pay-sell',
+          crypto: crypto,
+          phone: phone,
+          secretCode: secretCode,
+          proofType: proofType.value,
+          smsText: smsText,
+          screenshotUrl: screenshotUrl,
+          timestamp: new Date().toISOString()
+        };
         const response = await fetch(`${BASE_URL}/data/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'pay-sell',
-            crypto: crypto,
-            phone: phone,
-            secretCode: secretCode,
-            proofType: proofType.value,
-            smsText: smsText,
-            screenshotUrl: screenshotUrl,
-            timestamp: new Date().toISOString()
-          })
+          body: JSON.stringify(orderData)
         });
         if (!response.ok) throw new Error(`Status: ${response.status}`);
-        loading.style.display = 'none';
         document.getElementById('sell-payment-section').style.display = 'none';
         document.getElementById('success-section').style.display = 'block';
       } catch (err) {
+        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nätanyş xato ýüze çykdy.');
+        errorDiv.style.display = 'block';
+      } finally {
         loading.style.display = 'none';
-        showError(err.message || 'Nomaʼlum xato', errorEl);
       }
     });
-
-    // === QOLGAN KODLAR (theme, nav, hesaplaýyşlar...) öz ýerinde ===
+    // Qolgan funksionallyk saklanýar (theme, nav, kalkulyator, etc.)
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
@@ -1653,4 +1611,4 @@
     });
   </script>
 </body>
-                      </html>
+  </html>
