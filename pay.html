@@ -444,10 +444,6 @@
       font-size: 1.05rem;
       animation: highlightGlow 2s infinite alternate;
     }
-    @keyframes highlightGlow {
-      from { box-shadow: 0 0 10px rgba(13, 148, 136, 0.1); }
-      to { box-shadow: 0 0 20px rgba(13, 148, 136, 0.3); }
-    }
     .crypto-list {
       display: flex;
       flex-wrap: wrap;
@@ -683,7 +679,7 @@
       background: rgba(6, 95, 70, 0.25);
       color: #bbf7d0;
     }
-    /* === PREMIUM LOADING SPINNER STILI === */
+    /* === YANGI STIL: Premium Loading Spinner === */
     .premium-spinner {
       position: relative;
       width: 50px;
@@ -1052,13 +1048,14 @@
       </div>
       <div class="content" id="buy-payment-section" style="display:none;">
         <h2><i class="fas fa-credit-card"></i> Töleg ma'lumotlary</h2>
-        <!-- ✅ TÄZE: Esletme metini üýtgedildi -->
-        <div class="note" id="payment-note">
-          <p><strong><i class="fas fa-exclamation-triangle"></i> Diňläň!</strong> Tölegiňiz <span id="user-phone-placeholder">[Mijozun nomeri]</span> nomerinden ýerine ýetirilmelidir.</p>
-          <p><i class="fas fa-mobile-alt"></i> Bizniň töleg nomerlerimiz:</p>
-          <div class="numbers" id="payment-amount-display"></div>
-          <p id="split-payment-notice" style="display: none;"><i class="fas fa-exclamation-circle"></i> Eger jemi töleg 300 TMT dan çuň bolsa, har bir nomere 300 TMT den az bolmazdan bölip geçirmeli.</p>
+        <p><strong><i class="fas fa-exclamation-triangle"></i> Diňläň!</strong> Tölegiňiz <u>diňe öz nomeriňizden</u> ýerine ýetirilmelidir.</p>
+        <div class="form-group">
+          <label for="client-phone"><i class="fas fa-phone"></i> Siziň nomeriňiz (Töleg ediljek nomer)</label>
+          <input type="tel" id="client-phone" placeholder="+993 XX XXXXXX" required>
         </div>
+        <p><i class="fas fa-mobile-alt"></i> Bizniň töleg nomerlerimiz:</p>
+        <div class="numbers" id="payment-amount-display"></div>
+        <p><i class="fas fa-arrow-down"></i> Ýokardaky nomerlerden birine jemi töleg mukdaryny geçirmeli .</p> 
         <h3><i class="fas fa-check-circle"></i> Tölegi tassyklaň</h3>
         <div class="radio-group">
           <div class="radio-option" onclick="handleProofType('screenshot')">
@@ -1094,7 +1091,7 @@
           </div>
           <div id="file-error"></div>
         </div>
-        <!-- ✅ TÄZE: Premium Loading Spinner -->
+        <!-- PREMIUM LOADING ANIMASIÝASY -->
         <div class="loading" id="buy-loading">
           <div class="premium-spinner">
             <div class="spinner-circle"></div>
@@ -1149,6 +1146,7 @@
           </div>
           <div id="file-error-sell"></div>
         </div>
+        <!-- PREMIUM LOADING ANIMASIÝASY -->
         <div class="loading" id="sell-loading">
           <div class="premium-spinner">
             <div class="spinner-circle"></div>
@@ -1575,16 +1573,6 @@
         html += `<p><i class="fas fa-phone"></i> +993 71 789091</p><p><i class="fas fa-phone"></i> +993 64 629487</p><p><i class="fas fa-phone"></i> +993 71 788546</p>`;
         paymentDisplay.innerHTML = html;
       }
-      // ✅ TÄZE: Esletme metini üýtgetmek
-      const userPhonePlaceholder = document.getElementById('user-phone-placeholder');
-      const splitPaymentNotice = document.getElementById('split-payment-notice');
-      userPhonePlaceholder.textContent = phone;
-      // ✅ TÄZE: 300 TMT dan çuň bolsa esletme goşmak
-      if (total > 300) {
-        splitPaymentNotice.style.display = 'block';
-      } else {
-        splitPaymentNotice.style.display = 'none';
-      }
       document.getElementById('buy-payment-section').style.display = 'block';
       document.getElementById('buy-section').style.display = 'none';
     });
@@ -1634,4 +1622,4 @@
     });
   </script>
 </body>
-  </html>
+              </html>
