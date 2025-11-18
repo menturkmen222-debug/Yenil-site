@@ -736,7 +736,7 @@
       background: var(--dark-bg);
       border-top: 1px solid rgba(255,255,255,0.1);
     }
-    /* ✅ TÄZE: Skrinshot yuklash paneli (oq we gara režimleri üçin) */
+    /* Skrinshot yuklash paneli */
     #screenshot-upload-section,
     #screenshot-upload-section-sell {
       display: none;
@@ -1020,7 +1020,6 @@
           <p><strong><i class="fas fa-sms"></i> SMS habary nusxalap goýuň ýada töleg geçen wagtyny ýazyň:</strong></p>
           <textarea id="sms-text" rows="3" placeholder="SMS haty şu ýere ýazyň..."></textarea>
         </div>
-        <!-- ✅ TÄZE: Buy uchun skrinshot paneli -->
         <div id="screenshot-upload-section">
           <h3 style="color: var(--primary); text-align:center; margin-bottom:15px; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <i class="fas fa-cloud-upload-alt"></i> Skrinshotni yuklaň
@@ -1070,7 +1069,6 @@
           <p><strong><i class="fas fa-sms"></i> SMS habary nusgalap goýuň ýada töleg geçen wagtyny ýazyň:</strong></p>
           <textarea id="sms-text-sell" rows="3" placeholder="SMS haty şu ýere ýazyň..."></textarea>
         </div>
-        <!-- ✅ TÄZE: Sell uchun skrinshot paneli -->
         <div id="screenshot-upload-section-sell">
           <h3 style="color: var(--primary); text-align:center; margin-bottom:15px; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <i class="fas fa-cloud-upload-alt"></i> Skrinshotni yuklaň
@@ -1234,7 +1232,7 @@
         }
       }
     }
-    // === Buy yuborish (tuzatilgan) ===
+    // === Buy yuborish (TO'LIQ Tuzatilgan) ===
     document.getElementById('buy-submit-btn').addEventListener('click', async function() {
       const crypto = document.getElementById('buy-crypto').value;
       const phone = document.getElementById('buy-phone').value;
@@ -1263,18 +1261,18 @@
         }
       }
       const smsText = proofType.value === 'sms' ? document.getElementById('sms-text').value.trim() : "";
-      // 🛠️ Tuzatilgan: mijoz ma'lumotlari toliq orderData'ga qo'shildi
       const orderData = {
         type: 'pay-buy',
         crypto: crypto,
         phone: phone,
         total: total,
+        totalPrice: total, // ✅ BU QO'SHILDI!
         proofType: proofType.value,
         smsText: smsText,
         screenshotUrl: screenshotUrl,
         timestamp: new Date().toISOString()
       };
-      // Platforma ID we amount qoshyldy
+      // Platforma ID, amount, currency qoshyldy
       if (crypto === 'payeer') {
         orderData.payeerId = document.getElementById('buy-payeer-id').value;
         orderData.amount = parseFloat(document.getElementById('buy-amount').value) || 0;
@@ -1306,7 +1304,7 @@
         errorDiv.style.display = 'block';
       }
     });
-    // === Sell yuborish (tuzatilgan) ===
+    // === Sell yuborish (TO'LIQ Tuzatilgan) ===
     document.getElementById('sell-submit-btn').addEventListener('click', async function() {
       const crypto = document.getElementById('sell-crypto').value;
       const phone = document.getElementById('sell-phone').value;
@@ -1335,17 +1333,19 @@
         }
       }
       const smsText = proofType.value === 'sms' ? document.getElementById('sms-text-sell').value.trim() : "";
+      const total = parseFloat(document.getElementById('sell-total').textContent) || 0;
       const orderData = {
         type: 'pay-sell',
         crypto: crypto,
         phone: phone,
         secretCode: secretCode,
+        total: total,
+        totalPrice: total, // ✅ BU QO'SHILDI!
         proofType: proofType.value,
         smsText: smsText,
         screenshotUrl: screenshotUrl,
         timestamp: new Date().toISOString()
       };
-      // Platforma ID we amount qoshyldy
       if (crypto === 'payeer') {
         orderData.payeerId = document.getElementById('sell-payeer-id').value;
         orderData.amount = parseFloat(document.getElementById('sell-amount').value) || 0;
@@ -1377,7 +1377,7 @@
         errorDiv.style.display = 'block';
       }
     });
-    // Qolgan funksionallyk...
+    // Qolgan funksionallyk (theme, nav, kalkulyator, etc.)
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
