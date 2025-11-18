@@ -1,23 +1,30 @@
 <!DOCTYPE html>
 <html lang="tk" dir="ltr">
 <head>
-  <!-- Open Graph & Twitter -->
+  <!-- Open Graph teglari (Facebook, LinkedIn) -->
   <meta property="og:title" content="Ýeňil — Pay">
   <meta property="og:description" content="Ýeňil Pay – Daşary ýurt pullaryny arzan alyş çalyş etmek">
   <meta property="og:image" content="https://yenil.ru/images/logo-1.png">
   <meta property="og:url" content="https://yenil.ru">
   <meta property="og:type" content="website">
+  <!-- Twitter uchun meta teglar -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ýeňil — Pay">
   <meta name="twitter:description" content="Ýeňil Paý – Daşary ýurt pullaryny arzan alyş çalyş etmek">
   <meta name="twitter:image" content="https://yenil.ru/images/logo-twitter.png">
+  <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <!-- Apple Touch Icon -->
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <!-- Android Chrome Icons -->
   <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+  <!-- Microsoft Edge -->
   <meta name="msapplication-TileColor" content="#0d9488">
   <meta name="msapplication-TileImage" content="/mstile-150x150.png">
+  <!-- Manifest File -->
   <link rel="manifest" href="/site.webmanifest">
+  <!-- Theme Color -->
   <meta name="theme-color" content="#ffffff">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=0.5"/>
@@ -444,6 +451,10 @@
       font-size: 1.05rem;
       animation: highlightGlow 2s infinite alternate;
     }
+    @keyframes highlightGlow {
+      from { box-shadow: 0 0 10px rgba(13, 148, 136, 0.1); }
+      to { box-shadow: 0 0 20px rgba(13, 148, 136, 0.3); }
+    }
     .crypto-list {
       display: flex;
       flex-wrap: wrap;
@@ -679,7 +690,8 @@
       background: rgba(6, 95, 70, 0.25);
       color: #bbf7d0;
     }
-    /* === YANGI STIL: Premium Loading Spinner === */
+
+    /* === PREMIUM LOADING SPINNER STILI === */
     .premium-spinner {
       position: relative;
       width: 50px;
@@ -783,7 +795,7 @@
       background: var(--dark-bg);
       border-top: 1px solid rgba(255,255,255,0.1);
     }
-    /* === YANGI STIL: Skrinshot yuklash paneli === */
+    /* ✅ TÄZE: Skrinshot yuklash paneli (oq we gara režimleri üçin) */
     #screenshot-upload-section,
     #screenshot-upload-section-sell {
       display: none;
@@ -1049,13 +1061,9 @@
       <div class="content" id="buy-payment-section" style="display:none;">
         <h2><i class="fas fa-credit-card"></i> Töleg ma'lumotlary</h2>
         <p><strong><i class="fas fa-exclamation-triangle"></i> Diňläň!</strong> Tölegiňiz <u>diňe öz nomeriňizden</u> ýerine ýetirilmelidir.</p>
-        <div class="form-group">
-          <label for="client-phone"><i class="fas fa-phone"></i> Siziň nomeriňiz (Töleg ediljek nomer)</label>
-          <input type="tel" id="client-phone" placeholder="+993 XX XXXXXX" required>
-        </div>
         <p><i class="fas fa-mobile-alt"></i> Bizniň töleg nomerlerimiz:</p>
         <div class="numbers" id="payment-amount-display"></div>
-        <p><i class="fas fa-arrow-down"></i> Ýokardaky nomerlerden birine jemi töleg mukdaryny geçirmeli .</p> 
+        <p><i class="fas fa-arrow-down"></i> Ýokardaky nomerlerden birine jemi töleg mukdaryny geçirmeli .</p>
         <h3><i class="fas fa-check-circle"></i> Tölegi tassyklaň</h3>
         <div class="radio-group">
           <div class="radio-option" onclick="handleProofType('screenshot')">
@@ -1071,6 +1079,7 @@
           <p><strong><i class="fas fa-sms"></i> SMS habary nusxalap goýuň ýada töleg geçen wagtyny ýazyň:</strong></p>
           <textarea id="sms-text" rows="3" placeholder="SMS haty şu ýere ýazyň..."></textarea>
         </div>
+        <!-- ✅ TÄZE: Buy uchun skrinshot paneli -->
         <div id="screenshot-upload-section">
           <h3 style="color: var(--primary); text-align:center; margin-bottom:15px; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <i class="fas fa-cloud-upload-alt"></i> Skrinshotni yuklaň
@@ -1091,7 +1100,7 @@
           </div>
           <div id="file-error"></div>
         </div>
-        <!-- PREMIUM LOADING ANIMASIÝASY -->
+        <!-- PREMIUM LOADING SPINNER -->
         <div class="loading" id="buy-loading">
           <div class="premium-spinner">
             <div class="spinner-circle"></div>
@@ -1126,6 +1135,7 @@
           <p><strong><i class="fas fa-sms"></i> SMS habary nusgalap goýuň ýada töleg geçen wagtyny ýazyň:</strong></p>
           <textarea id="sms-text-sell" rows="3" placeholder="SMS haty şu ýere ýazyň..."></textarea>
         </div>
+        <!-- ✅ TÄZE: Sell uchun skrinshot paneli -->
         <div id="screenshot-upload-section-sell">
           <h3 style="color: var(--primary); text-align:center; margin-bottom:15px; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <i class="fas fa-cloud-upload-alt"></i> Skrinshotni yuklaň
@@ -1146,7 +1156,7 @@
           </div>
           <div id="file-error-sell"></div>
         </div>
-        <!-- PREMIUM LOADING ANIMASIÝASY -->
+        <!-- PREMIUM LOADING SPINNER -->
         <div class="loading" id="sell-loading">
           <div class="premium-spinner">
             <div class="spinner-circle"></div>
@@ -1185,6 +1195,7 @@
     const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
     const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
     const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
+    // ✅ TÄZE: Skrinshot yuklaw interfeisi — hem oq, hem gara režim ücin
     function setupScreenshotUploader(isSell = false) {
       const dropArea = document.getElementById(isSell ? 'drop-area-sell' : 'drop-area');
       const fileInput = document.getElementById(isSell ? 'screenshot-file-sell' : 'screenshot-file');
@@ -1622,4 +1633,4 @@
     });
   </script>
 </body>
-              </html>
+  </html>
