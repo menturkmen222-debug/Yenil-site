@@ -679,8 +679,6 @@
       background: rgba(6, 95, 70, 0.25);
       color: #bbf7d0;
     }
-
-    /* === PREMIUM LOADING SPINNER (demiryol.html dan) === */
     .premium-spinner {
       position: relative;
       width: 50px;
@@ -734,14 +732,12 @@
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.5); opacity: 0.7; }
     }
-    /* Qara rejim uchun */
     body.dark-mode .premium-spinner .spinner-circle {
       border-top-color: #6ee7b7;
     }
     body.dark-mode .premium-spinner .spinner-dot {
       background-color: #6ee7b7;
     }
-
     .loading {
       display: none;
       text-align: center;
@@ -755,7 +751,6 @@
     body.dark-mode .loading p {
       color: #94a3b8;
     }
-
     .error-message {
       display: none;
       background: #fee;
@@ -1068,9 +1063,8 @@
         <button class="btn" id="sell-confirm-btn"><i class="fas fa-paper-plane"></i> Töleg etmek</button>
       </div>
       <div class="content" id="buy-payment-section" style="display:none;">
-        <h2><i class="fas fa-credit-card"></i> Töleg ma'lumotlary</h2>
+        <h2><i class="fas fa-credit-card"></i> Töleg maglumatlary</h2>
         <div id="payment-instruction" class="highlight">
-          <!-- To'ldiriladi JS bilan -->
         </div>
         <h3><i class="fas fa-check-circle"></i> Tölegi tassyklaň</h3>
         <div class="radio-group">
@@ -1089,7 +1083,7 @@
         </div>
         <div id="screenshot-upload-section">
           <h3 style="color: var(--primary); text-align:center; margin-bottom:15px; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <i class="fas fa-cloud-upload-alt"></i> Skrinshotni yuklaň
+            <i class="fas fa-cloud-upload-alt"></i> Skrinshot yükläň
           </h3>
           <div id="drop-area">
             <i class="fas fa-image" style="font-size:3rem; color:var(--primary); margin-bottom:12px;"></i>
@@ -1107,7 +1101,6 @@
           </div>
           <div id="file-error"></div>
         </div>
-        <!-- YANGI: Premium Loading -->
         <div class="loading" id="buy-loading">
           <div class="premium-spinner">
             <div class="spinner-circle"></div>
@@ -1121,7 +1114,7 @@
         <button class="btn" id="buy-submit-btn" data-loading="false"><i class="fas fa-paper-plane"></i> Göýbermek we tassyklamak</button>
       </div>
       <div class="content" id="sell-payment-section" style="display:none;">
-        <h2><i class="fas fa-credit-card"></i> Töleg ma'lumotlary</h2>
+        <h2><i class="fas fa-credit-card"></i> Töleg maglumatlary</h2>
         <div class="note">
           <p><strong><i class="fas fa-paper-plane"></i> Siz aşakdäki ID adrese pul ýollamalysyňyz:</strong></p>
           <p id="sell-admin-address">P1115509057</p>
@@ -1144,7 +1137,7 @@
         </div>
         <div id="screenshot-upload-section-sell">
           <h3 style="color: var(--primary); text-align:center; margin-bottom:15px; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <i class="fas fa-cloud-upload-alt"></i> Skrinshotni yuklaň
+            <i class="fas fa-cloud-upload-alt"></i> Skrinshotni yükläň
           </h3>
           <div id="drop-area-sell">
             <i class="fas fa-image" style="font-size:3rem; color:var(--primary); margin-bottom:12px;"></i>
@@ -1162,7 +1155,6 @@
           </div>
           <div id="file-error-sell"></div>
         </div>
-        <!-- YANGI: Premium Loading -->
         <div class="loading" id="sell-loading">
           <div class="premium-spinner">
             <div class="spinner-circle"></div>
@@ -1207,19 +1199,31 @@
       "+993 71 788546"
     ];
 
-    // === YANGILANGAN EVENT HANDLERS (darhol loading) ===
-
+    // === BUY SEND LOGIC ===
     document.getElementById('buy-submit-btn').addEventListener('click', async function() {
       if (this.dataset.loading === 'true') return;
-
       const crypto = document.getElementById('buy-crypto').value;
       const phone = document.getElementById('buy-phone').value;
       const total = parseFloat(document.getElementById('buy-total').textContent) || 0;
       const proofType = document.querySelector('input[name="proof"]:checked');
-
-      if (!phone || !proofType) {
-        alert('⚠️, ähli meýdançary dolduryň!');
+      if (!crypto || !phone || !proofType) {
+        alert('⚠️, Ähli meýdançallary dolduryň!');
         return;
+      }
+
+      let amount = 0;
+      let currency = '';
+      let payeerId = '', perfectId = '', webmoneyId = '';
+      if (crypto === 'payeer') {
+        amount = parseFloat(document.getElementById('buy-amount').value) || 0;
+        currency = document.getElementById('buy-currency').value;
+        payeerId = document.getElementById('buy-payeer-id').value.trim();
+      } else if (crypto === 'perfect') {
+        amount = parseFloat(document.getElementById('buy-perfect-amount').value) || 0;
+        perfectId = document.getElementById('buy-perfect-id').value.trim();
+      } else if (crypto === 'webmoney') {
+        amount = parseFloat(document.getElementById('buy-webmoney-amount').value) || 0;
+        webmoneyId = document.getElementById('buy-webmoney-id').value.trim();
       }
 
       let screenshotFile = null;
@@ -1230,26 +1234,20 @@
           return;
         }
         if (screenshotFile.size > 5 * 1024 * 1024) {
-          alert('Rasm 5 MB dan katta!');
+          alert('Surat 5 MB dan uly!');
           return;
         }
       }
-
       const smsText = proofType.value === 'sms' ? document.getElementById('sms-text').value.trim() : "";
 
-      // ✅ Darhol UI-ni yangilash
       const btn = this;
       const loading = document.getElementById('buy-loading');
       const errorDiv = document.getElementById('buy-error');
-
       btn.dataset.loading = 'true';
       btn.disabled = true;
       loading.style.display = 'block';
       errorDiv.style.display = 'none';
-
-      // ✅ Brauzerga rendering uchun vaqt berish
       await new Promise(resolve => setTimeout(resolve, 0));
-
       try {
         let screenshotUrl = null;
         if (screenshotFile) {
@@ -1259,7 +1257,7 @@
             method: 'POST',
             body: formData
           });
-          if (!res.ok) throw new Error('Skrinshot yuklanmady');
+          if (!res.ok) throw new Error('Skrinshot ýüklenmedi');
           const data = await res.json();
           screenshotUrl = data.secure_url;
         }
@@ -1267,8 +1265,13 @@
         const orderData = {
           type: 'pay-buy',
           crypto: crypto,
+          currency: currency,
+          amount: amount,
+          totalPrice: total,
           phone: phone,
-          total: total,
+          payeerId: payeerId,
+          perfectId: perfectId,
+          webmoneyId: webmoneyId,
           proofType: proofType.value,
           smsText: smsText,
           screenshotUrl: screenshotUrl,
@@ -1280,15 +1283,13 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderData)
         });
-
         if (!response.ok) throw new Error(`Status: ${response.status}`);
-
         loading.style.display = 'none';
         document.getElementById('buy-payment-section').style.display = 'none';
         document.getElementById('success-section').style.display = 'block';
       } catch (err) {
         loading.style.display = 'none';
-        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nomaʼlum xato');
+        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Ýalňyşlyk');
         errorDiv.style.display = 'block';
       } finally {
         btn.dataset.loading = 'false';
@@ -1296,45 +1297,55 @@
       }
     });
 
+    // === SELL SEND LOGIC ===
     document.getElementById('sell-submit-btn').addEventListener('click', async function() {
       if (this.dataset.loading === 'true') return;
-
       const crypto = document.getElementById('sell-crypto').value;
       const phone = document.getElementById('sell-phone').value;
       const secretCode = document.getElementById('secret-code').value;
       const proofType = document.querySelector('input[name="sell-proof"]:checked');
-
-      if (!phone || !secretCode || !proofType) {
-        alert('⚠️, ähli meýdançary dolduryň!');
+      if (!crypto || !phone || !secretCode || !proofType) {
+        alert('⚠️, Ähli meýdançallary dolduryň!');
         return;
+      }
+
+      let amount = 0;
+      let currency = '';
+      let payeerId = '', perfectId = '', webmoneyId = '';
+      if (crypto === 'payeer') {
+        amount = parseFloat(document.getElementById('sell-amount').value) || 0;
+        currency = document.getElementById('sell-currency').value;
+        payeerId = document.getElementById('sell-payeer-id').value.trim();
+      } else if (crypto === 'perfect') {
+        amount = parseFloat(document.getElementById('sell-perfect-amount').value) || 0;
+        perfectId = document.getElementById('sell-perfect-id').value.trim();
+      } else if (crypto === 'webmoney') {
+        amount = parseFloat(document.getElementById('sell-webmoney-amount').value) || 0;
+        webmoneyId = document.getElementById('sell-webmoney-id').value.trim();
       }
 
       let screenshotFile = null;
       if (proofType.value === 'screenshot') {
         screenshotFile = window.selectedScreenshotFileSell;
         if (!screenshotFile) {
-          alert('Skrinshot tanlanmady!');
+          alert('Skrinshot saýlanmady!');
           return;
         }
         if (screenshotFile.size > 5 * 1024 * 1024) {
-          alert('Rasm 5 MB dan katta!');
+          alert('Surat 5 MB dan uly!');
           return;
         }
       }
-
       const smsText = proofType.value === 'sms' ? document.getElementById('sms-text-sell').value.trim() : "";
 
       const btn = this;
       const loading = document.getElementById('sell-loading');
       const errorDiv = document.getElementById('sell-error');
-
       btn.dataset.loading = 'true';
       btn.disabled = true;
       loading.style.display = 'block';
       errorDiv.style.display = 'none';
-
       await new Promise(resolve => setTimeout(resolve, 0));
-
       try {
         let screenshotUrl = null;
         if (screenshotFile) {
@@ -1344,7 +1355,7 @@
             method: 'POST',
             body: formData
           });
-          if (!res.ok) throw new Error('Skrinshot yuklanmady');
+          if (!res.ok) throw new Error('Skrinshot yüklenmedi');
           const data = await res.json();
           screenshotUrl = data.secure_url;
         }
@@ -1352,8 +1363,14 @@
         const orderData = {
           type: 'pay-sell',
           crypto: crypto,
+          currency: currency,
+          amount: amount,
+          totalPrice: parseFloat(document.getElementById('sell-total').textContent) || 0,
           phone: phone,
           secretCode: secretCode,
+          payeerId: payeerId,
+          perfectId: perfectId,
+          webmoneyId: webmoneyId,
           proofType: proofType.value,
           smsText: smsText,
           screenshotUrl: screenshotUrl,
@@ -1365,15 +1382,13 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderData)
         });
-
         if (!response.ok) throw new Error(`Status: ${response.status}`);
-
         loading.style.display = 'none';
         document.getElementById('sell-payment-section').style.display = 'none';
         document.getElementById('success-section').style.display = 'block';
       } catch (err) {
         loading.style.display = 'none';
-        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nomaʼlum xato');
+        errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Bilinmeýýän ýalňyşlyk');
         errorDiv.style.display = 'block';
       } finally {
         btn.dataset.loading = 'false';
@@ -1381,7 +1396,8 @@
       }
     });
 
-    // === Qolgan funksiyalar (avvalgiday) ===
+    // ... (qolgan skriptlar — calculate, generatePaymentInstruction, event listeners, theme toggle — o'zgarmasdan davom etadi)
+    // [Quyidagi qism avvalgidagi kabi qoldirilgan — faqat uzunlik sababli qisqartirilmagan kodda to'liq bo'ladi]
 
     function setupScreenshotUploader(isSell = false) {
       const dropArea = document.getElementById(isSell ? 'drop-area-sell' : 'drop-area');
@@ -1440,7 +1456,6 @@
         reader.readAsDataURL(file);
       }
     }
-
     function handleProofType(type) {
       document.getElementById('proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('proof-sms').checked = (type === 'sms');
@@ -1459,7 +1474,6 @@
         }
       }
     }
-
     function handleProofTypeSell(type) {
       document.getElementById('sell-proof-screenshot').checked = (type === 'screenshot');
       document.getElementById('sell-proof-sms').checked = (type === 'sms');
@@ -1478,7 +1492,6 @@
         }
       }
     }
-
     function generatePaymentInstruction(phone, total) {
       const numbers = PAYMENT_NUMBERS;
       let instruction = `<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
@@ -1619,7 +1632,6 @@
       </div>`;
       return instruction;
     }
-
     function calculateBuyPrice() {
       const crypto = document.getElementById('buy-crypto').value;
       let total = 0;
@@ -1640,7 +1652,6 @@
       }
       document.getElementById('buy-total').textContent = total.toFixed(2);
     }
-
     function calculateSellPrice() {
       const crypto = document.getElementById('sell-crypto').value;
       let receive = 0;
@@ -1661,7 +1672,6 @@
       }
       document.getElementById('sell-total').textContent = receive.toFixed(2);
     }
-
     function updateBuyAmountLabel() {
       const crypto = document.getElementById('buy-crypto').value;
       const currency = document.getElementById('buy-currency').value;
@@ -1684,7 +1694,6 @@
         document.getElementById('buy-webmoney-amount').placeholder = '1.00';
       }
     }
-
     function updateSellAmountLabel() {
       const crypto = document.getElementById('sell-crypto').value;
       const currency = document.getElementById('sell-currency').value;
@@ -1699,7 +1708,6 @@
         label.innerHTML = '<i class="fas fa-calculator"></i> Näçe WMZ satmak isleýändigiňiz?';
       }
     }
-
     document.getElementById('buy-confirm-btn').addEventListener('click', function() {
       const crypto = document.getElementById('buy-crypto').value;
       if (!crypto) {
@@ -1748,7 +1756,6 @@
       document.getElementById('buy-payment-section').style.display = 'block';
       document.getElementById('buy-section').style.display = 'none';
     });
-
     document.getElementById('sell-confirm-btn').addEventListener('click', function() {
       const crypto = document.getElementById('sell-crypto').value;
       if (!crypto || crypto === 'crypto') {
@@ -1792,7 +1799,6 @@
       document.getElementById('sell-payment-section').style.display = 'block';
       document.getElementById('sell-section').style.display = 'none';
     });
-
     document.getElementById('buy-crypto').addEventListener('change', function() {
       const value = this.value;
       document.getElementById('buy-payeer-fields').style.display = value === 'payeer' ? 'block' : 'none';
@@ -1801,12 +1807,10 @@
       calculateBuyPrice();
       updateBuyAmountLabel();
     });
-
     document.getElementById('buy-currency').addEventListener('change', function() {
       updateBuyAmountLabel();
       calculateBuyPrice();
     });
-
     document.getElementById('sell-crypto').addEventListener('change', function() {
       const value = this.value;
       document.getElementById('sell-payeer-fields').style.display = value === 'payeer' ? 'block' : 'none';
@@ -1816,30 +1820,24 @@
       calculateSellPrice();
       updateSellAmountLabel();
     });
-
     document.getElementById('sell-currency').addEventListener('change', function() {
       updateSellAmountLabel();
       calculateSellPrice();
     });
-
     ['buy-amount', 'buy-perfect-amount', 'buy-webmoney-amount'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', calculateBuyPrice);
     });
-
     ['sell-amount', 'sell-perfect-amount', 'sell-webmoney-amount'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', calculateSellPrice);
     });
-
     document.getElementById('buy-btn').addEventListener('click', function() {
       document.getElementById('buy-section').style.display = 'block';
     });
-
     document.getElementById('sell-btn').addEventListener('click', function() {
       document.getElementById('sell-section').style.display = 'block';
     });
-
     document.querySelectorAll('.radio-option').forEach(option => {
       option.addEventListener('click', function() {
         const radio = this.querySelector('input[type="radio"]');
@@ -1853,12 +1851,10 @@
         }
       });
     });
-
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
     document.getElementById('mobile-theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
-
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
       document.body.classList.toggle('light-mode');
@@ -1867,24 +1863,19 @@
       document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
       document.getElementById('mobile-theme-toggle').textContent = isDark ? '☀️' : '🌙';
     }
-
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
-
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
     const menuOverlay = document.getElementById('menu-overlay');
-
     menuToggle.addEventListener('click', () => {
       menuToggle.classList.toggle('active');
       navMenu.classList.toggle('active');
     });
-
     menuOverlay.addEventListener('click', () => {
       menuToggle.classList.remove('active');
       navMenu.classList.remove('active');
     });
-
     document.querySelectorAll('.nav-menu a, .nav-menu button').forEach(item => {
       item.addEventListener('click', () => {
         menuToggle.classList.remove('active');
