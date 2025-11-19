@@ -1017,9 +1017,8 @@
             <h3 style="margin: 0; color: #dc2626; font-weight: 700;">Diňläň!</h3>
           </div>
           <p style="margin-bottom: 15px; line-height: 1.5;">
-            <strong><i class="fas fa-mobile-alt" style="color: var(--primary); margin-right: 5px;"></i> +993 64 629487</strong> şu öz nomeriňizden <strong>0804</strong>-e girip aşakdaky nomerlere <strong><span id="total-amount-display">58.00 TMT</span></strong> geçirmeli we geçireniňizden soň pul geçenligi tölegi tassyklamak üçin ekran suraty ýa-da SMS habaryň nusgasy ýüklemeli.
+            <strong><i class="fas fa-mobile-alt" style="color: var(--primary); margin-right: 5px;"></i> <span id="payment-phone-display">+993 XX XXXXXX</span></strong> şu öz nomeriňizden <strong>0804</strong>-e girip aşakdaky nomerlere <strong><span id="total-amount-display">58.00 TMT</span></strong> geçirmeli we geçireniňizden soň pul geçenligi tölegi tassyklamak üçin ekran suraty ýa-da SMS habaryň nusgasy ýüklemeli.
           </p>
-
           <!-- Öňüňdeki nusga ugrunçy -->
           <div style="background: linear-gradient(135deg, rgba(13,148,136,0.1), rgba(13,148,136,0.05)); padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); margin: 15px 0;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
@@ -1033,7 +1032,6 @@
               <span style="font-family: monospace; background: #f0fdfa; padding: 4px 8px; border-radius: 4px; color: var(--primary);">+993 71 789091</span>
             </div>
           </div>
-
           <!-- Alternatiw nomerler -->
           <div style="margin-top: 20px;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
@@ -1051,7 +1049,6 @@
               </div>
             </div>
           </div>
-
           <!-- Mühim eslatma -->
           <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 12px; border-left: 4px solid #f59e0b;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
@@ -1185,7 +1182,6 @@
       "+993 64 629487",
       "+993 71 788546"
     ];
-    // Skrinshot yuklaw
     function setupScreenshotUploader(isSell = false) {
       const dropArea = document.getElementById(isSell ? 'drop-area-sell' : 'drop-area');
       const fileInput = document.getElementById(isSell ? 'screenshot-file-sell' : 'screenshot-file');
@@ -1259,16 +1255,13 @@
       document.getElementById('proof-sms').checked = (type === 'sms');
       const smsSection = document.getElementById('sms-input-section');
       const screenshotSection = document.getElementById('screenshot-upload-section');
-      const sellSection = document.getElementById('screenshot-upload-section-sell');
       if (type === 'sms') {
         smsSection.style.display = 'block';
         screenshotSection.style.display = 'none';
-        if (sellSection) sellSection.style.display = 'none';
         delete window.selectedScreenshotFile;
       } else {
         smsSection.style.display = 'none';
         screenshotSection.style.display = 'block';
-        if (sellSection) sellSection.style.display = 'none';
         if (!window.screenshotUploaderInitialized) {
           setupScreenshotUploader(false);
           window.screenshotUploaderInitialized = true;
@@ -1280,16 +1273,13 @@
       document.getElementById('sell-proof-sms').checked = (type === 'sms');
       const smsSection = document.getElementById('sms-input-section-sell');
       const screenshotSection = document.getElementById('screenshot-upload-section-sell');
-      const buySection = document.getElementById('screenshot-upload-section');
       if (type === 'sms') {
         smsSection.style.display = 'block';
         screenshotSection.style.display = 'none';
-        if (buySection) buySection.style.display = 'none';
         delete window.selectedScreenshotFileSell;
       } else {
         smsSection.style.display = 'none';
         screenshotSection.style.display = 'block';
-        if (buySection) buySection.style.display = 'none';
         if (!window.screenshotUploaderInitializedSell) {
           setupScreenshotUploader(true);
           window.screenshotUploaderInitializedSell = true;
@@ -1297,7 +1287,7 @@
       }
     }
     function generatePaymentInstruction(phone, total) {
-      const numbers = PAYMENT_NUMBERS; // [ "+993 71 789091", "+993 64 629487", "+993 71 788546" ]
+      const numbers = PAYMENT_NUMBERS;
       let instruction = `<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
         <i class="fas fa-exclamation-triangle" style="color: #dc2626; font-size: 1rem;"></i>
         <h3 style="margin: 0; color: #dc2626; font-weight: 700;">Diňläň!</h3>
@@ -1305,7 +1295,6 @@
       <p style="margin-bottom: 15px; line-height: 1.5;">
         <strong><i class="fas fa-mobile-alt" style="color: var(--primary); margin-right: 5px;"></i> ${phone}</strong> şu öz nomeriňizden <strong>0804</strong>-e girip aşakdaky nomerlere <strong><span id="total-amount-display">${total.toFixed(2)} TMT</span></strong> geçirmeli we geçireniňizden soň pul geçenligi tölegi tassyklamak üçin ekran suraty ýa-da SMS habaryň nusgasy ýüklemeli.
       </p>`;
-
       if (total <= 300) {
         instruction += `<div style="background: linear-gradient(135deg, rgba(13,148,136,0.1), rgba(13,148,136,0.05)); padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); margin: 15px 0;">
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
@@ -1329,7 +1318,7 @@
               <i class="fas fa-phone-alt" style="color: var(--accent);"></i>
               <span style="font-family: monospace; background: #f0fdfa; padding: 4px 8px; border-radius: 4px; color: var(--accent);">${numbers[1]}</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 10px; background: white; border-radius: 8px; padding: 8px;">
+           <div style="display: flex; align-items: center; gap: 10px; background: white; border-radius: 8px; padding: 8px;">
               <i class="fas fa-phone-alt" style="color: var(--accent);"></i>
               <span style="font-family: monospace; background: #f0fdfa; padding: 4px 8px; border-radius: 4px; color: var(--accent);">${numbers[2]}</span>
             </div>
@@ -1426,7 +1415,6 @@
           </div>
         </div>`;
       }
-
       instruction += `<div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 12px; border-left: 4px solid #f59e0b;">
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
           <i class="fas fa-lock" style="color: #f59e0b;"></i>
@@ -1436,23 +1424,26 @@
           Tölegiňizi tamamlanandan soň, ekran suratyny ýa-da SMS habaryň nusgasyny <strong>tassyklama</strong> üçin ýüklemeli. Bu hem siz hem de biz üçin ynamlylygy delilleýär.
         </p>
       </div>`;
-
       return instruction;
     }
-    // === Buy so'rov yuborish (duplicate oldini oladi) ===
+
+    // === BUY SUBMIT BUTTON — Loading + Duplication prevention
     document.getElementById('buy-submit-btn').addEventListener('click', async function() {
       if (this.dataset.loading === 'true') return;
+
       const crypto = document.getElementById('buy-crypto').value;
       const phone = document.getElementById('buy-phone').value;
       const total = parseFloat(document.getElementById('buy-total').textContent) || 0;
       const proofType = document.querySelector('input[name="proof"]:checked');
+
       if (!phone || !proofType) {
         alert('⚠️, ähli meýdançary dolduryň!');
         return;
       }
-      let screenshotUrl = null;
+
+      let file = null;
       if (proofType.value === 'screenshot') {
-        const file = window.selectedScreenshotFile;
+        file = window.selectedScreenshotFile;
         if (!file) {
           alert('Skrinshot tanlanmady!');
           return;
@@ -1461,64 +1452,75 @@
           alert('Rasm 5 MB dan katta!');
           return;
         }
-        try {
-          screenshotUrl = await uploadScreenshot(file);
-        } catch (err) {
-          alert('Skrinshot yuklanmady: ' + err.message);
-          return;
-        }
       }
-      const smsText = proofType.value === 'sms' ? document.getElementById('sms-text').value.trim() : "";
-      const orderData = {
-        type: 'pay-buy',
-        crypto: crypto,
-        phone: phone,
-        total: total,
-        proofType: proofType.value,
-        smsText: smsText,
-        screenshotUrl: screenshotUrl,
-        timestamp: new Date().toISOString()
-      };
+
+      // Loadingni yoqish
       const loading = document.getElementById('buy-loading');
       const errorDiv = document.getElementById('buy-error');
       const btn = this;
+
       btn.dataset.loading = 'true';
       btn.disabled = true;
       loading.style.display = 'block';
       errorDiv.style.display = 'none';
+
+      let screenshotUrl = null;
       try {
+        if (file) {
+          screenshotUrl = await uploadScreenshot(file);
+        }
+
+        const smsText = proofType.value === 'sms' ? document.getElementById('sms-text').value.trim() : "";
+
+        const orderData = {
+          type: 'pay-buy',
+          crypto: crypto,
+          phone: phone,
+          total: total,
+          proofType: proofType.value,
+          smsText: smsText,
+          screenshotUrl: screenshotUrl,
+          timestamp: new Date().toISOString()
+        };
+
         const response = await fetch(`${BASE_URL}/data/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderData)
         });
+
         if (!response.ok) throw new Error(`Status: ${response.status}`);
-        loading.style.display = 'none';
+
         document.getElementById('buy-payment-section').style.display = 'none';
         document.getElementById('success-section').style.display = 'block';
+
       } catch (err) {
-        loading.style.display = 'none';
         errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nomaʼlum xato');
         errorDiv.style.display = 'block';
       } finally {
+        loading.style.display = 'none';
         btn.dataset.loading = 'false';
         btn.disabled = false;
       }
     });
-    // === Sell so'rov yuborish (duplicate oldini oladi) ===
+
+    // === SELL SUBMIT BUTTON — Loading + Duplication prevention
     document.getElementById('sell-submit-btn').addEventListener('click', async function() {
       if (this.dataset.loading === 'true') return;
+
       const crypto = document.getElementById('sell-crypto').value;
       const phone = document.getElementById('sell-phone').value;
       const secretCode = document.getElementById('secret-code').value;
       const proofType = document.querySelector('input[name="sell-proof"]:checked');
+
       if (!phone || !secretCode || !proofType) {
         alert('⚠️, ähli meýdançary dolduryň!');
         return;
       }
-      let screenshotUrl = null;
+
+      let file = null;
       if (proofType.value === 'screenshot') {
-        const file = window.selectedScreenshotFileSell;
+        file = window.selectedScreenshotFileSell;
         if (!file) {
           alert('Skrinshot tanlanmady!');
           return;
@@ -1527,91 +1529,99 @@
           alert('Rasm 5 MB dan katta!');
           return;
         }
-        try {
-          screenshotUrl = await uploadScreenshot(file);
-        } catch (err) {
-          alert('Skrinshot yuklanmady: ' + err.message);
-          return;
-        }
       }
-      const smsText = proofType.value === 'sms' ? document.getElementById('sms-text-sell').value.trim() : "";
-      const orderData = {
-        type: 'pay-sell',
-        crypto: crypto,
-        phone: phone,
-        secretCode: secretCode,
-        proofType: proofType.value,
-        smsText: smsText,
-        screenshotUrl: screenshotUrl,
-        timestamp: new Date().toISOString()
-      };
+
       const loading = document.getElementById('sell-loading');
       const errorDiv = document.getElementById('sell-error');
       const btn = this;
+
       btn.dataset.loading = 'true';
       btn.disabled = true;
       loading.style.display = 'block';
       errorDiv.style.display = 'none';
+
+      let screenshotUrl = null;
       try {
+        if (file) {
+          screenshotUrl = await uploadScreenshot(file);
+        }
+
+        const smsText = proofType.value === 'sms' ? document.getElementById('sms-text-sell').value.trim() : "";
+
+        const orderData = {
+          type: 'pay-sell',
+          crypto: crypto,
+          phone: phone,
+          secretCode: secretCode,
+          proofType: proofType.value,
+          smsText: smsText,
+          screenshotUrl: screenshotUrl,
+          timestamp: new Date().toISOString()
+        };
+
         const response = await fetch(`${BASE_URL}/data/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderData)
         });
+
         if (!response.ok) throw new Error(`Status: ${response.status}`);
-        loading.style.display = 'none';
+
         document.getElementById('sell-payment-section').style.display = 'none';
         document.getElementById('success-section').style.display = 'block';
+
       } catch (err) {
-        loading.style.display = 'none';
         errorDiv.textContent = 'Ýalňyşlyk: ' + (err.message || 'Nomaʼlum xato');
         errorDiv.style.display = 'block';
       } finally {
+        loading.style.display = 'none';
         btn.dataset.loading = 'false';
         btn.disabled = false;
       }
     });
-   function calculateBuyPrice() {
-  const crypto = document.getElementById('buy-crypto').value;
-  let total = 0;
-  if (crypto === 'payeer') {
-    const currency = document.getElementById('buy-currency').value;
-    const amount = parseFloat(document.getElementById('buy-amount').value) || 0;
-    if (currency === 'usd') {
-      total = amount * 29; // 1$ = 29 TMT
-    } else if (currency === 'rub') {
-      total = (amount / 90) * 29; // 90 ₽ = 29 TMT
+
+    function calculateBuyPrice() {
+      const crypto = document.getElementById('buy-crypto').value;
+      let total = 0;
+      if (crypto === 'payeer') {
+        const currency = document.getElementById('buy-currency').value;
+        const amount = parseFloat(document.getElementById('buy-amount').value) || 0;
+        if (currency === 'usd') {
+          total = amount * 29;
+        } else if (currency === 'rub') {
+          total = (amount / 90) * 29;
+        }
+      } else if (crypto === 'perfect') {
+        const amount = parseFloat(document.getElementById('buy-perfect-amount').value) || 0;
+        total = amount * 29;
+      } else if (crypto === 'webmoney') {
+        const amount = parseFloat(document.getElementById('buy-webmoney-amount').value) || 0;
+        total = amount * 29;
+      }
+      document.getElementById('buy-total').textContent = total.toFixed(2);
     }
-  } else if (crypto === 'perfect') {
-    const amount = parseFloat(document.getElementById('buy-perfect-amount').value) || 0;
-    total = amount * 29;
-  } else if (crypto === 'webmoney') {
-    const amount = parseFloat(document.getElementById('buy-webmoney-amount').value) || 0;
-    total = amount * 29;
-  }
-  document.getElementById('buy-total').textContent = total.toFixed(2);
-}
+
     function calculateSellPrice() {
-  const crypto = document.getElementById('sell-crypto').value;
-  let receive = 0;
-  if (crypto === 'payeer') {
-    const currency = document.getElementById('sell-currency').value;
-    const amount = parseFloat(document.getElementById('sell-amount').value) || 0;
-    if (currency === 'usd') {
-      receive = amount * 19; // 1$ = 19 TMT
-    } else if (currency === 'rub') {
-      receive = (amount / 50) * 10; // 50 ₽ = 10 TMT → 1 ₽ = 0.2 TMT
+      const crypto = document.getElementById('sell-crypto').value;
+      let receive = 0;
+      if (crypto === 'payeer') {
+        const currency = document.getElementById('sell-currency').value;
+        const amount = parseFloat(document.getElementById('sell-amount').value) || 0;
+        if (currency === 'usd') {
+          receive = amount * 19;
+        } else if (currency === 'rub') {
+          receive = (amount / 50) * 10;
+        }
+      } else if (crypto === 'perfect') {
+        const amount = parseFloat(document.getElementById('sell-perfect-amount').value) || 0;
+        receive = amount * 19;
+      } else if (crypto === 'webmoney') {
+        const amount = parseFloat(document.getElementById('sell-webmoney-amount').value) || 0;
+        receive = amount * 19;
+      }
+      document.getElementById('sell-total').textContent = receive.toFixed(2);
     }
-  } else if (crypto === 'perfect') {
-    const amount = parseFloat(document.getElementById('sell-perfect-amount').value) || 0;
-    receive = amount * 19;
-  } else if (crypto === 'webmoney') {
-    const amount = parseFloat(document.getElementById('sell-webmoney-amount').value) || 0;
-    receive = amount * 19;
-  }
-  document.getElementById('sell-total').textContent = receive.toFixed(2);
-}
-    // === Buy valyutaga mos label ===
+
     function updateBuyAmountLabel() {
       const crypto = document.getElementById('buy-crypto').value;
       const currency = document.getElementById('buy-currency').value;
@@ -1634,7 +1644,7 @@
         document.getElementById('buy-webmoney-amount').placeholder = '1.00';
       }
     }
-    // === Sell valyutaga mos label ===
+
     function updateSellAmountLabel() {
       const crypto = document.getElementById('sell-crypto').value;
       const currency = document.getElementById('sell-currency').value;
@@ -1649,7 +1659,7 @@
         label.innerHTML = '<i class="fas fa-calculator"></i> Näçe WMZ satmak isleýändigiňiz?';
       }
     }
-    // === Buy tasdiqlash ===
+
     document.getElementById('buy-confirm-btn').addEventListener('click', function() {
       const crypto = document.getElementById('buy-crypto').value;
       if (!crypto) {
@@ -1670,7 +1680,6 @@
         return;
       }
       const total = parseFloat(document.getElementById('buy-total').textContent) || 0;
-      // Validatsiya
       if (total === 0) {
         alert('⚠️ Jemi töleg 0 TMT! Minimal mukdar giriziň.');
         return;
@@ -1696,10 +1705,11 @@
         }
       }
       document.getElementById('payment-instruction').innerHTML = generatePaymentInstruction(phone, total);
+      document.getElementById('payment-phone-display').textContent = phone;
       document.getElementById('buy-payment-section').style.display = 'block';
       document.getElementById('buy-section').style.display = 'none';
     });
-    // === Sell tasdiqlash ===
+
     document.getElementById('sell-confirm-btn').addEventListener('click', function() {
       const crypto = document.getElementById('sell-crypto').value;
       if (!crypto || crypto === 'crypto') {
@@ -1707,7 +1717,7 @@
         return;
       }
       let amount = 0;
-      let currencyUnit = 'USD'; // default
+      let currencyUnit = 'USD';
       if (crypto === 'payeer') {
         amount = parseFloat(document.getElementById('sell-amount').value) || 0;
         const currency = document.getElementById('sell-currency').value;
@@ -1723,7 +1733,6 @@
         amount = parseFloat(document.getElementById('sell-webmoney-amount').value) || 0;
         currencyUnit = 'WMZ';
       }
-      // Minimal tekshiruv (jami TMT ≥ 10)
       const receiveTMT = parseFloat(document.getElementById('sell-total').textContent) || 0;
       if (receiveTMT < 10) {
         alert('⚠️ Minimum satmak mukdary 10 TMT (ýa-da ekwiwalent) bolup biler!');
@@ -1739,13 +1748,12 @@
         alert('⚠️, ähli meýdançary dolduryň!');
         return;
       }
-      // ✅ Dinamik valyutani ko'rsatish
       document.getElementById('sell-send-amount').textContent = amount.toFixed(2);
       document.getElementById('sell-currency-unit').textContent = currencyUnit;
       document.getElementById('sell-payment-section').style.display = 'block';
       document.getElementById('sell-section').style.display = 'none';
     });
-    // === Event listeners ===
+
     document.getElementById('buy-crypto').addEventListener('change', function() {
       const value = this.value;
       document.getElementById('buy-payeer-fields').style.display = value === 'payeer' ? 'block' : 'none';
@@ -1798,7 +1806,7 @@
         }
       });
     });
-    // === Umumiy navigatsiya ===
+
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
@@ -1832,4 +1840,4 @@
     });
   </script>
 </body>
-</html>
+  </html>
