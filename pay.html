@@ -4,14 +4,14 @@
   <!-- Open Graph teglari (Facebook, LinkedIn) -->
   <meta property="og:title" content="Ýeňil — Pay">
   <meta property="og:description" content="Ýeňil Pay – Daşary ýurt pullaryny arzan alyş çalyş etmek">
-  <meta property="og:image" content="https://yenil.ru/images/logo-1.png">
+  <meta property="og:image" content="https://www.yenil.ru/images/logo-1.png">
   <meta property="og:url" content="https://yenil.ru">
   <meta property="og:type" content="website">
-  <!-- Twitter uchun meta teglar -->
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ýeňil — Pay">
   <meta name="twitter:description" content="Ýeňil Paý – Daşary ýurt pullaryny arzan alyş çalyş etmek">
-  <meta name="twitter:image" content="https://yenil.ru/images/logo-twitter.png">
+  <meta name="twitter:image" content="https://www.yenil.ru/images/logo-twitter.png">
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <!-- Apple Touch Icon -->
@@ -1090,9 +1090,7 @@
             <p style="font-size:1.1rem; color:var(--primary); margin-bottom:12px; font-weight: 600;">
               Suraty ýüklemek üçin üstünden basyň
             </p>
-            <p style="color:var(--light-text); font-size:0.95rem; opacity: 0.8;">
-              JPG, PNG, GIF (maksimum 5 MB)
-            </p>
+            <p style="color:#f59e0b; font-size:0.95rem; opacity: 0.8;">JPG, PNG, GIF (maksimum 5 MB)</p>
             <input type="file" id="screenshot-file" accept="image/*" style="display:none;" />
           </div>
           <div id="preview-container">
@@ -1144,9 +1142,7 @@
             <p style="font-size:1.1rem; color:var(--primary); margin-bottom:12px; font-weight: 600;">
               Suraty ýüklemek üçin üstünden basyň
             </p>
-            <p style="color:var(--light-text); font-size:0.95rem; opacity: 0.8;">
-              JPG, PNG, GIF (maksimum 5 MB)
-            </p>
+            <p style="color:#f59e0b; font-size:0.95rem; opacity: 0.8;">JPG, PNG, GIF (maksimum 5 MB)</p>
             <input type="file" id="screenshot-file-sell" accept="image/*" style="display:none;" />
           </div>
           <div id="preview-container-sell">
@@ -1169,7 +1165,7 @@
       </div>
       <div class="content" id="success-section" style="display:none;">
         <div class="success-message">
-          <h2><i class="fas fa-trophy"></i> 🎉 Üstünlik!</h2>
+          <h2><i class="fas fa-trophy"></i> Üstünlikli!</h2>
           <p><i class="fas fa-clock"></i> Iň tiz wagtda Ýakyn siz bilen baglanar we size bron kody we bilet nusgasy berer.</p>
           <p><i class="fas fa-home"></i> Baş sahypa gaýtmagyňyz mümkin.</p>
         </div>
@@ -1199,7 +1195,7 @@
       "+993 71 788546"
     ];
 
-    // === BUY SEND LOGIC ===
+    
     document.getElementById('buy-submit-btn').addEventListener('click', async function() {
       if (this.dataset.loading === 'true') return;
       const crypto = document.getElementById('buy-crypto').value;
@@ -1230,7 +1226,7 @@
       if (proofType.value === 'screenshot') {
         screenshotFile = window.selectedScreenshotFile;
         if (!screenshotFile) {
-          alert('Skrinshot tanlanmady!');
+          alert('Skrinshot ýüklemediňiz!');
           return;
         }
         if (screenshotFile.size > 5 * 1024 * 1024) {
@@ -1297,7 +1293,7 @@
       }
     });
 
-    // === SELL SEND LOGIC ===
+    
     document.getElementById('sell-submit-btn').addEventListener('click', async function() {
       if (this.dataset.loading === 'true') return;
       const crypto = document.getElementById('sell-crypto').value;
@@ -1395,9 +1391,6 @@
         btn.disabled = false;
       }
     });
-
-    // ... (qolgan skriptlar — calculate, generatePaymentInstruction, event listeners, theme toggle — o'zgarmasdan davom etadi)
-    // [Quyidagi qism avvalgidagi kabi qoldirilgan — faqat uzunlik sababli qisqartirilmagan kodda to'liq bo'ladi]
 
     function setupScreenshotUploader(isSell = false) {
       const dropArea = document.getElementById(isSell ? 'drop-area-sell' : 'drop-area');
@@ -1503,10 +1496,10 @@
       </p>`;
       if (total <= 300) {
         instruction += `<div style="background: linear-gradient(135deg, rgba(13,148,136,0.1), rgba(13,148,136,0.05)); padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); margin: 15px 0;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <i class="fas fa-info-circle" style="color: var(--primary);"></i>
-            <strong style="color: var(--light-text);">Öňüňdeki nusga:</strong>
-          </div>
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+    <i class="fas fa-info-circle" style="color: var(--primary);"></i>
+    <strong style="color: #38bdf8; font-weight: 600;">Öňüňdeki nusga:</strong>
+  </div>
           <div style="padding-left: 20px; display: flex; align-items: center; gap: 10px; background: white; border-radius: 8px; padding: 8px; margin-top: 8px;">
             <i class="fas fa-wallet" style="color: var(--primary);"></i>
             <span style="font-weight: 600; color: var(--primary);">${total.toFixed(2)} TMT</span>
@@ -1515,10 +1508,10 @@
           </div>
         </div>`;
         instruction += `<div style="margin-top: 20px;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <i class="fas fa-users" style="color: var(--accent);"></i>
-            <strong style="color: var(--light-text);">Ýa-da bu nomerlere hem geçirmegiňiz mümkin:</strong>
-          </div>
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+    <i class="fas fa-users" style="color: var(--accent);"></i>
+    <strong style="color: #38bdf8; font-weight: 600;">Ýa-da bu nomerlere hem geçirmegiňiz mümkin:</strong> <!-- Rang o'zgartirildi -->
+  </div>
           <div style="display: flex; flex-direction: column; gap: 8px; padding-left: 20px;">
             <div style="display: flex; align-items: center; gap: 10px; background: white; border-radius: 8px; padding: 8px;">
               <i class="fas fa-phone-alt" style="color: var(--accent);"></i>
@@ -1535,10 +1528,10 @@
         const first = 300;
         const second = total - 300;
         instruction += `<div style="background: linear-gradient(135deg, rgba(13,148,136,0.1), rgba(13,148,136,0.05)); padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); margin: 15px 0;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <i class="fas fa-info-circle" style="color: var(--primary);"></i>
-            <strong style="color: var(--light-text);">Öňüňdeki nusga:</strong>
-          </div>
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+    <i class="fas fa-info-circle" style="color: var(--primary);"></i>
+    <strong style="color: #38bdf8; font-weight: 600;">Öňünden nusga:</strong>
+  </div>
           <div style="padding-left: 20px; display: flex; align-items: center; gap: 10px; background: white; border-radius: 8px; padding: 8px; margin-top: 8px;">
             <i class="fas fa-wallet" style="color: var(--primary);"></i>
             <span style="font-weight: 600; color: var(--primary);">${first} TMT</span>
@@ -1553,10 +1546,10 @@
           </div>
         </div>`;
         instruction += `<div style="margin-top: 20px;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <i class="fas fa-users" style="color: var(--accent);"></i>
-            <strong style="color: var(--light-text);">Ýa-da bu nomere geçirmegiňiz hem mümkin:</strong>
-          </div>
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+    <i class="fas fa-users" style="color: var(--accent);"></i>
+    <strong style="color: #38bdf8; font-weight: 600;">Ýa-da bu nomerlere hem geçirmegiňiz mümkin:</strong>
+  </div>
           <div style="display: flex; flex-direction: column; gap: 8px; padding-left: 20px;">
             <div style="display: flex; align-items: center; gap: 10px; background: white; border-radius: 8px; padding: 8px;">
               <i class="fas fa-phone-alt" style="color: var(--accent);"></i>
@@ -1570,10 +1563,10 @@
         const second = 300;
         const third = total - 600;
         instruction += `<div style="background: linear-gradient(135deg, rgba(13,148,136,0.1), rgba(13,148,136,0.05)); padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); margin: 15px 0;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <i class="fas fa-info-circle" style="color: var(--primary);"></i>
-            <strong style="color: var(--light-text);">Öňüňdeki nusga:</strong>
-          </div>
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+    <i class="fas fa-info-circle" style="color: var(--primary);"></i>
+    <strong style="color: #38bdf8; font-weight: 600;">Öňüňdeki nusga:</strong>
+  </div>
           <div style="padding-left: 20px; display: flex; align-items: center; gap: 10px; background: white; border-radius: 8px; padding: 8px; margin-top: 8px;">
             <i class="fas fa-wallet" style="color: var(--primary);"></i>
             <span style="font-weight: 600; color: var(--primary);">${first} TMT</span>
@@ -1597,10 +1590,10 @@
       else if (total <= 1000) {
         const part = total / 3;
         instruction += `<div style="background: linear-gradient(135deg, rgba(13,148,136,0.1), rgba(13,148,136,0.05)); padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); margin: 15px 0;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <i class="fas fa-info-circle" style="color: var(--primary);"></i>
-            <strong style="color: var(--light-text);">Öňüňdeki nusga:</strong>
-          </div>
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+    <i class="fas fa-info-circle" style="color: var(--primary);"></i>
+    <strong style="color: #38bdf8; font-weight: 600;">Öňüňdeki nusga:</strong>
+  </div>
           <div style="padding-left: 20px; display: flex; align-items: center; gap: 10px; background: white; border-radius: 8px; padding: 8px; margin-top: 8px;">
             <i class="fas fa-wallet" style="color: var(--primary);"></i>
             <span style="font-weight: 600; color: var(--primary);">${part.toFixed(2)} TMT</span>
