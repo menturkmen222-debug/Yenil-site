@@ -4,13 +4,13 @@
   <!-- Open Graph & Twitter -->
   <meta property="og:title" content="Ýeňil — Demirýollary">
   <meta property="og:description" content="Ýeňil Demirýollary — Biletleri TMCELL üsti bilen kart tölegsiz, arzan we tiz satyn alyň">
-  <meta property="og:image" content="https://yenil.ru/images/logo-1.png">
+  <meta property="og:image" content="https://www.yenil.ru/images/logo-1.png">
   <meta property="og:url" content="https://yenil.ru">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ýeňil — Demirýollary">
   <meta name="twitter:description" content="Ýeňil Demirýollary — Biletleri TMCELL üsti bilen kart tölegsiz, arzan we tiz satyn alyň">
-  <meta name="twitter:image" content="https://yenil.ru/images/logo-twitter.png">
+  <meta name="twitter:image" content="https://www.yenil.ru/images/logo-twitter.png">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
@@ -23,7 +23,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.5"/>
   <meta name="description" content="Ýeňil Demirýollary arkaly biletleri kart tölegsiz, arzan we tiz satyn alyň.">
   <title>Ýeňil Demirýollary — Onlayn bilet satyn almak, TMCELL bilen</title>
-  <meta name="keywords" content="Ýeňil demirýollary, demirýol bileti, Aşgabat-Daşoguz, biletlary satyn almak, petek bron etmek, onlayn bilet, Türkmenistan demiryollary, kart tölegsiz bilet, biletlary arzan satyn almak, poyyz bileti, otly, petek">
+  <meta name="keywords" content="Ýeňil demirýollary, demirýol bilet, demiryol, demiryollary, Aşgabat-Daşoguz, biletlary satyn almak, petek bron etmek, onlayn bilet, Türkmenistan demiryollary, kart tölegsiz bilet, biletlary arzan satyn almak, poyyz bilet, otly, petek">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/all.min.css">
   <style>
@@ -679,7 +679,7 @@
       background: rgba(6, 95, 70, 0.25);
       color: #bbf7d0;
     }
-    /* === YANGI STIL: Premium Loading Spinner === */
+    
     .premium-spinner {
       position: relative;
       width: 50px;
@@ -733,7 +733,7 @@
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.5); opacity: 0.7; }
     }
-    /* QARA MOD ÜÇIN */
+    
     body.dark-mode .premium-spinner .spinner-circle {
       border-top-color: #6ee7b7;
     }
@@ -845,8 +845,8 @@
       color: var(--dark-text);
     }
     body.dark-mode #ticket-modal .modal-content input {
-  background: #ffffff; /* Fon rangi - oq */
-  color: #333; /* Matn rangi - qora */
+  background: #ffffff; 
+  color: #333; 
 }
     #ticket-modal .close-btn {
       position: absolute;
@@ -948,7 +948,7 @@
     body.dark-mode #confirmation-section .btn.no {
       background: #64748b;
     }
-    /* === YANGI STIL: Skrinshot yuklash paneli === */
+   
     #screenshot-upload-section {
       display: none;
       margin-top: 20px;
@@ -1132,7 +1132,9 @@
                 <option value="ashgabat">Aşgabat</option>
                 <option value="dashoguz">Daşoguz</option>
                 <option value="balkanabat">Balkanabat</option>
+                <option value="turkmenbasy">Türkmenbaşy</option>
                 <option value="mary">Mary</option>
+                <option value="lebap">Lebap</option>
               </select>
             </div>
             <div class="route-arrow-container">
@@ -1143,7 +1145,9 @@
               <select id="to-city" class="route-select">
                 <option value="dashoguz">Daşoguz</option>
                 <option value="balkanabat">Balkanabat</option>
+                <option value="turkmenbasy">Türkmenbaşy</option>
                 <option value="mary">Mary</option>
+                <option value="lebap">Lebap</option>
                 <option value="ashgabat">Aşgabat</option>
               </select>
             </div>
@@ -1205,9 +1209,7 @@
             <p style="font-size:1.1rem; color:var(--primary); margin-bottom:12px; font-weight: 600;">
               Suraty ýüklemek üçin üstünden basyň
             </p>
-            <p style="color:var(--light-text); font-size:0.95rem; opacity: 0.8;">
-              JPG, PNG, GIF (maksimum 5 MB)
-            </p>
+            <p style="color:#f59e0b; font-size:0.95rem; opacity: 0.8;">JPG, PNG, GIF (maksimum 5 MB)</p>
             <input type="file" id="screenshot-file" accept="image/*" style="display:none;" />
           </div>
           <div id="preview-container">
@@ -1235,7 +1237,7 @@
         <div class="info-box">
           <i class="fas fa-question-circle"></i> <strong>Tasyklaýamyň?</strong> Eger ähli maglumatlar dogry bolsa, "Hawa" düwmesine basyň.
         </div>
-        <!-- PREMIUM LOADING ANIMASIÝASY -->
+        
         <div class="loading" id="loading">
           <div class="premium-spinner">
             <div class="spinner-circle"></div>
@@ -1469,7 +1471,7 @@
     }
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
-    // Mobil menýu
+    
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
     const menuOverlay = document.getElementById('menu-overlay');
@@ -1487,7 +1489,7 @@
         navMenu.classList.remove('active');
       });
     });
-    // Form önü
+    
     document.getElementById('continue-btn').addEventListener('click', function() {
       if (document.getElementById('read-info').checked) {
         document.getElementById('form-section').style.display = 'block';
@@ -1562,7 +1564,7 @@
       html += `<p><i class="fas fa-phone"></i> +993 71 789091</p><p><i class="fas fa-phone"></i> +993 64 629487</p><p><i class="fas fa-phone"></i> +993 71 788546</p>`;
       paymentDisplay.innerHTML = html;
     }
-    // Gatlary özi bir birinden çykarma
+    
     document.getElementById('first-class')?.addEventListener('change', function() {
       if (this.checked) document.getElementById('second-class').checked = false;
     });
@@ -1764,11 +1766,24 @@
           modalWagon.textContent = `${pnr.wagon_type_title || '—'} (№${pnr.wagon_number || '?'})`;
           modalSeat.textContent = pnr.seat_label || '?';
           if (ticket?.qr_code) {
-            modalQrImage.src = ticket.qr_code;
-            modalQrContainer.style.display = 'block';
-          } else {
-            modalQrContainer.style.display = 'none';
-          }
+  let qrUrl = ticket.qr_code;
+  
+  if (qrUrl.startsWith('http://')) {
+    qrUrl = qrUrl.replace('http://', 'https://');
+  }
+  modalQrImage.src = qrUrl;
+  modalQrImage.onerror = () => {
+   
+    if (ticket.qr_code.startsWith('http://')) {
+      modalQrImage.src = ticket.qr_code;
+    } else {
+      modalQrContainer.style.display = 'none';
+    }
+  };
+  modalQrContainer.style.display = 'block';
+} else {
+  modalQrContainer.style.display = 'none';
+}
           if (ticket?.pdf_url) {
             modalPdfUrl.href = ticket.pdf_url;
             modalPdfLink.style.display = 'block';
@@ -1789,7 +1804,10 @@
       ashgabat: 'Aşgabat',
       dashoguz: 'Daşoguz',
       balkanabat: 'Balkanabat',
+      turkmenbasy: 'Türkmenbaşy',
       mary: 'Mary'
+      lebap: 'Lebap',
+      
     };
     function updateRoute() {
       const from = document.getElementById('from-city').value;
