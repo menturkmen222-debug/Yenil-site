@@ -3,150 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=0.5" />
-  <title>Admin — Parol</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="icon" href="image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
-  <style>
-    :root {
-      --primary: #0d9488;
-      --primary-light: #6ee7b7;
-      --danger: #ef476f;
-      --light-bg: #f9fafb;
-      --dark-bg: #0f172a;
-      --card-light: #ffffff;
-      --card-dark: #1e293b;
-      --text-light: #1e293b;
-      --text-dark: #f1f5f9;
-      --border-light: #e2e8f0;
-      --border-dark: #334155;
-      --shadow: 0 8px 24px rgba(0,0,0,0.08);
-      --shadow-dark: 0 8px 24px rgba(0,0,0,0.2);
-      --radius: 20px;
-      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: var(--light-bg);
-      color: var(--text-light);
-      transition: var(--transition);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    body.dark-mode {
-      background: var(--dark-bg);
-      color: var(--text-dark);
-    }
-    .auth-container {
-      width: 90%;
-      max-width: 420px;
-      background: var(--card-light);
-      padding: 40px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      text-align: center;
-    }
-    body.dark-mode .auth-container {
-      background: var(--card-dark);
-      box-shadow: var(--shadow-dark);
-    }
-    .auth-icon {
-      font-size: 3rem;
-      margin-bottom: 24px;
-    }
-    .auth-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 20px;
-      color: var(--primary);
-    }
-    .auth-input {
-      width: 100%;
-      padding: 14px 18px;
-      font-size: 1.1rem;
-      border: 1px solid var(--border-light);
-      border-radius: 14px;
-      margin-bottom: 20px;
-      background: var(--card-light);
-      color: var(--text-light);
-    }
-    body.dark-mode .auth-input {
-      border-color: var(--border-dark);
-      background: var(--card-dark);
-      color: var(--text-dark);
-    }
-    .auth-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
-    }
-    .auth-btn {
-      width: 100%;
-      padding: 14px;
-      background: var(--primary);
-      color: white;
-      font-size: 1.1rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: var(--transition);
-      box-shadow: var(--shadow);
-    }
-    .auth-btn:hover {
-      background: var(--primary-light);
-      transform: translateY(-2px);
-    }
-    .error-message {
-      color: var(--danger);
-      font-size: 0.95rem;
-      margin-top: 12px;
-      min-height: 24px;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .error-message.show {
-      opacity: 1;
-    }
-  </style>
-</head>
-<body class="light-mode">
-  <div class="auth-container">
-    <div class="auth-icon">🔐</div>
-    <h1 class="auth-title">Admin paneli</h1>
-    <p>Paroly giriziň</p>
-    <input type="password" id="password-input" class="auth-input" placeholder="••••••••" autocomplete="off" autofocus />
-    <button class="auth-btn" id="login-btn">Gir</button>
-    <div class="error-message" id="error-message">Nädogry parol</div>
-  </div>
-
-  <script>
-    const CORRECT_PASSWORD = "33orta63";
-
-    const loginBtn = document.getElementById('login-btn');
-    const passwordInput = document.getElementById('password-input');
-    const errorMessage = document.getElementById('error-message');
-
-    function showError() {
-      errorMessage.classList.add('show');
-      setTimeout(() => {
-        errorMessage.classList.remove('show');
-      }, 3000);
-    }
-
-    function loadAdminPanel() {
-      // Asosiy admin panel HTML — sizning admin.txt asosida
-      const adminHTML = `<!DOCTYPE html>
-<html lang="tk">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=0.5" />
   <title>Admin — Ýeňil</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="icon" href="image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
@@ -194,6 +50,7 @@
       margin: 0 auto;
       padding: 0 20px;
     }
+    /* Header */
     .header {
       padding: 20px 0;
       position: sticky;
@@ -240,33 +97,7 @@
       transform: rotate(180deg);
       background: var(--primary-light);
     }
-    .loading-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.2);
-      z-index: 9999;
-      backdrop-filter: blur(2px);
-    }
-    .spinner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 50px;
-      height: 50px;
-      border: 5px solid rgba(255,255,255,0.3);
-      border-top: 5px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: translate(-50%, -50%) rotate(0deg); }
-      100% { transform: translate(-50%, -50%) rotate(360deg); }
-    }
+    /* Main */
     .main {
       padding: 40px 0;
       flex: 1;
@@ -279,6 +110,7 @@
       font-weight: 700;
       text-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
+    /* Tabs */
     .tabs {
       display: flex;
       gap: 20px;
@@ -331,6 +163,7 @@
       text-align: center;
       box-shadow: 0 4px 10px rgba(239, 71, 111, 0.4);
     }
+    /* Content */
     .content-area {
       min-height: 300px;
       margin-top: 10px;
@@ -429,6 +262,7 @@
     .priority-badge.checked::before {
       content: "✅";
     }
+    /* SMS Buttons */
     .action-buttons {
       margin-top: 20px;
       display: flex;
@@ -535,7 +369,6 @@
     });
     const tabButtons = document.querySelectorAll('.tab-btn');
     const contentArea = document.getElementById('content-area');
-    const loadingOverlay = document.getElementById('loading-overlay');
     tabButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         tabButtons.forEach(b => b.classList.remove('active'));
@@ -545,25 +378,21 @@
     });
     let allOrders = [];
     let allQuestions = [];
-    function showLoading(show = true) {
-      loadingOverlay.style.display = show ? 'block' : 'none';
-    }
+    // Loading funksiyasi olib tashlandi
     async function fetchAllData() {
-      showLoading(true);
       try {
-        const ordersRes = await fetch(\`https://api.backendless.com/\${appId}/\${apiKey}/data/orders?pageSize=100\`);
+        const ordersRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/orders?pageSize=100`);
         const ordersData = await ordersRes.json();
         allOrders = Array.isArray(ordersData) ? ordersData : (ordersData.data || []);
-        const questionsRes = await fetch(\`https://api.backendless.com/\${appId}/\${apiKey}/data/questions?pageSize=100\`);
+        const questionsRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/questions?pageSize=100`);
         const questionsData = await questionsRes.json();
         allQuestions = Array.isArray(questionsData) ? questionsData : (questionsData.data || []);
         updateBadges();
         loadActiveTab();
       } catch (err) {
-        console.error('Ma\\\\'lumot yuklanmadi:', err);
-      } finally {
-        showLoading(false);
+        console.error('Ma\'lumot yuklanmadi:', err);
       }
+      // finally bloki olib tashlandi – yuklanish animatsiyasi yo'q
     }
     function updateBadges() {
       const railCount = allOrders.filter(o => o.type === 'demiryol' && !o.priorityChecked).length;
@@ -577,14 +406,21 @@
       const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
       if (activeTab) loadTabContent(activeTab);
     }
+    // Backendlessdan keladigan URLlar uchun aniq aniqlash
     function getMediaType(url) {
       if (!url) return null;
-      if (url.includes('/files/')) return 'image';
+      if (url.includes('/files/')) {
+        return 'image';
+      }
       const lower = url.toLowerCase();
       if (lower.endsWith('.mp4') || lower.endsWith('.mov') || lower.endsWith('.avi') ||
-          lower.endsWith('.webm') || lower.endsWith('.mkv')) return 'video';
+          lower.endsWith('.webm') || lower.endsWith('.mkv')) {
+        return 'video';
+      }
       if (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') ||
-          lower.endsWith('.gif') || lower.endsWith('.webp')) return 'image';
+          lower.endsWith('.gif') || lower.endsWith('.webp')) {
+        return 'image';
+      }
       return null;
     }
     function renderMediaPreview(order) {
@@ -592,31 +428,35 @@
       if (!url) return '';
       const type = getMediaType(url);
       if (type === 'video') {
-        const posterUrl = \`https://res.cloudinary.com/daq8wfght/image/upload/q_30,f_jpg/\${url.split('/').slice(-2).join('/')}.jpg\`;
-        return \`
+        const posterUrl = `https://res.cloudinary.com/daq8wfght/image/upload/q_30,f_jpg/${url.split('/').slice(-2).join('/')}.jpg`;
+        return `
           <div class="media-preview">
-            <video controls poster="\${posterUrl}">
-              <source src="\${url}" type="video/mp4">
+            <video controls poster="${posterUrl}">
+              <source src="${url}" type="video/mp4">
               Video ochilmadi.
             </video>
           </div>
-        \`;
+        `;
       } else if (type === 'image') {
-        const imageUrl = url;
-        return \`
+        const imageUrl = url.includes('api.backendless.com')
+          ? url
+          : url;
+        return `
           <div class="media-preview">
-            <img src="\${imageUrl}" alt="Tassyklama" onerror="this.parentElement.style.display='none'">
+            <img src="${imageUrl}" alt="Tassyklama" onerror="this.parentElement.style.display='none'">
           </div>
-        \`;
+        `;
       }
       return '';
     }
     function loadTabContent(tab) {
       let html = '';
       if (tab === 'rail') {
-        const railOrders = allOrders.filter(o => o.type === 'demiryol').sort((a, b) => (b.created || 0) - (a.created || 0));
+        const railOrders = allOrders
+          .filter(o => o.type === 'demiryol')
+          .sort((a, b) => (b.created || 0) - (a.created || 0));
         if (railOrders.length === 0) {
-          contentArea.innerHTML = \`<div class="empty-state">Demirýol buyurtmasy ýok.</div>\`;
+          contentArea.innerHTML = `<div class="empty-state">Demirýol buyurtmasy ýok.</div>`;
           return;
         }
         html = railOrders.map(order => {
@@ -624,8 +464,9 @@
           const route = order.route || '—';
           let travelDate = '01-01-2025';
           if (order.travelDate) {
-            if (typeof order.travelDate === 'number') travelDate = new Date(order.travelDate).toLocaleDateString('tk-TM');
-            else if (typeof order.travelDate === 'string') {
+            if (typeof order.travelDate === 'number') {
+              travelDate = new Date(order.travelDate).toLocaleDateString('tk-TM');
+            } else if (typeof order.travelDate === 'string') {
               const d = new Date(order.travelDate);
               travelDate = isNaN(d) ? order.travelDate : d.toLocaleDateString('tk-TM');
             }
@@ -635,39 +476,48 @@
           const proofType = order.proof_type || order.proofType || 'unknown';
           const proofText = proofType === 'screenshot' || proofType === 'file' ? 'Skrinshot' : proofType === 'sms' ? 'SMS habary' : '—';
           const mediaPreview = renderMediaPreview(order);
-          const smsPart = (proofType === 'sms' && order.smsText) ? \`<div class="order-detail"><strong>SMS:</strong> \${order.smsText}</div>\` : '';
-          const sms1 = \`✅ Salam gadyrly müşderi siziň \${travelDate} \${route} ugry boýunça sargydyňyz üstünlikli kabul edildi we işlenýär iň tiz wagtda Ýeňil size bron kody we ýer baradaky maglumatlary berer\\nÝeňil bizi saýlanyňyz üçin sagbolyň\`;
-          const sms2 = \`🎉Salam gadyrly müşderi siziň\\n\${travelDate} \${route} eden sargydyňyz üstünlikli ýerine ýetirildi Bron kody 000000 Ugraýan wagty 00:00 Wagon 0. Ýer 0.\\nÝeňil bizi saýlanyňyz üçin sagbolyň\`;
-          const sms3 = \`✅ Salam hormatly müşderi \${travelDate} \${route} ugry boýunça sargydyňyz üstünlikli kabul edildi indi tölegi doly etmegiňizi haýyş edýäris edilmeli töleg \${totalPrice} TMT biz siz töleg edenden soň işe başlaýas\\nÝeňil bizi saýlanyňyz üçin sagbolyň\`;
-          return \`
+          const smsPart = (proofType === 'sms' && order.smsText)
+            ? `<div class="order-detail"><strong>SMS:</strong> ${order.smsText}</div>`
+            : '';
+          const sms1 = `✅ Salam gadyrly müşderi siziň ${travelDate} ${route} ugry boýunça sargydyňyz üstünlikli kabul edildi we işlenýär iň tiz wagtda Ýeňil size bron kody we ýer baradaky maglumatlary berer
+Ýeňil bizi saýlanyňyz üçin sagbolyň`;
+          const sms2 = `🎉Salam gadyrly müşderi siziň
+${travelDate} ${route} eden sargydyňyz üstünlikli ýerine ýetirildi Bron kody 000000 Ugraýan wagty 00:00 Wagon 0. Ýer 0.
+Ýeňil bizi saýlanyňyz üçin sagbolyň`;
+          const sms3 = `✅ Salam hormatly müşderi ${travelDate} ${route} ugry boýunça sargydyňyz üstünlikli kabul edildi indi tölegi doly etmegiňizi haýyş edýäris edilmeli töleg ${totalPrice} TMT biz siz töleg edenden soň işe başlaýas
+Ýeňil bizi saýlanyňyz üçin sagbolyň`;
+          return `
             <div class="order-item">
-              <div class="order-header">🚆 Demirýol — \${route}</div>
-              <div class="order-detail"><strong>Ady/Familýa:</strong> \${order.name || ''} \${order.surname || ''}</div>
-              <div class="order-detail"><strong>Doglan kuni:</strong> \${birthDate}</div>
-              <div class="order-detail"><strong>Passport ID:</strong> \${order.passport || '—'}</div>
-              <div class="order-detail"><strong>Sapar senesi:</strong> \${travelDate}</div>
-              <div class="order-detail"><strong>Jemi:</strong> \${totalPrice} TMT</div>
-              <div class="order-detail"><strong>Nomer:</strong> \${phone}</div>
-              \${order.firstClass ? '<div class="order-detail"><strong>1-nji gat:</strong> ✅</div>' : ''}
-              \${order.secondClass ? '<div class="order-detail"><strong>2-nji gat:</strong> ✅</div>' : ''}
-              \${order.mediaPortal ? '<div class="order-detail"><strong>Media portal:</strong> ✅</div>' : ''}
-              <div class="order-detail"><strong>Tassyklama:</strong> \${proofText}</div>
-              \${mediaPreview}
-              \${smsPart}
-              <div class="order-detail"><strong>Wagt:</strong> \${order.created ? new Date(order.created).toLocaleString('tk-TM') : '—'}</div>
-              <div class="priority-badge \${order.priorityChecked ? 'checked' : ''}" data-id="\${order.objectId}" data-type="orders">Üstünlikli</div>
+              <div class="order-header">🚆 Demirýol — ${route}</div>
+              <div class="order-detail"><strong>Ady/Familýa:</strong> ${order.name || ''} ${order.surname || ''}</div>
+              <div class="order-detail"><strong>Doglan kuni:</strong> ${birthDate}</div>
+              <div class="order-detail"><strong>Passport ID:</strong> ${order.passport || '—'}</div>
+              <div class="order-detail"><strong>Sapar senesi:</strong> ${travelDate}</div>
+              <div class="order-detail"><strong>Jemi:</strong> ${totalPrice} TMT</div>
+              <div class="order-detail"><strong>Nomer:</strong> ${phone}</div>
+              ${order.firstClass ? '<div class="order-detail"><strong>1-nji gat:</strong> ✅</div>' : ''}
+              ${order.secondClass ? '<div class="order-detail"><strong>2-nji gat:</strong> ✅</div>' : ''}
+              ${order.mediaPortal ? '<div class="order-detail"><strong>Media portal:</strong> ✅</div>' : ''}
+              <div class="order-detail"><strong>Tassyklama:</strong> ${proofText}</div>
+              ${mediaPreview}
+              ${smsPart}
+              <div class="order-detail"><strong>Wagt:</strong> ${order.created ? new Date(order.created).toLocaleString('tk-TM') : '—'}</div>
+              <div class="priority-badge ${order.priorityChecked ? 'checked' : ''}" data-id="${order.objectId}" data-type="orders">Üstünlikli</div>
               <div class="action-buttons">
-                <a href="sms:\${phone}?body=\${encodeURIComponent(sms1)}" class="action-btn">Kabul edildi</a>
-                <a href="sms:\${phone}?body=\${encodeURIComponent(sms2)}" class="action-btn">Bilet alyndy</a>
-                <a href="sms:\${phone}?body=\${encodeURIComponent(sms3)}" class="action-btn">Doly töleg</a>
+                <a href="sms:${phone}?body=${encodeURIComponent(sms1)}" class="action-btn">Kabul edildi</a>
+                <a href="sms:${phone}?body=${encodeURIComponent(sms2)}" class="action-btn">Bilet alyndy</a>
+                <a href="sms:${phone}?body=${encodeURIComponent(sms3)}" class="action-btn">Doly töleg</a>
               </div>
             </div>
-          \`;
+          `;
         }).join('');
-      } else if (tab === 'pay') {
-        const payOrders = allOrders.filter(o => o.type === 'pay-buy' || o.type === 'pay-sell').sort((a, b) => (b.created || 0) - (a.created || 0));
+      }
+      else if (tab === 'pay') {
+        const payOrders = allOrders
+          .filter(o => o.type === 'pay-buy' || o.type === 'pay-sell')
+          .sort((a, b) => (b.created || 0) - (a.created || 0));
         if (payOrders.length === 0) {
-          contentArea.innerHTML = \`<div class="empty-state">Ýeňil Pay buyurtmasy ýok.</div>\`;
+          contentArea.innerHTML = `<div class="empty-state">Ýeňil Pay buyurtmasy ýok.</div>`;
           return;
         }
         html = payOrders.map(order => {
@@ -679,57 +529,66 @@
           const proofType = order.proof_type || order.proofType || 'unknown';
           const proofText = proofType === 'screenshot' || proofType === 'file' ? 'Skrinshot' : proofType === 'sms' ? 'SMS habary' : '—';
           const mediaPreview = renderMediaPreview(order);
-          const smsPart = (proofType === 'sms' && order.smsText) ? \`<div class="order-detail"><strong>SMS:</strong> \${order.smsText}</div>\` : '';
-          const paySms1 = \`🎉Salam gadyrly müşderi siziň\\n\${typeText} — \${amount} \${crypto} eden sargydyňyz üstünlikli ýerine ýetirildi\\nÝeňil bizi saýlanyňyz üçin sagbolyň\`;
-          const paySms2 = \`✅ Salam hormatly müşderi sargydyňyz üstünlikli kabul edildi indi tölegi doly etmegiňizi haýyş edýäris edilmeli töleg \${total} TMT biz siz töleg edenden soň işe başlaýas\\nÝeňil bizi saýlanyňyz üçin sagbolyň\`;
-          return \`
+          const smsPart = (proofType === 'sms' && order.smsText)
+            ? `<div class="order-detail"><strong>SMS:</strong> ${order.smsText}</div>`
+            : '';
+          const paySms1 = `🎉Salam gadyrly müşderi siziň
+${typeText} — ${amount} ${crypto} eden sargydyňyz üstünlikli ýerine ýetirildi
+Ýeňil bizi saýlanyňyz üçin sagbolyň`;
+          const paySms2 = `✅ Salam hormatly müşderi sargydyňyz üstünlikli kabul edildi indi tölegi doly etmegiňizi haýyş edýäris edilmeli töleg ${total} TMT biz siz töleg edenden soň işe başlaýas
+Ýeňil bizi saýlanyňyz üçin sagbolyň`;
+          return `
             <div class="order-item">
-              <div class="order-header">💸 \${typeText} — \${crypto}</div>
-              <div class="order-detail"><strong>Miqdary:</strong> \${amount}</div>
-              <div class="order-detail"><strong>Jemi:</strong> \${total} TMT</div>
-              \${order.type === 'pay-sell' ? \`<div class="order-detail"><strong>Maxfiy söz:</strong> \${order.secret_code || order.secretCode || '—'}</div>\` : ''}
-              <div class="order-detail"><strong>Nomer:</strong> \${phone}</div>
-              \${order.payeerId ? \`<div class="order-detail"><strong>Payeer ID:</strong> \${order.payeerId}</div>\` : ''}
-              \${order.perfectId ? \`<div class="order-detail"><strong>Perfect ID:</strong> \${order.perfectId}</div>\` : ''}
-              \${order.webmoneyId ? \`<div class="order-detail"><strong>WebMoney ID:</strong> \${order.webmoneyId}</div>\` : ''}
-              <div class="order-detail"><strong>Tassyklama:</strong> \${proofText}</div>
-              \${mediaPreview}
-              \${smsPart}
-              <div class="order-detail"><strong>Wagt:</strong> \${order.created ? new Date(order.created).toLocaleString('tk-TM') : '—'}</div>
-              <div class="priority-badge \${order.priorityChecked ? 'checked' : ''}" data-id="\${order.objectId}" data-type="orders">Üstünlikli</div>
+              <div class="order-header">💸 ${typeText} — ${crypto}</div>
+              <div class="order-detail"><strong>Miqdary:</strong> ${amount}</div>
+              <div class="order-detail"><strong>Jemi:</strong> ${total} TMT</div>
+              ${order.type === 'pay-sell' ? `<div class="order-detail"><strong>Maxfiy söz:</strong> ${order.secret_code || order.secretCode || '—'}</div>` : ''}
+              <div class="order-detail"><strong>Nomer:</strong> ${phone}</div>
+              ${order.payeerId ? `<div class="order-detail"><strong>Payeer ID:</strong> ${order.payeerId}</div>` : ''}
+              ${order.perfectId ? `<div class="order-detail"><strong>Perfect ID:</strong> ${order.perfectId}</div>` : ''}
+              ${order.webmoneyId ? `<div class="order-detail"><strong>WebMoney ID:</strong> ${order.webmoneyId}</div>` : ''}
+              <div class="order-detail"><strong>Tassyklama:</strong> ${proofText}</div>
+              ${mediaPreview}
+              ${smsPart}
+              <div class="order-detail"><strong>Wagt:</strong> ${order.created ? new Date(order.created).toLocaleString('tk-TM') : '—'}</div>
+              <div class="priority-badge ${order.priorityChecked ? 'checked' : ''}" data-id="${order.objectId}" data-type="orders">Üstünlikli</div>
               <div class="action-buttons">
-                <a href="sms:\${phone}?body=\${encodeURIComponent(paySms1)}" class="action-btn">Ýerine ýetirildi</a>
-                <a href="sms:\${phone}?body=\${encodeURIComponent(paySms2)}" class="action-btn">Töleg talap edilýär</a>
+                <a href="sms:${phone}?body=${encodeURIComponent(paySms1)}" class="action-btn">Ýerine ýetirildi</a>
+                <a href="sms:${phone}?body=${encodeURIComponent(paySms2)}" class="action-btn">Töleg talap edilýär</a>
               </div>
             </div>
-          \`;
+          `;
         }).join('');
-      } else if (tab === 'help') {
-        const questions = allQuestions.sort((a, b) => (b.created || 0) - (a.created || 0));
+      }
+      else if (tab === 'help') {
+        const questions = allQuestions
+          .sort((a, b) => (b.created || 0) - (a.created || 0));
         if (questions.length === 0) {
-          contentArea.innerHTML = \`<div class="empty-state">Sorag ýok.</div>\`;
+          contentArea.innerHTML = `<div class="empty-state">Sorag ýok.</div>`;
           return;
         }
         html = questions.map(q => {
           const proofType = q.proof_type || q.proofType || 'unknown';
           const proofText = proofType === 'screenshot' || proofType === 'file' ? 'Skrinshot' : proofType === 'sms' ? 'SMS habary' : '—';
           const mediaPreview = renderMediaPreview(q);
-          const smsPart = (proofType === 'sms' && q.smsText) ? \`<div class="question-detail"><strong>SMS:</strong> \${q.smsText}</div>\` : '';
-          return \`
+          const smsPart = (proofType === 'sms' && q.smsText)
+            ? `<div class="question-detail"><strong>SMS:</strong> ${q.smsText}</div>`
+            : '';
+          return `
             <div class="question-item">
-              <div class="question-header">🙋 \${q.name || 'Anonim'}</div>
-              <div class="question-detail"><strong>Nomer:</strong> \${q.phone || '—'}</div>
-              <div class="question-detail"><strong>Sorag:</strong> \${q.question || '—'}</div>
-              <div class="question-detail"><strong>Tassyklama:</strong> \${proofText}</div>
-              \${mediaPreview}
-              \${smsPart}
-              <div class="question-detail"><small>\${q.created ? new Date(q.created).toLocaleString('tk-TM') : '—'}</small></div>
-              <div class="priority-badge \${q.priorityChecked ? 'checked' : ''}" data-id="\${q.objectId}" data-type="questions">Üstünlikli</div>
+              <div class="question-header">🙋 ${q.name || 'Anonim'}</div>
+              <div class="question-detail"><strong>Nomer:</strong> ${q.phone || '—'}</div>
+              <div class="question-detail"><strong>Sorag:</strong> ${q.question || '—'}</div>
+              <div class="question-detail"><strong>Tassyklama:</strong> ${proofText}</div>
+              ${mediaPreview}
+              ${smsPart}
+              <div class="question-detail"><small>${q.created ? new Date(q.created).toLocaleString('tk-TM') : '—'}</small></div>
+              <div class="priority-badge ${q.priorityChecked ? 'checked' : ''}" data-id="${q.objectId}" data-type="questions">Üstünlikli</div>
             </div>
-          \`;
+          `;
         }).join('');
       }
-      contentArea.innerHTML = html || \`<div class="empty-state">Ma'lumot ýok.</div>\`;
+      contentArea.innerHTML = html || `<div class="empty-state">Ma'lumot ýok.</div>`;
       document.querySelectorAll('.priority-badge').forEach(badge => {
         badge.addEventListener('click', togglePriority);
       });
@@ -739,12 +598,19 @@
       const objectId = badge.dataset.id;
       const type = badge.dataset.type;
       const isChecked = badge.classList.contains('checked');
-      const url = \`https://api.backendless.com/\${appId}/\${apiKey}/data/\${type}/\${objectId}\`;
+      const url = `https://api.backendless.com/${appId}/${apiKey}/data/${type}/${objectId}`;
       const updateData = isChecked
         ? { priorityChecked: null, priorityExpiresAt: null }
-        : { priorityChecked: true, priorityExpiresAt: Date.now() + 3 * 24 * 60 * 60 * 1000 };
+        : {
+            priorityChecked: true,
+            priorityExpiresAt: Date.now() + 3 * 24 * 60 * 60 * 1000
+          };
       try {
-        const res = await fetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updateData) });
+        const res = await fetch(url, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updateData)
+        });
         if (res.ok) {
           if (type === 'orders') {
             const idx = allOrders.findIndex(o => o.objectId === objectId);
@@ -763,33 +629,6 @@
     fetchAllData();
     loadTabContent('rail');
     setInterval(fetchAllData, 30000);
-  <\/script>
-</body>
-</html>`;
-
-      document.open();
-      document.write(adminHTML);
-      document.close();
-    }
-
-    loginBtn.addEventListener('click', () => {
-      const entered = passwordInput.value.trim();
-      if (entered === CORRECT_PASSWORD) {
-        loadAdminPanel();
-      } else {
-        showError();
-        passwordInput.value = '';
-        passwordInput.focus();
-      }
-    });
-
-    passwordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') loginBtn.click();
-    });
-
-    // Light/dark mode — login sahifasi uchun ham
-    const savedTheme = localStorage.getItem('theme') || 'light-mode';
-    document.body.className = savedTheme;
   </script>
 </body>
 </html>
