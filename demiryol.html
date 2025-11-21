@@ -1767,22 +1767,14 @@
           modalSeat.textContent = pnr.seat_label || '?';
           if (ticket?.qr_code) {
   let qrUrl = ticket.qr_code;
-  
   if (qrUrl.startsWith('http://')) {
-    qrUrl = qrUrl.replace('http://', 'https://');
+    qrUrl = `/api/proxy-qr?url=${encodeURIComponent(qrUrl)}`;
   }
   modalQrImage.src = qrUrl;
   modalQrImage.onerror = () => {
-   
-    if (ticket.qr_code.startsWith('http://')) {
-      modalQrImage.src = ticket.qr_code;
-    } else {
-      modalQrContainer.style.display = 'none';
-    }
+    modalQrContainer.style.display = 'none';
   };
   modalQrContainer.style.display = 'block';
-} else {
-  modalQrContainer.style.display = 'none';
 }
           if (ticket?.pdf_url) {
             modalPdfUrl.href = ticket.pdf_url;
