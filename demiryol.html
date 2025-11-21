@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tk" dir="ltr">
 <head>
-  <!-- Open  Graph & Twitter -->
+  <!-- Open Graph & Twitter -->
   <meta property="og:title" content="Ýeňil — Demirýollary">
   <meta property="og:description" content="Ýeňil Demirýollary — Biletleri TMCELL üsti bilen kart tölegsiz, arzan we tiz satyn alyň">
   <meta property="og:image" content="https://www.yenil.ru/images/logo-1.png">
@@ -679,7 +679,6 @@
       background: rgba(6, 95, 70, 0.25);
       color: #bbf7d0;
     }
-    
     .premium-spinner {
       position: relative;
       width: 50px;
@@ -733,7 +732,6 @@
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.5); opacity: 0.7; }
     }
-    
     body.dark-mode .premium-spinner .spinner-circle {
       border-top-color: #6ee7b7;
     }
@@ -845,9 +843,9 @@
       color: var(--dark-text);
     }
     body.dark-mode #ticket-modal .modal-content input {
-  background: #ffffff; 
-  color: #333; 
-}
+      background: #ffffff; 
+      color: #333; 
+    }
     #ticket-modal .close-btn {
       position: absolute;
       top: 15px;
@@ -948,7 +946,6 @@
     body.dark-mode #confirmation-section .btn.no {
       background: #64748b;
     }
-   
     #screenshot-upload-section {
       display: none;
       margin-top: 20px;
@@ -1237,7 +1234,6 @@
         <div class="info-box">
           <i class="fas fa-question-circle"></i> <strong>Tasyklaýamyň?</strong> Eger ähli maglumatlar dogry bolsa, "Hawa" düwmesine basyň.
         </div>
-        
         <div class="loading" id="loading">
           <div class="premium-spinner">
             <div class="spinner-circle"></div>
@@ -1471,7 +1467,6 @@
     }
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
-    
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
     const menuOverlay = document.getElementById('menu-overlay');
@@ -1489,7 +1484,6 @@
         navMenu.classList.remove('active');
       });
     });
-    
     document.getElementById('continue-btn').addEventListener('click', function() {
       if (document.getElementById('read-info').checked) {
         document.getElementById('form-section').style.display = 'block';
@@ -1564,7 +1558,6 @@
       html += `<p><i class="fas fa-phone"></i> +993 71 789091</p><p><i class="fas fa-phone"></i> +993 64 629487</p><p><i class="fas fa-phone"></i> +993 71 788546</p>`;
       paymentDisplay.innerHTML = html;
     }
-    
     document.getElementById('first-class')?.addEventListener('change', function() {
       if (this.checked) document.getElementById('second-class').checked = false;
     });
@@ -1765,17 +1758,20 @@
           modalDateTime.textContent = `${formattedDate} (${depTime} → ${arrTime})`;
           modalWagon.textContent = `${pnr.wagon_type_title || '—'} (№${pnr.wagon_number || '?'})`;
           modalSeat.textContent = pnr.seat_label || '?';
+          // 🔥 QR kodni proxy orqali yuklash
           if (ticket?.qr_code) {
-  let qrUrl = ticket.qr_code;
-  if (qrUrl.startsWith('http://')) {
-    qrUrl = `/api/proxy-qr?url=${encodeURIComponent(qrUrl)}`;
-  }
-  modalQrImage.src = qrUrl;
-  modalQrImage.onerror = () => {
-    modalQrContainer.style.display = 'none';
-  };
-  modalQrContainer.style.display = 'block';
-}
+            let qrUrl = ticket.qr_code;
+            if (qrUrl.startsWith('http://')) {
+              qrUrl = `/api/proxy-qr?url=${encodeURIComponent(qrUrl)}`;
+            }
+            modalQrImage.src = qrUrl;
+            modalQrImage.onerror = () => {
+              modalQrContainer.style.display = 'none';
+            };
+            modalQrContainer.style.display = 'block';
+          } else {
+            modalQrContainer.style.display = 'none';
+          }
           if (ticket?.pdf_url) {
             modalPdfUrl.href = ticket.pdf_url;
             modalPdfLink.style.display = 'block';
@@ -1797,9 +1793,8 @@
       dashoguz: 'Daşoguz',
       balkanabat: 'Balkanabat',
       turkmenbasy: 'Türkmenbaşy',
-      mary: 'Mary', 
+      mary: 'Mary',
       lebap: 'Lebap'
-      
     };
     function updateRoute() {
       const from = document.getElementById('from-city').value;
@@ -1811,4 +1806,4 @@
     updateRoute();
   </script>
 </body>
-</html>
+  </html>
