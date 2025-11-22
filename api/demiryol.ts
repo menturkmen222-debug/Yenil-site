@@ -2,18 +2,18 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 
 const CLOUDFLARE_WORKER_URL = 'https://railway-proxy.menturkmen111.workers.dev';
-const SELF_ORIGIN = 'https://www.yenil.ru'; // Sizning domen
 
+// Retry + timeout bilan fetch
 async function fetchWithRetry(
   url: string,
   retries: number = 3,
-  baseDelay: number = 2000
+  baseDelay: number = 2500
 ): Promise<Response> {
   let lastError: unknown;
 
   for (let attempt = 0; attempt < retries; attempt++) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 18000);
+    const timeoutId = setTimeout(() => controller.abort(), 18000); // 18 soniya
 
     try {
       const res = await fetch(url, {
@@ -28,7 +28,7 @@ async function fetchWithRetry(
 
       if (res.status >= 400 && res.status < 500) return res;
 
-      lastError = new Error(`HTTP ${res.status}: ${res.statusText}`);
+      lastError = new Error(`HTTP ${res.status}`);
     } catch (err) {
       clearTimeout(timeoutId);
       lastError = err;
@@ -42,24 +42,28 @@ async function fetchWithRetry(
   throw lastError;
 }
 
-// QR URL-ni proxy orqali qayta ishlash
-function processQrCode(ticket: any) {
-  if (!ticket?.qr_code || typeof ticket.qr_code !== 'string') return;
-  
-  if (ticket.qr_code.startsWith('http://')) {
-    try {
-      const encodedUrl = encodeURIComponent(ticket.qr_code);
-      ticket.qr_code = `${SELF_ORIGIN}/api/proxy-qr?url=${encodedUrl}`;
-    } catch (e) {
-      // Encoding muvaffaqiyatsiz bo'lsa, QR-ni o'chirib tashlaymiz
-      ticket.qr_code = null;
-    }
+// QR rasmini Base64 sifatida olish
+async function fetchQrAsBase64(qrUrl: string): Promise<string | null> {
+  if (!qrUrl.startsWith('http://')) return null;
+
+  try {
+    const res = await fetch(qrUrl);
+    if (!res.ok) return null;
+
+    const contentType = res.headers.get('content-type') || 'image/png';
+    if (!contentType.startsWith('image/')) return null;
+
+    const arrayBuffer = await res.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString('base64');
+    return `${contentType};base64,${base64}`;
+  } catch (e) {
+    console.warn('QR rasm yuklanmadi:', qrUrl);
+    return null;
   }
-  // `https://` URL-lar o'zgarishsiz qoladi
 }
 
 export default async (req: VercelRequest, res: VercelResponse) => {
-  // ✅ CORS sozlamalari
+  // ✅ CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -100,10 +104,16 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     const data = await proxyRes.json();
 
-    // ✅ QR kodni xavfsiz HTTPS URL-ga aylantirish
-    if (data?.data?.booking?.tickets?.length) {
-      for (const ticket of data.data.booking.tickets) {
-        processQrCode(ticket);
+    // QR kodni Base64 qilish
+    if (
+      data?.data?.booking?.tickets?.[0]?.qr_code &&
+      typeof data.data.booking.tickets[0].qr_code === 'string' &&
+      data.data.booking.tickets[0].qr_code.startsWith('http://')
+    ) {
+      const qrBase64 = await fetchQrAsBase64(data.data.booking.tickets[0].qr_code);
+      if (qrBase64) {
+        data.data.booking.tickets[0].qr_image = qrBase64;
+        delete data.data.booking.tickets[0].qr_code;
       }
     }
 
