@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tk" dir="ltr">
 <head>
-  <!-- Open Graph & Twitter -->
+  <!-- Open  Graph & Twitter -->
   <meta property="og:title" content="Ýeňil — Demirýollary">
   <meta property="og:description" content="Ýeňil Demirýollary — Biletleri TMCELL üsti bilen kart tölegsiz, arzan we tiz satyn alyň">
   <meta property="og:image" content="https://www.yenil.ru/images/logo-1.png">
@@ -679,6 +679,7 @@
       background: rgba(6, 95, 70, 0.25);
       color: #bbf7d0;
     }
+    
     .premium-spinner {
       position: relative;
       width: 50px;
@@ -732,6 +733,7 @@
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.5); opacity: 0.7; }
     }
+    
     body.dark-mode .premium-spinner .spinner-circle {
       border-top-color: #6ee7b7;
     }
@@ -842,6 +844,10 @@
       background: var(--card-dark);
       color: var(--dark-text);
     }
+    body.dark-mode #ticket-modal .modal-content input {
+  background: #ffffff; 
+  color: #333; 
+}
     #ticket-modal .close-btn {
       position: absolute;
       top: 15px;
@@ -852,6 +858,151 @@
     }
     #ticket-modal .close-btn:hover {
       color: #ef4444;
+    }
+    #confirmation-section {
+      display: none;
+    }
+    #confirmation-section .content {
+      background: var(--card-light);
+      border: 2px solid var(--accent);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 12px rgba(16,185,128,0.1);
+    }
+    body.dark-mode #confirmation-section .content {
+      background: var(--card-dark);
+      border-color: var(--accent);
+    }
+    #confirmation-section .content p {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      background: var(--light-bg);
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      margin-bottom: 8px;
+      font-size: 1rem;
+      color: var(--light-text);
+    }
+    body.dark-mode #confirmation-section .content p {
+      background: var(--dark-bg);
+      color: var(--dark-text);
+    }
+    #confirmation-section .content p i {
+      color: var(--primary);
+    }
+    #confirmation-section .content p strong {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    #confirmation-section .info-box {
+      background: var(--light-bg);
+      padding: 15px;
+      border-radius: 12px;
+      margin: 15px 0;
+      border-left: 4px solid var(--primary);
+      font-size: 0.95rem;
+      color: var(--light-text);
+    }
+    body.dark-mode #confirmation-section .info-box {
+      background: var(--dark-bg);
+      color: var(--dark-text);
+    }
+    #confirmation-section .info-box i {
+      color: var(--primary);
+    }
+    #confirmation-section .btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 15px;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(13,148,136,0.3);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    #confirmation-section .btn:hover {
+      transform: translateY(-3px);
+      opacity: 0.95;
+    }
+    #confirmation-section .btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+    }
+    #confirmation-section .btn.yes {
+      background: var(--gradient);
+      color: white;
+      border: none;
+    }
+    #confirmation-section .btn.no {
+      background: #94a3b8;
+      color: white;
+      border: none;
+    }
+    body.dark-mode #confirmation-section .btn.yes {
+      background: var(--gradient);
+    }
+    body.dark-mode #confirmation-section .btn.no {
+      background: #64748b;
+    }
+   
+    #screenshot-upload-section {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 16px;
+      border: 2px dashed var(--primary);
+      background: var(--light-bg);
+    }
+    body.dark-mode #screenshot-upload-section {
+      background: var(--dark-bg);
+    }
+    #drop-area {
+      border: 2px dashed var(--accent);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      background: var(--light-bg);
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    body.dark-mode #drop-area {
+      background: var(--dark-bg);
+    }
+    #file-error {
+      display: none;
+      color: #ef4444;
+      margin-top: 10px;
+      text-align: center;
+      font-weight: 600;
+      background: #fee;
+      padding: 8px;
+      border-radius: 8px;
+      border-left: 4px solid #f59e0b;
+    }
+    body.dark-mode #file-error {
+      background: #4a1a1a;
+      color: #f87171;
+    }
+    #preview-container {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+    #preview-img {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border: 2px solid var(--accent);
+    }
+    body.dark-mode #preview-img {
+      border-color: var(--accent);
     }
   </style>
 </head>
@@ -885,70 +1036,297 @@
     <div class="container">
       <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Yza</a>
       <div class="logo-page">Ýeňil demirýollary</div>
-      <div class="content">
-        <h1><i class="fas fa-info-circle"></i> Biletiňizi gözleň</h1>
-        <p>Bron kodyňyz bilen bilet maglumatlarynyňyzy darhol gözläp bilersiňiz.</p>
-        <div style="margin-top: 20px;">
-          <label for="booking-code" style="font-weight: 600; display: block; margin-bottom: 10px;">Bron kodyňyz (6 belgi):</label>
-          <input type="text" id="booking-code" placeholder="Meselem: ABC123" maxlength="6" autocomplete="off" style="font-size: 1.1rem; text-transform: uppercase; padding: 14px; border: 2px solid #e2e8f0; border-radius: 14px; width: 100%; text-align: center; background: white; transition: border-color 0.3s ease;">
+      <div class="content" id="info-section">
+        <h1><i class="fas fa-train"></i> Ýeňil demirýollary bilen doly tanyşyň</h1>
+        <p><i class="fas fa-question-circle"></i> Bilet almak üçin her gezek wagzala baryp terminala oçurda durmakdan ýadadyňyzmy? ýada her gezek taksa pul bermek bulardan ýadadyňyzmy?</p>
+        <p><i class="fas fa-question-circle"></i> Ýa-da hergezek bilet almakçy bolanyňyzda sizden kart soralýamy we siziň töleg etmeg üçin kartyňyz ýokmy?</p>
+        <p><i class="fas fa-exclamation-triangle"></i> Ýa-da bilet almakçy bolanymyzda <strong>BU SENE ÜÇIN ÝER TAPYLMADY</strong> diýýärmi?</p>
+        <div style="background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border-radius: 20px; padding: 20px; margin: 25px 0; border-left: 6px solid #10b981; box-shadow: 0 4px 12px rgba(16, 185, 128, 0.1);">
+          <h2 style="color: #065f46; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-tags" style="color: #10b981;"></i> Bahalar
+          </h2>
+          <ul style="padding-left: 20px; margin: 15px 0 0; list-style-type: none; font-size: 1.05rem;">
+            <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: white; border-radius: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.07);">
+              <span style="color: #10b981; font-weight: 700;"><i class="fas fa-clock"></i> 4-15 gün galandaky baha:</span> <span style="font-weight: 700; color: #065f46;">60 TMT</span>
+            </li>
+            <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: white; border-radius: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.07);">
+              <span style="color: #10b981; font-weight: 700;"><i class="fas fa-clock"></i> 2-3 gün galandaky baha:</span> <span style="font-weight: 700; color: #065f46;">70 TMT</span>
+            </li>
+            <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: white; border-radius: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.07);">
+              <span style="color: #10b981; font-weight: 700;"><i class="fas fa-clock"></i> 1 gün galandaky baha:</span> <span style="font-weight: 700; color: #065f46;">80 TMT</span>
+            </li>
+          </ul>
         </div>
-        <button id="search-ticket-btn" class="btn" style="margin-top: 20px;">
-          <i class="fas fa-search"></i> Bileti gözle
-        </button>
-        <div id="ticket-loading" style="display:none; text-align: center; padding: 20px; background: var(--card-light); border-radius: 14px; margin-top: 15px;">
-          <div class="premium-spinner" style="width:40px; height:40px; margin:0 auto;">
-            <div class="spinner-circle"></div>
-            <div class="spinner-dot" style="animation-delay:0.3s;"></div>
-            <div class="spinner-dot" style="animation-delay:0.6s;"></div>
-            <div class="spinner-dot" style="animation-delay:0.9s;"></div>
+        <div style="background: linear-gradient(135deg, #fef3c7, #feebc8); border-radius: 20px; padding: 20px; margin: 25px 0; border-left: 6px solid #f59e0b; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: 10px; right: 10px; font-size: 1.2rem; color: #f59e0b;">
+            <i class="fas fa-exclamation-triangle"></i>
           </div>
-          <p style="margin-top:10px; font-size: 0.9rem; color: #64748b;">Gözlenýär...</p>
-        </div>
-        <div id="ticket-error" style="display:none; background: #fee; color: #c33; padding: 15px; border-radius: 14px; margin-top: 15px; text-align: center; font-size: 0.95rem; border-left: 4px solid #f59e0b;">
-          <i class="fas fa-exclamation-triangle"></i> <strong>Ýalňyşlyk:</strong> Bron kody tapylmady.
-        </div>
-        <div id="ticket-result" style="display:none; background: #f0fdf4; color: #065f46; padding: 20px; border-radius: 14px; margin-top: 15px; font-size: 0.95rem; border-left: 4px solid #10b981; box-shadow: inset 0 0 10px rgba(16,185,128,0.1);">
-          <h3 style="color: var(--primary); text-align:center; margin-bottom:12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <i class="fas fa-ticket-alt"></i> Bilet tapyldy!
+          <h3 style="color: #92400e; font-weight: 700; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-bell" style="color: #f59e0b;"></i> Esasy
           </h3>
-          <div style="font-size: 1.05rem; line-height: 1.6; margin: 15px 0;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-              <i class="fas fa-user" style="color: var(--primary);"></i>
-              <strong>Müşderi:</strong> <span id="modal-passenger">—</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-              <i class="fas fa-route" style="color: var(--primary);"></i>
-              <strong>Ugraýar:</strong> <span id="modal-route">—</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-              <i class="fas fa-calendar-day" style="color: var(--primary);"></i>
-              <strong>Sapar senesi:</strong> <span id="modal-date-time">—</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-              <i class="fas fa-train" style="color: var(--primary);"></i>
-              <strong>Wagon:</strong> <span id="modal-wagon">—</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-              <i class="fas fa-chair" style="color: var(--primary);"></i>
-              <strong>Orun:</strong> <span id="modal-seat">—</span>
-            </div>
-          </div>
-          <div id="modal-qr-container" style="text-align: center; margin: 15px 0; display: none;">
-            <img id="modal-qr-image" src="" alt="QR kod" style="max-width: 160px; border: 1px solid #ddd; border-radius: 8px;">
-          </div>
-          <div id="modal-pdf-link" style="text-align: center; margin: 15px 0; display: none;">
-            <a href="#" id="modal-pdf-url" target="_blank" class="pdf-link" style="background: #10b981; color: white; padding: 10px 20px; text-decoration: none; border-radius: 10px; font-weight: 600; display: inline-block;">
-              <i class="fas fa-download"></i> PDF ýükläp alyň
-            </a>
-          </div>
-          <p style="font-size:0.82rem; margin-top:12px; color:#64748b; text-align:center; line-height: 1.4; padding-top: 12px; border-top: 1px dashed #94a3b8;">
-            <i class="fas fa-info-circle"></i> PDF ýükläp alyň diýen belgiň üstünden basyň we telefonyňyza göçürriň.
+          <p style="color: #92400e; line-height: 1.6; font-size: 1.0rem; margin: 0;">
+            <span style="display: flex; align-items: center; gap: 4px;"><i class="fas fa-terminal"></i>Biz terminaldan töleg kabul edemizok. Öz nomeriňizden töleg etmeli.</span><br>
+            <span style="display: flex; align-items: center; gap: 4px;"><i class="fas fa-money-check"></i>Töleg edeniňizden soň bize töleg geçendigi baradaky tasyklaýyş skrinshoty ýada SMS habary wagty iberilmeli.</span><br>
+            <span style="display: flex; align-items: center; gap: 4px;"><i class="fas fa-play"></i>Biz töleg edilenden soň işe başlaýas.</span>
           </p>
         </div>
+        <p><strong><i class="fas fa-info-circle"></i> Indi Ýeňil Demirýollary bilen tanyşyň:</strong></p>
+        <ul>
+          <li><i class="fas fa-credit-card"></i> Kart tölegsiz we arzan</li>
+          <li><i class="fas fa-clock"></i> Tiz wagtda ýerine ýetirmek hyzmaty</li>
+          <li><i class="fas fa-ticket-alt"></i> Otly üçin ähli wagt bilet (ýagny petek) tapylýar — arkaýyn ýüz tutup bilersiňiz</li>
+        </ul>
+        <div class="checkbox-group">
+          <input type="checkbox" id="read-info">
+          <label for="read-info"> Maglumatlary okap çykdym we razy</label>
+        </div>
+        <button class="btn" id="continue-btn"><i class="fas fa-arrow-right"></i> Dowam et</button>
+      </div>
+      <div class="note" style="margin-top: 20px; background: #ecfdf5; border-left: 4px solid #10b981; padding: 15px; border-radius: 16px;">
+        <p style="font-weight: 600; color: #065f46; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-comment-dots" style="color: #10b981;"></i> Online zaýawka berip bilmeýänler üçin ýeňillik
+        </p>
+      </div>
+      <button class="btn" id="sms-btn" style="background: linear-gradient(135deg, #10b981, #34d399); margin-top: 15px; border-radius: 50px; padding: 10px 25px; font-size: 1.2rem; box-shadow: 0 4px 12px rgba(16, 185, 128, 0.3); transition: all 0.3s ease;" onclick="window.location='sms.html'">
+        <i class="fas fa-sms" style="margin-right: 8px;"></i> SMS zaýawka
+      </button>
+      <div class="note" style="margin-top: 20px; background: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 16px;">
+        <p style="font-weight: 600; color: #92400e; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-gift" style="color: #f59e0b;"></i>  15 TMT möçberinde arznlaşyk alyp bilersiňiz
+        </p>
+        <h3 style="margin: 10px 0 6px; color: var(--primary); font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
+          <i class="fas fa-file-signature" style="font-size: 0.8rem; color: var(--primary);"></i> Şerti
+        </h3>
+        <p style="font-size: 1rem; color: #92400e; line-height: 1.5; margin: 3;">
+          <i class="fab fa-tiktok"></i> TikTok ýa-da <i class="fab fa-instagram"></i> Instagram sahypaňyzda bizi reklama etmeli<br>
+          Ol reklama azyndan 500 adam gören bolmaly<br>
+          <br>
+          <strong><i class="fas fa-envelope"></i> Şu şerti ýerine ýetirenden soň bize ýazyň ýa-da SMS ugradyň.</strong>
+        </p>
+      </div>
+      <div class="content" id="form-section" style="display:none;">
+        <h2><i class="fas fa-user-edit"></i> Saparyňyz üçin maglumat</h2>
+        <div class="form-group">
+          <label for="name"><i class="fas fa-user"></i> Adyňyz</label>
+          <input type="text" id="name" required>
+        </div>
+        <div class="form-group">
+          <label for="surname"><i class="fas fa-user"></i> Familýaňyz</label>
+          <input type="text" id="surname" required>
+        </div>
+        <div class="form-group">
+          <label for="birthdate"><i class="fas fa-calendar-alt"></i> Doglan aýy güni (GG.AA.YYYY)</label>
+          <input type="date" id="birthdate" required>
+        </div>
+        <div class="form-group">
+          <label for="passport"><i class="fas fa-passport"></i> Pasport ID (Meselem: I-DZ 123456)</label>
+          <p><strong>Eger sizde dogluş hakyndaky şahadatnama ýada harby bilet bolsa</strong>, Pasport ID ornyna şony ýazmaly.</p>
+          <input type="text" id="passport" placeholder="I-DZ 123456" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-route"></i> Ugratma boýunça:</label>
+          <div class="route-selector">
+            <div class="route-pair">
+              <label><i class="fas fa-map-marker-alt"></i> Nirden</label>
+              <select id="from-city" class="route-select">
+                <option value="ashgabat">Aşgabat</option>
+                <option value="dashoguz">Daşoguz</option>
+                <option value="balkanabat">Balkanabat</option>
+                <option value="turkmenbasy">Türkmenbaşy</option>
+                <option value="mary">Mary</option>
+                <option value="lebap">Lebap</option>
+              </select>
+            </div>
+            <div class="route-arrow-container">
+              <div class="route-arrow-icon">⟷</div>
+            </div>
+            <div class="route-pair">
+              <label><i class="fas fa-map-marker-alt"></i> Nira</label>
+              <select id="to-city" class="route-select">
+                <option value="dashoguz">Daşoguz</option>
+                <option value="balkanabat">Balkanabat</option>
+                <option value="turkmenbasy">Türkmenbaşy</option>
+                <option value="mary">Mary</option>
+                <option value="lebap">Lebap</option>
+                <option value="ashgabat">Aşgabat</option>
+              </select>
+            </div>
+          </div>
+          <input type="hidden" id="route" value="ashgabat-dashoguz">
+        </div>
+        <div class="form-group">
+          <label for="travel-date"><i class="fas fa-calendar-day"></i> Sapar senesi (15 günden artyk bolmaz)</label>
+          <input type="date" id="travel-date" required>
+        </div>
+        <div class="addon">
+          <input type="checkbox" id="first-class">
+          <label for="first-class"><i class="fas fa-ticket-alt"></i> 1-nji gat</label>
+        </div>
+        <div class="addon">
+          <input type="checkbox" id="second-class">
+          <label for="second-class"><i class="fas fa-ticket-alt"></i> 2-nji gat</label>
+        </div>
+        <div class="addon">
+          <input type="checkbox" id="media">
+          <label for="media"><i class="fas fa-tv"></i> Media portal</label>
+        </div>
+        <div class="price-display">
+          <i class="fas fa-money-bill-wave"></i> Jemi töleg: <span id="total-price">0.00</span> TMT
+        </div>
+        <button class="btn" id="pay-btn"><i class="fas fa-credit-card"></i> Töleg etmek</button>
+      </div>
+      <div class="content" id="payment-section" style="display:none;">
+        <h2><i class="fas fa-money-check"></i> Töleg ma'lumotlary</h2>
+        <p><strong><i class="fas fa-exclamation-triangle"></i> Esasy!</strong> Tölegiňiz <u>diňe öz nomeriňizden</u> ýerine ýetirilmelidir.</p>
+        <div class="form-group">
+          <label for="client-phone"><i class="fas fa-phone"></i> Siziň nomeriňiz (Töleg ediljek nomer)</label>
+          <input type="tel" id="client-phone" placeholder="+993 XX XXXXXX" required>
+        </div>
+        <p><i class="fas fa-mobile-alt"></i> Bizniň töleg nomerlerimiz:</p>
+        <div class="numbers" id="payment-amount-display"></div>
+        <p><i class="fas fa-arrow-down"></i> Ýokardaky nomerlaryň birine hasaplanan töleg mukdaryny geçirmeli .</p> 
+        <h3><i class="fas fa-check-circle"></i> Tölegi tassyklaň</h3>
+        <div class="radio-group">
+          <div class="radio-option" onclick="handleProofType('screenshot')">
+            <input type="radio" name="proof" id="proof-screenshot" value="screenshot">
+            <label for="proof-screenshot"><i class="fas fa-camera"></i> Skrinshot</label>
+          </div>
+          <div class="radio-option" onclick="handleProofType('sms')">
+            <input type="radio" name="proof" id="proof-sms" value="sms">
+            <label for="proof-sms"><i class="fas fa-sms"></i> SMS habary</label>
+          </div>
+        </div>
+        <div id="sms-input-section" style="display:none; margin-top:15px;">
+          <p><strong><i class="fas fa-sms"></i> SMS habary nusxalap goýuň ýada töleg geçen wagtyny ýazyň:</strong></p>
+          <textarea id="sms-text" rows="3" placeholder="SMS haty şu ýere ýazyň..."></textarea>
+        </div>
+        <div id="screenshot-upload-section">
+          <h3 style="color: var(--primary); text-align:center; margin-bottom:15px; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fas fa-cloud-upload-alt"></i> Skrinshoty ýagny ekran suratyny ýükläň
+          </h3>
+          <div id="drop-area">
+            <i class="fas fa-image" style="font-size:3rem; color:var(--primary); margin-bottom:12px;"></i>
+            <p style="font-size:1.1rem; color:var(--primary); margin-bottom:12px; font-weight: 600;">
+              Suraty ýüklemek üçin üstünden basyň
+            </p>
+            <p style="color:#f59e0b; font-size:0.95rem; opacity: 0.8;">JPG, PNG, GIF (maksimum 5 MB)</p>
+            <input type="file" id="screenshot-file" accept="image/*" style="display:none;" />
+          </div>
+          <div id="preview-container">
+            <img id="preview-img" src="" alt="Öňünden görmek" style="max-width: 100%; max-height: 300px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid var(--accent);">
+            <p style="margin-top:10px; color:var(--primary); font-weight:600;">Taýyn!</p>
+          </div>
+          <div id="file-error"></div>
+        </div>
+        <button class="btn" id="submit-btn"><i class="fas fa-paper-plane"></i> Göýbermek we tassyklamak</button>
+      </div>
+      <div class="content" id="confirmation-section" style="display:none;">
+        <h2 style="color: var(--primary); font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+          <i class="fas fa-check-double"></i> Saparyňyz barada maglumat
+        </h2>
+        <div class="content">
+          <p><strong><i class="fas fa-user"></i> Adyňyz:</strong> <span id="conf-name">—</span></p>
+          <p><strong><i class="fas fa-user"></i> Familýaňyz:</strong> <span id="conf-surname">—</span></p>
+          <p><strong><i class="fas fa-passport"></i> Passport ID:</strong> <span id="conf-passport">—</span></p>
+          <p><strong><i class="fas fa-route"></i> Ugratma:</strong> <span id="conf-route">—</span></p>
+          <p><strong><i class="fas fa-calendar-day"></i> Sapar senesi:</strong> <span id="conf-date">—</span></p>
+          <p><strong><i class="fas fa-money-bill-wave"></i> Töleg mukdary:</strong> <span id="conf-price">—</span> TMT</p>
+          <p><strong><i class="fas fa-phone"></i> Nomeriňiz:</strong> <span id="conf-phone">—</span></p>
+          <p><strong><i class="fas fa-check-circle"></i> Tassyklama:</strong> <span id="conf-proof">—</span></p>
+        </div>
+        <div class="info-box">
+          <i class="fas fa-question-circle"></i> <strong>Tasyklaýamyň?</strong> Eger ähli maglumatlar dogry bolsa, "Hawa" düwmesine basyň.
+        </div>
+        
+        <div class="loading" id="loading">
+          <div class="premium-spinner">
+            <div class="spinner-circle"></div>
+            <div class="spinner-dot"></div>
+            <div class="spinner-dot"></div>
+            <div class="spinner-dot"></div>
+          </div>
+          <p>Ýüklenýär...</p>
+        </div>
+        <div class="error-message" id="error"></div>
+        <button class="btn yes" id="confirm-yes">
+          <i class="fas fa-check"></i> Hawa, tassyklaýyn
+        </button>
+        <button class="btn no" id="confirm-no">
+          <i class="fas fa-times"></i> Ýok, özgertmek gerek
+        </button>
+      </div>
+      <div class="content" id="success-section" style="display:none;">
+        <div class="success-message">
+          <h2><i class="fas fa-trophy"></i> Üstünlikli!</h2>
+          <p><i class="fas fa-clock"></i> Iň tiz wagtda Ýakyn siz bilen baglanar we size bron kody we bilet nusgasy berer.</p>
+          <p><i class="fas fa-home"></i> Baş sahypa gaýtmagyňyz mümkin.</p>
+        </div>
+        <a href="index.html" class="btn"><i class="fas fa-home"></i> Baş sahypa</a>
       </div>
       <footer>
         <i class="far fa-copyright"></i> 2025 Ýeňil. Hemma hukuklar goralan.
       </footer>
+    </div>
+  </div>
+  <div id="modal-overlay"></div>
+  <div id="ticket-modal">
+    <div class="modal-content">
+      <span class="close-btn" id="close-modal">&times;</span>
+      <h3 style="text-align:center; margin-bottom:15px; color: var(--primary); font-weight: 700;"><i class="fas fa-search"></i> Bron kodyňyzy giriziň</h3>
+      <input type="text" id="booking-code" placeholder="Meselem: ABC123" maxlength="6" autocomplete="off" style="font-size: 1.1rem; text-transform: uppercase; padding: 14px; border: 2px solid #e2e8f0; border-radius: 14px; width: 100%; text-align: center; background: white; transition: border-color 0.3s ease;">
+      <button id="search-ticket-btn" class="btn" style="width:100%; padding:14px; margin-top:15px; font-size: 1.1rem; font-weight: 600; border-radius: 14px; box-shadow: 0 4px 12px rgba(13,148,136,0.3);">
+        <i class="fas fa-search"></i> Gözle
+      </button>
+      <div id="ticket-loading" style="display:none; text-align: center; padding: 20px; background: var(--card-light); border-radius: 14px; margin-top: 15px;">
+        <div class="premium-spinner" style="width:40px; height:40px; margin:0 auto;">
+          <div class="spinner-circle"></div>
+          <div class="spinner-dot" style="animation-delay:0.3s;"></div>
+          <div class="spinner-dot" style="animation-delay:0.6s;"></div>
+          <div class="spinner-dot" style="animation-delay:0.9s;"></div>
+        </div>
+        <p style="margin-top:10px; font-size: 0.9rem; color: #64748b;">Gözlenýär garaşyň...</p>
+      </div>
+      <div id="ticket-error" style="display:none; background: #fee; color: #c33; padding: 15px; border-radius: 14px; margin-top: 15px; text-align: center; font-size: 0.95rem; border-left: 4px solid #f59e0b;">
+        <i class="fas fa-exclamation-triangle"></i> <strong>Ýalňyşlyk:</strong> Bron kody tapylmady.
+      </div>
+      <div id="ticket-result" style="display:none; background: #f0fdf4; color: #065f46; padding: 20px; border-radius: 14px; margin-top: 15px; font-size: 0.95rem; border-left: 4px solid #10b981; box-shadow: inset 0 0 10px rgba(16,185,128,0.1);">
+        <h3 style="color: var(--primary); text-align:center; margin-bottom:12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <i class="fas fa-ticket-alt"></i> Bilet tapyldy!
+        </h3>
+        <div style="font-size: 1.05rem; line-height: 1.6; margin: 15px 0;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <i class="fas fa-user" style="color: var(--primary);"></i>
+            <strong>Müşderi:</strong> <span id="modal-passenger">—</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <i class="fas fa-route" style="color: var(--primary);"></i>
+            <strong>Ugraýar:</strong> <span id="modal-route">—</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <i class="fas fa-calendar-day" style="color: var(--primary);"></i>
+            <strong>Sapar senesi:</strong> <span id="modal-date-time">—</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <i class="fas fa-train" style="color: var(--primary);"></i>
+            <strong>Wagon:</strong> <span id="modal-wagon">—</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <i class="fas fa-chair" style="color: var(--primary);"></i>
+            <strong>Orun:</strong> <span id="modal-seat">—</span>
+          </div>
+        </div>
+        <div id="modal-qr-container" style="text-align: center; margin: 15px 0; display: none;">
+          <img id="modal-qr-image" src="" alt="QR kod" style="max-width: 160px; border: 1px solid #ddd; border-radius: 8px;">
+        </div>
+        <div id="modal-pdf-link" style="text-align: center; margin: 15px 0; display: none;">
+          <a href="#" id="modal-pdf-url" target="_blank" class="pdf-link" style="background: #10b981; color: white; padding: 10px 20px; text-decoration: none; border-radius: 10px; font-weight: 600; display: inline-block;">
+            <i class="fas fa-download"></i> PDF yükläp alyň
+          </a>
+        </div>
+        <p style="font-size:0.82rem; margin-top:12px; color:#64748b; text-align:center; line-height: 1.4; padding-top: 12px; border-top: 1px dashed #94a3b8;">
+          <i class="fas fa-info-circle"></i> PDF ýükläp alyň diýen belgiň üstünden basyň we telefonyňyza göçürriň we sapar güni şu PDF den peýdalanyň.
+        </p>
+      </div>
     </div>
   </div>
   <ul class="nav-menu" id="nav-menu">
@@ -961,6 +1339,124 @@
   </ul>
   <div class="menu-overlay" id="menu-overlay"></div>
   <script>
+    const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
+    const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
+    const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
+    function setupScreenshotUploader() {
+      const dropArea = document.getElementById('drop-area');
+      const fileInput = document.getElementById('screenshot-file');
+      const previewContainer = document.getElementById('preview-container');
+      const previewImg = document.getElementById('preview-img');
+      const errorDiv = document.getElementById('file-error');
+      dropArea.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (e) => {
+        handleFile(e.target.files[0]);
+      });
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+      });
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => {
+          dropArea.style.borderColor = '#38bdf8';
+        }, false);
+      });
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => {
+          dropArea.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+        }, false);
+      });
+      dropArea.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const file = dt.files[0];
+        handleFile(file);
+      });
+      function handleFile(file) {
+        errorDiv.style.display = 'none';
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+          errorDiv.textContent = '⚠️ Surat 5 MB dan uly!';
+          errorDiv.style.display = 'block';
+          return;
+        }
+        if (!file.type.match('image.*')) {
+          errorDiv.textContent = '⚠️ Diňe ekran suraty (JPG, PNG, GIF)';
+          errorDiv.style.display = 'block';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previewImg.src = e.target.result;
+          previewContainer.style.display = 'block';
+          window.selectedScreenshotFile = file;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    function handleProofType(type) {
+      document.getElementById('proof-screenshot').checked = (type === 'screenshot');
+      document.getElementById('proof-sms').checked = (type === 'sms');
+      const smsSection = document.getElementById('sms-input-section');
+      const screenshotSection = document.getElementById('screenshot-upload-section');
+      if (type === 'sms') {
+        smsSection.style.display = 'block';
+        screenshotSection.style.display = 'none';
+        delete window.selectedScreenshotFile;
+        document.getElementById('preview-container').style.display = 'none';
+      } else {
+        smsSection.style.display = 'none';
+        screenshotSection.style.display = 'block';
+        if (!window.screenshotUploaderInitialized) {
+          setupScreenshotUploader();
+          window.screenshotUploaderInitialized = true;
+        }
+      }
+    }
+    function validateAllFields() {
+      const requiredFields = [
+        { id: 'name', label: 'Adyňyz' },
+        { id: 'surname', label: 'Familýaňyz' },
+        { id: 'birthdate', label: 'Doglan aýy güni' },
+        { id: 'passport', label: 'Pasport ID' },
+        { id: 'travel-date', label: 'Sapar senesi' },
+        { id: 'client-phone', label: 'Siziň nomeriňiz' }
+      ];
+      for (const field of requiredFields) {
+        const el = document.getElementById(field.id);
+        if (!el || !el.value.trim()) {
+          alert(`⚠️ "${field.label}" meýdançasy doldurylmaly!`);
+          return false;
+        }
+      }
+      const fromCity = document.getElementById('from-city').value;
+      const toCity = document.getElementById('to-city').value;
+      if (fromCity === toCity) {
+        alert('⚠️ "Nirden" we "Nira" bir birinden tapawutly bolmaly!');
+        return false;
+      }
+      const proofType = document.querySelector('input[name="proof"]:checked');
+      if (!proofType) {
+        alert('⚠️ Töleg tassyklamasyny saýlaň!');
+        return false;
+      }
+      if (proofType.value === 'sms') {
+        const smsText = document.getElementById('sms-text').value.trim();
+        if (!smsText) {
+          alert('⚠️ SMS habary nusgasyny giriziň!');
+          return false;
+        }
+      }
+      if (proofType.value === 'screenshot') {
+        if (!window.selectedScreenshotFile) {
+          alert('⚠️ Skrinshot tanlanmady!');
+          return false;
+        }
+      }
+      return true;
+    }
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
@@ -975,6 +1471,7 @@
     }
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
+    
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
     const menuOverlay = document.getElementById('menu-overlay');
@@ -992,92 +1489,334 @@
         navMenu.classList.remove('active');
       });
     });
-
-    // Bilet izlash logikasi
-    document.getElementById('search-ticket-btn').addEventListener('click', async () => {
-      const codeInput = document.getElementById('booking-code');
-      const code = codeInput.value.trim().toUpperCase();
-      if (!code || code.length !== 6 || !/^[A-Z0-9]{6}$/.test(code)) {
-        alert('⚠️ Bron kody 6 belgi bolmaly (meselem: ABC123)');
+    
+    document.getElementById('continue-btn').addEventListener('click', function() {
+      if (document.getElementById('read-info').checked) {
+        document.getElementById('form-section').style.display = 'block';
+        const notes = document.querySelectorAll('.note, .highlight, .checkbox-group');
+        notes.forEach(note => note.style.display = 'none');
+        const smsButton = document.getElementById('sms-btn');
+        if (smsButton) smsButton.style.display = 'none';
+        calculatePrice();
+      } else {
+        alert('Maglumatlary okap çykdym we razy ketegine belgi goýuň!');
+      }
+    });
+    document.getElementById('pay-btn').addEventListener('click', function() {
+      const name = document.getElementById('name').value;
+      const surname = document.getElementById('surname').value;
+      const travelDate = document.getElementById('travel-date').value;
+      if (!name || !surname || !travelDate) {
+        alert('Ähli meýdançalary dolduryň!');
         return;
       }
-
-      const loadingEl = document.getElementById('ticket-loading');
-      const errorEl = document.getElementById('ticket-error');
-      const resultEl = document.getElementById('ticket-result');
-      loadingEl.style.display = 'block';
-      errorEl.style.display = 'none';
-      resultEl.style.display = 'none';
-
+      const total = calculatePrice();
+      const diffDays = Math.ceil((new Date(travelDate) - new Date()) / (1000 * 60 * 60 * 24));
+      updatePaymentAmountDisplay(total, diffDays);
+      document.getElementById('payment-section').style.display = 'block';
+      document.getElementById('form-section').style.display = 'none';
+    });
+    const today = new Date();
+    const maxDate = new Date();
+    maxDate.setDate(today.getDate() + 15);
+    const travelDateInput = document.getElementById('travel-date');
+    const todayStr = today.toISOString().split('T')[0];
+    const maxDateStr = maxDate.toISOString().split('T')[0];
+    travelDateInput.min = todayStr;
+    travelDateInput.max = maxDateStr;
+    function calculatePrice() {
+      const travelDateInput = document.getElementById('travel-date');
+      if (!travelDateInput?.value) return 0;
+      const travelDate = new Date(travelDateInput.value);
+      const today = new Date();
+      const diffTime = travelDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      let basePrice = 60;
+      if (diffDays <= 1) basePrice = 80;
+      else if (diffDays <= 3) basePrice = 70;
+      let addons = 0;
+      if (document.getElementById('second-class')?.checked) {
+        addons += (diffDays <= 4) ? 10 : 5;
+      }
+      if (document.getElementById('media')?.checked) {
+        addons += 5;
+      }
+      if (document.getElementById('first-class')?.checked) {
+        addons += (diffDays <= 4) ? 15 : 10;
+      }
+      let total = basePrice + addons;
+      if (total < 0) total = 0;
+      const priceDisplay = document.getElementById('total-price');
+      if (priceDisplay) priceDisplay.textContent = total.toFixed(2);
+      return total;
+    }
+    function updatePaymentAmountDisplay(total, diffDays) {
+      const paymentDisplay = document.getElementById('payment-amount-display');
+      if (!paymentDisplay) return;
+      let basePrice = 60;
+      if (diffDays <= 1) basePrice = 80;
+      else if (diffDays <= 3) basePrice = 70;
+      let html = `<p><strong><i class="fas fa-money-bill-wave"></i> Bilediň bahasy : ${basePrice} TMT</strong></p>`;
+      if (document.getElementById('first-class')?.checked) html += `<p><i class="fas fa-ticket-alt"></i> 1-nji gat: +${(diffDays <= 4) ? 15 : 10} TMT</p>`;
+      if (document.getElementById('second-class')?.checked) html += `<p><i class="fas fa-ticket-alt"></i> 2-nji gat: +${(diffDays <= 4) ? 10 : 5} TMT</p>`;
+      if (document.getElementById('media')?.checked) html += `<p><i class="fas fa-tv"></i> Media portal: +5 TMT</p>`;
+      html += `<p><strong><i class="fas fa-money-bill-wave"></i> Jemi töleg: ${total.toFixed(2)} TMT</strong></p>`;
+      html += `<p><i class="fas fa-phone"></i> +993 71 789091</p><p><i class="fas fa-phone"></i> +993 64 629487</p><p><i class="fas fa-phone"></i> +993 71 788546</p>`;
+      paymentDisplay.innerHTML = html;
+    }
+    
+    document.getElementById('first-class')?.addEventListener('change', function() {
+      if (this.checked) document.getElementById('second-class').checked = false;
+    });
+    document.getElementById('second-class')?.addEventListener('change', function() {
+      if (this.checked) document.getElementById('first-class').checked = false;
+    });
+    ['travel-date', 'first-class', 'second-class', 'media'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('change', calculatePrice);
+    });
+    document.querySelectorAll('.radio-option').forEach(option => {
+      option.addEventListener('click', function() {
+        const radio = this.querySelector('input[type="radio"]');
+        if (radio) radio.checked = true;
+        const type = radio.id.includes('screenshot') ? 'screenshot' : 'sms';
+        handleProofType(type);
+      });
+    });
+    document.getElementById('passport').addEventListener('input', function() {
+      this.value = this.value.toUpperCase();
+    });
+    document.getElementById('submit-btn').addEventListener('click', async function() {
+      if (!validateAllFields()) return;
+      const clientPhone = document.getElementById('client-phone').value;
+      const proofType = document.querySelector('input[name="proof"]:checked').value;
+      const name = document.getElementById('name').value;
+      const surname = document.getElementById('surname').value;
+      const passport = document.getElementById('passport').value;
+      const route = document.getElementById('route').value;
+      const [fromCity, toCity] = route.split('-');
+      const routeText = `${cityNames[fromCity] || fromCity} → ${cityNames[toCity] || toCity}`;
+      const travelDate = document.getElementById('travel-date').value;
+      const totalPrice = document.getElementById('total-price').textContent;
+      document.getElementById('conf-name').textContent = name;
+      document.getElementById('conf-surname').textContent = surname;
+      document.getElementById('conf-passport').textContent = passport;
+      document.getElementById('conf-route').textContent = routeText;
+      document.getElementById('conf-date').textContent = travelDate;
+      document.getElementById('conf-price').textContent = totalPrice;
+      document.getElementById('conf-phone').textContent = clientPhone;
+      document.getElementById('conf-proof').textContent = proofType === 'screenshot' ? 'Skrinshot' : 'SMS habary';
+      if (proofType === 'screenshot') {
+        window.tempScreenshotFile = window.selectedScreenshotFile;
+      } else {
+        delete window.tempScreenshotFile;
+      }
+      document.getElementById('payment-section').style.display = 'none';
+      document.getElementById('confirmation-section').style.display = 'block';
+    });
+    document.getElementById('confirm-yes').addEventListener('click', async function() {
+      if (!validateAllFields()) return;
+      const name = document.getElementById('name').value;
+      const surname = document.getElementById('surname').value;
+      const passport = document.getElementById('passport').value;
+      const birthdate = document.getElementById('birthdate').value;
+      const route = document.getElementById('route').value;
+      const travelDate = document.getElementById('travel-date').value;
+      const totalPrice = parseFloat(document.getElementById('total-price').textContent);
+      const clientPhone = document.getElementById('client-phone').value;
+      const firstClass = document.getElementById('first-class').checked;
+      const secondClass = document.getElementById('second-class').checked;
+      const mediaPortal = document.getElementById('media').checked;
+      const proofType = document.querySelector('input[name="proof"]:checked').value;
+      const smsText = proofType === 'sms' ? document.getElementById('sms-text').value : null;
+      const loading = document.getElementById('loading');
+      const error = document.getElementById('error');
+      const btn = document.getElementById('confirm-yes');
+      loading.style.display = 'block';
+      error.style.display = 'none';
+      btn.disabled = true;
       try {
-        const apiUrl = `https://www.yenil.ru/api/demiryol?id=${encodeURIComponent(code)}`;
-        const response = await fetch(apiUrl, { method: 'GET' });
-        if (!response.ok) {
-          const err = await response.json().catch(() => ({}));
-          throw new Error(err.error || `Server xatosi: ${response.status}`);
-        }
-        const result = await response.json();
-        if (!result.data?.booking) {
-          throw new Error('⚠️ Bron kody tapylmady');
-        }
-
-        const booking = result.data.booking;
-        const ticket = booking.tickets?.[0];
-        const pnr = ticket?.pnrs?.[0];
-        if (!pnr) throw new Error('⚠️ Maglumat ýeterlik däl');
-
-        document.getElementById('modal-passenger').textContent = booking.main_contact || '—';
-        document.getElementById('modal-route').textContent = `${pnr.source || '—'} → ${pnr.destination || '—'}`;
-        const depDate = new Date(pnr.departure_time);
-        const formattedDate = depDate.toLocaleDateString('tk', { month: 'long', day: 'numeric' });
-        const depTime = pnr.departure_time.split('T')[1]?.slice(0,5) || '—';
-        const arrTime = pnr.arrival_time.split('T')[1]?.slice(0,5) || '—';
-        document.getElementById('modal-date-time').textContent = `${formattedDate} (${depTime} → ${arrTime})`;
-        document.getElementById('modal-wagon').textContent = `${pnr.wagon_type_title || '—'} (№${pnr.wagon_number || '?'})`;
-        document.getElementById('modal-seat').textContent = pnr.seat_label || '?';
-
-        // QR kodni avtomatik HTTPS orqali yuklash
-        const qrContainer = document.getElementById('modal-qr-container');
-        const qrImage = document.getElementById('modal-qr-image');
-        if (ticket?.qr_code) {
-          let qrUrl = ticket.qr_code;
-          if (qrUrl.startsWith('http://')) {
-            qrUrl = `/api/proxy-qr?url=${encodeURIComponent(qrUrl)}`;
+        let screenshotUrl = null;
+        if (proofType === 'screenshot' && window.tempScreenshotFile) {
+          const file = window.tempScreenshotFile;
+          const formData = new FormData();
+          formData.append('screenshot', file);
+          const res = await fetch('/api/upload-screenshot', {
+            method: 'POST',
+            body: formData
+          });
+          if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.error || 'Yüklemekde ýalňyşlyk');
           }
-          qrImage.src = qrUrl;
-          qrImage.onerror = () => {
-            qrContainer.style.display = 'none';
-          };
-          qrContainer.style.display = 'block';
-        } else {
-          qrContainer.style.display = 'none';
+          const data = await res.json();
+          screenshotUrl = data.secure_url;
         }
-
-        // PDF link
-        const pdfLink = document.getElementById('modal-pdf-link');
-        const pdfUrl = document.getElementById('modal-pdf-url');
-        if (ticket?.pdf_url) {
-          pdfUrl.href = ticket.pdf_url;
-          pdfLink.style.display = 'block';
-        } else {
-          pdfLink.style.display = 'none';
+        const response = await fetch(`${BASE_URL}/data/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'demiryol',
+            name: name,
+            surname: surname,
+            passport: passport,
+            birthdate: birthdate,
+            route: route,
+            travelDate: travelDate,
+            totalPrice: totalPrice,
+            clientPhone: clientPhone,
+            proofType: proofType,
+            smsText: smsText,
+            screenshotUrl: screenshotUrl,
+            firstClass: firstClass,
+            secondClass: secondClass,
+            mediaPortal: mediaPortal,
+            timestamp: new Date().toISOString(),
+            created: new Date().toISOString(),
+            updated: new Date().toISOString()
+          })
+        });
+        if (!response.ok) {
+          throw new Error(`Status: ${response.status}`);
         }
-
-        resultEl.style.display = 'block';
+        document.getElementById('confirmation-section').style.display = 'none';
+        document.getElementById('success-section').style.display = 'block';
       } catch (err) {
-        errorEl.textContent = '❌ ' + (err.message || 'Nätanyş ýalňyşlyk');
-        errorEl.style.display = 'block';
+        error.textContent = 'Ýalňyşlyk: ' + (err.message || '⛔ Bilinmeýän ýalňyşlyk');
+        error.style.display = 'block';
       } finally {
-        loadingEl.style.display = 'none';
+        loading.style.display = 'none';
+        btn.disabled = false;
       }
     });
-
-    // Enter tugmasi bilan qidirish
-    document.getElementById('booking-code').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        document.getElementById('search-ticket-btn').click();
-      }
+    document.getElementById('confirm-no').addEventListener('click', function() {
+      document.getElementById('confirmation-section').style.display = 'none';
+      document.getElementById('payment-section').style.display = 'block';
     });
+    document.addEventListener('DOMContentLoaded', () => {
+      const printBtn = document.getElementById('print-ticket-btn');
+      const modal = document.getElementById('ticket-modal');
+      const overlay = document.getElementById('modal-overlay');
+      const closeBtn = document.getElementById('close-modal');
+      const searchBtn = document.getElementById('search-ticket-btn');
+      const codeInput = document.getElementById('booking-code');
+      if (!printBtn || !modal || !overlay || !closeBtn || !searchBtn) return;
+      printBtn.addEventListener('click', () => {
+        modal.style.display = 'block';
+        overlay.style.display = 'block';
+        codeInput.value = '';
+        document.getElementById('ticket-result').style.display = 'none';
+        document.getElementById('ticket-error').style.display = 'none';
+      });
+      const closeModal = () => {
+        modal.style.display = 'none';
+        overlay.style.display = 'none';
+      };
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', closeModal);
+      codeInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchBtn.click();
+      });
+      searchBtn.addEventListener('click', async () => {
+        const code = codeInput.value.trim().toUpperCase();
+        if (!code || code.length !== 6 || !/^[A-Z0-9]{6}$/.test(code)) {
+          alert('⚠️ Bron kody 6 belgi bolmaly (meselem: ABC123)');
+          return;
+        }
+        const loadingEl = document.getElementById('ticket-loading');
+        const errorEl = document.getElementById('ticket-error');
+        const resultEl = document.getElementById('ticket-result');
+        loadingEl.style.display = 'block';
+        errorEl.style.display = 'none';
+        resultEl.style.display = 'none';
+        try {
+          const apiUrl = `https://www.yenil.ru/api/demiryol?id=${encodeURIComponent(code)}`;
+          const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+          });
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || `Server xatosi: ${response.status}`);
+          }
+          const result = await response.json();
+          if (!result.data?.booking) {
+            throw new Error('⚠️ Bron kody tapylmady');
+          }
+          const booking = result.data.booking;
+          const ticket = booking.tickets?.[0];
+          const pnr = ticket?.pnrs?.[0];
+          if (!pnr) throw new Error('⚠️ Bilet maglumatlary ýeterli däl');
+          const modalPassenger = document.getElementById('modal-passenger');
+          const modalRoute = document.getElementById('modal-route');
+          const modalDateTime = document.getElementById('modal-date-time');
+          const modalWagon = document.getElementById('modal-wagon');
+          const modalSeat = document.getElementById('modal-seat');
+          const modalQrContainer = document.getElementById('modal-qr-container');
+          const modalQrImage = document.getElementById('modal-qr-image');
+          const modalPdfLink = document.getElementById('modal-pdf-link');
+          const modalPdfUrl = document.getElementById('modal-pdf-url');
+          modalPassenger.textContent = booking.main_contact || '—';
+          modalRoute.textContent = `${pnr.source || '—'} → ${pnr.destination || '—'}`;
+          const depDate = new Date(pnr.departure_time);
+          const formattedDate = depDate.toLocaleDateString('tk', { month: 'long', day: 'numeric' });
+          const depTime = pnr.departure_time.split('T')[1]?.slice(0,5) || '—';
+          const arrTime = pnr.arrival_time.split('T')[1]?.slice(0,5) || '—';
+          modalDateTime.textContent = `${formattedDate} (${depTime} → ${arrTime})`;
+          modalWagon.textContent = `${pnr.wagon_type_title || '—'} (№${pnr.wagon_number || '?'})`;
+          modalSeat.textContent = pnr.seat_label || '?';
+         // Yangi: QR Base64 yoki URL bo'lishi mumkin
+if (ticket?.qr_image) {
+  // Base64 — xavfsiz, hech qachon bloklanmaydi
+  modalQrImage.src = ticket.qr_image;
+  modalQrContainer.style.display = 'block';
+} else if (ticket?.qr_code) {
+  // Zaxira sifatida — eski usul
+  let qrUrl = ticket.qr_code;
+  if (qrUrl.startsWith('http://')) {
+    qrUrl = `/api/proxy-qr?url=${encodeURIComponent(qrUrl)}`;
+  }
+  modalQrImage.src = qrUrl;
+  modalQrImage.onerror = () => {
+    modalQrContainer.style.display = 'none';
+  };
+  modalQrContainer.style.display = 'block';
+} else {
+  modalQrContainer.style.display = 'none';
+}
+          if (ticket?.pdf_url) {
+            modalPdfUrl.href = ticket.pdf_url;
+            modalPdfLink.style.display = 'block';
+          } else {
+            modalPdfLink.style.display = 'none';
+          }
+          resultEl.style.display = 'block';
+        } catch (err) {
+          console.error('⚠️ Ýalňyşlyk:', err);
+          errorEl.textContent = '❌ ' + (err.message || 'Nätanyş ýalňyşlyk');
+          errorEl.style.display = 'block';
+        } finally {
+          loadingEl.style.display = 'none';
+        }
+      });
+    });
+    const cityNames = {
+      ashgabat: 'Aşgabat',
+      dashoguz: 'Daşoguz',
+      balkanabat: 'Balkanabat',
+      turkmenbasy: 'Türkmenbaşy',
+      mary: 'Mary', 
+      lebap: 'Lebap'
+      
+    };
+    function updateRoute() {
+      const from = document.getElementById('from-city').value;
+      const to = document.getElementById('to-city').value;
+      document.getElementById('route').value = `${from}-${to}`;
+    }
+    document.getElementById('from-city').addEventListener('change', updateRoute);
+    document.getElementById('to-city').addEventListener('change', updateRoute);
+    updateRoute();
   </script>
 </body>
 </html>
