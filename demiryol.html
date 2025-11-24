@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tk" dir="ltr">
 <head>
-  <!-- Open  Graph & Twitter -->
+  <!-- Open Graph & Twitter -->
   <meta property="og:title" content="Ýeňil — Demirýollary">
   <meta property="og:description" content="Ýeňil Demirýollary — Biletleri TMCELL üsti bilen kart tölegsiz, arzan we tiz satyn alyň">
   <meta property="og:image" content="https://www.yenil.ru/images/logo-1.png">
@@ -679,7 +679,6 @@
       background: rgba(6, 95, 70, 0.25);
       color: #bbf7d0;
     }
-    
     .premium-spinner {
       position: relative;
       width: 50px;
@@ -733,7 +732,6 @@
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.5); opacity: 0.7; }
     }
-    
     body.dark-mode .premium-spinner .spinner-circle {
       border-top-color: #6ee7b7;
     }
@@ -845,9 +843,9 @@
       color: var(--dark-text);
     }
     body.dark-mode #ticket-modal .modal-content input {
-  background: #ffffff; 
-  color: #333; 
-}
+      background: #ffffff; 
+      color: #333; 
+    }
     #ticket-modal .close-btn {
       position: absolute;
       top: 15px;
@@ -948,7 +946,6 @@
     body.dark-mode #confirmation-section .btn.no {
       background: #64748b;
     }
-   
     #screenshot-upload-section {
       display: none;
       margin-top: 20px;
@@ -1237,7 +1234,6 @@
         <div class="info-box">
           <i class="fas fa-question-circle"></i> <strong>Tasyklaýamyň?</strong> Eger ähli maglumatlar dogry bolsa, "Hawa" düwmesine basyň.
         </div>
-        
         <div class="loading" id="loading">
           <div class="premium-spinner">
             <div class="spinner-circle"></div>
@@ -1289,43 +1285,14 @@
       <div id="ticket-error" style="display:none; background: #fee; color: #c33; padding: 15px; border-radius: 14px; margin-top: 15px; text-align: center; font-size: 0.95rem; border-left: 4px solid #f59e0b;">
         <i class="fas fa-exclamation-triangle"></i> <strong>Ýalňyşlyk:</strong> Bron kody tapylmady.
       </div>
-      <div id="ticket-result" style="display:none; background: #f0fdf4; color: #065f46; padding: 20px; border-radius: 14px; margin-top: 15px; font-size: 0.95rem; border-left: 4px solid #10b981; box-shadow: inset 0 0 10px rgba(16,185,128,0.1);">
-        <h3 style="color: var(--primary); text-align:center; margin-bottom:12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <i class="fas fa-ticket-alt"></i> Bilet tapyldy!
-        </h3>
-        <div style="font-size: 1.05rem; line-height: 1.6; margin: 15px 0;">
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-            <i class="fas fa-user" style="color: var(--primary);"></i>
-            <strong>Müşderi:</strong> <span id="modal-passenger">—</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-            <i class="fas fa-route" style="color: var(--primary);"></i>
-            <strong>Ugraýar:</strong> <span id="modal-route">—</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-            <i class="fas fa-calendar-day" style="color: var(--primary);"></i>
-            <strong>Sapar senesi:</strong> <span id="modal-date-time">—</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-            <i class="fas fa-train" style="color: var(--primary);"></i>
-            <strong>Wagon:</strong> <span id="modal-wagon">—</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-            <i class="fas fa-chair" style="color: var(--primary);"></i>
-            <strong>Orun:</strong> <span id="modal-seat">—</span>
-          </div>
+      <div id="ticket-result" style="display:none; padding: 20px; border-radius: 14px; margin-top: 15px; font-size: 0.95rem;">
+        <h3 id="ticket-result-title" style="text-align:center; margin-bottom:12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;"></h3>
+        <div id="ticket-info" style="font-size: 1.05rem; line-height: 1.6; margin: 15px 0;">
+          <!-- Dynamic passenger info will go here -->
         </div>
-        <div id="modal-qr-container" style="text-align: center; margin: 15px 0; display: none;">
-          <img id="modal-qr-image" src="" alt="QR kod" style="max-width: 160px; border: 1px solid #ddd; border-radius: 8px;">
+        <div id="ticket-actions" style="text-align: center; margin: 15px 0;">
+          <!-- Dynamic QR/PDF or expired message goes here -->
         </div>
-        <div id="modal-pdf-link" style="text-align: center; margin: 15px 0; display: none;">
-          <a href="#" id="modal-pdf-url" target="_blank" class="pdf-link" style="background: #10b981; color: white; padding: 10px 20px; text-decoration: none; border-radius: 10px; font-weight: 600; display: inline-block;">
-            <i class="fas fa-download"></i> PDF yükläp alyň
-          </a>
-        </div>
-        <p style="font-size:0.82rem; margin-top:12px; color:#64748b; text-align:center; line-height: 1.4; padding-top: 12px; border-top: 1px dashed #94a3b8;">
-          <i class="fas fa-info-circle"></i> PDF ýükläp alyň diýen belgiň üstünden basyň we telefonyňyza göçürriň we sapar güni şu PDF den peýdalanyň.
-        </p>
       </div>
     </div>
   </div>
@@ -1471,7 +1438,6 @@
     }
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
-    
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
     const menuOverlay = document.getElementById('menu-overlay');
@@ -1489,7 +1455,6 @@
         navMenu.classList.remove('active');
       });
     });
-    
     document.getElementById('continue-btn').addEventListener('click', function() {
       if (document.getElementById('read-info').checked) {
         document.getElementById('form-section').style.display = 'block';
@@ -1564,7 +1529,6 @@
       html += `<p><i class="fas fa-phone"></i> +993 71 789091</p><p><i class="fas fa-phone"></i> +993 64 629487</p><p><i class="fas fa-phone"></i> +993 71 788546</p>`;
       paymentDisplay.innerHTML = html;
     }
-    
     document.getElementById('first-class')?.addEventListener('change', function() {
       if (this.checked) document.getElementById('second-class').checked = false;
     });
@@ -1726,6 +1690,9 @@
         const loadingEl = document.getElementById('ticket-loading');
         const errorEl = document.getElementById('ticket-error');
         const resultEl = document.getElementById('ticket-result');
+        const ticketInfo = document.getElementById('ticket-info');
+        const actionsContainer = document.getElementById('ticket-actions');
+        const titleEl = document.getElementById('ticket-result-title');
         loadingEl.style.display = 'block';
         errorEl.style.display = 'none';
         resultEl.style.display = 'none';
@@ -1747,49 +1714,89 @@
           const ticket = booking.tickets?.[0];
           const pnr = ticket?.pnrs?.[0];
           if (!pnr) throw new Error('⚠️ Bilet maglumatlary ýeterli däl');
-          const modalPassenger = document.getElementById('modal-passenger');
-          const modalRoute = document.getElementById('modal-route');
-          const modalDateTime = document.getElementById('modal-date-time');
-          const modalWagon = document.getElementById('modal-wagon');
-          const modalSeat = document.getElementById('modal-seat');
-          const modalQrContainer = document.getElementById('modal-qr-container');
-          const modalQrImage = document.getElementById('modal-qr-image');
-          const modalPdfLink = document.getElementById('modal-pdf-link');
-          const modalPdfUrl = document.getElementById('modal-pdf-url');
-          modalPassenger.textContent = booking.main_contact || '—';
-          modalRoute.textContent = `${pnr.source || '—'} → ${pnr.destination || '—'}`;
-          const depDate = new Date(pnr.departure_time);
-          const formattedDate = depDate.toLocaleDateString('tk', { month: 'long', day: 'numeric' });
-          const depTime = pnr.departure_time.split('T')[1]?.slice(0,5) || '—';
-          const arrTime = pnr.arrival_time.split('T')[1]?.slice(0,5) || '—';
-          modalDateTime.textContent = `${formattedDate} (${depTime} → ${arrTime})`;
-          modalWagon.textContent = `${pnr.wagon_type_title || '—'} (№${pnr.wagon_number || '?'})`;
-          modalSeat.textContent = pnr.seat_label || '?';
-         // Yangi: QR Base64 yoki URL bo'lishi mumkin
-if (ticket?.qr_image) {
-  // Base64 — xavfsiz, hech qachon bloklanmaydi
-  modalQrImage.src = ticket.qr_image;
-  modalQrContainer.style.display = 'block';
-} else if (ticket?.qr_code) {
-  // Zaxira sifatida — eski usul
-  let qrUrl = ticket.qr_code;
-  if (qrUrl.startsWith('http://')) {
-    qrUrl = `/api/proxy-qr?url=${encodeURIComponent(qrUrl)}`;
-  }
-  modalQrImage.src = qrUrl;
-  modalQrImage.onerror = () => {
-    modalQrContainer.style.display = 'none';
-  };
-  modalQrContainer.style.display = 'block';
-} else {
-  modalQrContainer.style.display = 'none';
-}
-          if (ticket?.pdf_url) {
-            modalPdfUrl.href = ticket.pdf_url;
-            modalPdfLink.style.display = 'block';
+
+          const now = new Date();
+          const expireTime = new Date(booking.expire_time || '1970-01-01');
+          const isExpired = now > expireTime;
+
+          // Ticket title
+          if (isExpired) {
+            titleEl.innerHTML = `<i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> Bilediňiziň möhleti dolan`;
+            titleEl.style.color = '#ef4444';
           } else {
-            modalPdfLink.style.display = 'none';
+            titleEl.innerHTML = `<i class="fas fa-ticket-alt"></i> Bilet tapyldy!`;
+            titleEl.style.color = 'var(--primary)';
           }
+
+          // Passenger info
+          let infoHtml = `
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <i class="fas fa-user" style="color: var(--primary);"></i>
+              <strong>Müşderi:</strong> <span>${booking.main_contact || '—'}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <i class="fas fa-route" style="color: var(--primary);"></i>
+              <strong>Ugraýar:</strong> <span>${(pnr.source || '—')} → ${pnr.destination || '—'}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <i class="fas fa-calendar-day" style="color: var(--primary);"></i>
+              <strong>Sapar senesi:</strong> 
+              <span>${new Date(pnr.departure_time).toLocaleDateString('tk', { month: 'long', day: 'numeric' })} (${pnr.departure_time.split('T')[1]?.slice(0,5) || '—'} → ${pnr.arrival_time.split('T')[1]?.slice(0,5) || '—'})</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <i class="fas fa-train" style="color: var(--primary);"></i>
+              <strong>Wagon:</strong> <span>${pnr.wagon_type_title || '—'} (№${pnr.wagon_number || '?'})</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <i class="fas fa-chair" style="color: var(--primary);"></i>
+              <strong>Orun:</strong> <span>${pnr.seat_label || '?'}</span>
+            </div>
+          `;
+          ticketInfo.innerHTML = infoHtml;
+
+          // Actions (QR/PDF or expired message)
+          if (isExpired) {
+            actionsContainer.innerHTML = `
+              <div style="background: #fee; color: #c33; padding: 16px; border-radius: 12px; width: 100%; border-left: 4px solid #f59e0b; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <p style="margin: 0; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.05rem;">
+                  <i class="fas fa-times-circle" style="color: #ef4444;"></i>
+                  Bilediňiziň möhleti dolan, ulanyp bilmeýäňiz
+                </p>
+              </div>
+            `;
+          } else {
+            actionsContainer.innerHTML = `
+              <div style="display: flex; justify-content: center; gap: 12px; width: 100%;">
+                <a href="${ticket?.qr_code || '#'}" ${ticket?.qr_code ? 'target="_blank"' : ''} style="
+                  display: flex; align-items: center; justify-content: center;
+                  width: 40px; height: 40px;
+                  background: #10b981;
+                  color: white;
+                  border-radius: 10px;
+                  text-decoration: none;
+                  font-size: 20px;
+                ">
+                  <i class="fas fa-qrcode"></i>
+                </a>
+                <a href="${ticket?.pdf_url || '#'}" ${ticket?.pdf_url ? 'target="_blank"' : ''} class="pdf-link" style="
+                  display: inline-flex; align-items: center; justify-content: center;
+                  padding: 0 16px; height: 40px;
+                  background: #10b981;
+                  color: white;
+                  border-radius: 10px;
+                  text-decoration: none;
+                  font-weight: 600;
+                  font-size: 16px;
+                ">
+                  <i class="fas fa-download"></i> PDF ýükläp al
+                </a>
+              </div>
+              <p style="font-size:0.82rem; margin-top:12px; color:#64748b; text-align:center; line-height: 1.4; padding-top: 12px; border-top: 1px dashed #94a3b8;">
+                <i class="fas fa-info-circle"></i> QR ýa-da PDF ýükläp al diýen belgiň üstünden basyň we telefonyňyza göçürriň we sapar güni şu PDF den peýdalanyň.
+              </p>
+            `;
+          }
+
           resultEl.style.display = 'block';
         } catch (err) {
           console.error('⚠️ Ýalňyşlyk:', err);
@@ -1807,7 +1814,6 @@ if (ticket?.qr_image) {
       turkmenbasy: 'Türkmenbaşy',
       mary: 'Mary', 
       lebap: 'Lebap'
-      
     };
     function updateRoute() {
       const from = document.getElementById('from-city').value;
