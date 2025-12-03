@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tk">
 <head>
-<meta property="og:title" content="Ýeňil — Ýardam">
+  <meta property="og:title" content="Ýeňil — Ýardam">
   <meta property="og:description" content="Ýeňil — Bilmedik ýerleriňiz bolsa biz bar biz bilen öwreniň...">
   <meta property="og:image" content="https://www.yenil.ru/images/logo-headr.png">
   <meta property="og:url" content="https://yenil.ru/help.html">
@@ -46,7 +46,7 @@
     body {
       font-family: 'Poppins', sans-serif;
       font-size: 20px;
-      line-height: 1.6;
+      line-height: 1.8;
       background: var(--light-bg);
       color: var(--light-text);
       transition: background 0.4s ease, color 0.4s ease;
@@ -102,139 +102,189 @@
     body.dark-mode .logo-img {
       filter: brightness(0.9);
     }
+
+    /* === FAQ STILI (MUKAMMAL QILIB) === */
     .faq-container {
       max-width: 800px;
       margin: 0 auto;
     }
     .faq-item {
-      margin-bottom: 15px;
-      border-radius: 12px;
+      margin-bottom: 25px;
+      border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease;
+    }
+    .faq-item:hover {
+      transform: translateY(-2px);
     }
     .faq-question {
       width: 100%;
-      padding: 18px 20px;
+      padding: 22px 25px;
       font-size: 20px;
       background: var(--card-light);
       border: none;
       text-align: left;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--primary);
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
     .faq-answer {
-      font-size: 18px;
+      font-size: 20px;
       display: none;
-      padding: 18px 20px;
-      background: #f8fafc;
-      border-top: 10px solid #e2e8f0;
-      line-height: 1.6;
+      padding: 25px 30px;
+      background: var(--card-light);
+      border-top: 4px solid var(--accent);
+      line-height: 1.8;
+      animation: fadeInUp 0.4s ease-out;
+      border-radius: 0 0 16px 16px;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .faq-answer i {
+      color: var(--primary);
+      margin-right: 10px;
+      font-size: 1.3em;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.85; }
     }
     body.dark-mode .faq-question {
       background: var(--card-dark);
     }
     body.dark-mode .faq-answer {
-      background: #1e293b;
+      background: var(--card-dark);
       border-top-color: #334155;
     }
+
+    /* === FORMA STILI (MUKAMMAL QILIB) === */
+    .content {
+      margin-top: 50px;
+      padding: 35px;
+      background: var(--card-light);
+      border-radius: 20px;
+      box-shadow: 0 10px 32px rgba(0,0,0,0.09);
+      animation: fadeInUp 0.5s ease-out;
+    }
+    body.dark-mode .content {
+      background: var(--card-dark);
+      box-shadow: 0 10px 32px rgba(0,0,0,0.25);
+    }
     .form-group {
-      margin: 20px 0;
+      margin: 28px 0;
+      position: relative;
     }
     label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 18px;
+      color: var(--light-text);
+      transition: color 0.3s ease;
+    }
+    body.dark-mode label {
+      color: var(--dark-text);
     }
     input, textarea {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
+      padding: 15px 20px;
+      border: 2px solid #ddd;
+      border-radius: 14px;
       font-size: 1rem;
       background: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 2px 12px rgba(4, 120, 87, 0.25);
     }
     body.dark-mode input,
     body.dark-mode textarea {
       background: #1e293b;
       border-color: #334155;
       color: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
-    
-    .premium-spinner {
-      position: relative;
-      width: 50px;
-      height: 50px;
-      margin: 0 auto;
+    h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: var(--primary);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      animation: bounceIn 0.6s ease-out;
     }
-    .spinner-circle {
-      position: absolute;
-      top: 0;
-      left: 0;
+    p {
+      font-size: 17px;
+      margin-bottom: 25px;
+      text-align: center;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    body.dark-mode p {
+      color: #94a3b8;
+    }
+
+    /* Tugmalar */
+    .proof-btn, .submit-btn {
+      display: block;
       width: 100%;
-      height: 100%;
-      border: 4px solid transparent;
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1.2s linear infinite;
-      z-index: 1;
+      padding: 18px;
+      background: var(--gradient);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 30px;
+      box-shadow: 0 4px 18px rgba(4, 120, 87, 0.3);
     }
-    .spinner-dot {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background-color: var(--primary);
-      border-radius: 50%;
-      animation: pulse 1.2s ease-in-out infinite;
+    .submit-btn {
+      background: linear-gradient(135deg, #059669, #047857);
     }
-    .spinner-dot:nth-child(2) {
-      top: 50%;
-      left: 0;
-      transform: translateY(-50%);
-      animation-delay: 0.3s;
+    .proof-btn:hover, .submit-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 22px rgba(4, 120, 87, 0.4);
+      opacity: 0.96;
     }
-    .spinner-dot:nth-child(3) {
-      top: 50%;
-      right: 0;
-      transform: translateY(-50%);
-      animation-delay: 0.6s;
+    .proof-btn:disabled, .submit-btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
-    .spinner-dot:nth-child(4) {
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      animation-delay: 0.9s;
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.5); opacity: 0.7; }
-    }
-    body.dark-mode .premium-spinner .spinner-circle {
-      border-top-color: #6ee7b7;
-    }
-    body.dark-mode .premium-spinner .spinner-dot {
-      background-color: #6ee7b7;
-    }
+
+    /* Loading va xatoliklar */
     .loading {
       display: none;
       text-align: center;
-      padding: 25px;
+      padding: 30px;
+      animation: fadeIn 0.3s ease;
     }
     .loading p {
       color: #64748b;
-      font-size: 0.9rem;
-      margin-top: 10px;
+      font-size: 0.95rem;
+      margin-top: 15px;
       font-weight: 500;
     }
     body.dark-mode .loading p {
@@ -243,64 +293,45 @@
     .error-message {
       color: #ef476f;
       text-align: center;
-      margin-top: 10px;
+      margin-top: 15px;
       display: none;
       font-weight: 600;
+      font-size: 17px;
+      animation: shake 0.5s ease-in-out;
     }
-.menu-toggle {
-  font-size: 1.8rem;
-  color: #059669;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px 12px;
-  margin-right: 10px;
-  
-  margin-top: -105px;
-}
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
 
+    /* Animatsiyalar */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes bounceIn {
+      from { transform: scale(0.6); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
 
-.menu-toggle {
-  
-  margin-top: -30px; 
-}
-    .radio-option[data-type="file"] {
-      background: linear-gradient(135deg, #035e46, #035e46);
-      border: 2px solid #047857;
-      box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
-      transition: all 0.3s ease;
-      padding: 15px 20px;
-      min-width: 250px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      cursor: pointer;
-      border-radius: 16px;
-      flex: 1;
-    }
-    .radio-option[data-type="file"]:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(4, 120, 87, 0.4);
-    }
-    .radio-option[data-type="file"] input[type="radio"] {
-      display: none;
-    }
-    .radio-option[data-type="file"] label {
-      color: #fef3c7;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      font-size: 1.1rem;
-    }
+    /* Fayl yuklash qismi (faqat stil) */
     #file-upload-section {
       display: none;
-      margin-top: 20px;
+      margin-top: 25px;
       background: var(--card-light);
-      padding: 20px;
-      border-radius: 16px;
+      padding: 25px;
+      border-radius: 18px;
       border: 2px dashed var(--primary);
     }
     body.dark-mode #file-upload-section {
@@ -308,8 +339,8 @@
     }
     #drop-area {
       border: 2px dashed #a7f3d0;
-      border-radius: 12px;
-      padding: 30px;
+      border-radius: 14px;
+      padding: 32px;
       text-align: center;
       background: #f8fbf9;
       transition: all 0.3s;
@@ -322,70 +353,51 @@
     #file-error {
       display: none;
       color: #ef4444;
-      margin-top: 10px;
+      margin-top: 12px;
       text-align: center;
       font-weight: 600;
     }
     #preview-container {
       display: none;
-      margin-top: 20px;
+      margin-top: 22px;
       text-align: center;
     }
     #preview-img, #preview-video {
       max-width: 100%;
       max-height: 300px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.12);
     }
     .proof-section {
-      margin-top: 20px;
-      padding: 20px;
+      margin-top: 25px;
+      padding: 25px;
       background: var(--card-light);
-      border-radius: 16px;
+      border-radius: 18px;
       box-shadow: var(--shadow);
-      border-left: 5px solid var(--primary);
+      border-left: 6px solid var(--primary);
     }
     body.dark-mode .proof-section {
       background: var(--card-dark);
     }
     .proof-title {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       font-weight: 600;
       color: var(--primary);
-      margin-bottom: 15px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
-      gap: 8px;
-    }
-    .proof-btn, .submit-btn {
-      display: block;
-      width: 100%;
-      padding: 15px;
-      background: var(--gradient);
-      color: white;
-      border: none;
-      border-radius: 14px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       gap: 10px;
-      margin-top: 20px;
     }
-    .submit-btn {
-      background: linear-gradient(135deg, #059669, #047857);
-    }
-    .proof-btn:hover, .submit-btn:hover {
-      transform: translateY(-3px);
-      opacity: 0.95;
-    }
-    .proof-btn:disabled, .submit-btn:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-      transform: none;
+
+    /* Menyu */
+    .menu-toggle {
+      font-size: 1.8rem;
+      color: #059669;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      margin-top: -30px;
     }
   </style>
 </head>
@@ -408,11 +420,14 @@
       </div>
     </div>
   </header>
+
   <div class="container" style="padding: 40px 20px;">
-    <h1 style="text-align:center; margin-bottom:40px;"><i class="fas fa-headset"></i> Ýeňil barada sorag joagap</h1>
+    <h1 style="text-align:center; margin-bottom:40px; font-size:28px; font-weight:700;">
+      <i class="fas fa-headset"></i> Ýeňil barada sorag joagap
+    </h1>
     <div class="faq-container">
       <div class="faq-item">
-        <button class="faq-question"><i class="fas fa-question-circle"></i> 1. Siz tölegi öňünden alýaňyzmy ýa-da tölegi soň etsem hem bolýamy ?</button>
+        <button class="faq-question"><i class="fas fa-question-circle"></i> 1. Siz tölegi öňünden alýaňyzmy ýa-da tölegi soň etsem hem bolýamy?</button>
         <div class="faq-answer">
           <p><i class="fas fa-check"></i> Howa biz tölegi öňünden alýas iş ýerine ýetirilenden soň däl. Biz töleg edilenden soň işe başlaýarys.</p>
         </div>
@@ -444,7 +459,7 @@
       <div class="faq-item">
         <button class="faq-question"><i class="fas fa-hand-holding-usd"></i> 6. Bilet ýagny petek baradaky doly maglumaty nirden alsam bolýa we biledi kagyza çap etmek şertmi?</button>
         <div class="faq-answer">
-          <p><i class="fas fa-exchange-alt"></i> Bilediňiz baradaky doly maglumaty biziň web sahypamyzyň depe sag tarapynda ýerleşen {Bilet çap etmek} diýen ýeriň üstünden basýaňyz we size berlen Bron kody gizirýäňiz we Gözle diýenine basyp biraz garaşanyňyzdan soň, Maglumatlaryňyzy görersiňiz, eger stansia görkezilýän biledi almak üçin bolsa Ýüklemek diýen ýerini bapyp ýükläp alyp saparyňyz güni ulanyp bilýärsiňiz </p>
+          <p><i class="fas fa-exchange-alt"></i> Bilediňiz baradaky doly maglumaty biziň web sahypamyzyň depe sag tarapynda ýerleşen {Bilet çap etmek} diýen ýeriň üstünden basýaňyz we size berlen Bron kody gizirýäňiz we Gözle diýenine basyp biraz garaşanyňyzdan soň, Maglumatlaryňyzy görersiňiz, eger stansia görkezilýän biledi almak üçin bolsa Ýüklemek diýen ýerini bapyp ýükläp alyp saparyňyz güni ulanyp bilýärsiňiz.</p>
         </div>
       </div>
       <div class="faq-item">
@@ -454,7 +469,9 @@
         </div>
       </div>
     </div>
-    <div class="content" style="margin-top: 40px;">
+
+    <!-- Sorag Göýberiş Formasy -->
+    <div class="content">
       <h2><i class="fas fa-comment-dots"></i> Sözüňiz barmy?</h2>
       <p><i class="fas fa-lightbulb"></i> Agar yuqarydaky soraglarga jogap tapmasaňyz, öz soragyňyzy yozyp beriň:</p>
       <div class="form-group">
@@ -469,6 +486,7 @@
         <label for="user-question"><i class="fas fa-comment"></i> Soragyňyz</label>
         <textarea id="user-question" rows="4" placeholder="Soragyňyzy bu ýere ýazyň..."></textarea>
       </div>
+
       <div class="proof-section">
         <div class="proof-title">
           <i class="fas fa-check-circle"></i> Faýyl goşmak (isleseňiz)
@@ -495,6 +513,7 @@
           <div id="file-error"></div>
         </div>
       </div>
+
       <div class="loading" id="loading">
         <div class="premium-spinner">
           <div class="spinner-circle"></div>
@@ -508,48 +527,55 @@
       <button class="submit-btn" id="submit-question"><i class="fas fa-paper-plane"></i> Soragy göýber</button>
     </div>
   </div>
+
   <script>
-   const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
+    const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
     const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
     const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
     let selectedFile = null;
+
     function setupFileUploader() {
       const dropArea = document.getElementById('drop-area');
       const fileInput = document.getElementById('file-upload');
       const previewContainer = document.getElementById('preview-container');
       const errorDiv = document.getElementById('file-error');
+
       dropArea.addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', (e) => {
-        handleFile(e.target.files[0]);
-      });
+      fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
       ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, preventDefaults, false);
       });
+
       function preventDefaults(e) {
         e.preventDefault();
         e.stopPropagation();
       }
+
       ['dragenter', 'dragover'].forEach(eventName => {
         dropArea.addEventListener(eventName, () => {
           dropArea.style.backgroundColor = '#e0f2fe';
           dropArea.style.borderColor = '#38bdf8';
         }, false);
       });
+
       ['dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, () => {
           dropArea.style.backgroundColor = '#f8fbf9';
           dropArea.style.borderColor = '#a7f3d0';
         }, false);
       });
+
       dropArea.addEventListener('drop', (e) => {
         const dt = e.dataTransfer;
         handleFile(dt.files[0]);
       });
+
       function handleFile(file) {
         errorDiv.style.display = 'none';
         if (!file) return;
         if (file.size > 20 * 1024 * 1024) {
-          errorDiv.textContent = '⚠️ Fayl 20 MB dan uly!';
+          errorDiv.textContent = '⚠️ Faýl 20 MB dan uly!';
           errorDiv.style.display = 'block';
           selectedFile = null;
           return;
@@ -567,8 +593,8 @@
           img.id = 'preview-img';
           img.style.maxWidth = '100%';
           img.style.maxHeight = '300px';
-          img.style.borderRadius = '10px';
-          img.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+          img.style.borderRadius = '12px';
+          img.style.boxShadow = '0 5px 15px rgba(0,0,0,0.12)';
           reader.onload = (e) => {
             img.src = e.target.result;
             previewContainer.appendChild(img);
@@ -581,8 +607,8 @@
           video.controls = true;
           video.style.maxWidth = '100%';
           video.style.maxHeight = '300px';
-          video.style.borderRadius = '10px';
-          video.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+          video.style.borderRadius = '12px';
+          video.style.boxShadow = '0 5px 15px rgba(0,0,0,0.12)';
           reader.onload = (e) => {
             video.src = e.target.result;
             previewContainer.appendChild(video);
@@ -593,6 +619,7 @@
         selectedFile = file;
       }
     }
+
     async function uploadFile(file) {
       const formData = new FormData();
       formData.append('file', file);
@@ -604,6 +631,7 @@
       if (!res.ok) throw new Error(data.error || 'Ýüklemekde ýalňyşlyk');
       return data.secure_url;
     }
+
     function handleProofType() {
       document.getElementById('file-upload-section').style.display = 'block';
       if (!window.fileUploaderInit) {
@@ -611,6 +639,7 @@
         window.fileUploaderInit = true;
       }
     }
+
     async function submitQuestion() {
       const name = document.getElementById('user-name').value.trim();
       const phone = document.getElementById('user-phone').value.trim();
@@ -618,15 +647,18 @@
       const loading = document.getElementById('loading');
       const error = document.getElementById('error');
       const submitButton = document.getElementById('submit-question');
+
       if (!name || !phone || !question) {
         error.style.display = 'block';
         error.textContent = '⚠️ Ähli meýdançary dolduryň!';
         return;
       }
+
       error.style.display = 'none';
       loading.style.display = 'block';
       submitButton.disabled = true;
       submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Göýberilýär...';
+
       let fileUrl = null;
       if (selectedFile) {
         try {
@@ -640,6 +672,7 @@
           return;
         }
       }
+
       try {
         const response = await fetch(`${BASE_URL}/data/questions`, {
           method: 'POST',
@@ -670,7 +703,10 @@
         submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Soragy göýber';
       }
     }
+
     document.getElementById('submit-question').addEventListener('click', submitQuestion);
+
+    // Tema saqlash
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
@@ -681,9 +717,12 @@
       localStorage.setItem('theme', isDark ? 'dark-mode' : 'light-mode');
       document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
     });
+
     document.getElementById('menu-toggle').addEventListener('click', () => {
       document.getElementById('nav-menu').classList.toggle('active');
     });
+
+    // FAQ ochish/yopish
     document.querySelectorAll('.faq-question').forEach(button => {
       button.addEventListener('click', () => {
         const answer = button.nextElementSibling;
@@ -692,4 +731,4 @@
     });
   </script>
 </body>
-  </html>
+</html>
