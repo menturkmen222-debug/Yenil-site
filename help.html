@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tk">
 <head>
-  <meta property="og:title" content="Ýeňil — Ýardam">
+<meta property="og:title" content="Ýeňil — Ýardam">
   <meta property="og:description" content="Ýeňil — Bilmedik ýerleriňiz bolsa biz bar biz bilen öwreniň...">
   <meta property="og:image" content="https://www.yenil.ru/images/logo-headr.png">
   <meta property="og:url" content="https://yenil.ru/help.html">
@@ -33,6 +33,7 @@
       --card-dark: #1e293b;
       --shadow: 0 8px 24px rgba(0,0,0,0.08);
       --gradient: linear-gradient(135deg, #0d9488, #14b8a6);
+      --transition: all 0.3s ease;
     }
     * {
       margin: 0;
@@ -46,7 +47,7 @@
     body {
       font-family: 'Poppins', sans-serif;
       font-size: 20px;
-      line-height: 1.8;
+      line-height: 1.6;
       background: var(--light-bg);
       color: var(--light-text);
       transition: background 0.4s ease, color 0.4s ease;
@@ -102,210 +103,145 @@
     body.dark-mode .logo-img {
       filter: brightness(0.9);
     }
-
-    /* === FAQ STILI (MUKAMMAL QILIB) === */
     .faq-container {
       max-width: 800px;
       margin: 0 auto;
     }
     .faq-item {
-      margin-bottom: 25px;
+      margin-bottom: 15px;
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-      transition: transform 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      transition: var(--transition);
     }
     .faq-item:hover {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
       transform: translateY(-2px);
     }
     .faq-question {
       width: 100%;
-      padding: 22px 25px;
+      padding: 18px 20px;
       font-size: 20px;
       background: var(--card-light);
       border: none;
       text-align: left;
-      font-weight: 700;
+      font-weight: 600;
       color: var(--primary);
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: var(--transition);
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
+      position: relative;
+      border-radius: 16px 16px 0 0;
     }
-    .faq-answer {
-      font-size: 20px;
-      display: none;
-      padding: 25px 30px;
-      background: var(--card-light);
-      border-top: 4px solid var(--accent);
-      line-height: 1.8;
-      animation: fadeInUp 0.4s ease-out;
-      border-radius: 0 0 16px 16px;
-      box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .faq-answer i {
+    .faq-question::after {
+      content: '+';
+      position: absolute;
+      right: 20px;
+      font-size: 1.5rem;
       color: var(--primary);
-      margin-right: 10px;
-      font-size: 1.3em;
-      animation: pulse 1.6s ease-in-out infinite;
+      transition: var(--transition);
     }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.85; }
+    .faq-question.active::after {
+      content: '-';
+      transform: rotate(180deg);
     }
     body.dark-mode .faq-question {
       background: var(--card-dark);
     }
+    .faq-answer {
+      font-size: 18px;
+      display: none;
+      padding: 20px 25px;
+      background: var(--card-light);
+      border-top: 3px solid var(--primary);
+      line-height: 1.7;
+      border-radius: 0 0 16px 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .faq-answer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--primary), var(--accent));
+      border-radius: 4px 0 0 4px;
+    }
+    .faq-answer p {
+      margin: 0 0 15px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+    .faq-answer p:first-child {
+      margin-top: 0;
+    }
+    .faq-answer p:last-child {
+      margin-bottom: 0;
+    }
+    .faq-answer i.fas {
+      color: var(--primary);
+      margin-right: 10px;
+      font-size: 1.2em;
+      animation: pulseIcon 2s infinite;
+    }
+    @keyframes pulseIcon {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .faq-answer .premium-text {
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .faq-answer .highlight {
+      background: linear-gradient(135deg, rgba(13,148,136,0.1), rgba(20,184,166,0.1));
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(13,148,136,0.2);
+      display: inline-block;
+      margin: 0 4px;
+      transition: var(--transition);
+    }
+    .faq-answer .highlight:hover {
+      background: linear-gradient(135deg, rgba(13,148,136,0.2), rgba(20,184,166,0.2));
+      transform: translateY(-2px);
+    }
     body.dark-mode .faq-answer {
       background: var(--card-dark);
       border-top-color: #334155;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
-
-    /* === FORMA STILI (MUKAMMAL QILIB) === */
-    .content {
-      margin-top: 50px;
-      padding: 35px;
-      background: var(--card-light);
-      border-radius: 20px;
-      box-shadow: 0 10px 32px rgba(0,0,0,0.09);
-      animation: fadeInUp 0.5s ease-out;
+    body.dark-mode .faq-answer::before {
+      background: linear-gradient(to bottom, #6ee7b7, #34d399);
     }
-    body.dark-mode .content {
-      background: var(--card-dark);
-      box-shadow: 0 10px 32px rgba(0,0,0,0.25);
+    body.dark-mode .faq-answer p {
+      color: #f1f5f9;
     }
-    .form-group {
-      margin: 28px 0;
-      position: relative;
+    body.dark-mode .faq-answer i.fas {
+      color: #6ee7b7;
     }
-    label {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
-      font-weight: 600;
-      font-size: 18px;
-      color: var(--light-text);
-      transition: color 0.3s ease;
+    body.dark-mode .faq-answer .premium-text {
+      color: #6ee7b7;
     }
-    body.dark-mode label {
-      color: var(--dark-text);
+    body.dark-mode .faq-answer .highlight {
+      background: linear-gradient(135deg, rgba(13,148,136,0.1), rgba(20,184,166,0.1));
+      border: 1px solid rgba(13,148,136,0.3);
     }
-    input, textarea {
-      width: 100%;
-      padding: 15px 20px;
-      border: 2px solid #ddd;
-      border-radius: 14px;
-      font-size: 1rem;
-      background: white;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    body.dark-mode .faq-answer .highlight:hover {
+      background: linear-gradient(135deg, rgba(13,148,136,0.2), rgba(20,184,166,0.2));
     }
-    input:focus, textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 2px 12px rgba(4, 120, 87, 0.25);
+    /* Premium animasiýa we effektlere */
+    .faq-answer.animate-in {
+      animation: fadeInUp 0.6s ease-out;
     }
-    body.dark-mode input,
-    body.dark-mode textarea {
-      background: #1e293b;
-      border-color: #334155;
-      color: white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
-    h2 {
-      font-size: 24px;
-      margin-bottom: 20px;
-      color: var(--primary);
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      animation: bounceIn 0.6s ease-out;
-    }
-    p {
-      font-size: 17px;
-      margin-bottom: 25px;
-      text-align: center;
-      color: #64748b;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-    }
-    body.dark-mode p {
-      color: #94a3b8;
-    }
-
-    /* Tugmalar */
-    .proof-btn, .submit-btn {
-      display: block;
-      width: 100%;
-      padding: 18px;
-      background: var(--gradient);
-      color: white;
-      border: none;
-      border-radius: 16px;
-      font-size: 1.2rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 30px;
-      box-shadow: 0 4px 18px rgba(4, 120, 87, 0.3);
-    }
-    .submit-btn {
-      background: linear-gradient(135deg, #059669, #047857);
-    }
-    .proof-btn:hover, .submit-btn:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 22px rgba(4, 120, 87, 0.4);
-      opacity: 0.96;
-    }
-    .proof-btn:disabled, .submit-btn:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    /* Loading va xatoliklar */
-    .loading {
-      display: none;
-      text-align: center;
-      padding: 30px;
-      animation: fadeIn 0.3s ease;
-    }
-    .loading p {
-      color: #64748b;
-      font-size: 0.95rem;
-      margin-top: 15px;
-      font-weight: 500;
-    }
-    body.dark-mode .loading p {
-      color: #94a3b8;
-    }
-    .error-message {
-      color: #ef476f;
-      text-align: center;
-      margin-top: 15px;
-      display: none;
-      font-weight: 600;
-      font-size: 17px;
-      animation: shake 0.5s ease-in-out;
-    }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-6px); }
-      75% { transform: translateX(6px); }
-    }
-
-    /* Animatsiyalar */
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -316,80 +252,129 @@
         transform: translateY(0);
       }
     }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    .faq-answer .icon-pulse {
+      animation: iconPulse 1.5s infinite;
     }
-    @keyframes bounceIn {
-      from { transform: scale(0.6); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+    @keyframes iconPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
     }
-
-    /* Fayl yuklash qismi (faqat stil) */
-    #file-upload-section {
-      display: none;
-      margin-top: 25px;
-      background: var(--card-light);
-      padding: 25px;
-      border-radius: 18px;
-      border: 2px dashed var(--primary);
+    .form-group {
+      margin: 20px 0;
     }
-    body.dark-mode #file-upload-section {
-      background: var(--card-dark);
-    }
-    #drop-area {
-      border: 2px dashed #a7f3d0;
-      border-radius: 14px;
-      padding: 32px;
-      text-align: center;
-      background: #f8fbf9;
-      transition: all 0.3s;
-      cursor: pointer;
-    }
-    body.dark-mode #drop-area {
-      background: #1a2435;
-      border-color: #334155;
-    }
-    #file-error {
-      display: none;
-      color: #ef4444;
-      margin-top: 12px;
-      text-align: center;
+    label {
+      display: block;
+      margin-bottom: 8px;
       font-weight: 600;
-    }
-    #preview-container {
-      display: none;
-      margin-top: 22px;
-      text-align: center;
-    }
-    #preview-img, #preview-video {
-      max-width: 100%;
-      max-height: 300px;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.12);
-    }
-    .proof-section {
-      margin-top: 25px;
-      padding: 25px;
-      background: var(--card-light);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      border-left: 6px solid var(--primary);
-    }
-    body.dark-mode .proof-section {
-      background: var(--card-dark);
-    }
-    .proof-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 16px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
-
-    /* Menyu */
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 1rem;
+      background: white;
+      transition: var(--transition);
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(13,148,136,0.2);
+    }
+    body.dark-mode input,
+    body.dark-mode textarea {
+      background: #1e293b;
+      border-color: #334155;
+      color: white;
+    }
+    body.dark-mode input:focus,
+    body.dark-mode textarea:focus {
+      border-color: #6ee7b7;
+      box-shadow: 0 0 0 2px rgba(102,252,188,0.2);
+    }
+    .premium-spinner {
+      position: relative;
+      width: 50px;
+      height: 50px;
+      margin: 0 auto;
+    }
+    .spinner-circle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 4px solid transparent;
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1.2s linear infinite;
+      z-index: 1;
+    }
+    .spinner-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background-color: var(--primary);
+      border-radius: 50%;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    .spinner-dot:nth-child(2) {
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      animation-delay: 0.3s;
+    }
+    .spinner-dot:nth-child(3) {
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      animation-delay: 0.6s;
+    }
+    .spinner-dot:nth-child(4) {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      animation-delay: 0.9s;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.5); opacity: 0.7; }
+    }
+    body.dark-mode .premium-spinner .spinner-circle {
+      border-top-color: #6ee7b7;
+    }
+    body.dark-mode .premium-spinner .spinner-dot {
+      background-color: #6ee7b7;
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 25px;
+    }
+    .loading p {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+    body.dark-mode .loading p {
+      color: #94a3b8;
+    }
+    .error-message {
+      color: #ef476f;
+      text-align: center;
+      margin-top: 10px;
+      display: none;
+      font-weight: 600;
+    }
     .menu-toggle {
       font-size: 1.8rem;
       color: #059669;
@@ -397,7 +382,145 @@
       border: none;
       cursor: pointer;
       padding: 8px 12px;
-      margin-top: -30px;
+      margin-right: 10px;
+      margin-top: -105px;
+    }
+    .menu-toggle {
+      margin-top: -30px; 
+    }
+    .radio-option[data-type="file"] {
+      background: linear-gradient(135deg, #035e46, #035e46);
+      border: 2px solid #047857;
+      box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
+      transition: var(--transition);
+      padding: 15px 20px;
+      min-width: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      border-radius: 16px;
+      flex: 1;
+    }
+    .radio-option[data-type="file"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(4, 120, 87, 0.4);
+    }
+    .radio-option[data-type="file"] input[type="radio"] {
+      display: none;
+    }
+    .radio-option[data-type="file"] label {
+      color: #fef3c7;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+    #file-upload-section {
+      display: none;
+      margin-top: 20px;
+      background: var(--card-light);
+      padding: 20px;
+      border-radius: 16px;
+      border: 2px dashed var(--primary);
+      transition: var(--transition);
+    }
+    body.dark-mode #file-upload-section {
+      background: var(--card-dark);
+    }
+    #drop-area {
+      border: 2px dashed #a7f3d0;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      background: #f8fbf9;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    body.dark-mode #drop-area {
+      background: #1a2435;
+      border-color: #334155;
+    }
+    #drop-area:hover {
+      background: #e0f2fe;
+      border-color: #38bdf8;
+    }
+    #file-error {
+      display: none;
+      color: #ef4444;
+      margin-top: 10px;
+      text-align: center;
+      font-weight: 600;
+    }
+    #preview-container {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+    #preview-img, #preview-video {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: var(--transition);
+    }
+    #preview-img:hover, #preview-video:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+    .proof-section {
+      margin-top: 20px;
+      padding: 20px;
+      background: var(--card-light);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      border-left: 5px solid var(--primary);
+      transition: var(--transition);
+    }
+    body.dark-mode .proof-section {
+      background: var(--card-dark);
+    }
+    .proof-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .proof-btn, .submit-btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      background: var(--gradient);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .submit-btn {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+    .proof-btn:hover, .submit-btn:hover {
+      transform: translateY(-3px);
+      opacity: 0.95;
+    }
+    .proof-btn:disabled, .submit-btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
     }
   </style>
 </head>
@@ -420,14 +543,11 @@
       </div>
     </div>
   </header>
-
   <div class="container" style="padding: 40px 20px;">
-    <h1 style="text-align:center; margin-bottom:40px; font-size:28px; font-weight:700;">
-      <i class="fas fa-headset"></i> Ýeňil barada sorag joagap
-    </h1>
+    <h1 style="text-align:center; margin-bottom:40px;"><i class="fas fa-headset"></i> Ýeňil barada sorag joagap</h1>
     <div class="faq-container">
       <div class="faq-item">
-        <button class="faq-question"><i class="fas fa-question-circle"></i> 1. Siz tölegi öňünden alýaňyzmy ýa-da tölegi soň etsem hem bolýamy?</button>
+        <button class="faq-question"><i class="fas fa-question-circle"></i> 1. Siz tölegi öňünden alýaňyzmy ýa-da tölegi soň etsem hem bolýamy ?</button>
         <div class="faq-answer">
           <p><i class="fas fa-check"></i> Howa biz tölegi öňünden alýas iş ýerine ýetirilenden soň däl. Biz töleg edilenden soň işe başlaýarys.</p>
         </div>
@@ -459,7 +579,7 @@
       <div class="faq-item">
         <button class="faq-question"><i class="fas fa-hand-holding-usd"></i> 6. Bilet ýagny petek baradaky doly maglumaty nirden alsam bolýa we biledi kagyza çap etmek şertmi?</button>
         <div class="faq-answer">
-          <p><i class="fas fa-exchange-alt"></i> Bilediňiz baradaky doly maglumaty biziň web sahypamyzyň depe sag tarapynda ýerleşen {Bilet çap etmek} diýen ýeriň üstünden basýaňyz we size berlen Bron kody gizirýäňiz we Gözle diýenine basyp biraz garaşanyňyzdan soň, Maglumatlaryňyzy görersiňiz, eger stansia görkezilýän biledi almak üçin bolsa Ýüklemek diýen ýerini bapyp ýükläp alyp saparyňyz güni ulanyp bilýärsiňiz.</p>
+          <p><i class="fas fa-exchange-alt"></i> Bilediňiz baradaky doly maglumaty biziň web sahypamyzyň depe sag tarapynda ýerleşen {Bilet çap etmek} diýen ýeriň üstünden basýaňyz we size berlen Bron kody gizirýäňiz we Gözle diýenine basyp biraz garaşanyňyzdan soň, Maglumatlaryňyzy görersiňiz, eger stansia görkezilýän biledi almak üçin bolsa Ýüklemek diýen ýerini bapyp ýükläp alyp saparyňyz güni ulanyp bilýärsiňiz </p>
         </div>
       </div>
       <div class="faq-item">
@@ -469,9 +589,7 @@
         </div>
       </div>
     </div>
-
-    <!-- Sorag Göýberiş Formasy -->
-    <div class="content">
+    <div class="content" style="margin-top: 40px;">
       <h2><i class="fas fa-comment-dots"></i> Sözüňiz barmy?</h2>
       <p><i class="fas fa-lightbulb"></i> Agar yuqarydaky soraglarga jogap tapmasaňyz, öz soragyňyzy yozyp beriň:</p>
       <div class="form-group">
@@ -486,7 +604,6 @@
         <label for="user-question"><i class="fas fa-comment"></i> Soragyňyz</label>
         <textarea id="user-question" rows="4" placeholder="Soragyňyzy bu ýere ýazyň..."></textarea>
       </div>
-
       <div class="proof-section">
         <div class="proof-title">
           <i class="fas fa-check-circle"></i> Faýyl goşmak (isleseňiz)
@@ -513,7 +630,6 @@
           <div id="file-error"></div>
         </div>
       </div>
-
       <div class="loading" id="loading">
         <div class="premium-spinner">
           <div class="spinner-circle"></div>
@@ -527,55 +643,48 @@
       <button class="submit-btn" id="submit-question"><i class="fas fa-paper-plane"></i> Soragy göýber</button>
     </div>
   </div>
-
   <script>
-    const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
+   const APP_ID = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
     const API_KEY = '9A8CACA4-5889-4D47-903E-BF12F059E175';
     const BASE_URL = `https://api.backendless.com/${APP_ID}/${API_KEY}`;
     let selectedFile = null;
-
     function setupFileUploader() {
       const dropArea = document.getElementById('drop-area');
       const fileInput = document.getElementById('file-upload');
       const previewContainer = document.getElementById('preview-container');
       const errorDiv = document.getElementById('file-error');
-
       dropArea.addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
-
+      fileInput.addEventListener('change', (e) => {
+        handleFile(e.target.files[0]);
+      });
       ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, preventDefaults, false);
       });
-
       function preventDefaults(e) {
         e.preventDefault();
         e.stopPropagation();
       }
-
       ['dragenter', 'dragover'].forEach(eventName => {
         dropArea.addEventListener(eventName, () => {
           dropArea.style.backgroundColor = '#e0f2fe';
           dropArea.style.borderColor = '#38bdf8';
         }, false);
       });
-
       ['dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, () => {
           dropArea.style.backgroundColor = '#f8fbf9';
           dropArea.style.borderColor = '#a7f3d0';
         }, false);
       });
-
       dropArea.addEventListener('drop', (e) => {
         const dt = e.dataTransfer;
         handleFile(dt.files[0]);
       });
-
       function handleFile(file) {
         errorDiv.style.display = 'none';
         if (!file) return;
         if (file.size > 20 * 1024 * 1024) {
-          errorDiv.textContent = '⚠️ Faýl 20 MB dan uly!';
+          errorDiv.textContent = '⚠️ Fayl 20 MB dan uly!';
           errorDiv.style.display = 'block';
           selectedFile = null;
           return;
@@ -593,8 +702,8 @@
           img.id = 'preview-img';
           img.style.maxWidth = '100%';
           img.style.maxHeight = '300px';
-          img.style.borderRadius = '12px';
-          img.style.boxShadow = '0 5px 15px rgba(0,0,0,0.12)';
+          img.style.borderRadius = '10px';
+          img.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
           reader.onload = (e) => {
             img.src = e.target.result;
             previewContainer.appendChild(img);
@@ -607,8 +716,8 @@
           video.controls = true;
           video.style.maxWidth = '100%';
           video.style.maxHeight = '300px';
-          video.style.borderRadius = '12px';
-          video.style.boxShadow = '0 5px 15px rgba(0,0,0,0.12)';
+          video.style.borderRadius = '10px';
+          video.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
           reader.onload = (e) => {
             video.src = e.target.result;
             previewContainer.appendChild(video);
@@ -619,7 +728,6 @@
         selectedFile = file;
       }
     }
-
     async function uploadFile(file) {
       const formData = new FormData();
       formData.append('file', file);
@@ -631,7 +739,6 @@
       if (!res.ok) throw new Error(data.error || 'Ýüklemekde ýalňyşlyk');
       return data.secure_url;
     }
-
     function handleProofType() {
       document.getElementById('file-upload-section').style.display = 'block';
       if (!window.fileUploaderInit) {
@@ -639,7 +746,6 @@
         window.fileUploaderInit = true;
       }
     }
-
     async function submitQuestion() {
       const name = document.getElementById('user-name').value.trim();
       const phone = document.getElementById('user-phone').value.trim();
@@ -647,18 +753,15 @@
       const loading = document.getElementById('loading');
       const error = document.getElementById('error');
       const submitButton = document.getElementById('submit-question');
-
       if (!name || !phone || !question) {
         error.style.display = 'block';
         error.textContent = '⚠️ Ähli meýdançary dolduryň!';
         return;
       }
-
       error.style.display = 'none';
       loading.style.display = 'block';
       submitButton.disabled = true;
       submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Göýberilýär...';
-
       let fileUrl = null;
       if (selectedFile) {
         try {
@@ -672,7 +775,6 @@
           return;
         }
       }
-
       try {
         const response = await fetch(`${BASE_URL}/data/questions`, {
           method: 'POST',
@@ -703,10 +805,7 @@
         submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Soragy göýber';
       }
     }
-
     document.getElementById('submit-question').addEventListener('click', submitQuestion);
-
-    // Tema saqlash
     const saved = localStorage.getItem('theme') || 'light-mode';
     document.body.className = saved;
     document.getElementById('theme-toggle').textContent = saved === 'dark-mode' ? '☀️' : '🌙';
@@ -717,17 +816,48 @@
       localStorage.setItem('theme', isDark ? 'dark-mode' : 'light-mode');
       document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
     });
-
     document.getElementById('menu-toggle').addEventListener('click', () => {
       document.getElementById('nav-menu').classList.toggle('active');
     });
-
-    // FAQ ochish/yopish
+    // FAQ açylmagy we ýapylmagy
     document.querySelectorAll('.faq-question').forEach(button => {
       button.addEventListener('click', () => {
         const answer = button.nextElementSibling;
-        answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+        const isActive = button.classList.contains('active');
+        
+        // Hemme faýllary ýap
+        document.querySelectorAll('.faq-question').forEach(btn => {
+          btn.classList.remove('active');
+          btn.nextElementSibling.style.display = 'none';
+          btn.nextElementSibling.classList.remove('animate-in');
+        });
+        
+        // Şeýle ýerinde aç
+        if (!isActive) {
+          button.classList.add('active');
+          answer.style.display = 'block';
+          answer.classList.add('animate-in');
+          
+          // Ikonkalary animasiýa bilen başlatmak
+          setTimeout(() => {
+            answer.querySelectorAll('i.fas').forEach(icon => {
+              icon.classList.add('icon-pulse');
+            });
+          }, 100);
+        }
       });
+    });
+    
+    // Yazgylary mukammallaşdyrmak
+    document.querySelectorAll('.faq-answer p').forEach(p => {
+      let text = p.innerHTML;
+      // "Bilet çap etmek" diýen sözüni highlight etmek
+      text = text.replace(/(Bilet çap etmek)/gi, '<span class="highlight">$1</span>');
+      // "PDF suraty" diýen sözüni highlight etmek
+      text = text.replace(/(PDF suraty)/gi, '<span class="highlight">$1</span>');
+      // "Bron kod" diýen sözüni highlight etmek
+      text = text.replace(/(bron kod)/gi, '<span class="highlight">$1</span>');
+      p.innerHTML = text;
     });
   </script>
 </body>
