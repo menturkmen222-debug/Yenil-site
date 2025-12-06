@@ -26,7 +26,7 @@
 <link rel="manifest" href="/site.webmanifest">
 <!-- Theme Color -->
 <meta name="theme-color" content="#ffffff">
- 
+
 <title>Ýeňil — Biz barada</title>
 
 <meta name="description" content="Ýeňil — Biz türkmenistanyň kiçi biznesleriň we şahslaryň onlaýn töleglerde, biletlary satyn almakda we pul göçürmelerde ýeňilleşmesine kömek etmek üçin ýaradylan.">
@@ -106,6 +106,55 @@
       background: #333;
       color: #fff;
     }
+
+    /* Modal Styling */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #ffffff;
+      color: #000000;
+      padding: 25px;
+      border-radius: 12px;
+      max-width: 90%;
+      width: 350px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    body.dark-mode .modal-content {
+      background: #1e1e1e;
+      color: #f0f0f0;
+    }
+    .modal-content h3 {
+      margin: 0 0 12px;
+      font-size: 1.3em;
+    }
+    .modal-content p {
+      margin-bottom: 18px;
+      font-size: 0.95em;
+      line-height: 1.5;
+    }
+    .modal-close {
+      background: #0d9488;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .modal-close:hover {
+      opacity: 0.9;
+    }
   </style>
 </head>
 <body class="light-mode">
@@ -144,7 +193,7 @@
       </div>
     </section>
     <section class="services">
-      <div class="service-card demiryol" onclick="window.location='demiryol.html'">
+      <div class="service-card demiryol" onclick="showDemiryolModal()">
         <div class="service-icon">
           <img src="images/logo-demiryol.png" alt="Ýeňil demirýollary">
         </div>
@@ -220,6 +269,15 @@
   </ul>
   
   <div class="menu-overlay" id="menu-overlay"></div>
+
+  <!-- Modal for Demiryol Unavailable -->
+  <div class="modal-overlay" id="demiryolModal">
+    <div class="modal-content">
+      <h3>Ulgam hozirki wagtda işlämeýär</h3>
+      <p>Bu bölümde düzeltme işleri dowam edýär. Ýatda saklaň: bu hyzmat ýene hem işläp başlaýar!</p>
+      <button class="modal-close" onclick="closeModal()">Düşündim</button>
+    </div>
+  </div>
   
   <script>
     
@@ -270,6 +328,19 @@
     }
     
     window.addEventListener('load', shuffleReviews);
+
+    // Modal functions for demiryol section
+    function showDemiryolModal() {
+      document.getElementById('demiryolModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('demiryolModal').style.display = 'none';
+    }
+
+    document.getElementById('demiryolModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
   </script>
 </body>
 </html>
