@@ -381,10 +381,10 @@
     // Loading funksiyasi olib tashlandi
     async function fetchAllData() {
       try {
-        const ordersRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/orders?pageSize=1000`);
+        const ordersRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/orders`);
         const ordersData = await ordersRes.json();
         allOrders = Array.isArray(ordersData) ? ordersData : (ordersData.data || []);
-        const questionsRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/questions?pageSize=1000`);
+        const questionsRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/questions`);
         const questionsData = await questionsRes.json();
         allQuestions = Array.isArray(questionsData) ? questionsData : (questionsData.data || []);
         updateBadges();
