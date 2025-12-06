@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.5" />
   <title>Admin — Ýeňil</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="icon" href="image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
   <style>
     :root {
       --primary: #0d9488;
@@ -356,6 +356,7 @@
   <script>
     const appId = 'C3BB5032-1DCC-4DB3-888F-AEDA785F26CB';
     const apiKey = '9A8CACA4-5889-4D47-903E-BF12F059E175';
+
     const savedTheme = localStorage.getItem('theme') || 'light-mode';
     document.body.className = savedTheme;
     const themeToggle = document.getElementById('theme-toggle');
@@ -367,6 +368,7 @@
       localStorage.setItem('theme', isDark ? 'dark-mode' : 'light-mode');
       themeToggle.textContent = isDark ? '☀️' : '🌙';
     });
+
     const tabButtons = document.querySelectorAll('.tab-btn');
     const contentArea = document.getElementById('content-area');
     tabButtons.forEach(btn => {
@@ -376,24 +378,28 @@
         loadTabContent(btn.dataset.tab);
       });
     });
+
     let allOrders = [];
     let allQuestions = [];
-    // Loading funksiyasi olib tashlandi
+
+    // ✅ Tuzatilgan fetchAllData: URLda bo'sh joy yo'q + pagesize=1000
     async function fetchAllData() {
       try {
-        const ordersRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/orders`);
+        const ordersRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/orders?pagesize=1000`);
         const ordersData = await ordersRes.json();
         allOrders = Array.isArray(ordersData) ? ordersData : (ordersData.data || []);
-        const questionsRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/questions`);
+
+        const questionsRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/questions?pagesize=1000`);
         const questionsData = await questionsRes.json();
         allQuestions = Array.isArray(questionsData) ? questionsData : (questionsData.data || []);
+
         updateBadges();
         loadActiveTab();
       } catch (err) {
         console.error('Ma\'lumot yuklanmadi:', err);
       }
-      // finally bloki olib tashlandi – yuklanish animatsiyasi yo'q
     }
+
     function updateBadges() {
       const railCount = allOrders.filter(o => o.type === 'demiryol' && !o.priorityChecked).length;
       const payCount = allOrders.filter(o => ['pay-buy', 'pay-sell'].includes(o.type) && !o.priorityChecked).length;
@@ -402,11 +408,12 @@
       document.getElementById('badge-pay').textContent = payCount || '';
       document.getElementById('badge-help').textContent = helpCount || '';
     }
+
     function loadActiveTab() {
       const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
       if (activeTab) loadTabContent(activeTab);
     }
-    // Backendlessdan keladigan URLlar uchun aniq aniqlash
+
     function getMediaType(url) {
       if (!url) return null;
       if (url.includes('/files/')) {
@@ -423,6 +430,7 @@
       }
       return null;
     }
+
     function renderMediaPreview(order) {
       const url = order.proof_url || order.image_url || order.fileUrl || order.screenshotUrl;
       if (!url) return '';
@@ -438,17 +446,15 @@
           </div>
         `;
       } else if (type === 'image') {
-        const imageUrl = url.includes('api.backendless.com')
-          ? url
-          : url;
         return `
           <div class="media-preview">
-            <img src="${imageUrl}" alt="Tassyklama" onerror="this.parentElement.style.display='none'">
+            <img src="${url}" alt="Tassyklama" onerror="this.parentElement.style.display='none'">
           </div>
         `;
       }
       return '';
     }
+
     function loadTabContent(tab) {
       let html = '';
       if (tab === 'rail') {
@@ -479,13 +485,10 @@
           const smsPart = (proofType === 'sms' && order.smsText)
             ? `<div class="order-detail"><strong>SMS:</strong> ${order.smsText}</div>`
             : '';
-          const sms1 = `✅ Salam gadyrly müşderi siziň ${travelDate} ${route} ugry boýunça sargydyňyz üstünlikli kabul edildi we işlenýär iň tiz wagtda Ýeňil size bron kody we ýer baradaky maglumatlary berer
-Ýeňil bizi saýlanyňyz üçin sagbolyň`;
-          const sms2 = `🎉Salam gadyrly müşderi siziň
-${travelDate} ${route} eden sargydyňyz üstünlikli ýerine ýetirildi Bron kody 000000 Ugraýan wagty 00:00 Wagon 0. Ýer 0.
-Ýeňil bizi saýlanyňyz üçin sagbolyň`;
-          const sms3 = `✅ Salam hormatly müşderi ${travelDate} ${route} ugry boýunça sargydyňyz üstünlikli kabul edildi indi tölegi doly etmegiňizi haýyş edýäris edilmeli töleg ${totalPrice} TMT biz siz töleg edenden soň işe başlaýas
-Ýeňil bizi saýlanyňyz üçin sagbolyň`;
+          const sms1 = `✅ Salam gadyrly müşderi siziň ${travelDate} ${route} ugry boýunça sargydyňyz üstünlikli kabul edildi we işlenýär iň tiz wagtda Ýeňil size bron kody we ýer baradaky maglumatlary berer\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
+          const sms2 = `🎉Salam gadyrly müşderi siziň\n${travelDate} ${route} eden sargydyňyz üstünlikli ýerine ýetirildi Bron kody 000000 Ugraýan wagty 00:00 Wagon 0. Ýer 0.\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
+          const sms3 = `✅ Salam hormatly müşderi ${travelDate} ${route} ugry boýunça sargydyňyz üstünlikli kabul edildi indi tölegi doly etmegiňizi haýyş edýäris edilmeli töleg ${totalPrice} TMT biz siz töleg edenden soň işe başlaýas\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
+
           return `
             <div class="order-item">
               <div class="order-header">🚆 Demirýol — ${route}</div>
@@ -506,7 +509,7 @@ ${travelDate} ${route} eden sargydyňyz üstünlikli ýerine ýetirildi Bron kod
               <div class="action-buttons">
                 <a href="sms:${phone}?body=${encodeURIComponent(sms1)}" class="action-btn">Kabul edildi</a>
                 <a href="sms:${phone}?body=${encodeURIComponent(sms2)}" class="action-btn">Bilet alyndy</a>
-                <a href="sms:${phone}?body=${encodeURIComponent(sms3)}" class="action-btn">Doly töleg</a>
+                <a href=".sms:${phone}?body=${encodeURIComponent(sms3)}" class="action-btn">Doly töleg</a>
               </div>
             </div>
           `;
@@ -532,11 +535,9 @@ ${travelDate} ${route} eden sargydyňyz üstünlikli ýerine ýetirildi Bron kod
           const smsPart = (proofType === 'sms' && order.smsText)
             ? `<div class="order-detail"><strong>SMS:</strong> ${order.smsText}</div>`
             : '';
-          const paySms1 = `🎉Salam gadyrly müşderi siziň
-${typeText} — ${amount} ${crypto} eden sargydyňyz üstünlikli ýerine ýetirildi
-Ýeňil bizi saýlanyňyz üçin sagbolyň`;
-          const paySms2 = `✅ Salam hormatly müşderi sargydyňyz üstünlikli kabul edildi indi tölegi doly etmegiňizi haýyş edýäris edilmeli töleg ${total} TMT biz siz töleg edenden soň işe başlaýas
-Ýeňil bizi saýlanyňyz üçin sagbolyň`;
+          const paySms1 = `🎉Salam gadyrly müşderi siziň\n${typeText} — ${amount} ${crypto} eden sargydyňyz üstünlikli ýerine ýetirildi\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
+          const paySms2 = `✅ Salam hormatly müşderi sargydyňyz üstünlikli kabul edildi indi tölegi doly etmegiňizi haýyş edýäris edilmeli töleg ${total} TMT biz siz töleg edenden soň işe başlaýas\nÝeňil bizi saýlanyňyz üçin sagbolyň`;
+
           return `
             <div class="order-item">
               <div class="order-header">💸 ${typeText} — ${crypto}</div>
@@ -593,6 +594,7 @@ ${typeText} — ${amount} ${crypto} eden sargydyňyz üstünlikli ýerine ýetir
         badge.addEventListener('click', togglePriority);
       });
     }
+
     async function togglePriority(e) {
       const badge = e.currentTarget;
       const objectId = badge.dataset.id;
@@ -626,9 +628,10 @@ ${typeText} — ${amount} ${crypto} eden sargydyňyz üstünlikli ýerine ýetir
         console.error('Prioritet yangilanmadi:', err);
       }
     }
+
     fetchAllData();
     loadTabContent('rail');
     setInterval(fetchAllData, 30000);
   </script>
 </body>
-  </html>
+</html>
