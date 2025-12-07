@@ -385,11 +385,11 @@
     // ✅ Tuzatilgan fetchAllData: URLda bo'sh joy yo'q + pagesize=1000
     async function fetchAllData() {
       try {
-        const ordersRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/orders?pagesize=200`);
+        const ordersRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/orders`);
         const ordersData = await ordersRes.json();
         allOrders = Array.isArray(ordersData) ? ordersData : (ordersData.data || []);
 
-        const questionsRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/questions?pagesize=200`);
+        const questionsRes = await fetch(`https://api.backendless.com/${appId}/${apiKey}/data/questions`);
         const questionsData = await questionsRes.json();
         allQuestions = Array.isArray(questionsData) ? questionsData : (questionsData.data || []);
 
