@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
     if (!GROQ_API_KEY) return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
 
-    // Language-specific system instructions
+    // Language-specific system instructions 
     const langInstructions = {
         tk: 'Türkmen dilinde jogap ber. Sen türkmen biznesleri üçin web çözgütler hödürleýän ÝEŇIL AI Asistanysyň.',
         uz: "O'zbek tilida javob ber. Sen ÝEŇIL AI Asistantisan — veb saytlar, e-tijorat va biznes yechimlari bo'yicha mutaxassis.",
