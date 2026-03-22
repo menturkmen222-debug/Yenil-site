@@ -218,6 +218,52 @@
             }
         }
 
+        @keyframes scroll-v {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(-50%);
+            }
+        }
+
+        @keyframes scroll-h {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .track-v {
+            display: flex;
+            flex-direction: column;
+            height: max-content;
+            animation: scroll-v 25s linear infinite;
+            will-change: transform;
+        }
+
+        .track-h {
+            display: flex;
+            flex-direction: row;
+            width: max-content;
+            animation: scroll-h 25s linear infinite;
+            will-change: transform;
+        }
+
+        .mask-v {
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+        }
+
+        .mask-h {
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+
         @keyframes typing {
             from {
                 width: 0
@@ -455,6 +501,105 @@
         .modal-overlay.active .modal-content {
             transform: translate(-50%, -50%) scale(1)
         }
+
+        /* Auto-popup nudge bubble */
+        .chat-nudge {
+            position: fixed;
+            bottom: 90px;
+            right: 80px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 20px 20px 4px 20px;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+            opacity: 0;
+            transform: translateY(20px) scale(0.8);
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 9998;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .chat-nudge.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+            animation: nudgeBounce 2s ease-in-out infinite 1s;
+        }
+
+        .chat-nudge::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            right: 12px;
+            width: 12px;
+            height: 12px;
+            background: #059669;
+            transform: rotate(45deg);
+        }
+
+        @keyframes nudgeBounce {
+
+            0%,
+            100% {
+                transform: translateY(0) scale(1);
+            }
+
+            50% {
+                transform: translateY(-6px) scale(1.03);
+            }
+        }
+
+        @media(max-width: 640px) {
+            .chat-nudge {
+                bottom: 80px;
+                right: 70px;
+                font-size: 13px;
+                padding: 10px 16px;
+            }
+        }
+
+        /* Typing indicator */
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #34d399;
+            animation: dotBounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dotBounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0.6);
+                opacity: 0.4;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
@@ -488,8 +633,6 @@
                         data-i18n="nav_about">Biz hakda</a>
                     <a href="#services" class="nav-link font-medium hover:text-primary transition-colors"
                         data-i18n="nav_services">Hyzmatlar</a>
-                    <a href="#projects" class="nav-link font-medium hover:text-primary transition-colors"
-                        data-i18n="nav_projects">Taslamalar</a>
                     <a href="#pricing" class="nav-link font-medium hover:text-primary transition-colors"
                         data-i18n="nav_pricing">Bahalar</a>
                     <a href="#contact" class="nav-link font-medium hover:text-primary transition-colors"
@@ -539,8 +682,6 @@
                     data-i18n="nav_about">Biz hakda</a>
                 <a href="#services" class="block text-lg hover:text-primary transition-colors mobile-link"
                     data-i18n="nav_services">Hyzmatlar</a>
-                <a href="#projects" class="block text-lg hover:text-primary transition-colors mobile-link"
-                    data-i18n="nav_projects">Taslamalar</a>
                 <a href="#pricing" class="block text-lg hover:text-primary transition-colors mobile-link"
                     data-i18n="nav_pricing">Bahalar</a>
                 <a href="#contact" class="block text-lg hover:text-primary transition-colors mobile-link"
@@ -603,23 +744,341 @@
                                 Peýda</span></span>
                     </div>
                 </div>
-                <div class="flex justify-center fade-up lg:justify-end" style="transition-delay:.3s">
-                    <div class="relative float-anim max-w-md w-full">
+                <!-- Hero Visual Container (Desktop & Mobile) -->
+                <div class="flex justify-center fade-up lg:justify-end w-full lg:h-[600px] mt-8 lg:mt-0"
+                    style="transition-delay:.3s">
+
+                    <!-- Desktop Layout: Vertical Tracks -->
+                    <div class="hidden lg:flex relative w-full h-full items-center justify-end overflow-visible">
+                        <!-- Masked Container for Tracks -->
                         <div
-                            class="w-64 h-64 sm:w-80 sm:h-80 mx-auto rounded-full overflow-hidden border-4 border-primary/40 glow relative z-10 bg-[#044e3b] flex items-center justify-center">
+                            class="absolute inset-y-0 left-0 right-[150px] overflow-hidden mask-v flex items-center justify-end gap-6 pointer-events-none">
+
+                            <!-- Track 1: Testimonials (moving up) -->
+                            <div class="track-v mr-4">
+                                <div class="flex flex-col gap-6 pb-6">
+                                    <div class="carousel-v-card glass-card w-[240px] p-4 flex flex-col gap-3">
+                                        <p class="text-[11px] opacity-80 italic" data-i18n="test_1_msg">"Öz biznesimiz
+                                            üçin e-söwda sahypasyny ýasatdyk, dizaýny gowy we platforma diýseň çalt
+                                            işleýär. Satuwymyz uly depginde artdy."</p>
+                                        <div class="flex items-center gap-2 mt-auto">
+                                            <div class="w-8 h-8 rounded-full bg-primary/20 border border-primary text-primary flex items-center justify-center font-bold text-xs"
+                                                data-i18n="test_1_init">A</div>
+                                            <div>
+                                                <p class="text-xs font-bold" data-i18n="test_1_name">Azat G.</p>
+                                                <p class="text-[9px] opacity-60 text-primary" data-i18n="test_1_role">
+                                                    Dükan Eýesi, Aşgabat</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="carousel-v-card glass-card w-[240px] p-4 flex flex-col gap-3">
+                                        <p class="text-[11px] opacity-80 italic" data-i18n="test_2_msg">"Taslama gysga
+                                            wagtyň içinde taýýar boldy, hemme zat islegimizdäki ýaly premium derejede.
+                                            Esasanam saýtyň mobil wersiýasy ajaýyp çykdy."</p>
+                                        <div class="flex items-center gap-2 mt-auto">
+                                            <div class="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500 text-blue-400 flex items-center justify-center font-bold text-xs"
+                                                data-i18n="test_2_init">B</div>
+                                            <div>
+                                                <p class="text-xs font-bold" data-i18n="test_2_name">Begenç M.</p>
+                                                <p class="text-[9px] opacity-60 text-blue-400" data-i18n="test_2_role">
+                                                    Telekeçi, Mary</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="carousel-v-card glass-card w-[240px] p-4 flex flex-col gap-3">
+                                        <p class="text-[11px] opacity-80 italic" data-i18n="test_3_msg">"Web
+                                            taslamamyzda biziň bilen iň ownuk zatlara çenli gyzyklandylar. Ygtybarly we
+                                            gaty innowasiýon çözgütler döredýärler. Ajaýyp iş."</p>
+                                        <div class="flex items-center gap-2 mt-auto">
+                                            <div class="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500 text-purple-400 flex items-center justify-center font-bold text-xs"
+                                                data-i18n="test_3_init">G</div>
+                                            <div>
+                                                <p class="text-xs font-bold" data-i18n="test_3_name">Gözel T.</p>
+                                                <p class="text-[9px] opacity-60 text-purple-400"
+                                                    data-i18n="test_3_role">Marketolog, Türkmenabat</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Duplicate for infinite scroll -->
+                                <div class="flex flex-col gap-6 pb-6">
+                                    <div class="carousel-v-card glass-card w-[240px] p-4 flex flex-col gap-3">
+                                        <p class="text-[11px] opacity-80 italic" data-i18n="test_1_msg">"Öz biznesimiz
+                                            üçin e-söwda sahypasyny ýasatdyk, dizaýny gowy we platforma diýseň çalt
+                                            işleýär. Satuwymyz uly depginde artdy."</p>
+                                        <div class="flex items-center gap-2 mt-auto">
+                                            <div class="w-8 h-8 rounded-full bg-primary/20 border border-primary text-primary flex items-center justify-center font-bold text-xs"
+                                                data-i18n="test_1_init">A</div>
+                                            <div>
+                                                <p class="text-xs font-bold" data-i18n="test_1_name">Azat G.</p>
+                                                <p class="text-[9px] opacity-60 text-primary" data-i18n="test_1_role">
+                                                    Dükan Eýesi, Aşgabat</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="carousel-v-card glass-card w-[240px] p-4 flex flex-col gap-3">
+                                        <p class="text-[11px] opacity-80 italic" data-i18n="test_2_msg">"Taslama gysga
+                                            wagtyň içinde taýýar boldy, hemme zat islegimizdäki ýaly premium derejede.
+                                            Esasanam saýtyň mobil wersiýasy ajaýyp çykdy."</p>
+                                        <div class="flex items-center gap-2 mt-auto">
+                                            <div class="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500 text-blue-400 flex items-center justify-center font-bold text-xs"
+                                                data-i18n="test_2_init">B</div>
+                                            <div>
+                                                <p class="text-xs font-bold" data-i18n="test_2_name">Begenç M.</p>
+                                                <p class="text-[9px] opacity-60 text-blue-400" data-i18n="test_2_role">
+                                                    Telekeçi, Mary</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="carousel-v-card glass-card w-[240px] p-4 flex flex-col gap-3">
+                                        <p class="text-[11px] opacity-80 italic" data-i18n="test_3_msg">"Web
+                                            taslamamyzda biziň bilen iň ownuk zatlara çenli gyzyklandylar. Ygtybarly we
+                                            gaty innowasiýon çözgütler döredýärler. Ajaýyp iş."</p>
+                                        <div class="flex items-center gap-2 mt-auto">
+                                            <div class="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500 text-purple-400 flex items-center justify-center font-bold text-xs"
+                                                data-i18n="test_3_init">G</div>
+                                            <div>
+                                                <p class="text-xs font-bold" data-i18n="test_3_name">Gözel T.</p>
+                                                <p class="text-[9px] opacity-60 text-purple-400"
+                                                    data-i18n="test_3_role">Marketolog, Türkmenabat</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Track 2: Tech Skills (moving down) -->
+                            <div class="track-v" style="animation-direction: reverse;">
+                                <div class="flex flex-col gap-6 pb-6">
+                                    <div
+                                        class="carousel-v-card glass-card px-4 py-3 flex items-center gap-2 border-cyan-500/30 w-fit mx-auto">
+                                        <i data-lucide="code" class="w-4 h-4 text-cyan-400"></i><span
+                                            class="text-xs font-bold whitespace-nowrap" data-i18n="skill_1">React /
+                                            Next.js</span>
+                                    </div>
+                                    <div
+                                        class="carousel-v-card glass-card px-4 py-3 flex items-center gap-2 border-emerald-500/30 w-fit mx-auto">
+                                        <i data-lucide="palette" class="w-4 h-4 text-emerald-400"></i><span
+                                            class="text-xs font-bold whitespace-nowrap" data-i18n="skill_3">UI/UX
+                                            (Psihology)</span>
+                                    </div>
+                                    <div
+                                        class="carousel-v-card glass-card px-4 py-3 flex items-center gap-2 border-orange-500/30 w-fit mx-auto">
+                                        <i data-lucide="zap" class="w-4 h-4 text-orange-400"></i><span
+                                            class="text-xs font-bold whitespace-nowrap" data-i18n="skill_2">Tizlik /
+                                            Optimizasiýa</span>
+                                    </div>
+                                    <div
+                                        class="carousel-v-card glass-card px-4 py-3 flex items-center gap-2 border-blue-400/30 w-fit mx-auto">
+                                        <i data-lucide="box" class="w-4 h-4 text-blue-400"></i><span
+                                            class="text-xs font-bold whitespace-nowrap">Tailwind CSS</span>
+                                    </div>
+                                    <div
+                                        class="carousel-v-card glass-card px-4 py-3 flex items-center gap-2 border-primary/30 w-fit mx-auto">
+                                        <i data-lucide="bot" class="w-4 h-4 text-primary"></i><span
+                                            class="text-xs font-bold whitespace-nowrap">Llama 3 (Groq)</span>
+                                    </div>
+                                </div>
+                                <!-- Duplicate -->
+                                <div class="flex flex-col gap-6 pb-6">
+                                    <div
+                                        class="carousel-v-card glass-card px-4 py-3 flex items-center gap-2 border-cyan-500/30 w-fit mx-auto">
+                                        <i data-lucide="code" class="w-4 h-4 text-cyan-400"></i><span
+                                            class="text-xs font-bold whitespace-nowrap" data-i18n="skill_1">React /
+                                            Next.js</span>
+                                    </div>
+                                    <div
+                                        class="carousel-v-card glass-card px-4 py-3 flex items-center gap-2 border-emerald-500/30 w-fit mx-auto">
+                                        <i data-lucide="palette" class="w-4 h-4 text-emerald-400"></i><span
+                                            class="text-xs font-bold whitespace-nowrap" data-i18n="skill_3">UI/UX
+                                            (Psihology)</span>
+                                    </div>
+                                    <div
+                                        class="carousel-v-card glass-card px-4 py-3 flex items-center gap-2 border-orange-500/30 w-fit mx-auto">
+                                        <i data-lucide="zap" class="w-4 h-4 text-orange-400"></i><span
+                                            class="text-xs font-bold whitespace-nowrap" data-i18n="skill_2">Tizlik /
+                                            Optimizasiýa</span>
+                                    </div>
+                                    <div
+                                        class="carousel-v-card glass-card px-4 py-3 flex items-center gap-2 border-blue-400/30 w-fit mx-auto">
+                                        <i data-lucide="box" class="w-4 h-4 text-blue-400"></i><span
+                                            class="text-xs font-bold whitespace-nowrap">Tailwind CSS</span>
+                                    </div>
+                                    <div
+                                        class="carousel-v-card glass-card px-4 py-3 flex items-center gap-2 border-primary/30 w-fit mx-auto">
+                                        <i data-lucide="bot" class="w-4 h-4 text-primary"></i><span
+                                            class="text-xs font-bold whitespace-nowrap">Llama 3 (Groq)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- The ÝEŇIL Logo Pill on the right edge -->
+                        <div
+                            class="absolute -right-8 top-1/2 -translate-y-1/2 flex items-center justify-center w-[160px] h-[320px] bg-gradient-to-l from-primary/10 to-transparent border-t border-b border-l-2 border-primary/40 rounded-l-full shadow-[-30px_0_60px_rgba(16,185,129,0.15)] z-10 backdrop-blur-md float-anim">
                             <span
-                                class="text-6xl font-black text-white/50 bg-clip-text bg-gradient-to-tr from-primary to-white text-transparent tracking-widest italic"
+                                class="text-5xl font-black text-white/50 tracking-[0.2em] transform -rotate-90">ÝEŇIL</span>
+                            <div
+                                class="absolute -left-4 top-1/2 -translate-y-1/2 glass rounded-full px-3 py-1 text-[10px] font-bold text-primary flex items-center gap-1 border border-primary/30 z-20">
+                                <span class="relative flex h-2 w-2"><span
+                                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span><span
+                                        class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span></span>
+                                <span data-i18n="hero_available">Satuwy Ösdürýäris</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Layout: Horizontal Tracks -->
+                    <div
+                        class="lg:hidden relative w-full h-[500px] flex flex-col justify-between items-center overflow-hidden mask-h py-6">
+                        <!-- Top Horizontal Track (Skills) -->
+                        <div class="w-full overflow-visible z-0 pointer-events-none">
+                            <div class="track-h px-4 border-b border-white/5 pb-4">
+                                <!-- Group 1 -->
+                                <div class="flex gap-4 pr-4">
+                                    <div
+                                        class="carousel-h-card glass-card px-4 py-2 flex items-center gap-2 border-cyan-500/30 whitespace-nowrap">
+                                        <i data-lucide="code" class="w-4 h-4 text-cyan-400"></i><span
+                                            class="text-xs font-bold" data-i18n="skill_1">React / Next.js</span>
+                                    </div>
+                                    <div
+                                        class="carousel-h-card glass-card px-4 py-2 flex items-center gap-2 border-emerald-500/30 whitespace-nowrap">
+                                        <i data-lucide="palette" class="w-4 h-4 text-emerald-400"></i><span
+                                            class="text-xs font-bold" data-i18n="skill_3">UI/UX (Psihology)</span>
+                                    </div>
+                                    <div
+                                        class="carousel-h-card glass-card px-4 py-2 flex items-center gap-2 border-orange-500/30 whitespace-nowrap">
+                                        <i data-lucide="zap" class="w-4 h-4 text-orange-400"></i><span
+                                            class="text-xs font-bold" data-i18n="skill_2">Tizlik / Optimizasiýa</span>
+                                    </div>
+                                    <div
+                                        class="carousel-h-card glass-card px-4 py-2 flex items-center gap-2 border-primary/30 whitespace-nowrap">
+                                        <i data-lucide="bot" class="w-4 h-4 text-primary"></i><span
+                                            class="text-xs font-bold">Llama 3 (Groq)</span>
+                                    </div>
+                                </div>
+                                <!-- Duplicate -->
+                                <div class="flex gap-4 pr-4">
+                                    <div
+                                        class="carousel-h-card glass-card px-4 py-2 flex items-center gap-2 border-cyan-500/30 whitespace-nowrap">
+                                        <i data-lucide="code" class="w-4 h-4 text-cyan-400"></i><span
+                                            class="text-xs font-bold" data-i18n="skill_1">React / Next.js</span>
+                                    </div>
+                                    <div
+                                        class="carousel-h-card glass-card px-4 py-2 flex items-center gap-2 border-emerald-500/30 whitespace-nowrap">
+                                        <i data-lucide="palette" class="w-4 h-4 text-emerald-400"></i><span
+                                            class="text-xs font-bold" data-i18n="skill_3">UI/UX (Psihology)</span>
+                                    </div>
+                                    <div
+                                        class="carousel-h-card glass-card px-4 py-2 flex items-center gap-2 border-orange-500/30 whitespace-nowrap">
+                                        <i data-lucide="zap" class="w-4 h-4 text-orange-400"></i><span
+                                            class="text-xs font-bold" data-i18n="skill_2">Tizlik / Optimizasiýa</span>
+                                    </div>
+                                    <div
+                                        class="carousel-h-card glass-card px-4 py-2 flex items-center gap-2 border-primary/30 whitespace-nowrap">
+                                        <i data-lucide="bot" class="w-4 h-4 text-primary"></i><span
+                                            class="text-xs font-bold">Llama 3 (Groq)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Central ÝEŇIL Circle -->
+                        <div
+                            class="w-48 h-48 sm:w-56 sm:h-56 rounded-full border border-primary/40 flex items-center justify-center bg-[#021a12]/80 backdrop-blur-md glow relative z-10 mx-auto shadow-[0_0_50px_rgba(16,185,129,0.3)] float-anim">
+                            <span class="text-4xl font-black text-white/50 tracking-widest italic"
                                 style="text-shadow: 0 0 20px rgba(16,185,129,0.5);">ÝEŇIL</span>
                         </div>
-                        <!-- Decorative elements -->
-                        <div class="absolute top-0 right-10 w-20 h-20 bg-primary/20 rounded-full blur-xl"></div>
-                        <div class="absolute bottom-10 left-0 w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl"></div>
-                        <div
-                            class="absolute -bottom-6 right-0 glass rounded-xl px-5 py-3 text-sm font-bold text-primary flex items-center gap-2 border border-primary/30 z-20 shadow-lg">
-                            <span class="relative flex h-3 w-3"><span
-                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span><span
-                                    class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span></span>
-                            <span data-i18n="hero_available">Satuwy Ösdürýäris</span>
+
+                        <!-- Bottom Horizontal Track (Testimonials) -->
+                        <div class="w-full overflow-visible z-0 pointer-events-none">
+                            <div class="track-h px-4 border-t border-white/5 pt-4"
+                                style="animation-direction: reverse;">
+                                <!-- Group 1 -->
+                                <div class="flex gap-4 pr-4">
+                                    <div class="carousel-h-card glass-card w-[260px] p-3 flex flex-col gap-2">
+                                        <p class="text-[10px] opacity-80 italic line-clamp-3" data-i18n="test_1_msg">"Öz
+                                            biznesimiz üçin e-söwda sahypasyny ýasatdyk, dizaýny gowy we platforma
+                                            diýseň çalt işleýär."</p>
+                                        <div class="flex items-center gap-2 mt-auto">
+                                            <div class="w-6 h-6 rounded-full bg-primary/20 border border-primary text-primary flex items-center justify-center font-bold text-[10px]"
+                                                data-i18n="test_1_init">A</div>
+                                            <div>
+                                                <p class="text-[10px] font-bold leading-tight" data-i18n="test_1_name">
+                                                    Azat G.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="carousel-h-card glass-card w-[260px] p-3 flex flex-col gap-2">
+                                        <p class="text-[10px] opacity-80 italic line-clamp-3" data-i18n="test_2_msg">
+                                            "Taslama gysga wagtyň içinde taýýar boldy, hemme zat islegimizdäki ýaly
+                                            premium derejede."</p>
+                                        <div class="flex items-center gap-2 mt-auto">
+                                            <div class="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-500 text-blue-400 flex items-center justify-center font-bold text-[10px]"
+                                                data-i18n="test_2_init">B</div>
+                                            <div>
+                                                <p class="text-[10px] font-bold leading-tight" data-i18n="test_2_name">
+                                                    Begenç M.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="carousel-h-card glass-card w-[260px] p-3 flex flex-col gap-2">
+                                        <p class="text-[10px] opacity-80 italic line-clamp-3" data-i18n="test_3_msg">
+                                            "Web taslamamyzda biziň bilen iň ownuk zatlara çenli gyzyklandylar.
+                                            Ygtybarly we gaty innowasiýon çözgütler."</p>
+                                        <div class="flex items-center gap-2 mt-auto">
+                                            <div class="w-6 h-6 rounded-full bg-purple-500/20 border border-purple-500 text-purple-400 flex items-center justify-center font-bold text-[10px]"
+                                                data-i18n="test_3_init">G</div>
+                                            <div>
+                                                <p class="text-[10px] font-bold leading-tight" data-i18n="test_3_name">
+                                                    Gözel T.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Duplicate -->
+                                <div class="flex gap-4 pr-4">
+                                    <div class="carousel-h-card glass-card w-[260px] p-3 flex flex-col gap-2">
+                                        <p class="text-[10px] opacity-80 italic line-clamp-3" data-i18n="test_1_msg">"Öz
+                                            biznesimiz üçin e-söwda sahypasyny ýasatdyk, dizaýny gowy we platforma
+                                            diýseň çalt işleýär."</p>
+                                        <div class="flex items-center gap-2 mt-auto">
+                                            <div class="w-6 h-6 rounded-full bg-primary/20 border border-primary text-primary flex items-center justify-center font-bold text-[10px]"
+                                                data-i18n="test_1_init">A</div>
+                                            <div>
+                                                <p class="text-[10px] font-bold leading-tight" data-i18n="test_1_name">
+                                                    Azat G.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="carousel-h-card glass-card w-[260px] p-3 flex flex-col gap-2">
+                                        <p class="text-[10px] opacity-80 italic line-clamp-3" data-i18n="test_2_msg">
+                                            "Taslama gysga wagtyň içinde taýýar boldy, hemme zat islegimizdäki ýaly
+                                            premium derejede."</p>
+                                        <div class="flex items-center gap-2 mt-auto">
+                                            <div class="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-500 text-blue-400 flex items-center justify-center font-bold text-[10px]"
+                                                data-i18n="test_2_init">B</div>
+                                            <div>
+                                                <p class="text-[10px] font-bold leading-tight" data-i18n="test_2_name">
+                                                    Begenç M.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="carousel-h-card glass-card w-[260px] p-3 flex flex-col gap-2">
+                                        <p class="text-[10px] opacity-80 italic line-clamp-3" data-i18n="test_3_msg">
+                                            "Web taslamamyzda biziň bilen iň ownuk zatlara çenli gyzyklandylar.
+                                            Ygtybarly we gaty innowasiýon çözgütler."</p>
+                                        <div class="flex items-center gap-2 mt-auto">
+                                            <div class="w-6 h-6 rounded-full bg-purple-500/20 border border-purple-500 text-purple-400 flex items-center justify-center font-bold text-[10px]"
+                                                data-i18n="test_3_init">G</div>
+                                            <div>
+                                                <p class="text-[10px] font-bold leading-tight" data-i18n="test_3_name">
+                                                    Gözel T.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -845,249 +1304,6 @@
 
     <div class="section-divider"></div>
 
-    <!-- PROJECTS SECTION -->
-    <section id="projects" class="py-20 lg:py-32 relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12 fade-up">
-                <p class="text-primary font-bold tracking-widest uppercase mb-3"><span
-                        data-i18n="nav_projects">Taslamalarymyz</span></p>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-4" data-i18n="proj_title">Üstünlikli <span
-                        class="text-primary">Işlerimiz</span></h2>
-                <p class="opacity-70 max-w-2xl mx-auto text-lg" data-i18n="proj_desc">Satuwy artdyrýan, ynam döredýän
-                    owadan we çalt web platformalar.</p>
-            </div>
-            <div class="flex flex-wrap justify-center gap-3 mb-10 fade-up" id="portfolio-filters">
-                <button
-                    class="btn-outline border-none bg-primary/10 text-primary px-6 py-2 rounded-full font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] filter-btn active"
-                    data-filter="all" data-i18n="filter_all">Ählisi</button>
-                <button
-                    class="btn-outline border-none bg-glass text-white px-6 py-2 rounded-full font-semibold filter-btn hover:text-primary hover:bg-primary/10 transition-colors"
-                    data-filter="ecommerce" data-i18n="filter_ecom">E-Söwda</button>
-                <button
-                    class="btn-outline border-none bg-glass text-white px-6 py-2 rounded-full font-semibold filter-btn hover:text-primary hover:bg-primary/10 transition-colors"
-                    data-filter="landing" data-i18n="filter_landing">Lending / Sahypa</button>
-                <button
-                    class="btn-outline border-none bg-glass text-white px-6 py-2 rounded-full font-semibold filter-btn hover:text-primary hover:bg-primary/10 transition-colors"
-                    data-filter="ai" data-i18n="filter_ai">AI Çözgüt</button>
-                <button
-                    class="btn-outline border-none bg-glass text-white px-6 py-2 rounded-full font-semibold filter-btn hover:text-primary hover:bg-primary/10 transition-colors"
-                    data-filter="other" data-i18n="filter_other">Başgasy</button>
-            </div>
-            <div id="projects-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Proj 1: E-commerce -->
-                <div class="glass-card overflow-hidden fade-up project-item group" data-category="ecommerce">
-                    <div class="relative cursor-pointer overflow-hidden pb-[60%]" onclick="openModal(1)">
-                        <img src="https://picsum.photos/id/2/800/600" alt="Luxury E-com"
-                            class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            loading="lazy" />
-                        <div
-                            class="absolute inset-0 bg-darkBgMuted/80 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center p-4">
-                            <span class="btn-primary text-sm shadow-[0_0_20px_rgba(16,185,129,0.5)]">Maglumat
-                                görkeziş</span>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center gap-2 mb-2"><span
-                                class="px-2 py-1 text-[10px] uppercase tracking-wider font-bold bg-blue-500/20 text-blue-400 rounded-md border border-blue-500/30 flex items-center gap-1"><i
-                                    data-lucide="shopping-cart" class="w-3 h-3"></i> E-söwda</span></div>
-                        <h3 class="font-bold text-xl mb-2 group-hover:text-primary transition-colors"
-                            data-i18n="proj_1_title">Premium Geýim Dükan</h3>
-                        <p class="text-sm opacity-60 line-clamp-2" data-i18n="proj_1_desc">Satuwy 300% artdyran, iň ösen
-                            e-söwda integrasiýaly dükan.</p>
-                    </div>
-                </div>
-                <!-- Proj 2: Landing -->
-                <div class="glass-card overflow-hidden fade-up project-item group" data-category="landing"
-                    style="transition-delay:.1s">
-                    <div class="relative cursor-pointer overflow-hidden pb-[60%]" onclick="openModal(2)">
-                        <img src="https://picsum.photos/id/20/800/600" alt="SaaS"
-                            class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            loading="lazy" />
-                        <div
-                            class="absolute inset-0 bg-darkBgMuted/80 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center p-4">
-                            <span class="btn-primary text-sm shadow-[0_0_20px_rgba(16,185,129,0.5)]">Maglumat
-                                görkeziş</span>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center gap-2 mb-2"><span
-                                class="px-2 py-1 text-[10px] uppercase tracking-wider font-bold bg-purple-500/20 text-purple-400 rounded-md border border-purple-500/30 flex items-center gap-1"><i
-                                    data-lucide="layout-template" class="w-3 h-3"></i> Lending</span></div>
-                        <h3 class="font-bold text-xl mb-2 group-hover:text-primary transition-colors"
-                            data-i18n="proj_2_title">Ajaýyp Arassa Dizaýn Sahypa</h3>
-                        <p class="text-sm opacity-60 line-clamp-2" data-i18n="proj_2_desc">Telekeçiler we önüm
-                            öndürijiler üçin owadan prezentasiýa we landing portaly.</p>
-                    </div>
-                </div>
-                <!-- Proj 3: AI -->
-                <div class="glass-card overflow-hidden fade-up project-item group" data-category="ai"
-                    style="transition-delay:.2s">
-                    <div class="relative cursor-pointer overflow-hidden pb-[60%]" onclick="openModal(0)">
-                        <img src="https://picsum.photos/id/40/800/600" alt="Groq AI Chatbot"
-                            class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            loading="lazy" />
-                        <div
-                            class="absolute inset-0 bg-darkBgMuted/80 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center p-4">
-                            <span class="btn-primary text-sm shadow-[0_0_20px_rgba(16,185,129,0.5)]">Maglumat
-                                görkeziş</span>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center gap-2 mb-2"><span
-                                class="px-2 py-1 text-[10px] uppercase tracking-wider font-bold bg-primary/20 text-primary rounded-md border border-primary/30 flex items-center gap-1"><i
-                                    data-lucide="bot" class="w-3 h-3"></i> AI Asistan</span></div>
-                        <h3 class="font-bold text-xl mb-2 group-hover:text-primary transition-colors"
-                            data-i18n="proj_3_title">Täzelikleri Okap Beriji we Satujy AI</h3>
-                        <p class="text-sm opacity-60 line-clamp-2" data-i18n="proj_3_desc">Tekstde hem setde uly tizlik
-                            bilen işleýän (Groq) we satuwy awtomatlaşdyrýan bot.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Project Modal -->
-    <div id="project-modal" class="modal-overlay" aria-hidden="true">
-        <div class="modal-content glass-card p-6 sm:p-8 border-2 border-primary/30">
-            <button onclick="closeModal()"
-                class="absolute top-4 right-4 text-3xl font-light hover:text-primary transition-colors"><i
-                    data-lucide="x" class="w-8 h-8"></i></button>
-            <div class="rounded-xl overflow-hidden mb-6 relative">
-                <img id="modal-img" src="https://picsum.photos/id/2/800/600" alt="" class="w-full h-64 object-cover" />
-                <div class="absolute inset-0 shadow-[inset_0_-50px_50px_rgba(0,0,0,0.5)]"></div>
-            </div>
-            <h3 id="modal-title" class="text-3xl font-black mb-3 text-white" data-i18n="proj_modal_title">Geljekki
-                Taslamaňyz</h3>
-            <p id="modal-desc" class="opacity-80 mb-6 leading-relaxed font-medium" data-i18n="proj_modal_desc">Biziň
-                işleýiş tilsimlerimizi we netijelerimizi şu ýerden doly öwrenseňiz bolar. Islendik taslamany siziň üçin
-                aýratyn edip gurarly.</p>
-            <a href="#contact" onclick="closeModal()"
-                class="btn-primary block w-full text-center py-4 font-bold text-lg" data-i18n="proj_modal_btn">Şeýle
-                sahypa gerekmi? Ýazyň.</a>
-        </div>
-    </div>
-
-    <div class="section-divider"></div>
-
-    <!-- SKILLS SECTION -->
-    <section id="skills" class="py-20 lg:py-32 relative bg-gradient-to-br from-primary/5 to-transparent">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16 fade-up">
-                <p class="text-primary font-bold tracking-widest uppercase mb-3"><span data-i18n="skills_subtitle">Enjam
-                        we gurallar</span></p>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-4">Ussat <span class="text-primary"
-                        data-i18n="skills_title">Gurallarymyz</span></h2>
-            </div>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 px-2 sm:px-0">
-                <div class="glass-card p-6 fade-up relative overflow-hidden group">
-                    <div
-                        class="absolute -right-10 -bottom-10 w-32 h-32 bg-cyan-400/10 rounded-full blur-2xl group-hover:bg-cyan-400/20 transition-all">
-                    </div>
-                    <div class="flex justify-between items-end mb-4"><span
-                            class="font-bold text-lg flex items-center gap-2">
-                            <div class="w-8 h-8 flex items-center justify-center text-cyan-400"><i data-lucide="code"
-                                    class="w-6 h-6"></i></div> <span data-i18n="skill_1">React / Next.js</span>
-                        </span><span class="text-primary font-black">95%</span></div>
-                    <div class="progress-bar h-3">
-                        <div class="progress-fill" data-width="95" style="width:0"></div>
-                    </div>
-                </div>
-                <div class="glass-card p-6 fade-up relative overflow-hidden group" style="transition-delay:.1s">
-                    <div
-                        class="absolute -right-10 -bottom-10 w-32 h-32 bg-orange-400/10 rounded-full blur-2xl group-hover:bg-orange-400/20 transition-all">
-                    </div>
-                    <div class="flex justify-between items-end mb-4"><span
-                            class="font-bold text-lg flex items-center gap-2">
-                            <div class="w-8 h-8 flex items-center justify-center text-orange-400"><i data-lucide="zap"
-                                    class="w-6 h-6"></i></div> <span data-i18n="skill_2">Tizlik / Optimizasiýa</span>
-                        </span><span class="text-primary font-black">98%</span></div>
-                    <div class="progress-bar h-3">
-                        <div class="progress-fill" data-width="98" style="width:0"></div>
-                    </div>
-                </div>
-                <div class="glass-card p-6 fade-up relative overflow-hidden group" style="transition-delay:.2s">
-                    <div
-                        class="absolute -right-10 -bottom-10 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl group-hover:bg-emerald-400/20 transition-all">
-                    </div>
-                    <div class="flex justify-between items-end mb-4"><span
-                            class="font-bold text-lg flex items-center gap-2">
-                            <div class="w-8 h-8 flex items-center justify-center text-emerald-400"><i
-                                    data-lucide="palette" class="w-6 h-6"></i></div> <span data-i18n="skill_3">UI/UX
-                                (Psihology)</span>
-                        </span><span class="text-primary font-black">96%</span></div>
-                    <div class="progress-bar h-3">
-                        <div class="progress-fill" data-width="96" style="width:0"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <div class="section-divider"></div>
-
-    <!-- TESTIMONIALS SECTION (Sharhlar) -->
-    <section id="testimonials" class="py-20 lg:py-32 relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16 fade-up">
-                <p class="text-primary font-bold tracking-widest uppercase mb-3"><span data-i18n="test_sub">Müşderi
-                        Pikiri</span></p>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black" data-i18n="test_title"><span
-                        class="text-primary">Müşderi</span> teswirleri</h2>
-            </div>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Testimonial 1 -->
-                <div class="glass-card p-8 relative fade-up">
-                    <i data-lucide="quote" class="w-10 h-10 text-primary/20 absolute top-4 right-4"></i>
-                    <p class="text-lg opacity-80 mb-6 font-medium italic" data-i18n="test_1_msg">"Öz biznesimiz üçin
-                        e-söwda sahypasyny ýasatdyk, dizaýny gowy we platforma diýseň çalt işleýär. Satuwymyz uly
-                        depginde artdy."</p>
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center font-bold text-lg border border-primary text-primary"
-                            data-i18n="test_1_init">A</div>
-                        <div>
-                            <h4 class="font-bold" data-i18n="test_1_name">Azat G.</h4>
-                            <p class="text-xs opacity-60 text-primary" data-i18n="test_1_role">Dükan Eýesi, Aşgabat</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Testimonial 2 -->
-                <div class="glass-card p-8 relative fade-up" style="transition-delay:.1s">
-                    <i data-lucide="quote" class="w-10 h-10 text-primary/20 absolute top-4 right-4"></i>
-                    <p class="text-lg opacity-80 mb-6 font-medium italic" data-i18n="test_2_msg">"Loyiha qisqa muddat
-                        ichida tayyor bo'ldi, hammasi talabdagidek premium darajada. Ayniqsa saytning mobil versiyasi
-                        ajoyib chiqqan."</p>
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center font-bold text-lg border border-blue-500 text-blue-400"
-                            data-i18n="test_2_init">S</div>
-                        <div>
-                            <h4 class="font-bold" data-i18n="test_2_name">Sardor F.</h4>
-                            <p class="text-xs opacity-60 text-blue-400" data-i18n="test_2_role">Startap Asoschisi,
-                                Tashkent</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Testimonial 3 -->
-                <div class="glass-card p-8 relative fade-up" style="transition-delay:.2s">
-                    <i data-lucide="quote" class="w-10 h-10 text-primary/20 absolute top-4 right-4"></i>
-                    <p class="text-lg opacity-80 mb-6 font-medium italic" data-i18n="test_3_msg">"Web projemizde bizimle
-                        en ince detaylara kadar ilgilendiler. Güvenilir ve çok inovatif çözümler üretiyorlar. Harika
-                        iş."</p>
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center font-bold text-lg border border-purple-500 text-purple-400"
-                            data-i18n="test_3_init">E</div>
-                        <div>
-                            <h4 class="font-bold" data-i18n="test_3_name">Emre T.</h4>
-                            <p class="text-xs opacity-60 text-purple-400" data-i18n="test_3_role">E-Ticaret Yöneticisi,
-                                İstanbul</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <div class="section-divider"></div>
-
     <!-- PRICING SECTION (Narhlar) -->
     <section id="pricing" class="py-20 lg:py-32 relative bg-primary/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1117,6 +1333,28 @@
                             <span class="opacity-80" data-i18n="price_1_ft3">Mobil moslaşdyrma (Responsive)</span>
                         </li>
                     </ul>
+                    <div class="mt-2 mb-6 p-4 rounded-xl bg-darkBg/30 border border-white/5">
+                        <p class="text-xs font-bold uppercase text-primary mb-3 opacity-90 flex items-center gap-2"><i
+                                data-lucide="globe" class="w-4 h-4"></i> <span data-i18n="price_1_examples">Mysaly
+                                sahypalar:</span></p>
+                        <ul class="space-y-2 text-sm font-medium">
+                            <li><a href="https://tm.gymcity.info" target="_blank"
+                                    class="hover:text-primary transition-colors flex items-center justify-between group">tm.gymcity.info
+                                    <i data-lucide="external-link"
+                                        class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i></a>
+                            </li>
+                            <li><a href="https://logistics.tm" target="_blank"
+                                    class="hover:text-primary transition-colors flex items-center justify-between group">logistics.tm
+                                    <i data-lucide="external-link"
+                                        class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i></a>
+                            </li>
+                            <li><a href="https://oteller.com.tm" target="_blank"
+                                    class="hover:text-primary transition-colors flex items-center justify-between group">oteller.com.tm
+                                    <i data-lucide="external-link"
+                                        class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i></a>
+                            </li>
+                        </ul>
+                    </div>
                     <a href="#contact" class="btn-outline w-full rounded-xl"
                         data-i18n="price_btn_contact">Habarlaşyň</a>
                 </div>
@@ -1143,6 +1381,28 @@
                             <span class="opacity-80" data-i18n="price_2_ft3">Doly howpsuz we diller goldawy</span>
                         </li>
                     </ul>
+                    <div class="mt-2 mb-6 p-4 rounded-xl bg-darkBg/30 border border-primary/20">
+                        <p class="text-xs font-bold uppercase text-primary mb-3 opacity-90 flex items-center gap-2"><i
+                                data-lucide="globe" class="w-4 h-4"></i> <span data-i18n="price_2_examples">Mysaly
+                                sahypalar:</span></p>
+                        <ul class="space-y-2 text-sm font-medium">
+                            <li><a href="https://sakofe.com" target="_blank"
+                                    class="hover:text-primary transition-colors flex items-center justify-between group">sakofe.com
+                                    <i data-lucide="external-link"
+                                        class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i></a>
+                            </li>
+                            <li><a href="https://yakyn.biz" target="_blank"
+                                    class="hover:text-primary transition-colors flex items-center justify-between group">yakyn.biz
+                                    <i data-lucide="external-link"
+                                        class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i></a>
+                            </li>
+                            <li><a href="https://ozan.com.tm" target="_blank"
+                                    class="hover:text-primary transition-colors flex items-center justify-between group">ozan.com.tm
+                                    <i data-lucide="external-link"
+                                        class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i></a>
+                            </li>
+                        </ul>
+                    </div>
                     <a href="#contact" class="btn-primary w-full rounded-xl shadow-lg"
                         data-i18n="price_btn_select">Saýla we Ýaz</a>
                 </div>
@@ -1163,6 +1423,28 @@
                             <span class="opacity-80" data-i18n="price_3_ft2">Ses we tekstli Groq AI bot</span>
                         </li>
                     </ul>
+                    <div class="mt-2 mb-6 p-4 rounded-xl bg-darkBg/30 border border-white/5">
+                        <p class="text-xs font-bold uppercase text-primary mb-3 opacity-90 flex items-center gap-2"><i
+                                data-lucide="globe" class="w-4 h-4"></i> <span data-i18n="price_3_examples">Mysaly
+                                sahypalar:</span></p>
+                        <ul class="space-y-2 text-sm font-medium">
+                            <li><a href="https://simurgtm.com" target="_blank"
+                                    class="hover:text-primary transition-colors flex items-center justify-between group">simurgtm.com
+                                    <i data-lucide="external-link"
+                                        class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i></a>
+                            </li>
+                            <li><a href="https://turkmenistanairlines.tm" target="_blank"
+                                    class="hover:text-primary transition-colors flex items-center justify-between group">turkmenistanairlines.tm
+                                    <i data-lucide="external-link"
+                                        class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i></a>
+                            </li>
+                            <li><a href="https://akyol.com.tm" target="_blank"
+                                    class="hover:text-primary transition-colors flex items-center justify-between group">akyol.com.tm
+                                    <i data-lucide="external-link"
+                                        class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i></a>
+                            </li>
+                        </ul>
+                    </div>
                     <a href="#contact" class="btn-outline w-full rounded-xl" data-i18n="price_btn_advise">Maslahat
                         al</a>
                 </div>
@@ -1293,10 +1575,10 @@
                 <div>
                     <h4 class="font-bold mb-4 uppercase tracking-wider" data-i18n="footer_links">Salgylanmalar</h4>
                     <div class="space-y-2 text-sm opacity-80 font-medium"><a href="#about"
-                            class="block hover:text-primary transition-colors">Biz hakda</a><a href="#services"
-                            class="block hover:text-primary transition-colors">Hyzmatlar</a><a href="#projects"
-                            class="block hover:text-primary transition-colors">Taslamalar</a><a href="#pricing"
-                            class="block hover:text-primary transition-colors">Bahalar</a></div>
+                            class="block hover:text-primary transition-colors" data-i18n="nav_about">Biz hakda</a><a
+                            href="#services" class="block hover:text-primary transition-colors"
+                            data-i18n="nav_services">Hyzmatlar</a><a href="#pricing"
+                            class="block hover:text-primary transition-colors" data-i18n="nav_pricing">Bahalar</a></div>
                 </div>
                 <div>
                     <h4 class="font-bold mb-4 uppercase tracking-wider" data-i18n="footer_tech">Tehnologiýalar</h4>
@@ -1377,12 +1659,16 @@
             </div>
         </div>
         <button onclick="toggleChat()"
-            class="chat-bubble flex items-center justify-center pointer-events-auto mb-[env(safe-area-inset-bottom,16px)] sm:mb-0">
-            <i data-lucide="message-square" class="w-6 h-6 text-[#021a12] relative z-10"></i>
-            <span class="absolute -top-1 -right-1 flex h-3 w-3"><span
+            class="chat-bubble flex items-center justify-center pointer-events-auto mb-[env(safe-area-inset-bottom,16px)] sm:mb-0 overflow-hidden !bg-[#021a12] !border-[3px] !border-[#10b981] !p-0">
+            <img src="assets/img/ai-bot.png" alt="AI Agent" class="w-[120%] h-[120%] object-cover scale-110">
+            <span class="absolute top-0 -right-1 flex h-3 w-3"><span
                     class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span
                     class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>
         </button>
+        <!-- Auto-popup nudge -->
+        <div id="chat-nudge" class="chat-nudge" onclick="toggleChat(); this.classList.remove('visible');">
+            <span data-i18n="chat_nudge_text">Kömek gerekmi? 💬</span>
+        </div>
     </div>
 
     <!-- SCRIPTS: 5 Languages, JS functionality, Chat UI logic -->
@@ -1414,6 +1700,7 @@
                 "srv_more": "Maglumat gör",
                 "proj_title": "Üstünlikli <span class='text-primary'>Işlerimiz</span>",
                 "proj_desc": "Satuwy artdyrýan, ynam döredýän owadan we çalt web platformalar.",
+                "proj_hover_btn": "Maglumat görkeziş",
                 "filter_all": "Ählisi", "filter_ecom": "E-Söwda", "filter_landing": "Lending / Sahypa", "filter_ai": "AI Çözgüt", "filter_other": "Başgasy",
                 "proj_1_title": "Premium Geýim Dükan", "proj_1_desc": "Satuwy 300% artdyran, iň ösen e-söwda integrasiýaly dükan.",
                 "proj_2_title": "Ajaýyp Arassa Dizaýn Sahypa", "proj_2_desc": "Telekeçiler we önüm öndürijiler üçin owadan prezentasiýa we landing portaly.",
@@ -1426,13 +1713,15 @@
                 "price_1_title": "Başlangyç / Lending", "price_1_desc": "Uly bolmadyk biznesler we wizitkalar üçin.", "price_1_val": "3000 m.", "price_1_sub": "Başlaýan baha", "price_1_ft1": "1-3 Sahypaly dizaýn", "price_1_ft2": "Täze interfeýs (UI)", "price_1_ft3": "Mobil moslaşdyrma", "price_btn_contact": "Habarlaşyň",
                 "price_2_title": "E-Söwda / Portal", "price_2_desc": "Satuw platformasy we güýçli biznes administrasiýa.", "price_2_val": "10 000 m.", "price_2_sub": "Eksklýuziw dizaýn", "price_2_ft1": "Uly haryt görkeziji", "price_2_ft2": "Satyjy admin CRM", "price_2_ft3": "Çalt ýüklenmek tizligi", "price_btn_select": "Saýla we Ýaz",
                 "price_3_title": "Korporatiw / AI", "price_3_desc": "Özboluşly logika, AI integrasiýasy, kämil web.", "price_3_val": "Şertnamaly", "price_3_sub": "Doly işlenilýär", "price_3_ft1": "Ajaýyp funksional logika", "price_3_ft2": "Ses we tekstli Groq AI", "price_btn_advise": "Maslahat al",
+                "price_1_examples": "Mysaly sahypalar:", "price_2_examples": "Mysaly sahypalar:", "price_3_examples": "Mysaly sahypalar:",
                 "contact_title": "Arzuwlaryňyzy Hakykat Ederis", "contact_desc": "Taslamaňyz barmy? Merkezi Aziýanyň we Dünýäniň islendik ýerindäki müşderiler üçin iň gowy web we biznes hyzmatlaryny hödürleýäris.", "contact_phone": "Telefon", "contact_email": "E-Poçta", "contact_addr": "Salgymyz",
                 "form_name": "Doly Adyňyz *", "form_email": "Email / Telefon *", "form_type": "Taslama Görnüşi", "form_msg": "Hatyňyz *", "form_btn": "Ugrat",
                 "form_opt_1": "Onlaýn Dükan (E-Söwda)", "form_opt_2": "Biznes Sahypa / Landing", "form_opt_3": "AI Asistan / Bot", "form_opt_4": "Başgasy",
                 "form_success_msg": "Hat üstünlikli iberildi!",
                 "footer_desc": "Türkmenistan we dünýä üçin satuwy ösdürýän, ynam döredýän biznes çözgütler merkezi.", "footer_links": "Salgylanmalar", "footer_rights": "Ähli hukuklar goralan.",
                 "footer_tech": "Tehnologiýalar", "footer_contact": "Aragatnaşyk", "footer_loc": "Aşgabat, TM", "footer_credit": "Dizaýn we Gurluşyk: <span class='text-primary italic'>ÝEŇIL Team</span>",
-                "chat_placeholder": "Hat ýazyň...", "chat_opt_1": "Hyzmatlar", "chat_opt_2": "Baha we Nyrh", "chat_opt_3": "Habarlaşmak", "chat_bot_name": "ÝEŇIL Bot", "chat_online": "Onlaýn"
+                "chat_placeholder": "Hat ýazyň...", "chat_opt_1": "Hyzmatlar", "chat_opt_2": "Baha we Nyrh", "chat_opt_3": "Habarlaşmak", "chat_bot_name": "ÝEŇIL Bot", "chat_online": "Onlaýn",
+                "chat_nudge_text": "Kömek gerekmi? 💬"
             },
             "uz": {
                 "nav_home": "Asosiy", "nav_about": "Biz haqimizda", "nav_services": "Xizmatlar", "nav_projects": "Loyihalar", "nav_pricing": "Narhlar", "nav_contact": "Aloqa",
@@ -1457,6 +1746,7 @@
                 "srv_more": "Batafsil ko'rish",
                 "proj_title": "Muvaffaqiyatli <span class='text-primary'>Ishlarimiz</span>",
                 "proj_desc": "Savdoni oshiruvchi, ishonch uyg'otadigan chiroyli va tezkor veb platformalar.",
+                "proj_hover_btn": "Batafsil ko'rish",
                 "filter_all": "Barchasi", "filter_ecom": "E-Tijorat", "filter_landing": "Lending Sahifa", "filter_ai": "AI Yechimlar", "filter_other": "Boshqalar",
                 "proj_1_title": "Premium Kiyim Do'koni", "proj_1_desc": "Savdoni 300% ga oshirgan, eng zamonaviy elektron tijorat integratsiyasi bo'lgan do'kon.",
                 "proj_2_title": "Ajoyib Toza Dizaynli Sahifa", "proj_2_desc": "Tadbirkorlar va ijodkorlar uchun go'zal taqdimot va lending portali.",
@@ -1469,13 +1759,15 @@
                 "price_1_title": "Lending Sahifa", "price_1_desc": "Kichik biznes va vizitkalar uchun ideal.", "price_1_val": "$250", "price_1_sub": "Boshlang'ich narx", "price_1_ft1": "1-3 sahifali dizayn", "price_1_ft2": "Zamonaviy UI", "price_1_ft3": "Mobil moslashuv (Responsive)", "price_btn_contact": "Bog'lanish",
                 "price_2_title": "E-Tijorat / Do'kon", "price_2_desc": "Katta savdo platformasi va mijozlar bazasi.", "price_2_val": "$800", "price_2_sub": "Eksklyuziv dizayn bilan", "price_2_ft1": "Katta tovarlar katalogi", "price_2_ft2": "Kengaytirilgan CRM panel", "price_2_ft3": "Yuqori tezlik va xavfsizlik", "price_btn_select": "Tanlash",
                 "price_3_title": "Korporativ / AI", "price_3_desc": "Noyob mantiq, AI integratsiyasi va mukammallik.", "price_3_val": "Kelishilgan", "price_3_sub": "To'liq ishlab chiqiladi", "price_3_ft1": "Murakkab funksionallik", "price_3_ft2": "Groq AI bot tizimi", "price_btn_advise": "Maslahat",
+                "price_1_examples": "Namunaviy sahifalar:", "price_2_examples": "Namunaviy sahifalar:", "price_3_examples": "Namunaviy sahifalar:",
                 "contact_title": "Orzularingiz Haqiqatga Aylanadi", "contact_desc": "Loyihangiz bormi? Biz sizga eng yaxshi veb-xizmatlarni taqdim etamiz.", "contact_phone": "Telefon", "contact_email": "Elektron Pochta", "contact_addr": "Manzil",
                 "form_name": "To'liq Ismingiz *", "form_email": "Email / Telefon *", "form_type": "Loyiha Turi", "form_msg": "Xabaringiz *", "form_btn": "Yuborish",
                 "form_opt_1": "Onlayn Do'kon (E-Tijorat)", "form_opt_2": "Biznes Sahifa / Landing", "form_opt_3": "AI Asistent", "form_opt_4": "Boshqasi",
                 "form_success_msg": "Xabar muvaffaqiyatli yuborildi!",
                 "footer_desc": "Turkmaniston va dunyo bizneslari uchun savdoni oshiruvchi yechimlar markazi.", "footer_links": "Havolalar", "footer_rights": "Barcha huquqlar himoyalangan.",
                 "footer_tech": "Texnologiyalar", "footer_contact": "Aloqa", "footer_loc": "Toshkent, UZ", "footer_credit": "Dizayn va Dasturlash: <span class='text-primary italic'>ÝEŇIL Jamoasi</span>",
-                "chat_placeholder": "Xabar yozing...", "chat_opt_1": "Qanday xizmatlar?", "chat_opt_2": "Narxlar", "chat_opt_3": "Aloqa", "chat_bot_name": "ÝEŇIL Bot", "chat_online": "Onlayn"
+                "chat_placeholder": "Xabar yozing...", "chat_opt_1": "Qanday xizmatlar?", "chat_opt_2": "Narxlar", "chat_opt_3": "Aloqa", "chat_bot_name": "ÝEŇIL Bot", "chat_online": "Onlayn",
+                "chat_nudge_text": "Yordam kerakmi? 💬"
             },
             "tr": {
                 "nav_home": "Ana Sayfa", "nav_about": "Hakkımızda", "nav_services": "Hizmetler", "nav_projects": "Projeler", "nav_pricing": "Fiyatlar", "nav_contact": "İletişim",
@@ -1500,6 +1792,7 @@
                 "srv_more": "Detayları Gör",
                 "proj_title": "Başarılı <span class='text-primary'>İşlerimiz</span>",
                 "proj_desc": "Satışlarınızı artıran, güven yaratan şık ve hızlı web platformları.",
+                "proj_hover_btn": "Detayları Gör",
                 "filter_all": "Tümü", "filter_ecom": "E-Ticaret", "filter_landing": "Landing Sayfa", "filter_ai": "AI Çözümleri", "filter_other": "Diğerleri",
                 "proj_1_title": "Premium Giyim Mağazası", "proj_1_desc": "Satışları %300 artıran e-ticaret (online ödeme) entegrasyonlu süper hızlı bir mağaza.",
                 "proj_2_title": "Şık Saf Tasarım Sayfası", "proj_2_desc": "İşletmeler ve üreticiler için harika bir sunum ve karşılama portföy portalı.",
@@ -1512,13 +1805,15 @@
                 "price_1_title": "Başlangıç / Landing", "price_1_desc": "Küçük işletmeler ve kartvizit siteleri için.", "price_1_val": "10.000 ₺", "price_1_sub": "Başlangıç fiyatı", "price_1_ft1": "1-3 Sayfa özel tasarım", "price_1_ft2": "Modern arayüz (UI)", "price_1_ft3": "Mobil uyumlu (Responsive)", "price_btn_contact": "Bizimle İletişime Geç",
                 "price_2_title": "E-Ticaret / Portal", "price_2_desc": "Satış platformu ve güçlü yönetim sistemi.", "price_2_val": "30.000 ₺", "price_2_sub": "Tam donanımlı paket", "price_2_ft1": "Geniş ürün gösterimi", "price_2_ft2": "Gelişmiş admin CRM", "price_2_ft3": "Hızlı yüklenme optimizasyonu", "price_btn_select": "Hemen Başla",
                 "price_3_title": "Kurumsal / AI", "price_3_desc": "Özgün mantık, Yapay Zeka entegrasyonu.", "price_3_val": "Özel Fiyat", "price_3_sub": "Proje bazlı ölçüm", "price_3_ft1": "Akıllı otomasyon sistemleri", "price_3_ft2": "Groq altyapılı AI Asistan", "price_btn_advise": "Teklif Al",
+                "price_1_examples": "Örnek sayfalar:", "price_2_examples": "Örnek sayfalar:", "price_3_examples": "Örnek sayfalar:",
                 "contact_title": "Hayallerinizi Gerçeğe Dönüştürüyoruz", "contact_desc": "Markanızı büyütmek için bizimle iletişime geçin ve ücretsiz danışmanlık alın.", "contact_phone": "Telefon", "contact_email": "E-posta", "contact_addr": "Adres",
                 "form_name": "Adınız Soyadınız *", "form_email": "E-Posta / Telefon *", "form_type": "Proje Türü", "form_msg": "Mesajınız *", "form_btn": "Gönder",
                 "form_opt_1": "Online Mağaza (E-Ticaret)", "form_opt_2": "İşletme Sayfası / Landing", "form_opt_3": "AI Asistan / Y. Zeka", "form_opt_4": "Diğer",
                 "form_success_msg": "Mesajınız başarıyla gönderildi!",
                 "footer_desc": "Küresel ve yerel işletmeler için güvenilir e-ticaret ve teknoloji merkezi.", "footer_links": "Hızlı Bağlantılar", "footer_rights": "Tüm hakları saklıdır.",
                 "footer_tech": "Teknolojiler", "footer_contact": "İletişim", "footer_loc": "Aşkabat, TM", "footer_credit": "Tasarım & Geliştirici: <span class='text-primary italic'>ÝEŇIL Team</span>",
-                "chat_placeholder": "Mesaj yazın...", "chat_opt_1": "Hizmetler", "chat_opt_2": "Fiyatlandırma", "chat_opt_3": "İletişim", "chat_bot_name": "ÝEŇIL Bot", "chat_online": "Çevrimiçi"
+                "chat_placeholder": "Mesaj yazın...", "chat_opt_1": "Hizmetler", "chat_opt_2": "Fiyatlandırma", "chat_opt_3": "İletişim", "chat_bot_name": "ÝEŇIL Bot", "chat_online": "Çevrimiçi",
+                "chat_nudge_text": "Yardıma ihtiyacınız var mı? 💬"
             },
             "en": {
                 "nav_home": "Home", "nav_about": "About", "nav_services": "Services", "nav_projects": "Projects", "nav_pricing": "Pricing", "nav_contact": "Contact",
@@ -1543,6 +1838,7 @@
                 "srv_more": "See Details",
                 "proj_title": "Our Successful <span class='text-primary'>Cases</span>",
                 "proj_desc": "Beautiful and blazing-fast web platforms expanding sales and solidifying trust.",
+                "proj_hover_btn": "View Details",
                 "filter_all": "All", "filter_ecom": "E-Commerce", "filter_landing": "Landing Page", "filter_ai": "AI Agent Solutions", "filter_other": "Others",
                 "proj_1_title": "Premium Fashion Store", "proj_1_desc": "Increased sales by 300% via a highly advanced seamless e-commerce checkout integration.",
                 "proj_2_title": "Ultra Clean Design Page", "proj_2_desc": "A gorgeous modern presentation and landing portal built for creatives and startups.",
@@ -1555,13 +1851,15 @@
                 "price_1_title": "Landing Page", "price_1_desc": "For small businesses and brand showcases.", "price_1_val": "$500", "price_1_sub": "Starting from", "price_1_ft1": "Premium Custom Design", "price_1_ft2": "Modern UI/UX", "price_1_ft3": "Fully Responsive", "price_btn_contact": "Contact Us",
                 "price_2_title": "E-Commerce", "price_2_desc": "Robust sales platform & powerful dashboard.", "price_2_val": "$1,500", "price_2_sub": "Full-stack delivery", "price_2_ft1": "Advanced product grid", "price_2_ft2": "Seller CRM Panel", "price_2_ft3": "Blazing fast speeds", "price_btn_select": "Select Plan",
                 "price_3_title": "Enterprise / AI", "price_3_desc": "Custom logic, chatbots, scaling architecture.", "price_3_val": "Custom", "price_3_sub": "Fully Tailored", "price_3_ft1": "Complex workflow integration", "price_3_ft2": "Groq AI Voice/Text Agent", "price_btn_advise": "Get a Quote",
+                "price_1_examples": "Example sites:", "price_2_examples": "Example sites:", "price_3_examples": "Example sites:",
                 "contact_title": "Custom Tailored for You", "contact_desc": "Got a project? We provide the best web, CRM and e-commerce solutions across Central Asia and globally.", "contact_phone": "Phone", "contact_email": "Email", "contact_addr": "Address",
                 "form_name": "Full Name *", "form_email": "Email / Phone *", "form_type": "Project Type", "form_msg": "Your Message *", "form_btn": "Send Request",
                 "form_opt_1": "E-Commerce Store", "form_opt_2": "Landing / Company Page", "form_opt_3": "AI Agent / Chatbot", "form_opt_4": "Other Project",
                 "form_success_msg": "Message sent successfully!",
                 "footer_desc": "Empowering sales and building trust with modern web solutions.", "footer_links": "Quick Links", "footer_rights": "All rights reserved.",
                 "footer_tech": "Technologies", "footer_contact": "Contact Us", "footer_loc": "Ashgabat, TM", "footer_credit": "Design & Built By: <span class='text-primary italic'>ÝEŇIL Team</span>",
-                "chat_placeholder": "Type a message...", "chat_opt_1": "Services", "chat_opt_2": "Pricing", "chat_opt_3": "Contact", "chat_bot_name": "ÝEŇIL Bot", "chat_online": "Online"
+                "chat_placeholder": "Type a message...", "chat_opt_1": "Services", "chat_opt_2": "Pricing", "chat_opt_3": "Contact", "chat_bot_name": "ÝEŇIL Bot", "chat_online": "Online",
+                "chat_nudge_text": "Need help? 💬"
             },
             "ru": {
                 "nav_home": "Главная", "nav_about": "О нас", "nav_services": "Услуги", "nav_projects": "Проекты", "nav_pricing": "Цены", "nav_contact": "Контакты",
@@ -1586,6 +1884,7 @@
                 "srv_more": "Подробнее",
                 "proj_title": "Наши Успешные <span class='text-primary'>Кейсы</span>",
                 "proj_desc": "Надежные и потрясающие платформы, которые генерируют доверие и продажи.",
+                "proj_hover_btn": "Подробнее",
                 "filter_all": "Все", "filter_ecom": "E-Commerce", "filter_landing": "Лендинги", "filter_ai": "AI Решения", "filter_other": "Остальные",
                 "proj_1_title": "Бутик Одежды", "proj_1_desc": "Премиальный магазин одежды с интеграцией аналитики и увеличением продаж до 300%.",
                 "proj_2_title": "Минималистичный Портал", "proj_2_desc": "Идеально чистый и современный дизайн для технологичного стартапа.",
@@ -1598,13 +1897,15 @@
                 "price_1_title": "Лендинг", "price_1_desc": "Идеально для маленького бизнеса.", "price_1_val": "50 000 ₽", "price_1_sub": "Начальная цена", "price_1_ft1": "Оригинальный дизайн", "price_1_ft2": "Современный интерфейс", "price_1_ft3": "Мобильная адаптация", "price_btn_contact": "Написать",
                 "price_2_title": "E-Commerce", "price_2_desc": "Платформа для продаж и мощная CRM.", "price_2_val": "150 000 ₽", "price_2_sub": "Полный функционал", "price_2_ft1": "Каталог товаров высокого качества", "price_2_ft2": "Админ-панель продавца", "price_2_ft3": "Оптимизация скорости", "price_btn_select": "Выбрать",
                 "price_3_title": "Enterprise / AI", "price_3_desc": "Сложная логика, боты, масштабные проекты.", "price_3_val": "Договорная", "price_3_sub": "Индивидуальный план", "price_3_ft1": "Кастомная интеграция", "price_3_ft2": "Groq AI Чатбот", "price_btn_advise": "Получить консультацию",
+                "price_1_examples": "Примеры сайтов:", "price_2_examples": "Примеры сайтов:", "price_3_examples": "Примеры сайтов:",
                 "contact_title": "Решения для вас", "contact_desc": "Есть проект? Мы предоставляем лучшие веб-решения для всего мира.", "contact_phone": "Телефон", "contact_email": "E-mail", "contact_addr": "Адрес",
                 "form_name": "Полное имя *", "form_email": "E-mail / Телефон *", "form_type": "Тип проекта", "form_msg": "Ваше сообщение *", "form_btn": "Отправить",
                 "form_opt_1": "Онлайн Магазин", "form_opt_2": "Бизнес Сайт / Лендинг", "form_opt_3": "ИИ Ассистент / Бот", "form_opt_4": "Другое",
                 "form_success_msg": "Сообщение успешно отправлено!",
                 "footer_desc": "Центр премиальных решений для увеличения продаж вашего бизнеса.", "footer_links": "Ссылки", "footer_rights": "Все права защищены.",
                 "footer_tech": "Технологии", "footer_contact": "Связь", "footer_loc": "Ашхабад, ТМ", "footer_credit": "Создано командой: <span class='text-primary italic'>ÝEŇIL Team</span>",
-                "chat_placeholder": "Напишите сообщение...", "chat_opt_1": "Услуги", "chat_opt_2": "Цены", "chat_opt_3": "Связаться", "chat_bot_name": "ÝEŇIL Bot", "chat_online": "В сети"
+                "chat_placeholder": "Напишите сообщение...", "chat_opt_1": "Услуги", "chat_opt_2": "Цены", "chat_opt_3": "Связаться", "chat_bot_name": "ÝEŇIL Bot", "chat_online": "В сети",
+                "chat_nudge_text": "Нужна помощь? 💬"
             }
         };
 
@@ -1646,6 +1947,40 @@
 
         // General logic
         (function () {
+            // 3D Carousel Logic
+            function update3DCarousel() {
+                const vCards = document.querySelectorAll('.carousel-v-card');
+                const hCards = document.querySelectorAll('.carousel-h-card');
+                const centerY = window.innerHeight / 2;
+                const centerX = window.innerWidth / 2;
+
+                vCards.forEach(card => {
+                    const rect = card.getBoundingClientRect();
+                    const cardCenter = rect.top + rect.height / 2;
+                    const dist = Math.abs(centerY - cardCenter);
+                    let scale = 1.1 - (dist / 800);
+                    if (scale < 0.8) scale = 0.8;
+                    let opacity = 1 - (dist / 600);
+                    if (opacity < 0.2) opacity = 0.2;
+                    card.style.transform = `scale(${scale})`;
+                    card.style.opacity = opacity;
+                });
+
+                hCards.forEach(card => {
+                    const rect = card.getBoundingClientRect();
+                    const cardCenter = rect.left + rect.width / 2;
+                    const dist = Math.abs(centerX - cardCenter);
+                    let scale = 1.1 - (dist / 600);
+                    if (scale < 0.85) scale = 0.85;
+                    let opacity = 1 - (dist / 500);
+                    if (opacity < 0.2) opacity = 0.2;
+                    card.style.transform = `scale(${scale})`;
+                    card.style.opacity = opacity;
+                });
+
+                requestAnimationFrame(update3DCarousel);
+            }
+            requestAnimationFrame(update3DCarousel);
             // Particles
             const c = document.getElementById('particles-canvas');
             if (c) {
@@ -1753,43 +2088,118 @@
 
         })();
 
-        // GROQ AI WIDGET
+        // ═══════════════════════════════════════════════════
+        // GROQ AI WIDGET — Real API via Vercel
+        // ═══════════════════════════════════════════════════
+        const API_BASE = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
+            ? '' : '';  // Uses relative /api/ paths on Vercel
+
         let chatOpen = false;
+        let chatHistory = [];
+
+        const greetings = {
+            tk: 'Salam! ÝEŇIL AI Asistanyňa hoş geldiňiz! Groq arkaly iň çalt jogaplary we biznes maslahatlaryny berýärin. Näme kömek edip bilerin? 🚀',
+            uz: "Salom! ÝEŇIL AI Asistentiga xush kelibsiz! Savdo va veb loyihalarda qanday yordam bera olaman? 🚀",
+            tr: 'Merhaba! ÝEŇIL AI Asistanına hoş geldiniz! İşletmeniz için nasıl yardımcı olabilirim? 🚀',
+            en: 'Hello! Welcome to ÝEŇIL AI Assistant. Powered by Groq. How can I help you grow your business? 🚀',
+            ru: 'Здравствуйте! Добро пожаловать в ÝEŇIL AI Ассистент. Как я могу помочь вашему бизнесу? 🚀'
+        };
+
         function toggleChat() {
             chatOpen = !chatOpen;
             document.getElementById('chat-box').classList.toggle('open');
+            // Hide nudge when chat opens
+            document.getElementById('chat-nudge').classList.remove('visible');
+            analytics.chatOpened = true;
+            trackAction('chat_opened');
+
             if (chatOpen && document.getElementById('chat-messages').children.length === 0) {
-                const msg = (currentLang === 'en' || currentLang === 'ru')
-                    ? 'Hello! I am Ýeňil AI Assistant. Powered by Groq. How can I help you grow your business?'
-                    : (currentLang === 'uz' ? 'Salom! ÝEŇIL AI Asistentiga xush kelibsiz! Savdo va veb loyihalarda qanday yordam bera olaman?' : (currentLang === 'tr' ? 'Merhaba! ÝEŇIL AI Asistanına hoş geldiniz! İşletmeniz için nasıl yardımcı olabilirim?' : 'Salam! ÝEŇIL AI Asistanyňa hoş geldiňiz! Groq arkaly iň çalt jogaplary we biznes maslahatlaryny berýärin. Näme kömek edip bilerin?'));
-                addChatMsg('bot', msg);
+                addChatMsg('bot', greetings[currentLang] || greetings['tk']);
             }
         }
-        function processInput() {
+
+        async function processInput() {
             const inp = document.getElementById('chat-input');
-            const q = inp.value.trim().toLowerCase();
+            const q = inp.value.trim();
             if (!q) return;
-            addChatMsg('user', inp.value);
+            addChatMsg('user', q);
+            chatHistory.push({ role: 'user', text: q });
             inp.value = '';
 
-            setTimeout(() => {
-                let ans = '';
-                if (q.includes('birlik') || q.includes('price') || q.includes('baha') || q.includes('narx') || q.includes('fiyat') || q.includes('cena') || q.includes('pul') || q.includes('money') || q.includes('naca') || q.includes('nace')) {
-                    ans = dict[currentLang]['price_2_desc'] + '<br><br>' + dict[currentLang]['chat_opt_2'] + ' 👉 ' + dict[currentLang]['price_1_val'] + ' - ' + dict[currentLang]['price_2_val'];
-                } else if (q.includes('salam') || q.includes('hello') || q.includes('privet') || q.includes('merhaba') || q.includes('salom') || q.includes('hi')) {
-                    ans = (currentLang === 'en') ? 'Hello there! Let me know if you need info about our web services, pricing, or portfolio.' : (currentLang === 'uz' ? 'Salom! Sizga narxlar, xizmatlar yoki portfel haqida malumot kerakmi?' : (currentLang === 'tr' ? 'Merhaba! Hizmetlerimiz, fiyatlarımız veya projelerimiz hakkında bilgi isteyebilirsiniz.' : 'Salam! Biziň web hyzmatlarymyz, taslamalarymyz ýa-da bahalar barada sorap bilersiňiz.'));
-                } else if (q.includes('hyzmat') || q.includes('service') || q.includes('hizmet') || q.includes('xizmat') || q.includes('услуг') || q.includes('web') || q.includes('site') || q.includes('sayt')) {
-                    ans = dict[currentLang]['hero_subtitle'] + '<br><br>💎 ' + dict[currentLang]['price_1_title'] + '<br>💎 ' + dict[currentLang]['price_2_title'];
-                } else if (q.includes('aloqa') || q.includes('contact') || q.includes('habarlaşmak') || q.includes('habarlas') || q.includes('iletisim') || q.includes('связь') || q.includes('tel') || q.includes('nomer')) {
-                    ans = dict[currentLang]['contact_desc'] + '<br><br>📞 ' + dict[currentLang]['contact_phone'] + ': +993 61 23 45 67<br>✉️ ' + dict[currentLang]['contact_email'] + ': info@yenil.tm';
-                } else if (q.includes('kim') || q.includes('who') || q.includes('haqida') || q.includes('hakda') || q.includes('about') || q.includes('hakkinda') || q.includes('nas')) {
-                    ans = dict[currentLang]['hero_title'] + '! ' + dict[currentLang]['footer_desc'];
+            // Show typing indicator
+            const typingEl = showTyping();
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: q,
+                        lang: currentLang,
+                        history: chatHistory.slice(-6)
+                    })
+                });
+
+                removeTyping(typingEl);
+
+                if (res.ok) {
+                    const data = await res.json();
+                    const reply = data.reply || '...';
+                    addChatMsg('bot', reply);
+                    chatHistory.push({ role: 'bot', text: reply });
                 } else {
-                    ans = (currentLang === 'en') ? 'That is a great question! However, I am a specialized AI. Please leave your contact details in the form below so our human expert can assist you.' : (currentLang === 'uz' ? 'Ajoyib savol! Ammo men sun\'iy intellektman. Jamoamiz aniq javob berishi uchun quyidagi formadan xabar qoldiring!' : (currentLang === 'tr' ? 'Harika bir soru! Ancak ben bir yapay zekayım. Uzman ekibimizin size ulaşması için lütfen aşağıdaki iletişim formunu doldurun.' : 'Ajaýyp sorag! Ýöne men emeli aň. Bu soragyňyza ÝEŇIL ekibi has gowy jogap berer, aşakdaky formadan ýazyň!'));
+                    // Fallback to local response if API fails
+                    const fallback = getFallbackResponse(q.toLowerCase());
+                    addChatMsg('bot', fallback);
+                    chatHistory.push({ role: 'bot', text: fallback });
                 }
-                addChatMsg('bot', ans);
-            }, 600);
+            } catch (err) {
+                removeTyping(typingEl);
+                // Offline fallback
+                const fallback = getFallbackResponse(q.toLowerCase());
+                addChatMsg('bot', fallback);
+                chatHistory.push({ role: 'bot', text: fallback });
+            }
         }
+
+        function getFallbackResponse(q) {
+            if (q.includes('baha') || q.includes('narx') || q.includes('price') || q.includes('fiyat') || q.includes('цен')) {
+                return (dict[currentLang]['price_1_title'] || 'Landing') + ': ' + (dict[currentLang]['price_1_val'] || '$250') +
+                    ' | ' + (dict[currentLang]['price_2_title'] || 'E-Commerce') + ': ' + (dict[currentLang]['price_2_val'] || '$800');
+            }
+            if (q.includes('salam') || q.includes('hello') || q.includes('merhaba') || q.includes('привет') || q.includes('salom')) {
+                return greetings[currentLang] || greetings['tk'];
+            }
+            if (q.includes('hyzmat') || q.includes('service') || q.includes('hizmet') || q.includes('xizmat') || q.includes('услуг')) {
+                return (dict[currentLang]['services_desc'] || 'We build premium web solutions.');
+            }
+            if (q.includes('aloqa') || q.includes('contact') || q.includes('iletişim') || q.includes('связь') || q.includes('aloqa')) {
+                return '📞 +993 61 23 45 67 | ✉️ info@yenil.tm';
+            }
+            const fallbacks = {
+                tk: 'Häzir oflaýn. Aşakdaky formadan ýazyň, ekibimiz jogap berer!',
+                uz: "Hozirda oflayn. Quyidagi formadan yozing, jamoamiz javob beradi!",
+                tr: 'Şu an çevrimdışıyım. Aşağıdaki formdan yazın, ekibimiz cevap verecek!',
+                en: 'Currently offline. Please fill the form below and our team will reach out!',
+                ru: 'Сейчас офлайн. Заполните форму ниже, и наша команда свяжется с вами!'
+            };
+            return fallbacks[currentLang] || fallbacks['tk'];
+        }
+
+        function showTyping() {
+            const d = document.createElement('div');
+            d.className = 'flex gap-2 typing-msg';
+            const imgStr = `<img src="https://upload.wikimedia.org/wikipedia/commons/4/4d/Groq_logo.svg" style="width:14px;"/>`;
+            d.innerHTML = `<div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-xs flex-shrink-0 border border-emerald-400/30">${imgStr}</div><div class="glass rounded-lg px-4 py-3 border-primary/20 bg-[#044e3b]/80 shadow-lg"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+            document.getElementById('chat-messages').appendChild(d);
+            d.scrollIntoView({ behavior: 'smooth' });
+            return d;
+        }
+
+        function removeTyping(el) {
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+        }
+
         document.getElementById('chat-input').addEventListener('keypress', e => { if (e.key === 'Enter') processInput() });
 
         function addChatMsg(type, text) {
@@ -1802,16 +2212,173 @@
             document.getElementById('chat-messages').appendChild(d);
             d.scrollIntoView({ behavior: 'smooth' });
         }
+
         function askChat(q) {
-            if (q === 'hyzmat') {
-                document.getElementById('chat-input').value = dict[currentLang]['chat_opt_1'] || 'Hyzmatlaryňyz näme?';
-            }
-            if (q === 'baha') {
-                document.getElementById('chat-input').value = dict[currentLang]['chat_opt_2'] || 'Bahalar näçe?';
-            }
+            if (q === 'hyzmat') document.getElementById('chat-input').value = dict[currentLang]['chat_opt_1'] || 'Hyzmatlaryňyz näme?';
+            if (q === 'baha') document.getElementById('chat-input').value = dict[currentLang]['chat_opt_2'] || 'Bahalar näçe?';
             processInput();
         }
 
+        // ═══════════════════════════════════════════════════
+        // AUTO-POPUP NUDGE — 30s idle
+        // ═══════════════════════════════════════════════════
+        (function initNudge() {
+            if (sessionStorage.getItem('yenil_nudge_shown')) return;
+            let idleTimer = null;
+            const IDLE_MS = 30000; // 30 seconds
+
+            const nudgeTexts = {
+                tk: 'Kömek gerekmi? 💬',
+                uz: "Yordam kerakmi? 💬",
+                tr: 'Yardıma ihtiyacınız var mı? 💬',
+                en: 'Need help? 💬',
+                ru: 'Нужна помощь? 💬'
+            };
+
+            function resetIdle() {
+                clearTimeout(idleTimer);
+                if (chatOpen || sessionStorage.getItem('yenil_nudge_shown')) return;
+                idleTimer = setTimeout(showNudge, IDLE_MS);
+            }
+
+            function showNudge() {
+                if (chatOpen) return;
+                const el = document.getElementById('chat-nudge');
+                const span = el.querySelector('span');
+                if (span) span.textContent = nudgeTexts[currentLang] || nudgeTexts['tk'];
+                el.classList.add('visible');
+                sessionStorage.setItem('yenil_nudge_shown', '1');
+                trackAction('nudge_shown');
+            }
+
+            ['mousemove', 'touchstart', 'keydown', 'scroll', 'click'].forEach(evt =>
+                document.addEventListener(evt, resetIdle, { passive: true })
+            );
+            resetIdle();
+        })();
+
+        // ═══════════════════════════════════════════════════
+        // CONTACT FORM → TELEGRAM
+        // ═══════════════════════════════════════════════════
+        document.getElementById('contact-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            const origText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '⏳...';
+
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                projectType: document.getElementById('project-type').value,
+                message: document.getElementById('message').value,
+                lang: currentLang,
+                pageUrl: window.location.href,
+                userAgent: navigator.userAgent.substring(0, 100)
+            };
+
+            try {
+                await fetch('/api/telegram', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'order', data: formData })
+                });
+            } catch (err) {
+                console.warn('Telegram send failed (offline?):', err);
+            }
+
+            // Show success regardless (UX)
+            btn.disabled = false;
+            btn.textContent = origText;
+            this.reset();
+            document.getElementById('form-success').classList.remove('hidden');
+            analytics.formSubmitted = true;
+            trackAction('form_submitted');
+            lucide.createIcons();
+            setTimeout(() => document.getElementById('form-success').classList.add('hidden'), 5000);
+        });
+
+        // ═══════════════════════════════════════════════════
+        // USER ANALYTICS TRACKER → TELEGRAM
+        // ═══════════════════════════════════════════════════
+        const analytics = {
+            sessionId: 'S' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+            startTime: Date.now(),
+            actions: [],
+            maxScroll: 0,
+            chatOpened: false,
+            formSubmitted: false,
+            lang: 'tk'
+        };
+
+        function trackAction(action) {
+            const t = ((Date.now() - analytics.startTime) / 1000).toFixed(0);
+            analytics.actions.push(`[${t}s] ${action}`);
+        }
+
+        // Track scroll depth
+        window.addEventListener('scroll', () => {
+            const scrollH = document.documentElement.scrollHeight - window.innerHeight;
+            const pct = scrollH > 0 ? Math.round((window.scrollY / scrollH) * 100) : 0;
+            if (pct > analytics.maxScroll) analytics.maxScroll = pct;
+        }, { passive: true });
+
+        // Track social icon clicks
+        document.querySelectorAll('a[href]').forEach(link => {
+            link.addEventListener('click', () => {
+                const href = link.getAttribute('href') || '';
+                if (href.startsWith('#')) return;
+                trackAction('link_click: ' + href.substring(0, 60));
+            });
+        });
+
+        // Track nav clicks
+        document.querySelectorAll('.nav-link, .mobile-link').forEach(link => {
+            link.addEventListener('click', () => {
+                trackAction('nav: ' + (link.getAttribute('href') || ''));
+            });
+        });
+
+        // Send analytics on page leave
+        function sendAnalytics() {
+            const elapsed = Date.now() - analytics.startTime;
+            const mins = Math.floor(elapsed / 60000);
+            const secs = Math.floor((elapsed % 60000) / 1000);
+
+            const data = {
+                sessionId: analytics.sessionId,
+                timeOnSite: `${mins}m ${secs}s`,
+                scrollDepth: analytics.maxScroll,
+                lang: currentLang,
+                device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+                screen: `${screen.width}x${screen.height}`,
+                referrer: document.referrer || 'Direct',
+                actions: analytics.actions.slice(-20),
+                chatOpened: analytics.chatOpened,
+                formSubmitted: analytics.formSubmitted
+            };
+
+            // Use sendBeacon for reliability on page unload
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon('/api/telegram', JSON.stringify({ type: 'analytics', data }));
+            } else {
+                fetch('/api/telegram', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'analytics', data }),
+                    keepalive: true
+                }).catch(() => { });
+            }
+        }
+
+        window.addEventListener('beforeunload', sendAnalytics);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') sendAnalytics();
+        });
+
+        // ═══════════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════════
         switchLang('tk');
         // Initialize Lucide icons after translation
         setTimeout(() => lucide.createIcons(), 100);
