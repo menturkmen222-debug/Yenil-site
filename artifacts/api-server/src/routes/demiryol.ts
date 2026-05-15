@@ -30,8 +30,20 @@ async function fetchWithRetry(url: string, retries = 3, baseDelay = 2500): Promi
   throw lastError;
 }
 
+const ALLOWED_QR_HOSTS = new Set([
+  "railway.gov.tm",
+  "www.railway.gov.tm",
+  "bilet.railway.gov.tm",
+]);
+
 async function fetchQrAsBase64(qrUrl: string): Promise<string | null> {
-  if (!qrUrl.startsWith("http://")) return null;
+  let parsed: URL;
+  try {
+    parsed = new URL(qrUrl);
+  } catch {
+    return null;
+  }
+  if (!ALLOWED_QR_HOSTS.has(parsed.hostname)) return null;
   try {
     const res = await fetch(qrUrl);
     if (!res.ok) return null;
