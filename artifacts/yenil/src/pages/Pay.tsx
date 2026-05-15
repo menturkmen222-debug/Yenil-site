@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import { useBonusPul } from "@/contexts/BonusPulContext";
+import { useToast } from "@/components/Toast";
 
 const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AEDA785F26CB/9A8CACA4-5889-4D47-903E-BF12F059E175`;
 const PAYMENT_NUMBERS = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
@@ -17,6 +19,8 @@ type PaySection = "main" | "buy-form" | "buy-payment" | "sell-form" | "sell-paym
 type CryptoType = "payeer" | "perfect" | "webmoney" | "";
 
 export default function Pay() {
+  const { balance, deduct, deviceId } = useBonusPul();
+  const { toast } = useToast();
   const [section, setSection] = useState<PaySection>("main");
   const [mode, setMode] = useState<"buy" | "sell">("buy");
 

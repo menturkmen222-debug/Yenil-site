@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
+import { useBonusPul } from "@/contexts/BonusPulContext";
+import { useToast } from "@/components/Toast";
 
 const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AEDA785F26CB/9A8CACA4-5889-4D47-903E-BF12F059E175`;
 
@@ -25,6 +27,8 @@ function PremiumSpinner() {
 }
 
 export default function Demiryol() {
+  const { balance, deduct, deviceId } = useBonusPul();
+  const { toast } = useToast();
   const [section, setSection] = useState<"info" | "form" | "payment" | "confirmation" | "success">("info");
   const [fromCity, setFromCity] = useState("ashgabat");
   const [toCity, setToCity] = useState("dashoguz");
@@ -37,7 +41,7 @@ export default function Demiryol() {
   const [firstClass, setFirstClass] = useState(false);
   const [secondClass, setSecondClass] = useState(false);
   const [mediaPortal, setMediaPortal] = useState(false);
-  const [proofType, setProofType] = useState<"screenshot" | "sms" | null>(null);
+  const [proofType, setProofType] = useState<"screenshot" | "sms" | "bonus" | null>(null);
   const [smsText, setSmsText] = useState("");
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
@@ -90,7 +94,7 @@ export default function Demiryol() {
       return false;
     }
     if (!proofType) {
-      alert("⚠️ Töleg tassyklamasyny saýlaň!");
+      alert("⚠️ Töleg usulyny saýlaň!");
       return false;
     }
     if (proofType === "sms" && !smsText.trim()) {
@@ -109,6 +113,18 @@ export default function Demiryol() {
     setLoading(true);
     setError("");
     try {
+      const price = calculatePrice();
+
+      if (proofType === "bonus") {
+        if (balance < price) {
+          setError(`Ýeterlik bonus puluňyz ýok. Balansyňyz: ${balance} BP. Gerekli: ${price} BP`);
+          setLoading(false);
+          return;
+        }
+        const ok = await deduct(price);
+        if (!ok) { setError("Bonus pul aýyrmak başartmady!"); setLoading(false); return; }
+      }
+
       let screenshotUrl: string | null = null;
       if (proofType === "screenshot" && screenshotFile) {
         const formData = new FormData();
@@ -125,9 +141,11 @@ export default function Demiryol() {
         name, surname, passport, birthdate,
         route: `${fromCity}-${toCity}`,
         travelDate,
-        totalPrice: calculatePrice(),
+        totalPrice: price,
         clientPhone,
         proofType,
+        paymentMethod: proofType,
+        deviceId: proofType === "bonus" ? deviceId : undefined,
         smsText: proofType === "sms" ? smsText : null,
         screenshotUrl,
         firstClass, secondClass, mediaPortal,
@@ -142,6 +160,7 @@ export default function Demiryol() {
         body: JSON.stringify(orderData),
       });
       if (!response.ok) throw new Error(`Status: ${response.status}`);
+      if (proofType === "bonus") toast("💰 Bonus pul arkaly töleg üstünlikli!", "success");
       setSection("success");
     } catch (err: any) {
       setError("Ýalňyşlyk: " + (err.message || "Bilinmeýän ýalňyşlyk"));
@@ -354,29 +373,39 @@ export default function Demiryol() {
               <p style={{ marginTop: 15 }}><strong>Jemi töleg: {totalPrice} TMT</strong></p>
             </div>
 
-            <h3 style={{ color: "var(--primary)", margin: "20px 0 15px" }}><i className="fas fa-check-circle"></i> Tölegi tassyklaň</h3>
-            <div style={{ display: "flex", gap: 20, flexWrap: "wrap", margin: "15px 0" }}>
-              {(["screenshot", "sms"] as const).map(type => (
+            <h3 style={{ color: "var(--primary)", margin: "20px 0 15px" }}><i className="fas fa-credit-card"></i> Töleg usulyny saýlaň</h3>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", margin: "15px 0" }}>
+              {([
+                { id: "screenshot", icon: "fa-camera", label: "Skrinshot" },
+                { id: "sms", icon: "fa-sms", label: "SMS habary" },
+                { id: "bonus", icon: "fa-coins", label: `Bonus pul (${balance} BP)` },
+              ] as const).map(type => (
                 <div
-                  key={type}
-                  onClick={() => setProofType(type)}
+                  key={type.id}
+                  onClick={() => setProofType(type.id)}
                   style={{
-                    flex: 1, minWidth: 200,
-                    padding: 15,
-                    background: "var(--card-light)",
+                    flex: 1, minWidth: 120,
+                    padding: 14,
                     borderRadius: 14,
-                    border: `2px solid ${proofType === type ? "var(--primary)" : "#e2e8f0"}`,
-                    cursor: "pointer",
-                    fontSize: "1.05rem",
-                    transition: "border-color 0.3s ease",
+                    border: `2px solid ${proofType === type.id ? "var(--primary)" : "#e2e8f0"}`,
+                    cursor: "pointer", textAlign: "center",
+                    transition: "border-color 0.3s ease, background 0.3s",
+                    background: proofType === type.id ? "rgba(13,148,136,0.08)" : "transparent",
                   }}
                 >
-                  <input type="radio" name="proof" checked={proofType === type} onChange={() => setProofType(type)} style={{ accentColor: "var(--primary)", marginRight: 12 }} />
-                  <i className={`fas ${type === "screenshot" ? "fa-camera" : "fa-sms"}`} style={{ color: "var(--primary)", marginRight: 8 }}></i>
-                  {type === "screenshot" ? "Skrinshot" : "SMS habary"}
+                  <i className={`fas ${type.icon}`} style={{ color: "var(--primary)", display: "block", fontSize: "1.4rem", marginBottom: 5 }}></i>
+                  <span style={{ fontSize: "0.82rem", fontWeight: 600 }}>{type.label}</span>
                 </div>
               ))}
             </div>
+            {proofType === "bonus" && balance < calculatePrice() && (
+              <div style={{ background: "rgba(220,38,38,0.08)", borderLeft: "4px solid #dc2626", borderRadius: "var(--radius-sm)", padding: "12px 16px", marginBottom: 10 }}>
+                <p style={{ color: "#dc2626", fontWeight: 600, fontSize: "0.9rem" }}>
+                  <i className="fas fa-exclamation-triangle"></i> Ýeterlik bonus pul ýok. Balansyňyz: <strong>{balance} BP</strong>. Gerekli: <strong>{calculatePrice()} BP</strong>
+                </p>
+                <Link href="/tmcell"><button style={{ marginTop: 8, padding: "8px 16px", background: "var(--gradient)", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontSize: "0.82rem" }}>Bonus pul almak</button></Link>
+              </div>
+            )}
 
             {proofType === "sms" && (
               <div style={{ marginTop: 15 }}>
