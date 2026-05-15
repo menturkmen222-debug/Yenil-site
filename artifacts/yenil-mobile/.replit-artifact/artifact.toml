@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/yenil-mobile/"
+title = "Ýeňil Mobile"
+version = "1.0.0"
+id = "artifacts/yenil-mobile"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/yenil-mobile/" ]
+localPort = 25067
+
+[services.development]
+run = "pnpm --filter @workspace/yenil-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/yenil-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/yenil-mobile", "run", "serve" ]
+
+[services.env]
+PORT = "25067"
+BASE_PATH = "/yenil-mobile/"
