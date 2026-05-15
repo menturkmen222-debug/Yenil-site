@@ -10,12 +10,12 @@ import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { saveOrder } from "@/lib/firebase";
+import { uploadImage } from "@/lib/upload";
 
 const PAYMENT_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
 const BP_AMOUNTS = [50, 100, 200, 500];
 const UZS_AMOUNTS = [10000, 25000, 50000, 100000];
 const UZS_RATE = 0.028;
-const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
 
 const UZ_OPERATORS = [
   { id: "ucell", name: "Ucell", color: "#e63946" },
@@ -213,13 +213,9 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
     if (!amount || !phone) { Alert.alert("Ýalňyşlyk", "Ähli meýdançalary dolduryň!"); return; }
     setLoading(true);
     try {
-      let screenshotUrl: string | null = null;
-      if (imageUri && proofType === "screenshot") {
-        const formData = new FormData();
-        formData.append("screenshot", { uri: imageUri, type: "image/jpeg", name: "proof.jpg" } as any);
-        const res = await fetch(`${API_BASE}/api/upload-screenshot`, { method: "POST", body: formData });
-        if (res.ok) { const d = await res.json(); screenshotUrl = d.secure_url; }
-      }
+      const screenshotUrl = imageUri && proofType === "screenshot"
+        ? await uploadImage(imageUri, "proof.jpg")
+        : null;
       await saveOrder("orders", {
         type: mode === "buy" ? "pay-buy" : "pay-sell", crypto, currency,
         amount: parseFloat(amount), totalPrice: calcTotal(), phone, walletId,

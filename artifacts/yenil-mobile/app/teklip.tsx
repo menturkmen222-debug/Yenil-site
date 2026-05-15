@@ -10,8 +10,7 @@ import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
 import { saveOrder } from "@/lib/firebase";
-
-const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+import { uploadImage } from "@/lib/upload";
 
 export default function TeklipScreen() {
   const colors = useColors();
@@ -37,13 +36,7 @@ export default function TeklipScreen() {
     }
     setLoading(true);
     try {
-      let fileUrl: string | null = null;
-      if (fileUri) {
-        const formData = new FormData();
-        formData.append("screenshot", { uri: fileUri, type: "image/jpeg", name: "teklip.jpg" } as any);
-        const res = await fetch(`${API_BASE}/api/upload-screenshot`, { method: "POST", body: formData });
-        if (res.ok) { const d = await res.json(); fileUrl = d.secure_url; }
-      }
+      const fileUrl = fileUri ? await uploadImage(fileUri, "teklip.jpg") : null;
       await saveOrder("service-proposals", {
         name, phone, serviceName, description: desc, fileUrl, status: "pending",
       });

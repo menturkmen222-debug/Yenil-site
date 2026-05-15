@@ -8,10 +8,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
+import { uploadImage } from "@/lib/upload";
 
 const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AEDA785F26CB/9A8CACA4-5889-4D47-903E-BF12F059E175`;
 const PAYMENT_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
-const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
 
 type Mode = "main" | "buy" | "sell" | "success";
 type CryptoType = "payeer" | "perfect" | "webmoney";
@@ -73,16 +73,6 @@ export default function PayScreen() {
     }
   }
 
-  async function uploadImage(uri: string): Promise<string | null> {
-    try {
-      const formData = new FormData();
-      formData.append("screenshot", { uri, type: "image/jpeg", name: "proof.jpg" } as any);
-      const res = await fetch(`${API_BASE}/api/upload-screenshot`, { method: "POST", body: formData });
-      if (!res.ok) return null;
-      const d = await res.json();
-      return d.secure_url;
-    } catch { return null; }
-  }
 
   async function submitBuy() {
     if (!buyCrypto || !buyPhone || !buyProof) { Alert.alert("Ýalňyşlyk", "Ähli meýdançalary dolduryň!"); return; }

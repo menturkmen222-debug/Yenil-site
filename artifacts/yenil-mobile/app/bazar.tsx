@@ -11,9 +11,9 @@ import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
 import { db, ref, onValue, saveOrder } from "@/lib/firebase";
 import { useBonusPul } from "@/contexts/BonusPulContext";
+import { uploadImage } from "@/lib/upload";
 
 const PAYMENT_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
-const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
 
 const CATEGORIES = [
   { id: "all", label: "Hemmesi" },
@@ -148,13 +148,7 @@ function AddItemModal({ onClose, colors }: { onClose: () => void; colors: Return
     if (!title || !desc || !price || !seller || !sellerPhone) { Alert.alert("Ýalňyşlyk", "Ähli meýdançalary dolduryň!"); return; }
     setLoading(true);
     try {
-      let imageUrl: string | null = null;
-      if (imageUri) {
-        const formData = new FormData();
-        formData.append("screenshot", { uri: imageUri, type: "image/jpeg", name: "item.jpg" } as any);
-        const res = await fetch(`${API_BASE}/api/upload-screenshot`, { method: "POST", body: formData });
-        if (res.ok) { const d = await res.json(); imageUrl = d.secure_url; }
-      }
+      const imageUrl = imageUri ? await uploadImage(imageUri, "item.jpg") : null;
       await saveOrder("marketplace-items", {
         title, description: desc, price: parseFloat(price), category,
         sellerName: seller, sellerPhone, imageUrl, status: "pending",

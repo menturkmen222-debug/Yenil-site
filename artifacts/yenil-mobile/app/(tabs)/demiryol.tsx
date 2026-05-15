@@ -9,10 +9,20 @@ import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
+import { uploadImage } from "@/lib/upload";
 
 const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AEDA785F26CB/9A8CACA4-5889-4D47-903E-BF12F059E175`;
 const PAYMENT_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
-const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+const DEMIRYOL_API = process.env.EXPO_PUBLIC_DOMAIN
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api/demiryol`
+  : "/api/demiryol";
+
+interface TicketBooking {
+  passenger_name?: string;
+  route?: string;
+  departure_date?: string;
+  train_number?: string;
+}
 
 const CITIES: Record<string, string> = {
   ashgabat: "Aşgabat",
@@ -78,7 +88,7 @@ export default function DemiryolScreen() {
 
   // Ticket lookup
   const [bookingCode, setBookingCode] = useState("");
-  const [ticketResult, setTicketResult] = useState<any>(null);
+  const [ticketResult, setTicketResult] = useState<TicketBooking | null>(null);
   const [ticketLoading, setTicketLoading] = useState(false);
   const [ticketError, setTicketError] = useState("");
   const [showLookup, setShowLookup] = useState(false);
@@ -105,7 +115,7 @@ export default function DemiryolScreen() {
     if (!/^[A-Z0-9]{6}$/.test(code)) { Alert.alert("Ýalňyşlyk", "Bron kody 6 belgi bolmaly (meselem: ABC123)"); return; }
     setTicketLoading(true); setTicketError(""); setTicketResult(null);
     try {
-      const res = await fetch(`${API_BASE}/api/demiryol?id=${encodeURIComponent(code)}`, { headers: { Accept: "application/json" } });
+      const res = await fetch(`${DEMIRYOL_API}?id=${encodeURIComponent(code)}`, { headers: { Accept: "application/json" } });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `Status: ${res.status}`); }
       const data = await res.json();
       if (!data.data?.booking) throw new Error("Bron kody tapylmady");
@@ -138,13 +148,9 @@ export default function DemiryolScreen() {
         const ok = await deduct(price);
         if (!ok) { setError("Bonus pul aýyrmak başartmady!"); setLoading(false); return; }
       }
-      let screenshotUrl: string | null = null;
-      if (proofType === "screenshot" && screenshotUri) {
-        const formData = new FormData();
-        formData.append("screenshot", { uri: screenshotUri, type: "image/jpeg", name: "proof.jpg" } as any);
-        const res = await fetch(`${API_BASE}/api/upload-screenshot`, { method: "POST", body: formData });
-        if (res.ok) { const d = await res.json(); screenshotUrl = d.secure_url; }
-      }
+      const screenshotUrl = proofType === "screenshot" && screenshotUri
+        ? await uploadImage(screenshotUri, "proof.jpg")
+        : null;
       const orderData = {
         type: "demiryol", name, surname, passport, birthdate,
         route: `${CITY_KEYS[fromIdx]}-${CITY_KEYS[toIdx]}`,

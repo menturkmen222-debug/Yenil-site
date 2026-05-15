@@ -3,7 +3,7 @@ import {
   View, Text, ScrollView, StyleSheet, Pressable, Linking,
   Platform, useColorScheme,
 } from "react-native";
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -64,7 +64,7 @@ export default function HomeScreen() {
 
   const nav = (path: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push(path as any);
+    router.push(path as Href);
   };
 
   return (
