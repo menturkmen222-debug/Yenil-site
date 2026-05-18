@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { saveOrder } from "@/lib/firebase";
 import { useToast } from "@/components/Toast";
+import { SparkleIcon, LightbulbIcon } from "@/components/Icons";
 
 export default function Teklip() {
   const [name, setName] = useState("");
@@ -30,7 +31,7 @@ export default function Teklip() {
       }
       await saveOrder("service-proposals", { name, phone, serviceName, description: desc, fileUrl, status: "pending" });
       setDone(true);
-      toast("🎉 Teklip üstünlikli iberildi!", "success");
+      toast("Teklip üstünlikli iberildi!", "success");
     } catch { toast("Ýalňyşlyk ýüz berdi", "error"); }
     finally { setLoading(false); }
   }
@@ -38,7 +39,7 @@ export default function Teklip() {
   if (done) return (
     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }}>
       <div className="glass-card alert-success" style={{ maxWidth: 500, width: "100%", padding: 40, textAlign: "center", animation: "fadeInUp 0.6s ease" }}>
-        <div style={{ fontSize: "4rem", marginBottom: 16 }}>🎉</div>
+        <div className="success-icon-wrap" style={{ width: 80, height: 80, marginBottom: 20 }}><SparkleIcon size={36} strokeWidth={1.5} /></div>
         <h2 style={{ color: "var(--primary)", marginBottom: 12, fontSize: "1.5rem" }}>Teklip üstünlikli iberildi!</h2>
         <p style={{ lineHeight: 1.7, marginBottom: 24 }}>
           Toparymyz gysga wagtda siziň teklibiňizi gözden geçirer we size habarlaşarlar.
@@ -52,7 +53,7 @@ export default function Teklip() {
     <div style={{ flex: 1, paddingBottom: 40 }}>
       <div style={{ background: "var(--gradient2)", color: "white", padding: "50px 20px 40px", textAlign: "center" }}>
         <div className="container">
-          <div style={{ fontSize: "3rem", marginBottom: 10 }}>💡</div>
+          <div style={{ marginBottom: 14, color: "rgba(255,255,255,0.92)" }}><LightbulbIcon size={44} strokeWidth={1.5} /></div>
           <h1 style={{ fontSize: "clamp(1.5rem,4vw,2.2rem)", fontWeight: 800, marginBottom: 10 }}>Öz hyzmatyňyzy teklip ediň</h1>
           <p style={{ opacity: 0.9, maxWidth: 600, margin: "0 auto", lineHeight: 1.7 }}>
             Siziň hem hödürläp biljek hyzmatyňyz barmy? Bize ýazyň — biz siziň teklipleriňize garaşýarys!

@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useBonusPul } from "@/contexts/BonusPulContext";
+import {
+  WalletIcon, SunIcon, MoonIcon,
+  HomeIcon, NavTrainIcon, SimCardIcon, GridIcon, StoreIcon, InfoIcon, HeadphonesIcon,
+  ChevronRightIcon,
+} from "@/components/Icons";
 
 function useTheme() {
   const [theme, setTheme] = useState<string>(() => localStorage.getItem("theme") || "light-mode");
@@ -12,13 +17,13 @@ function useTheme() {
 }
 
 const NAV = [
-  { href: "/", icon: "fa-home", label: "Baş Sahypa" },
-  { href: "/demiryol", icon: "fa-train", label: "Demirýol" },
-  { href: "/tmcell", icon: "fa-sim-card", label: "TMCell" },
-  { href: "/ulgamlar", icon: "fa-th-large", label: "Ulgamlar" },
-  { href: "/bazar", icon: "fa-store", label: "Bazar" },
-  { href: "/about", icon: "fa-info-circle", label: "Biz Barada" },
-  { href: "/help", icon: "fa-headset", label: "Ýardam" },
+  { href: "/", Icon: HomeIcon, label: "Baş Sahypa" },
+  { href: "/demiryol", Icon: NavTrainIcon, label: "Demirýol" },
+  { href: "/tmcell", Icon: SimCardIcon, label: "TMCell" },
+  { href: "/ulgamlar", Icon: GridIcon, label: "Ulgamlar" },
+  { href: "/bazar", Icon: StoreIcon, label: "Bazar" },
+  { href: "/about", Icon: InfoIcon, label: "Biz Barada" },
+  { href: "/help", Icon: HeadphonesIcon, label: "Ýardam" },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -31,141 +36,160 @@ export function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => { setMenuOpen(false); }, [location]);
 
   const leftNav = NAV.slice(0, 3);
-  const rightNav = NAV.slice(3, 5);
-  const moreNav = NAV.slice(5);
-
-  const linkStyle = (href: string): React.CSSProperties => ({
-    color: location === href ? "var(--primary)" : isDark ? "rgba(241,245,249,0.8)" : "rgba(30,41,59,0.75)",
-    fontWeight: location === href ? 700 : 600,
-    fontSize: "0.82rem",
-    transition: "color 0.3s ease",
-    display: "flex",
-    alignItems: "center",
-    gap: 5,
-    whiteSpace: "nowrap",
-  });
+  const rightNav = NAV.slice(3);
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      {/* HEADER */}
+      {/* ── HEADER ── */}
       <header className="sticky-header">
         <div className="container" style={{ position: "relative" }}>
-          <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 56 }}>
+          <nav className="main-nav">
+
             {/* Left nav */}
-            <ul className="nav-desktop-left" style={{ display: "flex", listStyle: "none", gap: 18, margin: 0, padding: 0, alignItems: "center" }}>
-              {leftNav.map(l => (
-                <li key={l.href}>
-                  <Link href={l.href} style={linkStyle(l.href)}>
-                    <i className={`fas ${l.icon}`}></i> {l.label}
+            <ul className="nav-desktop-left">
+              {leftNav.map(({ href, Icon, label }) => (
+                <li key={href} className="nav-item">
+                  <Link href={href} className={`nav-link-item${location === href ? " active" : ""}`}>
+                    <Icon size={15} strokeWidth={location === href ? 2.1 : 1.8} />
+                    <span>{label}</span>
+                    {location === href && <span className="nav-active-dot" />}
                   </Link>
                 </li>
               ))}
             </ul>
 
-            {/* Hamburger (mobile) */}
+            {/* Hamburger */}
             <button
               className="menu-toggle-btn"
               onClick={() => setMenuOpen(o => !o)}
-              style={{
-                display: "none", flexDirection: "column", justifyContent: "space-between",
-                width: 28, height: 22, background: "none", border: "none", padding: 0, flexShrink: 0,
-              }}
+              aria-label="Menýu"
             >
-              {[0, 1, 2].map(i => (
-                <span key={i} style={{
-                  display: "block", height: 2.5, background: "var(--primary)", borderRadius: 3, transition: "all 0.3s ease",
-                  transform: menuOpen ? (i === 0 ? "rotate(45deg) translate(7px, 7px)" : i === 2 ? "rotate(-45deg) translate(7px, -7px)" : "none") : "none",
-                  opacity: menuOpen && i === 1 ? 0 : 1,
-                }} />
-              ))}
+              <span className={`burger-bar${menuOpen ? " open-top" : ""}`} />
+              <span className={`burger-bar${menuOpen ? " open-mid" : ""}`} />
+              <span className={`burger-bar${menuOpen ? " open-bot" : ""}`} />
             </button>
 
             {/* Right nav */}
-            <ul className="nav-desktop-right" style={{ display: "flex", listStyle: "none", gap: 16, margin: 0, padding: 0, alignItems: "center" }}>
-              {rightNav.map(l => (
-                <li key={l.href}>
-                  <Link href={l.href} style={linkStyle(l.href)}>
-                    <i className={`fas ${l.icon}`}></i> {l.label}
-                  </Link>
-                </li>
-              ))}
-              {moreNav.map(l => (
-                <li key={l.href}>
-                  <Link href={l.href} style={linkStyle(l.href)}>
-                    <i className={`fas ${l.icon}`}></i> {l.label}
+            <ul className="nav-desktop-right">
+              {rightNav.map(({ href, Icon, label }) => (
+                <li key={href} className="nav-item">
+                  <Link href={href} className={`nav-link-item${location === href ? " active" : ""}`}>
+                    <Icon size={15} strokeWidth={location === href ? 2.1 : 1.8} />
+                    <span>{label}</span>
+                    {location === href && <span className="nav-active-dot" />}
                   </Link>
                 </li>
               ))}
 
-              {/* Bonus Pul Badge */}
+              {/* Vertical divider */}
+              <li className="nav-divider" aria-hidden="true" />
+
+              {/* BP Badge */}
               <li>
                 <Link href="/tmcell">
                   <div className="bp-badge">
-                    💰 {balance.toFixed(2)} BP
+                    <WalletIcon size={13} strokeWidth={2} />
+                    <span>{balance.toFixed(2)}</span>
+                    <span className="bp-unit">BP</span>
                   </div>
                 </Link>
               </li>
 
               {/* Theme toggle */}
               <li>
-                <button onClick={toggleTheme} style={{ background: "var(--gradient)", color: "white", border: "none", width: 34, height: 34, borderRadius: "50%", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 4px 12px rgba(13,148,136,0.3)" }}>
-                  {isDark ? "☀️" : "🌙"}
+                <button
+                  onClick={toggleTheme}
+                  className="theme-toggle-btn"
+                  aria-label={isDark ? "Ýagty tema" : "Garaňky tema"}
+                >
+                  {isDark
+                    ? <SunIcon size={15} strokeWidth={2} />
+                    : <MoonIcon size={15} strokeWidth={2} />
+                  }
                 </button>
               </li>
             </ul>
           </nav>
 
-          {/* Center Logo */}
-          <div style={{ position: "absolute", left: "50%", top: -90, transform: "translateX(-50%)", zIndex: 99, pointerEvents: "none" }}>
-            <Link href="/" style={{ pointerEvents: "all" }}>
-              <img src="/images/logo-header.png" alt="Ýeňil" style={{ height: 245, width: "auto", filter: isDark ? "brightness(0.9)" : "none", transition: "filter 0.3s ease" }} />
+          {/* Center logo */}
+          <div className="header-logo-wrap">
+            <Link href="/">
+              <img
+                src="/images/logo-header.png"
+                alt="Ýeňil"
+                className="header-logo-img"
+                style={{ filter: isDark ? "brightness(0.92)" : "none" }}
+              />
             </Link>
           </div>
         </div>
 
-        {/* Mobile menu overlay */}
+        {/* ── Mobile menu ── */}
         {menuOpen && (
           <>
-            <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 997 }} />
-            <div style={{
-              position: "fixed", top: 0, left: 0, width: "75%", maxWidth: 300, height: "100vh",
-              background: isDark ? "rgba(15,23,42,0.98)" : "rgba(240,253,250,0.98)",
-              backdropFilter: "blur(20px)",
-              zIndex: 998, padding: "70px 24px 24px",
-              boxShadow: "4px 0 32px rgba(0,0,0,0.2)",
-              display: "flex", flexDirection: "column", gap: 4,
-              animation: "slideInLeft 0.3s ease",
-              overflowY: "auto",
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 0", borderBottom: "1px solid rgba(13,148,136,0.1)", marginBottom: 8 }}>
+            <div className="mobile-overlay" onClick={() => setMenuOpen(false)} />
+            <aside className="mobile-panel">
+              {/* Panel header */}
+              <div className="mobile-panel-head">
+                <div className="mobile-brand-row">
+                  <div className="mobile-brand-mark">Ý</div>
+                  <div>
+                    <div className="mobile-brand-name">Ýeňil</div>
+                    <div className="mobile-brand-sub">Türkmenistanda iň ynamly hyzmatlar</div>
+                  </div>
+                </div>
                 <Link href="/tmcell" onClick={() => setMenuOpen(false)}>
-                  <div className="bp-badge" style={{ fontSize: "0.9rem" }}>💰 {balance.toFixed(2)} BP</div>
+                  <div className="mobile-bp-badge">
+                    <WalletIcon size={13} strokeWidth={2} />
+                    <span>{balance.toFixed(2)} BP</span>
+                  </div>
                 </Link>
               </div>
-              {NAV.map(l => (
-                <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)} style={{
-                  display: "flex", alignItems: "center", gap: 12, padding: "13px 14px",
-                  borderRadius: "var(--radius-sm)",
-                  background: location === l.href ? "rgba(13,148,136,0.12)" : "transparent",
-                  color: location === l.href ? "var(--primary)" : isDark ? "var(--dark-text)" : "var(--light-text)",
-                  fontWeight: location === l.href ? 700 : 600,
-                  fontSize: "0.95rem", transition: "all 0.2s ease",
-                }}>
-                  <i className={`fas ${l.icon}`} style={{ color: "var(--primary)", width: 18, textAlign: "center" }}></i>
-                  {l.label}
-                </Link>
-              ))}
-              <div className="gradient-divider" />
-              <button onClick={() => { toggleTheme(); setMenuOpen(false); }} style={{
-                display: "flex", alignItems: "center", gap: 12, padding: "13px 14px",
-                borderRadius: "var(--radius-sm)", background: "none", border: "none",
-                color: isDark ? "var(--dark-text)" : "var(--light-text)",
-                fontWeight: 600, fontSize: "0.95rem", cursor: "pointer", fontFamily: "Poppins, sans-serif",
-              }}>
-                <span style={{ fontSize: "1.1rem", width: 18, textAlign: "center" }}>{isDark ? "☀️" : "🌙"}</span>
-                {isDark ? "Ýagty tema" : "Garaňky tema"}
+
+              {/* Nav items */}
+              <nav className="mobile-nav">
+                {NAV.map(({ href, Icon, label }) => {
+                  const isActive = location === href;
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setMenuOpen(false)}
+                      className={`mobile-nav-item${isActive ? " active" : ""}`}
+                    >
+                      <div className={`mobile-nav-icon-wrap${isActive ? " active" : ""}`}>
+                        <Icon size={16} strokeWidth={isActive ? 2.2 : 1.8} />
+                      </div>
+                      <span className="mobile-nav-label">{label}</span>
+                      <ChevronRightIcon size={13} strokeWidth={2} className="mobile-nav-arrow" />
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              <div className="mobile-divider" />
+
+              {/* Theme toggle */}
+              <button
+                className="mobile-theme-btn"
+                onClick={() => { toggleTheme(); setMenuOpen(false); }}
+              >
+                <div className="mobile-nav-icon-wrap">
+                  {isDark
+                    ? <SunIcon size={16} strokeWidth={1.9} />
+                    : <MoonIcon size={16} strokeWidth={1.9} />
+                  }
+                </div>
+                <span className="mobile-nav-label">{isDark ? "Ýagty tema" : "Garaňky tema"}</span>
               </button>
-            </div>
+
+              {/* Decorative bottom pattern */}
+              <div className="mobile-panel-deco" aria-hidden="true">
+                {Array.from({ length: 25 }).map((_, i) => (
+                  <div key={i} className="deco-dot" />
+                ))}
+              </div>
+            </aside>
           </>
         )}
       </header>
@@ -174,13 +198,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      {/* FOOTER */}
+      {/* ── FOOTER ── */}
       <footer className="site-footer">
         <div className="container">
           <div className="footer-grid">
             <div>
-              <div style={{ fontWeight: 800, fontSize: "1.2rem", color: "var(--secondary)", marginBottom: 8 }}>Ýeňil</div>
-              <p style={{ opacity: 0.6, fontSize: "0.85rem", lineHeight: 1.6 }}>Türkmenistanda iň ynamly onlayn töleg we bilet platformasy.</p>
+              <div className="footer-brand">Ýeňil</div>
+              <p style={{ opacity: 0.55, fontSize: "0.83rem", lineHeight: 1.65, marginBottom: 16 }}>
+                Türkmenistanda iň ynamly onlayn töleg we bilet platformasy.
+              </p>
               <div className="footer-social">
                 {[
                   { href: "http://tiktok.com/@yenil_", icon: "fab fa-tiktok" },
@@ -188,59 +214,43 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   { href: "http://t.me/yenil_tm", icon: "fab fa-telegram" },
                   { href: "https://s.imoim.net/DNCXX6", icon: "fas fa-comment-dots" },
                 ].map((s, i) => (
-                  <a key={i} href={s.href} target="_blank" rel="noopener noreferrer">
-                    <i className={s.icon}></i>
+                  <a key={i} href={s.href} target="_blank" rel="noopener noreferrer" className="footer-social-link">
+                    <i className={s.icon} />
                   </a>
                 ))}
               </div>
             </div>
             <div>
-              <div style={{ fontWeight: 700, marginBottom: 12, color: "rgba(241,245,249,0.7)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: 1 }}>Hyzmatlary</div>
+              <div className="footer-section-title">Hyzmatlary</div>
               {[
                 { href: "/demiryol", label: "Ýeňil Demirýol" },
                 { href: "/tmcell", label: "TMCell & Bonus Pul" },
                 { href: "/ulgamlar", label: "Içerki ulgamlar" },
                 { href: "/bazar", label: "Sanly bazar" },
               ].map(l => (
-                <Link key={l.href} href={l.href} style={{ display: "block", color: "rgba(241,245,249,0.55)", fontSize: "0.85rem", marginBottom: 6, transition: "color 0.2s ease" }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "var(--secondary)"}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "rgba(241,245,249,0.55)"}
-                >
-                  {l.label}
-                </Link>
+                <Link key={l.href} href={l.href} className="footer-link">{l.label}</Link>
               ))}
             </div>
             <div>
-              <div style={{ fontWeight: 700, marginBottom: 12, color: "rgba(241,245,249,0.7)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: 1 }}>Habarlaşmak</div>
+              <div className="footer-section-title">Habarlaşmak</div>
               {[
                 { icon: "fa-phone-alt", label: "+993 71 789091" },
                 { icon: "fa-envelope", label: "menturkmen111@gmail.com" },
                 { icon: "fa-comment-dots", label: "IMO: 71789091" },
               ].map((c, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, color: "rgba(241,245,249,0.55)", fontSize: "0.82rem" }}>
-                  <i className={`fas ${c.icon}`} style={{ color: "var(--secondary)", width: 16 }}></i>
-                  {c.label}
+                <div key={i} className="footer-contact-row">
+                  <i className={`fas ${c.icon}`} style={{ color: "var(--secondary)", width: 16, flexShrink: 0 }} />
+                  <span>{c.label}</span>
                 </div>
               ))}
             </div>
           </div>
           <div className="gradient-divider" />
-          <div style={{ textAlign: "center", opacity: 0.4, fontSize: "0.8rem" }}>
+          <div style={{ textAlign: "center", opacity: 0.35, fontSize: "0.78rem", letterSpacing: "0.03em" }}>
             © 2025 Ýeňil. Hemme hukuklar goralan.
           </div>
         </div>
       </footer>
-
-      <style>{`
-        @keyframes slideInLeft { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @media (max-width: 768px) {
-          .nav-desktop-left, .nav-desktop-right { display: none !important; }
-          .menu-toggle-btn { display: flex !important; }
-        }
-        @media (min-width: 769px) {
-          .menu-toggle-btn { display: none !important; }
-        }
-      `}</style>
     </div>
   );
 }

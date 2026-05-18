@@ -97,7 +97,7 @@ export default function Pay() {
   }
 
   async function submitBuy() {
-    if (!buyCrypto || !buyPhone || !buyProof) { alert("⚠️ Ähli meýdançallary dolduryň!"); return; }
+    if (!buyCrypto || !buyPhone || !buyProof) { alert("Ähli meýdançallary dolduryň!"); return; }
     if (buyProof === "screenshot" && !buyFile) { alert("Skrinshot ýüklemediňiz!"); return; }
     setBuyLoading(true);
     setBuyError("");
@@ -125,7 +125,7 @@ export default function Pay() {
   }
 
   async function submitSell() {
-    if (!sellCrypto || !sellPhone || !secretCode || !sellProof) { alert("⚠️ Ähli meýdançallary dolduryň!"); return; }
+    if (!sellCrypto || !sellPhone || !secretCode || !sellProof) { alert("Ähli meýdançallary dolduryň!"); return; }
     if (sellProof === "screenshot" && !sellFile) { alert("Skrinshot saýlanmady!"); return; }
     setSellLoading(true);
     setSellError("");

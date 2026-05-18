@@ -86,23 +86,23 @@ export default function Demiryol() {
 
   function validateFields() {
     if (!name || !surname || !birthdate || !passport || !travelDate || !clientPhone) {
-      alert("⚠️ Ähli meýdançalary dolduryň!");
+      alert("Ähli meýdançalary dolduryň!");
       return false;
     }
     if (fromCity === toCity) {
-      alert("⚠️ Nirden we Nira bir birinden tapawutly bolmaly!");
+      alert("Nirden we Nira bir birinden tapawutly bolmaly!");
       return false;
     }
     if (!proofType) {
-      alert("⚠️ Töleg usulyny saýlaň!");
+      alert("Töleg usulyny saýlaň!");
       return false;
     }
     if (proofType === "sms" && !smsText.trim()) {
-      alert("⚠️ SMS habary nusgasyny giriziň!");
+      alert("SMS habary nusgasyny giriziň!");
       return false;
     }
     if (proofType === "screenshot" && !screenshotFile) {
-      alert("⚠️ Skrinshot tanlanmady!");
+      alert("Skrinshot tanlanmady!");
       return false;
     }
     return true;
@@ -160,7 +160,7 @@ export default function Demiryol() {
         body: JSON.stringify(orderData),
       });
       if (!response.ok) throw new Error(`Status: ${response.status}`);
-      if (proofType === "bonus") toast("💰 Bonus pul arkaly töleg üstünlikli!", "success");
+      if (proofType === "bonus") toast("Bonus pul arkaly töleg üstünlikli!", "success");
       setSection("success");
     } catch (err: any) {
       setError("Ýalňyşlyk: " + (err.message || "Bilinmeýän ýalňyşlyk"));
@@ -172,7 +172,7 @@ export default function Demiryol() {
   async function searchTicket() {
     const code = bookingCode.trim().toUpperCase();
     if (!code || code.length !== 6 || !/^[A-Z0-9]{6}$/.test(code)) {
-      alert("⚠️ Bron kody 6 belgi bolmaly (meselem: ABC123)");
+      alert("Bron kody 6 belgi bolmaly (meselem: ABC123)");
       return;
     }
     setTicketLoading(true);
@@ -186,10 +186,10 @@ export default function Demiryol() {
         throw new Error(errData.error || `Server xatosi: ${response.status}`);
       }
       const result = await response.json();
-      if (!result.data?.booking) throw new Error("⚠️ Bron kody tapylmady");
+      if (!result.data?.booking) throw new Error("Bron kody tapylmady");
       setTicketResult(result.data.booking);
     } catch (err: any) {
-      setTicketError("❌ " + (err.message || "Nätanyş ýalňyşlyk"));
+      setTicketError(err.message || "Nätanyş ýalňyşlyk");
     } finally {
       setTicketLoading(false);
     }
@@ -525,7 +525,7 @@ export default function Demiryol() {
               const booking = ticketResult;
               const ticket = booking.tickets?.[0];
               const pnr = ticket?.pnrs?.[0];
-              if (!pnr) return <p style={{ color: "#c33", textAlign: "center", marginTop: 15 }}>⚠️ Bilet maglumatlary ýeterli däl</p>;
+              if (!pnr) return <p style={{ color: "#c33", textAlign: "center", marginTop: 15 }}>Bilet maglumatlary ýeterli däl</p>;
               const now = new Date();
               const isExpired = now > new Date(booking.expire_time || "1970-01-01");
               return (

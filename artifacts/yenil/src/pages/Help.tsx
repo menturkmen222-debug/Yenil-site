@@ -64,7 +64,7 @@ export default function Help() {
 
   async function submitQuestion() {
     if (!userName || !userPhone || !userQuestion) {
-      setError("⚠️ Ähli meýdançary dolduryň!");
+      setError("Ähli meýdançary dolduryň!");
       return;
     }
     setLoading(true);

@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { saveOrder } from "@/lib/firebase";
 import { useToast } from "@/components/Toast";
+import { SparkleIcon, CheckCircleIcon, TrophyIcon, SmartphoneIcon, WalletIcon } from "@/components/Icons";
 
 const ADMIN_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
 const BP_AMOUNTS = [50, 100, 200, 500];
@@ -51,14 +52,14 @@ function BonusBuySection() {
     try {
       await saveOrder("bonus-orders", { deviceId, amount: selected, userPhone: phone, status: "pending" });
       setDone(true);
-      toast("🎉 Bonus pul haýyşnamaňyz kabul edildi!", "success");
+      toast("Bonus pul haýyşnamaňyz kabul edildi!", "success");
     } catch { toast("Ýalňyşlyk ýüz berdi", "error"); }
     finally { setLoading(false); }
   }
 
   if (done) return (
     <div className="alert-success animate-in">
-      <div style={{ fontSize: "3rem", marginBottom: 12 }}>🎉</div>
+      <div className="success-icon-wrap"><SparkleIcon size={30} strokeWidth={1.6} /></div>
       <h3 style={{ color: "var(--primary)", marginBottom: 10 }}>Üstünlikli!</h3>
       <p>Siziň bonus pul haýyşnamaňyz kabul edildi. Iň gysga wagtda barlanar we hasabyňyza goşular.</p>
       <button className="btn-primary" style={{ marginTop: 20 }} onClick={() => { setDone(false); setSelected(null); setPhone(""); setShowPayment(false); }}>
@@ -135,7 +136,7 @@ function BonusSellSection() {
 
   if (done) return (
     <div className="alert-success animate-in">
-      <div style={{ fontSize: "3rem", marginBottom: 12 }}>✅</div>
+      <div className="success-icon-wrap"><CheckCircleIcon size={30} strokeWidth={1.6} /></div>
       <h3 style={{ color: "var(--primary)", marginBottom: 10 }}>Haýyşnama kabul edildi!</h3>
       <p>Siziň bonus pul satmak haýyşnamaňyz kabul edildi. Iň gysga wagtda işleniler.</p>
     </div>
@@ -214,7 +215,7 @@ function CurrencySection() {
 
   if (done) return (
     <div className="alert-success animate-in">
-      <div style={{ fontSize: "3rem", marginBottom: 12 }}>🏆</div>
+      <div className="success-icon-wrap"><TrophyIcon size={30} strokeWidth={1.6} /></div>
       <h3 style={{ color: "var(--primary)", marginBottom: 10 }}>Üstünlikli!</h3>
       <p>Iň tiz wagtda Ýeňil siz bilen baglanar.</p>
       <button className="btn-secondary" style={{ marginTop: 16 }} onClick={() => setDone(false)}>Täzeden</button>
@@ -364,7 +365,7 @@ function SimSection() {
 
   if (done) return (
     <div className="alert-success animate-in">
-      <div style={{ fontSize: "3rem", marginBottom: 12 }}>📱</div>
+      <div className="success-icon-wrap"><SmartphoneIcon size={30} strokeWidth={1.6} /></div>
       <h3 style={{ color: "var(--primary)", marginBottom: 10 }}>Üstünlikli!</h3>
       <p>SIM kart töleg haýyşnamaňyz kabul edildi. Iň gysga wagtda işleniler.</p>
       <button className="btn-secondary" style={{ marginTop: 16 }} onClick={() => { setDone(false); setOperator(null); setSelected(null); setShowPayment(false); }}>Täzeden</button>
@@ -448,7 +449,7 @@ function SimSection() {
           {payMethod === "bonus" && (
             <div className="alert-info">
               <p>Bonus puluňyzdan <strong>{tmt} BP</strong> aýrylar.</p>
-              {balance < parseFloat(tmt) && <p style={{ color: "#dc2626", marginTop: 6 }}>⚠️ Ýeterlik bonus pul ýok!</p>}
+              {balance < parseFloat(tmt) && <p style={{ color: "#dc2626", marginTop: 6 }}>Ýeterlik bonus pul ýok!</p>}
             </div>
           )}
           {loading ? <PremiumSpinner /> : (
@@ -484,7 +485,7 @@ export default function Tmcell() {
             Bonus pul satyn almak, satmak we daşary ýurt hyzmatlary
           </p>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", borderRadius: 50, padding: "8px 18px", marginTop: 16 }}>
-            <span style={{ fontSize: "1.2rem" }}>💰</span>
+            <WalletIcon size={16} strokeWidth={2} />
             <span style={{ fontWeight: 700 }}>{balance.toFixed(2)} BP</span>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { saveOrder } from "@/lib/firebase";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { useToast } from "@/components/Toast";
+import { SparkleIcon } from "@/components/Icons";
 
 const ADMIN_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
 
@@ -113,14 +114,14 @@ function AppPaymentFlow({ app, onBack }: { app: AppService; onBack: () => void }
       }
       await saveOrder("app-payments", { app: app.firebaseKey, plan: plan.label, amount: plan.amount, userPhone, paymentPhone: payMethod === "terminal" ? payPhone : undefined, paymentMethod: payMethod, deviceId, status: "pending" });
       setDone(true);
-      toast("🎉 Üstünlikli ýerine ýetdiňiz!", "success");
+      toast("Üstünlikli ýerine ýetdiňiz!", "success");
     } catch { toast("Ýalňyşlyk", "error"); }
     finally { setLoading(false); }
   }
 
   if (done) return (
     <div className="alert-success animate-in">
-      <div style={{ fontSize: "3rem", marginBottom: 12 }}>🎉</div>
+      <div className="success-icon-wrap"><SparkleIcon size={30} strokeWidth={1.6} /></div>
       <h3 style={{ color: "var(--primary)", marginBottom: 10 }}>Üstünlikli ýerine ýetdiňiz!</h3>
       <p>Iň tiz wagtda barlanar we size habar berler.</p>
       <div style={{ display: "flex", gap: 12, marginTop: 20, justifyContent: "center", flexWrap: "wrap" }}>

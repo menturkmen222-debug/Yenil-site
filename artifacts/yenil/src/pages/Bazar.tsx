@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { db, ref, onValue, saveOrder } from "@/lib/firebase";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { useToast } from "@/components/Toast";
+import { CheckCircleIcon, ShoppingBagIcon } from "@/components/Icons";
 
 const ADMIN_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
 const CATEGORIES = [
@@ -133,7 +134,7 @@ function BuyModal({ item, onClose }: { item: MarketItem; onClose: () => void }) 
   if (done) return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
       <div className="glass-card alert-success" style={{ maxWidth: 400, width: "100%", padding: 32, textAlign: "center" }}>
-        <div style={{ fontSize: "3rem", marginBottom: 12 }}>✅</div>
+        <div className="success-icon-wrap"><CheckCircleIcon size={30} strokeWidth={1.6} /></div>
         <h3 style={{ color: "var(--primary)", marginBottom: 10 }}>Sargyt kabul edildi!</h3>
         <p>Satyjy siz bilen {item.sellerPhone} arkaly habarlaşar.</p>
         <button className="btn-primary" style={{ marginTop: 20 }} onClick={onClose}>Düşündim</button>
@@ -212,7 +213,10 @@ export default function Bazar() {
     <div style={{ flex: 1, paddingBottom: 40 }}>
       <div style={{ background: "var(--gradient2)", color: "white", padding: "40px 20px 30px", textAlign: "center" }}>
         <div className="container">
-          <div style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: 8 }}>🛍️ Sanly bazar</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, fontWeight: 800, fontSize: "1.75rem", marginBottom: 8 }}>
+            <ShoppingBagIcon size={34} strokeWidth={1.6} style={{ opacity: 0.95 }} />
+            Sanly bazar
+          </div>
           <p style={{ opacity: 0.9 }}>Akkauntlar, sanly harytlar we hyzmatlar — hemmesi bir ýerde</p>
         </div>
       </div>
