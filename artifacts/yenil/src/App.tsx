@@ -13,27 +13,35 @@ import Tmcell from "@/pages/Tmcell";
 import Ulgamlar from "@/pages/Ulgamlar";
 import Teklip from "@/pages/Teklip";
 import Bazar from "@/pages/Bazar";
+import Konum from "@/pages/Konum";
+import KonumViewer from "@/pages/KonumViewer";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
 
 function Router() {
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/demiryol" component={Demiryol} />
-        <Route path="/pay" component={Pay} />
-        <Route path="/about" component={About} />
-        <Route path="/help" component={Help} />
-        <Route path="/sms" component={Sms} />
-        <Route path="/tmcell" component={Tmcell} />
-        <Route path="/ulgamlar" component={Ulgamlar} />
-        <Route path="/teklip" component={Teklip} />
-        <Route path="/bazar" component={Bazar} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <Switch>
+      <Route path="/konum/:token" component={KonumViewer} />
+      <Route>
+        <Layout>
+          <Switch>
+            <Route path="/" component={Home} />
+            <Route path="/demiryol" component={Demiryol} />
+            <Route path="/pay" component={Pay} />
+            <Route path="/about" component={About} />
+            <Route path="/help" component={Help} />
+            <Route path="/sms" component={Sms} />
+            <Route path="/tmcell" component={Tmcell} />
+            <Route path="/ulgamlar" component={Ulgamlar} />
+            <Route path="/teklip" component={Teklip} />
+            <Route path="/bazar" component={Bazar} />
+            <Route path="/konum" component={Konum} />
+            <Route component={NotFound} />
+          </Switch>
+        </Layout>
+      </Route>
+    </Switch>
   );
 }
 

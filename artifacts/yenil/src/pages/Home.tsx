@@ -6,6 +6,15 @@ import {
   StarIcon, ArrowRightIcon, SparkleIcon, GridIcon,
 } from "@/components/Icons";
 
+function MapPinIcon({ size = 26, strokeWidth = 1.7 }: { size?: number; strokeWidth?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 21C12 21 5 13.5 5 8.5a7 7 0 0 1 14 0C19 13.5 12 21 12 21z"/>
+      <circle cx="12" cy="8.5" r="2.5"/>
+    </svg>
+  );
+}
+
 const reviews = [
   { author: "Amangül", text: "Bilet almak aňsat eken maňa 2 sagadyň içinde bilet alyp berdiler we ulanmak hem aňsat" },
   { author: "Didar", text: "Demiryyolla hem tmcell goşaýmala — indi otran ýerimden kösenmän bilet alýan. Ýeňil sag bol!" },
@@ -199,6 +208,34 @@ export default function Home() {
                 </div>
               </div>
               <div className="banner-arrow" style={{ color: "var(--primary)" }}>
+                <ArrowRightIcon size={18} strokeWidth={2} />
+              </div>
+            </div>
+          </Link>
+        </div>
+      </section>
+
+      {/* ── KONUM BANNER ── */}
+      <section style={{ padding: "0 20px 22px" }}>
+        <div className="container">
+          <Link href="/konum">
+            <div className="banner-card" style={{
+              background: "linear-gradient(135deg, rgba(79,70,229,0.07), rgba(124,58,237,0.09))",
+              border: "1.5px solid rgba(124,58,237,0.18)",
+            }}>
+              <div className="banner-icon-wrap" style={{
+                background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+                color: "white",
+              }}>
+                <MapPinIcon size={26} strokeWidth={1.7} />
+              </div>
+              <div className="banner-body">
+                <div className="banner-title" style={{ color: "#4f46e5" }}>Ýer paýlaşma</div>
+                <div className="banner-desc">
+                  Haýsy ýerdedigiňizi aňsatlyk bilen paýlaşyň — Yandex we Google Karta bilen.
+                </div>
+              </div>
+              <div className="banner-arrow" style={{ color: "#7c3aed" }}>
                 <ArrowRightIcon size={18} strokeWidth={2} />
               </div>
             </div>
