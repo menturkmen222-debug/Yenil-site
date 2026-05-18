@@ -7,6 +7,7 @@ import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 
 const menuItems = [
+  { icon: "location-outline" as const, label: "Ýer paýlaşma", desc: "Canlý ýer yzarlama we link paýlaşma", href: "/konum", color: "#4f46e5" },
   { icon: "apps-outline" as const, label: "Içerki ulgamlar", desc: "Aydym, Belet film, Belet music", href: "/ulgamlar", color: "#f59e0b" },
   { icon: "bulb-outline" as const, label: "Teklip ibermek", desc: "Öz hyzmatyňyzy teklip ediň", href: "/teklip", color: "#0d9488" },
   { icon: "storefront-outline" as const, label: "Sanly bazar", desc: "Akkauntlar we sanly harytlar", href: "/bazar", color: "#8b5cf6" },

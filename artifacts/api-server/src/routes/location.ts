@@ -111,6 +111,33 @@ router.post("/location/share/:token/submit", async (req, res) => {
   return res.json({ ok: true, lat, lon });
 });
 
+router.patch("/location/share/:token/live", async (req, res) => {
+  const { token } = req.params;
+  const { lat, lon } = req.body as { lat?: number; lon?: number };
+
+  if (typeof lat !== "number" || typeof lon !== "number") {
+    return res.status(400).json({ error: "lat and lon required" });
+  }
+
+  const [share] = await db
+    .select({ id: locationSharesTable.id, status: locationSharesTable.status, expiresAt: locationSharesTable.expiresAt })
+    .from(locationSharesTable)
+    .where(eq(locationSharesTable.token, token))
+    .limit(1);
+
+  if (!share) return res.status(404).json({ error: "not_found" });
+  if (share.status === "expired" || new Date() > share.expiresAt) {
+    return res.status(410).json({ error: "expired" });
+  }
+
+  await db
+    .update(locationSharesTable)
+    .set({ lat, lon, status: "active" })
+    .where(eq(locationSharesTable.token, token));
+
+  return res.json({ ok: true, lat, lon, updatedAt: new Date().toISOString() });
+});
+
 router.get("/location/my-shares", async (req, res) => {
   const deviceId = req.query.deviceId as string;
   if (!deviceId) return res.status(400).json({ error: "deviceId required" });
