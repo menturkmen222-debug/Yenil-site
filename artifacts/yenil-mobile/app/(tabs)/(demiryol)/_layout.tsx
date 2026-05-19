@@ -59,6 +59,13 @@ export default function DemiryolLayout() {
           tabBarIcon: ({ color }) => <Ionicons name="settings-outline" size={22} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="sms"
+        options={{
+          title: "SMS sargyt",
+          tabBarIcon: ({ color }) => <Ionicons name="chatbubble-ellipses-outline" size={22} color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

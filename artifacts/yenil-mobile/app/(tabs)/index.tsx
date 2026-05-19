@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, Platform,
 } from "react-native";
@@ -32,25 +32,6 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { balance } = useBonusPul();
   const isWeb = Platform.OS === "web";
-
-  const [nums, setNums] = useState({ users: 0, orders: 0, rating: 0 });
-
-  useEffect(() => {
-    const targets = { users: 500, orders: 1200, rating: 98 };
-    const dur = 1500;
-    const start = Date.now();
-    const timer = setInterval(() => {
-      const progress = Math.min((Date.now() - start) / dur, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
-      setNums({
-        users: Math.round(targets.users * ease),
-        orders: Math.round(targets.orders * ease),
-        rating: Math.round(targets.rating * ease),
-      });
-      if (progress >= 1) clearInterval(timer);
-    }, 16);
-    return () => clearInterval(timer);
-  }, []);
 
   const nav = (path: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -110,20 +91,6 @@ export default function HomeScreen() {
             <Ionicons name="flash-outline" size={13} color="rgba(255,255,255,0.65)" />
           </Pressable>
         </View>
-      </View>
-
-      {/* STATS */}
-      <View style={styles.statsRow}>
-        {[
-          { num: `${nums.users}+`, label: "Müşderi" },
-          { num: `${nums.orders}+`, label: "Sargyt" },
-          { num: `${nums.rating}%`, label: "Kanagatlanma" },
-        ].map((s, i) => (
-          <View key={i} style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.statNum, { color: colors.primary }]}>{s.num}</Text>
-            <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{s.label}</Text>
-          </View>
-        ))}
       </View>
 
       {/* SERVICES */}
