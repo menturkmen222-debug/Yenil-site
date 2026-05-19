@@ -86,7 +86,6 @@ export default function DemiryolScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Ticket lookup
   const [bookingCode, setBookingCode] = useState("");
   const [ticketResult, setTicketResult] = useState<TicketBooking | null>(null);
   const [ticketLoading, setTicketLoading] = useState(false);
@@ -212,7 +211,7 @@ export default function DemiryolScreen() {
         ) : null}
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 34 : 100 }}
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 34 : 120 }}
         keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
         {section === "info" && (
@@ -323,7 +322,6 @@ export default function DemiryolScreen() {
                 <Text style={[s.proofLabel, { color: proofType === t.id ? colors.primary : colors.foreground }]}>{t.label}</Text>
               </Pressable>
             ))}
-
             {proofType === "bonus" && balance < price && (
               <View style={[s.warnBox, { backgroundColor: "#fee2e2", borderColor: "#ef4444" }]}>
                 <Ionicons name="warning-outline" size={16} color="#ef4444" />
@@ -353,7 +351,6 @@ export default function DemiryolScreen() {
             {screenshotUri && proofType === "screenshot" && (
               <Image source={{ uri: screenshotUri }} style={{ height: 160, borderRadius: 12, marginTop: 10, resizeMode: "cover" }} />
             )}
-
             <Pressable onPress={() => { if (!proofType) { Alert.alert("Saýlaň", "Töleg tassyklamasyny saýlaň!"); return; } setSection("confirm"); }}
               style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}>
               <Text style={s.primaryBtnText}>Tassyklamaga geçmek</Text>

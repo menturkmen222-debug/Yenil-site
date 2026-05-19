@@ -53,27 +53,16 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="demiryol"
+        name="(demiryol)"
         options={{
-          title: "Bilet",
+          title: "Demirýol",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="ticket" tintColor={color} size={24} />
+              <SymbolView name="tram" tintColor={color} size={24} />
             ) : (
               <Ionicons name="train-outline" size={22} color={color} />
             ),
-        }}
-      />
-      <Tabs.Screen
-        name="statistika"
-        options={{
-          title: "Statistika",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="chart.bar" tintColor={color} size={24} />
-            ) : (
-              <Ionicons name="bar-chart-outline" size={22} color={color} />
-            ),
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tabs.Screen
@@ -101,9 +90,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="pay"
-        options={{ href: null }}
+        name="sozlamalar"
+        options={{
+          title: "Sozlamalar",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="gear" tintColor={color} size={24} />
+            ) : (
+              <Ionicons name="settings-outline" size={22} color={color} />
+            ),
+        }}
       />
+      <Tabs.Screen name="pay" options={{ href: null }} />
+      <Tabs.Screen name="statistika" options={{ href: null }} />
     </Tabs>
   );
 }
