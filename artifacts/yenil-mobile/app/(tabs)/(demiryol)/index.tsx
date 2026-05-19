@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
-  Alert, ActivityIndicator, Platform, Image,
+  Alert, ActivityIndicator, Platform, Image, Linking,
 } from "react-native";
-import { Ionicons, Feather } from "@expo/vector-icons";
+import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
@@ -16,6 +16,7 @@ const PAYMENT_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
 const DEMIRYOL_API = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api/demiryol`
   : "/api/demiryol";
+const SMS_NUMBERS = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
 
 interface TicketBooking {
   passenger_name?: string;
@@ -34,7 +35,25 @@ const CITIES: Record<string, string> = {
 };
 const CITY_KEYS = Object.keys(CITIES);
 
-type Section = "info" | "form" | "payment" | "confirm" | "success";
+const ROUTES_SMS = [
+  { id: "a1", label: "Aşgabat → Mary" },
+  { id: "a2", label: "Aşgabat → Türkmenabat" },
+  { id: "a3", label: "Aşgabat → Daşoguz" },
+  { id: "a4", label: "Aşgabat → Balkanabat" },
+  { id: "a5", label: "Mary → Türkmenabat" },
+  { id: "a6", label: "Mary → Aşgabat" },
+  { id: "a7", label: "Türkmenabat → Aşgabat" },
+  { id: "a8", label: "Daşoguz → Aşgabat" },
+];
+
+const TRAIN_TYPES = [
+  { id: "express", label: "Ekspress (çalt)", desc: "Iň çalt ulag" },
+  { id: "passenger", label: "Ýolagçy", desc: "Kadaly tizlik" },
+  { id: "economy", label: "Ykdysady", desc: "Arzan nyrh" },
+];
+
+type MainSection = "choose" | "direct" | "agent" | "sms";
+type DirectSection = "form" | "payment" | "confirm" | "success";
 type ProofType = "screenshot" | "sms" | "bonus";
 
 function PickerRow({ label, value, onNext, onPrev }: { label: string; value: string; onNext: () => void; onPrev: () => void }) {
@@ -68,7 +87,11 @@ export default function DemiryolScreen() {
   const { balance, deduct, deviceId } = useBonusPul();
   const isWeb = Platform.OS === "web";
 
-  const [section, setSection] = useState<Section>("info");
+  // Main navigation
+  const [main, setMain] = useState<MainSection>("choose");
+
+  // ── Direct buy state ──
+  const [directStep, setDirectStep] = useState<DirectSection>("form");
   const [fromIdx, setFromIdx] = useState(0);
   const [toIdx, setToIdx] = useState(1);
   const [name, setName] = useState("");
@@ -86,11 +109,34 @@ export default function DemiryolScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [bookingCode, setBookingCode] = useState("");
-  const [ticketResult, setTicketResult] = useState<TicketBooking | null>(null);
-  const [ticketLoading, setTicketLoading] = useState(false);
-  const [ticketError, setTicketError] = useState("");
-  const [showLookup, setShowLookup] = useState(false);
+  // ── Agent order state ──
+  const [agentName, setAgentName] = useState("");
+  const [agentPhone, setAgentPhone] = useState("");
+  const [agentRoute, setAgentRoute] = useState("");
+  const [agentDate, setAgentDate] = useState("");
+  const [agentNote, setAgentNote] = useState("");
+  const [agentLoading, setAgentLoading] = useState(false);
+  const [agentDone, setAgentDone] = useState(false);
+
+  // ── SMS order state ──
+  const [smsName, setSmsName] = useState("");
+  const [smsPhone, setSmsPhone] = useState("");
+  const [smsPassengers, setSmsPassengers] = useState("1");
+  const [smsRoute, setSmsRoute] = useState("a1");
+  const [smsTrainType, setSmsTrainType] = useState("passenger");
+  const [smsDate, setSmsDate] = useState("");
+  const [smsNotes, setSmsNotes] = useState("");
+  const [smsStep, setSmsStep] = useState(1);
+  const [showRouteList, setShowRouteList] = useState(false);
+  const selectedSmsRoute = ROUTES_SMS.find(r => r.id === smsRoute);
+
+  function smsSendText() {
+    const tr = TRAIN_TYPES.find(t => t.id === smsTrainType)?.label ?? "";
+    return `Sargyt:\nAd we Familýa: ${smsName}\nNomer: ${smsPhone} (TMCell)\nUgruň: ${selectedSmsRoute?.label}\nGün: ${smsDate}\nOtly: ${tr}\nÝolagçy: ${smsPassengers}\n${smsNotes ? "Bellik: " + smsNotes : ""}`.trim();
+  }
+  function sendSms(number: string) {
+    Linking.openURL(`sms:${number}?body=${encodeURIComponent(smsSendText())}`);
+  }
 
   function calcPrice() {
     if (!travelDate) return 60;
@@ -109,20 +155,6 @@ export default function DemiryolScreen() {
     if (!result.canceled && result.assets[0]) setScreenshotUri(result.assets[0].uri);
   }
 
-  async function searchTicket() {
-    const code = bookingCode.trim().toUpperCase();
-    if (!/^[A-Z0-9]{6}$/.test(code)) { Alert.alert("Ýalňyşlyk", "Bron kody 6 belgi bolmaly (meselem: ABC123)"); return; }
-    setTicketLoading(true); setTicketError(""); setTicketResult(null);
-    try {
-      const res = await fetch(`${DEMIRYOL_API}?id=${encodeURIComponent(code)}`, { headers: { Accept: "application/json" } });
-      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `Status: ${res.status}`); }
-      const data = await res.json();
-      if (!data.data?.booking) throw new Error("Bron kody tapylmady");
-      setTicketResult(data.data.booking);
-    } catch (e: any) { setTicketError(e.message || "Nätanyş ýalňyşlyk"); }
-    finally { setTicketLoading(false); }
-  }
-
   function validateForm() {
     if (!name || !surname || !birthdate || !passport || !travelDate || !clientPhone) {
       Alert.alert("Ýalňyşlyk", "Ähli meýdançalary dolduryň!"); return false;
@@ -139,7 +171,7 @@ export default function DemiryolScreen() {
     return true;
   }
 
-  async function handleSubmit() {
+  async function handleDirectSubmit() {
     if (!validateProof()) return;
     setLoading(true); setError("");
     try {
@@ -148,8 +180,7 @@ export default function DemiryolScreen() {
         if (!ok) { setError("Bonus pul aýyrmak başartmady!"); setLoading(false); return; }
       }
       const screenshotUrl = proofType === "screenshot" && screenshotUri
-        ? await uploadImage(screenshotUri, "proof.jpg")
-        : null;
+        ? await uploadImage(screenshotUri, "proof.jpg") : null;
       const orderData = {
         type: "demiryol", name, surname, passport, birthdate,
         route: `${CITY_KEYS[fromIdx]}-${CITY_KEYS[toIdx]}`,
@@ -167,79 +198,200 @@ export default function DemiryolScreen() {
       });
       if (!response.ok) throw new Error(`Status: ${response.status}`);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setSection("success");
+      setDirectStep("success");
     } catch (e: any) {
       setError("Ýalňyşlyk: " + (e.message || "Bilinmeýän ýalňyşlyk"));
     } finally { setLoading(false); }
   }
 
+  async function handleAgentSubmit() {
+    if (!agentName.trim() || !agentPhone.trim() || !agentRoute.trim() || !agentDate.trim()) {
+      Alert.alert("Doldurylmadyk", "Ähli hökmany meýdançalary dolduryň!"); return;
+    }
+    setAgentLoading(true);
+    try {
+      await fetch(`${BACKENDLESS_URL}/data/orders`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "agent_monitor", name: agentName, phone: agentPhone,
+          route: agentRoute, date: agentDate, note: agentNote,
+          timestamp: new Date().toISOString(),
+          created: new Date().toISOString(), updated: new Date().toISOString(),
+        }),
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setAgentDone(true);
+    } catch {
+      Alert.alert("Ýalňyşlyk", "Soragy ibermek başartmady. Gaýtadan synanyşyň.");
+    } finally { setAgentLoading(false); }
+  }
+
   const topPad = (isWeb ? 0 : insets.top) + 12;
+
+  const goBack = (to: MainSection) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setMain(to);
+  };
 
   return (
     <View style={[s.container, { backgroundColor: colors.background }]}>
+      {/* ── HEADER ── */}
       <View style={[s.header, { paddingTop: topPad, backgroundColor: colors.primary }]}>
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <Ionicons name="train-outline" size={22} color="#fff" />
-            <Text style={s.headerTitle}>Demirýol biletleri</Text>
-          </View>
-          <Pressable onPress={() => setShowLookup(!showLookup)}
-            style={[s.lookupBtn, { backgroundColor: "rgba(255,255,255,0.2)" }]}>
-            <Ionicons name="search-outline" size={16} color="#fff" />
-            <Text style={{ color: "#fff", fontSize: 12, fontWeight: "600" }}>Bilet gözle</Text>
-          </Pressable>
-        </View>
-        {showLookup && (
-          <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
-            <TextInput value={bookingCode} onChangeText={t => setBookingCode(t.toUpperCase())}
-              placeholder="Bron kody (ABC123)" placeholderTextColor="rgba(255,255,255,0.6)"
-              maxLength={6} autoCapitalize="characters"
-              style={[s.lookupInput]}
-            />
-            <Pressable onPress={searchTicket} style={s.lookupSearchBtn}>
-              {ticketLoading ? <ActivityIndicator color="#fff" size="small" /> :
-                <Ionicons name="search" size={20} color="#fff" />}
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          {main !== "choose" && (
+            <Pressable onPress={() => {
+              goBack("choose");
+              if (main === "direct") setDirectStep("form");
+              if (main === "sms") setSmsStep(1);
+            }} style={s.backBtn}>
+              <Ionicons name="arrow-back" size={20} color="#fff" />
             </Pressable>
-          </View>
-        )}
-        {ticketError ? <Text style={{ color: "#fca5a5", marginTop: 6, fontSize: 12 }}>{ticketError}</Text> : null}
-        {ticketResult ? (
-          <View style={{ marginTop: 8, padding: 10, backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 10 }}>
-            <Text style={{ color: "#fff", fontWeight: "700" }}>{ticketResult.passenger_name} — {ticketResult.route || "Ugur"}</Text>
-            <Text style={{ color: "rgba(255,255,255,0.85)", fontSize: 12 }}>{ticketResult.departure_date} | {ticketResult.train_number}</Text>
-          </View>
-        ) : null}
+          )}
+          <Ionicons name="train-outline" size={22} color="#fff" />
+          <Text style={s.headerTitle}>
+            {main === "choose" ? "Demirýol biletleri" :
+             main === "direct" ? "Göni bilet almak" :
+             main === "agent" ? "Agent arkaly sargyt" :
+             "SMS zaýawka"}
+          </Text>
+        </View>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 120 }}
-        keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 120 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
 
-        {section === "info" && (
+        {/* ══════════════════════════════════════════
+            CHOOSE SCREEN — 3 service cards
+        ══════════════════════════════════════════ */}
+        {main === "choose" && (
           <View>
-            <View style={[s.infoBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Ionicons name="information-circle-outline" size={20} color={colors.primary} />
-              <View style={{ flex: 1 }}>
-                <Text style={[s.infoTitle, { color: colors.foreground }]}>Möhüm maglumat</Text>
-                <Text style={[s.infoText, { color: colors.mutedForeground }]}>
-                  Bu hyzmat arkaly Türkmenistanyň demirýol biletlerini kart tölegsiz satyn alyp bilersiňiz. Töleg öňünden geçirilýär. Bilet 1 sagadyň içinde SMS arkaly iberilýär.
+            {/* Subtitle */}
+            <Text style={[s.chooseTitle, { color: colors.foreground }]}>Hyzmat saýlaň</Text>
+            <Text style={[s.chooseSub, { color: colors.mutedForeground }]}>
+              Size laýyk görnüşde bilet alyberiş hyzmatyny saýlaň
+            </Text>
+
+            {/* Card 1 — Direct */}
+            <Pressable
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setMain("direct"); }}
+              style={({ pressed }) => [s.serviceCard, {
+                backgroundColor: colors.card, borderColor: colors.primary + "50",
+                borderWidth: 1.5, opacity: pressed ? 0.9 : 1,
+                shadowColor: colors.primary, shadowOpacity: 0.12, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, elevation: 4,
+              }]}
+            >
+              {/* Accent stripe */}
+              <View style={[s.cardStripe, { backgroundColor: colors.primary }]} />
+              <View style={{ flex: 1, paddingLeft: 16 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10 }}>
+                  <View style={[s.cardIconBg, { backgroundColor: colors.primary + "18" }]}>
+                    <Ionicons name="flash-outline" size={26} color={colors.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[s.cardTitle, { color: colors.foreground }]}>Göni özim almakçy</Text>
+                    <View style={[s.cardBadge, { backgroundColor: colors.primary + "18" }]}>
+                      <Text style={[s.cardBadgeText, { color: colors.primary }]}>Dessine</Text>
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+                </View>
+                <Text style={[s.cardDesc, { color: colors.mutedForeground }]}>
+                  Bilet çykan dessine özüňiz alyp bilersiňiz. Garaşmazdan, bilet satışa çykandan şol bada al.
                 </Text>
+                <View style={[s.cardFeatures, { borderTopColor: colors.border }]}>
+                  {["Şol bada sargyt", "Töleg öňünden", "1 sagat içinde SMS"].map((f, i) => (
+                    <View key={i} style={s.cardFeatureItem}>
+                      <Ionicons name="checkmark-circle" size={13} color={colors.primary} />
+                      <Text style={[s.cardFeatureText, { color: colors.mutedForeground }]}>{f}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
-            </View>
-            <View style={[s.warnBox, { backgroundColor: "#fef3c7", borderColor: "#f59e0b" }]}>
-              <Ionicons name="warning-outline" size={18} color="#d97706" />
-              <Text style={{ color: "#92400e", fontSize: 13, flex: 1, lineHeight: 18 }}>
-                Töleg edeniňizden soň 15 minut içinde SMS zaýawka iberilmeli.
-              </Text>
-            </View>
-            <Pressable onPress={() => setSection("form")}
-              style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}>
-              <Text style={s.primaryBtnText}>Dowam etmek</Text>
-              <Feather name="arrow-right" size={18} color="#fff" />
+            </Pressable>
+
+            {/* Card 2 — Agent */}
+            <Pressable
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setMain("agent"); setAgentDone(false); }}
+              style={({ pressed }) => [s.serviceCard, {
+                backgroundColor: colors.card, borderColor: "#8b5cf6" + "50",
+                borderWidth: 1.5, opacity: pressed ? 0.9 : 1,
+                shadowColor: "#8b5cf6", shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, elevation: 4,
+              }]}
+            >
+              <View style={[s.cardStripe, { backgroundColor: "#8b5cf6" }]} />
+              <View style={{ flex: 1, paddingLeft: 16 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10 }}>
+                  <View style={[s.cardIconBg, { backgroundColor: "#8b5cf6" + "18" }]}>
+                    <MaterialCommunityIcons name="robot-outline" size={26} color="#8b5cf6" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[s.cardTitle, { color: colors.foreground }]}>Size tabşyrmakçy</Text>
+                    <View style={[s.cardBadge, { backgroundColor: "#8b5cf6" + "18" }]}>
+                      <Text style={[s.cardBadgeText, { color: "#8b5cf6" }]}>7/24 kuzatuw</Text>
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#8b5cf6" />
+                </View>
+                <Text style={[s.cardDesc, { color: colors.mutedForeground }]}>
+                  Bilet maglumatlaryňyzy bize aýdyň — biz tarifymyza görä 7/24 kuzatyp, ýer çykandan dessine alyp bereris.
+                </Text>
+                <View style={[s.cardFeatures, { borderTopColor: colors.border }]}>
+                  {["7/24 awtomat kuzatuw", "Ýer çyksa dessine alýas", "Tarife görä hyzmat"].map((f, i) => (
+                    <View key={i} style={s.cardFeatureItem}>
+                      <Ionicons name="checkmark-circle" size={13} color="#8b5cf6" />
+                      <Text style={[s.cardFeatureText, { color: colors.mutedForeground }]}>{f}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </Pressable>
+
+            {/* Card 3 — SMS */}
+            <Pressable
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setMain("sms"); setSmsStep(1); }}
+              style={({ pressed }) => [s.serviceCard, {
+                backgroundColor: colors.card, borderColor: "#0ea5e9" + "50",
+                borderWidth: 1.5, opacity: pressed ? 0.9 : 1,
+                shadowColor: "#0ea5e9", shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, elevation: 4,
+              }]}
+            >
+              <View style={[s.cardStripe, { backgroundColor: "#0ea5e9" }]} />
+              <View style={{ flex: 1, paddingLeft: 16 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10 }}>
+                  <View style={[s.cardIconBg, { backgroundColor: "#0ea5e9" + "18" }]}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={26} color="#0ea5e9" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[s.cardTitle, { color: colors.foreground }]}>SMS zaýawka</Text>
+                    <View style={[s.cardBadge, { backgroundColor: "#0ea5e9" + "18" }]}>
+                      <Text style={[s.cardBadgeText, { color: "#0ea5e9" }]}>Internetsiz</Text>
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#0ea5e9" />
+                </View>
+                <Text style={[s.cardDesc, { color: colors.mutedForeground }]}>
+                  Internet bolmanda hem SMS arkaly bilet sargyt ediň. Maglumatlarňyzy dolduryň, SMS ugradyň.
+                </Text>
+                <View style={[s.cardFeatures, { borderTopColor: colors.border }]}>
+                  {["Internetsiz işleýär", "SMS arkaly tassyklanýar", "15-30 min içinde jaň"].map((f, i) => (
+                    <View key={i} style={s.cardFeatureItem}>
+                      <Ionicons name="checkmark-circle" size={13} color="#0ea5e9" />
+                      <Text style={[s.cardFeatureText, { color: colors.mutedForeground }]}>{f}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
             </Pressable>
           </View>
         )}
 
-        {section === "form" && (
+        {/* ══════════════════════════════════════════
+            DIRECT BUY FLOW
+        ══════════════════════════════════════════ */}
+        {main === "direct" && directStep === "form" && (
           <View>
             <Text style={[s.sectionHead, { color: colors.foreground }]}>Ugur we şahsy maglumatlar</Text>
             <PickerRow label="Nirden" value={CITIES[CITY_KEYS[fromIdx]]}
@@ -260,7 +412,7 @@ export default function DemiryolScreen() {
                 <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>{f.label}</Text>
                 <TextInput value={f.value} onChangeText={f.set} placeholder={f.ph}
                   placeholderTextColor={colors.mutedForeground}
-                  keyboardType={f.phone ? "phone-pad" : "default"}
+                  keyboardType={(f as any).phone ? "phone-pad" : "default"}
                   style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
                 />
               </View>
@@ -283,19 +435,15 @@ export default function DemiryolScreen() {
               <Ionicons name="cash-outline" size={20} color={colors.primary} />
               <Text style={[s.priceText, { color: colors.primary }]}>Jemi: {price} TMT</Text>
             </View>
-            <Pressable onPress={() => { if (validateForm()) setSection("payment"); }}
+            <Pressable onPress={() => { if (validateForm()) setDirectStep("payment"); }}
               style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}>
               <Text style={s.primaryBtnText}>Töleg usulyna geçmek</Text>
               <Feather name="arrow-right" size={18} color="#fff" />
             </Pressable>
-            <Pressable onPress={() => setSection("info")} style={s.secondaryBtn}>
-              <Feather name="arrow-left" size={16} color={colors.mutedForeground} />
-              <Text style={[s.secondaryBtnText, { color: colors.mutedForeground }]}>Yza</Text>
-            </Pressable>
           </View>
         )}
 
-        {section === "payment" && (
+        {main === "direct" && directStep === "payment" && (
           <View>
             <Text style={[s.sectionHead, { color: colors.foreground }]}>Töleg maglumatlary</Text>
             <View style={[s.infoBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -325,14 +473,12 @@ export default function DemiryolScreen() {
             {proofType === "bonus" && balance < price && (
               <View style={[s.warnBox, { backgroundColor: "#fee2e2", borderColor: "#ef4444" }]}>
                 <Ionicons name="warning-outline" size={16} color="#ef4444" />
-                <Text style={{ color: "#dc2626", fontSize: 13, flex: 1 }}>
-                  Ýeterlik bonus pul ýok ({balance} BP / {price} BP gerek)
-                </Text>
+                <Text style={{ color: "#dc2626", fontSize: 13, flex: 1 }}>Ýeterlik bonus pul ýok ({balance} BP / {price} BP gerek)</Text>
               </View>
             )}
             {proofType === "sms" && (
               <View style={{ marginTop: 12 }}>
-                <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>SMS habarynyzy giriziň</Text>
+                <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>SMS habaryňyzy giriziň</Text>
                 <TextInput value={smsText} onChangeText={setSmsText}
                   placeholder="SMS haty şu ýere ýazyň..." placeholderTextColor={colors.mutedForeground}
                   multiline numberOfLines={4}
@@ -342,7 +488,7 @@ export default function DemiryolScreen() {
             )}
             {proofType === "screenshot" && (
               <Pressable onPress={pickScreenshot}
-                style={[{ borderWidth: 2, borderStyle: "dashed", borderColor: colors.primary, borderRadius: 12, padding: 20, alignItems: "center", marginTop: 12, gap: 6 }]}>
+                style={{ borderWidth: 2, borderStyle: "dashed", borderColor: colors.primary, borderRadius: 12, padding: 20, alignItems: "center", marginTop: 12, gap: 6 }}>
                 <Ionicons name="cloud-upload-outline" size={32} color={colors.primary} />
                 <Text style={{ color: colors.primary, fontWeight: "600" }}>Suraty ýüklemek üçin üstünden basyň</Text>
                 <Text style={{ color: "#f59e0b", fontSize: 12 }}>JPG, PNG (maksimum 5 MB)</Text>
@@ -351,19 +497,19 @@ export default function DemiryolScreen() {
             {screenshotUri && proofType === "screenshot" && (
               <Image source={{ uri: screenshotUri }} style={{ height: 160, borderRadius: 12, marginTop: 10, resizeMode: "cover" }} />
             )}
-            <Pressable onPress={() => { if (!proofType) { Alert.alert("Saýlaň", "Töleg tassyklamasyny saýlaň!"); return; } setSection("confirm"); }}
+            <Pressable onPress={() => { if (!proofType) { Alert.alert("Saýlaň", "Töleg tassyklamasyny saýlaň!"); return; } setDirectStep("confirm"); }}
               style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}>
               <Text style={s.primaryBtnText}>Tassyklamaga geçmek</Text>
               <Feather name="arrow-right" size={18} color="#fff" />
             </Pressable>
-            <Pressable onPress={() => setSection("form")} style={s.secondaryBtn}>
+            <Pressable onPress={() => setDirectStep("form")} style={s.secondaryBtn}>
               <Feather name="arrow-left" size={16} color={colors.mutedForeground} />
               <Text style={[s.secondaryBtnText, { color: colors.mutedForeground }]}>Yza</Text>
             </Pressable>
           </View>
         )}
 
-        {section === "confirm" && (
+        {main === "direct" && directStep === "confirm" && (
           <View>
             <Text style={[s.sectionHead, { color: colors.foreground }]}>Tassyklaň</Text>
             <View style={[s.confirmCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -381,11 +527,11 @@ export default function DemiryolScreen() {
               ))}
             </View>
             {error ? (
-              <View style={[{ backgroundColor: "#fee2e2", borderRadius: 10, padding: 12, marginBottom: 8 }]}>
+              <View style={{ backgroundColor: "#fee2e2", borderRadius: 10, padding: 12, marginBottom: 8 }}>
                 <Text style={{ color: "#dc2626" }}>{error}</Text>
               </View>
             ) : null}
-            <Pressable onPress={handleSubmit} disabled={loading}
+            <Pressable onPress={handleDirectSubmit} disabled={loading}
               style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed || loading ? 0.7 : 1 }]}>
               {loading ? <ActivityIndicator color="#fff" size="small" /> : (
                 <>
@@ -394,14 +540,14 @@ export default function DemiryolScreen() {
                 </>
               )}
             </Pressable>
-            <Pressable onPress={() => setSection("payment")} style={s.secondaryBtn}>
+            <Pressable onPress={() => setDirectStep("payment")} style={s.secondaryBtn}>
               <Feather name="arrow-left" size={16} color={colors.mutedForeground} />
               <Text style={[s.secondaryBtnText, { color: colors.mutedForeground }]}>Yza</Text>
             </Pressable>
           </View>
         )}
 
-        {section === "success" && (
+        {main === "direct" && directStep === "success" && (
           <View style={[s.successCard, { backgroundColor: "#f0fdf4", borderColor: "#86efac" }]}>
             <Ionicons name="trophy-outline" size={48} color="#059669" />
             <Text style={[s.successTitle, { color: "#065f46" }]}>Üstünlikli!</Text>
@@ -409,17 +555,289 @@ export default function DemiryolScreen() {
               Iň tiz wagtda siz bilen baglanarlar we bron kody bilen bilet nusgasyny iberärler.
             </Text>
             <Pressable onPress={() => {
-              setSection("info");
+              setMain("choose"); setDirectStep("form");
               setName(""); setSurname(""); setPassport(""); setBirthdate(""); setTravelDate("");
               setClientPhone(""); setProofType(null); setSmsText(""); setScreenshotUri(null);
               setFirstClass(false); setSecondClass(false); setMediaPortal(false); setError("");
             }}
               style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#059669", opacity: pressed ? 0.85 : 1 }]}>
               <Ionicons name="home-outline" size={18} color="#fff" />
-              <Text style={s.primaryBtnText}>Täze sargyt</Text>
+              <Text style={s.primaryBtnText}>Baş sahypa</Text>
             </Pressable>
           </View>
         )}
+
+        {/* ══════════════════════════════════════════
+            AGENT ORDER FLOW
+        ══════════════════════════════════════════ */}
+        {main === "agent" && !agentDone && (
+          <View>
+            <View style={[s.agentHero, { backgroundColor: "#8b5cf6" + "12", borderColor: "#8b5cf6" + "30" }]}>
+              <MaterialCommunityIcons name="robot-outline" size={32} color="#8b5cf6" />
+              <View style={{ flex: 1 }}>
+                <Text style={[s.agentHeroTitle, { color: "#7c3aed" }]}>7/24 Agent Hyzmat</Text>
+                <Text style={[s.agentHeroDesc, { color: "#6d28d9" + "cc" }]}>
+                  Bilet maglumatlaryňyzy giriziň. Bilet çykan dessine alyp bereris.
+                </Text>
+              </View>
+            </View>
+
+            {[
+              { label: "Adyňyz we Familýaňyz", value: agentName, set: setAgentName, ph: "Doly adyňyz" },
+              { label: "Telefon nomeriňiz", value: agentPhone, set: setAgentPhone, ph: "+99361xxxxxx", phone: true },
+              { label: "Ugur (Nirden → Nira)", value: agentRoute, set: setAgentRoute, ph: "Mysal: Aşgabat → Mary" },
+              { label: "Sapar güni", value: agentDate, set: setAgentDate, ph: "Mysal: 25.06.2025" },
+            ].map((f, i) => (
+              <View key={i} style={{ marginTop: 14 }}>
+                <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>{f.label}</Text>
+                <TextInput value={f.value} onChangeText={f.set} placeholder={f.ph}
+                  placeholderTextColor={colors.mutedForeground}
+                  keyboardType={(f as any).phone ? "phone-pad" : "default"}
+                  style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
+                />
+              </View>
+            ))}
+
+            <View style={{ marginTop: 14 }}>
+              <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Goşmaça bellik (islege görä)</Text>
+              <TextInput value={agentNote} onChangeText={setAgentNote}
+                placeholder="Mysal: 1-nji gat, 2 adam, ýa başga islegi..." placeholderTextColor={colors.mutedForeground}
+                multiline numberOfLines={3}
+                style={[s.input, s.textarea, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
+              />
+            </View>
+
+            <View style={[s.warnBox, { backgroundColor: "#ede9fe", borderColor: "#8b5cf6", marginTop: 16 }]}>
+              <Ionicons name="information-circle-outline" size={16} color="#7c3aed" />
+              <Text style={{ color: "#5b21b6", fontSize: 13, flex: 1, lineHeight: 18 }}>
+                Sargydyňyz alynandan soň operatorymyz size jaň eder we töleg we tassyklama barada habar berer.
+              </Text>
+            </View>
+
+            <Pressable onPress={handleAgentSubmit} disabled={agentLoading}
+              style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#8b5cf6", opacity: pressed || agentLoading ? 0.75 : 1 }]}>
+              {agentLoading ? <ActivityIndicator color="#fff" size="small" /> : (
+                <>
+                  <MaterialCommunityIcons name="robot-outline" size={18} color="#fff" />
+                  <Text style={s.primaryBtnText}>Tabşyrmak</Text>
+                </>
+              )}
+            </Pressable>
+          </View>
+        )}
+
+        {main === "agent" && agentDone && (
+          <View style={[s.successCard, { backgroundColor: "#faf5ff", borderColor: "#c4b5fd" }]}>
+            <MaterialCommunityIcons name="robot-outline" size={48} color="#8b5cf6" />
+            <Text style={[s.successTitle, { color: "#5b21b6" }]}>Tabşyryldy!</Text>
+            <Text style={[s.successText, { color: "#6d28d9" }]}>
+              Agentimiz 7/24 bilet ýerini kuzatýar. Bilet çykan dessine alyp, size habar ederis.
+            </Text>
+            <Pressable onPress={() => { setMain("choose"); setAgentDone(false); setAgentName(""); setAgentPhone(""); setAgentRoute(""); setAgentDate(""); setAgentNote(""); }}
+              style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#8b5cf6", opacity: pressed ? 0.85 : 1 }]}>
+              <Ionicons name="home-outline" size={18} color="#fff" />
+              <Text style={s.primaryBtnText}>Baş sahypa</Text>
+            </Pressable>
+          </View>
+        )}
+
+        {/* ══════════════════════════════════════════
+            SMS ZAÝAWKA FLOW
+        ══════════════════════════════════════════ */}
+        {main === "sms" && (
+          <View>
+            {/* Step indicator */}
+            <View style={s.stepRow}>
+              {[1, 2, 3].map(step => (
+                <View key={step} style={s.stepWrap}>
+                  <View style={[s.stepDot, smsStep >= step ? { backgroundColor: "#0ea5e9" } : { backgroundColor: colors.border }]}>
+                    {smsStep > step
+                      ? <Ionicons name="checkmark" size={12} color="#fff" />
+                      : <Text style={[s.stepNum, { color: smsStep >= step ? "#fff" : colors.mutedForeground }]}>{step}</Text>
+                    }
+                  </View>
+                  {step < 3 && <View style={[s.stepLine, { backgroundColor: smsStep > step ? "#0ea5e9" : colors.border }]} />}
+                </View>
+              ))}
+            </View>
+
+            {/* Step 1 — Personal info */}
+            {smsStep === 1 && (
+              <>
+                <Text style={[s.sectionHead, { color: colors.foreground }]}>Şahsy maglumat</Text>
+                <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Adyňyz we Familýaňyz</Text>
+                  <TextInput value={smsName} onChangeText={setSmsName}
+                    placeholder="Doly adyňyz we familýaňyz" placeholderTextColor={colors.mutedForeground}
+                    style={[s.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]}
+                  />
+                  <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 6 }} />
+                  <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Telefon nomeriňiz</Text>
+                  <TextInput value={smsPhone} onChangeText={setSmsPhone}
+                    placeholder="+993 XX XXXXXX" placeholderTextColor={colors.mutedForeground}
+                    keyboardType="phone-pad"
+                    style={[s.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]}
+                  />
+                </View>
+                <Pressable onPress={() => {
+                  if (!smsName.trim() || !smsPhone.trim()) { Alert.alert("Doldurylmadyk", "Ad we telefon nomeri girizmelisiniz!"); return; }
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setSmsStep(2);
+                }}
+                  style={[s.primaryBtn, { backgroundColor: "#0ea5e9" }]}>
+                  <Text style={s.primaryBtnText}>Indiki</Text>
+                  <Ionicons name="arrow-forward" size={18} color="#fff" />
+                </Pressable>
+              </>
+            )}
+
+            {/* Step 2 — Route */}
+            {smsStep === 2 && (
+              <>
+                <Text style={[s.sectionHead, { color: colors.foreground }]}>Ugur we sene</Text>
+                <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowRouteList(!showRouteList); }}
+                  style={[s.selectBtn, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  <Ionicons name="train-outline" size={20} color="#0ea5e9" />
+                  <Text style={[s.selectBtnText, { color: colors.foreground }]}>{selectedSmsRoute?.label}</Text>
+                  <Ionicons name={showRouteList ? "chevron-up" : "chevron-down"} size={18} color={colors.mutedForeground} />
+                </Pressable>
+                {showRouteList && (
+                  <View style={[s.routeList, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                    {ROUTES_SMS.map(r => (
+                      <Pressable key={r.id} onPress={() => { setSmsRoute(r.id); setShowRouteList(false); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+                        style={[s.routeItem, smsRoute === r.id && { backgroundColor: "#0ea5e9" + "15" }]}>
+                        <Text style={[s.routeLabel, { color: smsRoute === r.id ? "#0ea5e9" : colors.foreground }]}>{r.label}</Text>
+                        {smsRoute === r.id && <Ionicons name="checkmark" size={16} color="#0ea5e9" />}
+                      </Pressable>
+                    ))}
+                  </View>
+                )}
+                <Text style={[s.sectionHead, { color: colors.foreground, marginTop: 16 }]}>Otly görnüşi</Text>
+                {TRAIN_TYPES.map(t => (
+                  <Pressable key={t.id} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSmsTrainType(t.id); }}
+                    style={[s.trainCard, { backgroundColor: smsTrainType === t.id ? "#0ea5e9" + "12" : colors.card, borderColor: smsTrainType === t.id ? "#0ea5e9" : colors.border }]}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[s.trainLabel, { color: smsTrainType === t.id ? "#0ea5e9" : colors.foreground }]}>{t.label}</Text>
+                      <Text style={[s.trainDesc, { color: colors.mutedForeground }]}>{t.desc}</Text>
+                    </View>
+                    <View style={[s.radioOuter, { borderColor: smsTrainType === t.id ? "#0ea5e9" : colors.border }]}>
+                      {smsTrainType === t.id && <View style={[s.radioInner, { backgroundColor: "#0ea5e9" }]} />}
+                    </View>
+                  </Pressable>
+                ))}
+                <Text style={[s.sectionHead, { color: colors.foreground }]}>Gün we ýolagçy sany</Text>
+                <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Sargyt güni (MM.GG.ÝÝÝÝ)</Text>
+                  <TextInput value={smsDate} onChangeText={setSmsDate}
+                    placeholder="mysal: 20.06.2025" placeholderTextColor={colors.mutedForeground} keyboardType="numeric"
+                    style={[s.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]}
+                  />
+                  <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 6 }} />
+                  <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Ýolagçy sany</Text>
+                  <View style={s.counterRow}>
+                    <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSmsPassengers(p => String(Math.max(1, parseInt(p) - 1))); }}
+                      style={[s.counterBtn, { backgroundColor: "#0ea5e9" + "20", borderColor: colors.border }]}>
+                      <Ionicons name="remove" size={20} color="#0ea5e9" />
+                    </Pressable>
+                    <Text style={[s.counterNum, { color: colors.foreground }]}>{smsPassengers}</Text>
+                    <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSmsPassengers(p => String(Math.min(8, parseInt(p) + 1))); }}
+                      style={[s.counterBtn, { backgroundColor: "#0ea5e9" + "20", borderColor: colors.border }]}>
+                      <Ionicons name="add" size={20} color="#0ea5e9" />
+                    </Pressable>
+                  </View>
+                </View>
+                <View style={s.btnRow}>
+                  <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSmsStep(1); }}
+                    style={[s.backBtnRow, { borderColor: colors.border }]}>
+                    <Ionicons name="arrow-back" size={18} color={colors.foreground} />
+                    <Text style={[s.secondaryBtnText, { color: colors.foreground }]}>Yza</Text>
+                  </Pressable>
+                  <Pressable onPress={() => {
+                    if (!smsDate.trim()) { Alert.alert("Doldurylmadyk", "Sargyt günini giriziň!"); return; }
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setSmsStep(3);
+                  }}
+                    style={[s.primaryBtn, { backgroundColor: "#0ea5e9", flex: 1 }]}>
+                    <Text style={s.primaryBtnText}>Indiki</Text>
+                    <Ionicons name="arrow-forward" size={18} color="#fff" />
+                  </Pressable>
+                </View>
+              </>
+            )}
+
+            {/* Step 3 — Send SMS */}
+            {smsStep === 3 && (
+              <>
+                <Text style={[s.sectionHead, { color: colors.foreground }]}>Goşmaça bellik</Text>
+                <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  <TextInput value={smsNotes} onChangeText={setSmsNotes}
+                    placeholder="Goşmaça islegleriňiz bar bolsa ýazyň..."
+                    placeholderTextColor={colors.mutedForeground} multiline numberOfLines={3}
+                    style={[s.input, s.textarea, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]}
+                  />
+                </View>
+                <Text style={[s.sectionHead, { color: colors.foreground }]}>Sargyt jikme-jikleri</Text>
+                <View style={[s.confirmCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  {[
+                    { icon: "person-outline" as const, label: "Ad", value: smsName },
+                    { icon: "call-outline" as const, label: "Nomer", value: `${smsPhone} (TMCell)` },
+                    { icon: "train-outline" as const, label: "Ugur", value: selectedSmsRoute?.label ?? "" },
+                    { icon: "calendar-outline" as const, label: "Gün", value: smsDate },
+                    { icon: "flash-outline" as const, label: "Otly", value: TRAIN_TYPES.find(t => t.id === smsTrainType)?.label ?? "" },
+                    { icon: "people-outline" as const, label: "Ýolagçy", value: `${smsPassengers} adam` },
+                  ].map((row, i) => (
+                    <View key={i}>
+                      {i > 0 && <View style={{ height: 1, backgroundColor: colors.border }} />}
+                      <View style={s.summaryRow}>
+                        <View style={[s.summaryIcon, { backgroundColor: "#0ea5e9" + "15" }]}>
+                          <Ionicons name={row.icon} size={16} color="#0ea5e9" />
+                        </View>
+                        <Text style={[s.summaryLabel, { color: colors.mutedForeground }]}>{row.label}</Text>
+                        <Text style={[s.summaryValue, { color: colors.foreground }]} numberOfLines={1}>{row.value}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+                <Text style={[s.sectionHead, { color: colors.foreground }]}>SMS iberjek nomeri saýlaň</Text>
+                {SMS_NUMBERS.map((num, i) => (
+                  <Pressable key={i} onPress={() => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); sendSms(num); }}
+                    style={({ pressed }) => [s.smsBtn, { backgroundColor: "#0ea5e9", opacity: pressed ? 0.85 : 1 }]}>
+                    <View style={s.smsBtnIcon}>
+                      <Ionicons name="chatbubble-ellipses-outline" size={20} color="#0ea5e9" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={s.smsBtnNum}>{num}</Text>
+                      <Text style={s.smsBtnLabel}>SMS ibermek üçin basyň</Text>
+                    </View>
+                    <Ionicons name="send-outline" size={18} color="#fff" />
+                  </Pressable>
+                ))}
+                <View style={[s.noteBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  <Ionicons name="information-circle-outline" size={16} color={colors.mutedForeground} />
+                  <Text style={[s.noteText, { color: colors.mutedForeground }]}>
+                    SMS iberilenden soň operator sizi 15-30 minut içinde yzyna jaň eder we sargydyňyzy tassyklar.
+                  </Text>
+                </View>
+                <View style={s.btnRow}>
+                  <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSmsStep(2); }}
+                    style={[s.backBtnRow, { borderColor: colors.border }]}>
+                    <Ionicons name="arrow-back" size={18} color={colors.foreground} />
+                    <Text style={[s.secondaryBtnText, { color: colors.foreground }]}>Yza</Text>
+                  </Pressable>
+                  <Pressable onPress={() => {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    setSmsStep(1); setSmsName(""); setSmsPhone(""); setSmsDate(""); setSmsNotes(""); setSmsPassengers("1");
+                    setMain("choose");
+                    Alert.alert("Üstünlikli!", "Sargydyňyz iberildi! Operator siziň bilen habarlaşar.");
+                  }}
+                    style={[s.primaryBtn, { backgroundColor: "#10b981", flex: 1 }]}>
+                    <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />
+                    <Text style={s.primaryBtnText}>Tamamla</Text>
+                  </Pressable>
+                </View>
+              </>
+            )}
+          </View>
+        )}
+
       </ScrollView>
     </View>
   );
@@ -427,34 +845,87 @@ export default function DemiryolScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingHorizontal: 16, paddingBottom: 16 },
+  header: { paddingHorizontal: 16, paddingBottom: 14 },
   headerTitle: { color: "#fff", fontSize: 18, fontWeight: "700" },
-  lookupBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20 },
-  lookupInput: { flex: 1, backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, color: "#fff", fontSize: 15, fontWeight: "700", letterSpacing: 2 },
-  lookupSearchBtn: { width: 42, height: 42, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center" },
-  infoBox: { flexDirection: "row", gap: 12, padding: 14, borderRadius: 14, borderWidth: 1, marginBottom: 12, alignItems: "flex-start" },
-  infoTitle: { fontWeight: "700", fontSize: 14, marginBottom: 4 },
-  infoText: { fontSize: 13, lineHeight: 20 },
-  warnBox: { flexDirection: "row", gap: 10, padding: 12, borderRadius: 12, borderWidth: 1, borderLeftWidth: 4, marginBottom: 12, alignItems: "flex-start" },
-  sectionHead: { fontSize: 16, fontWeight: "700", marginTop: 16, marginBottom: 12 },
+  backBtn: { width: 34, height: 34, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center" },
+
+  // Choose screen
+  chooseTitle: { fontSize: 20, fontWeight: "800", marginBottom: 6, marginTop: 4 },
+  chooseSub: { fontSize: 13, lineHeight: 18, marginBottom: 20 },
+  serviceCard: {
+    borderRadius: 20, marginBottom: 14, overflow: "hidden",
+    flexDirection: "row",
+  },
+  cardStripe: { width: 5 },
+  cardIconBg: { width: 52, height: 52, borderRadius: 16, alignItems: "center", justifyContent: "center" },
+  cardTitle: { fontSize: 16, fontWeight: "800", marginBottom: 5 },
+  cardBadge: { alignSelf: "flex-start", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  cardBadgeText: { fontSize: 10, fontWeight: "700" },
+  cardDesc: { fontSize: 13, lineHeight: 18, marginBottom: 12 },
+  cardFeatures: { borderTopWidth: 1, paddingTop: 10, gap: 5, paddingBottom: 14 },
+  cardFeatureItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+  cardFeatureText: { fontSize: 12 },
+
+  // Agent hero
+  agentHero: { flexDirection: "row", gap: 12, padding: 16, borderRadius: 16, borderWidth: 1, marginBottom: 16, alignItems: "flex-start" },
+  agentHeroTitle: { fontSize: 15, fontWeight: "800", marginBottom: 4 },
+  agentHeroDesc: { fontSize: 13, lineHeight: 18 },
+
+  // SMS steps
+  stepRow: { flexDirection: "row", alignItems: "center", marginBottom: 20 },
+  stepWrap: { flexDirection: "row", alignItems: "center" },
+  stepDot: { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
+  stepNum: { fontSize: 13, fontWeight: "800" },
+  stepLine: { width: 44, height: 2, marginHorizontal: 4 },
+
+  // Shared
+  sectionHead: { fontSize: 15, fontWeight: "800", marginTop: 18, marginBottom: 12 },
   fieldLabel: { fontSize: 12, fontWeight: "600", marginBottom: 6 },
-  input: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15 },
-  textarea: { height: 100, textAlignVertical: "top" },
-  checkRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 12, borderWidth: 1, marginBottom: 8 },
+  input: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 11, fontSize: 14 },
+  textarea: { height: 80, textAlignVertical: "top" },
+  infoBox: { flexDirection: "row", gap: 12, padding: 14, borderRadius: 14, borderWidth: 1, marginBottom: 12, alignItems: "flex-start" },
+  warnBox: { flexDirection: "row", gap: 10, padding: 12, borderRadius: 12, borderWidth: 1, borderLeftWidth: 4, marginBottom: 12, alignItems: "flex-start" },
+  priceBadge: { flexDirection: "row", alignItems: "center", gap: 10, padding: 14, borderRadius: 12, borderWidth: 1, marginTop: 16, marginBottom: 4 },
+  priceText: { fontWeight: "700", fontSize: 16 },
+  proofCard: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: 14, borderWidth: 1.5, marginBottom: 10 },
+  proofLabel: { fontSize: 14, fontWeight: "600" },
+  checkRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 14, borderWidth: 1, marginBottom: 8 },
   checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, alignItems: "center", justifyContent: "center" },
-  priceBadge: { flexDirection: "row", alignItems: "center", gap: 10, padding: 16, borderRadius: 14, borderWidth: 1, marginTop: 16 },
-  priceText: { fontSize: 20, fontWeight: "800" },
-  proofCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 12, borderWidth: 2, marginBottom: 10 },
-  proofLabel: { fontSize: 15, fontWeight: "600" },
-  confirmCard: { borderRadius: 14, borderWidth: 1, overflow: "hidden", marginBottom: 8 },
-  confirmRow: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1 },
-  confirmKey: { fontSize: 13 },
-  confirmVal: { fontSize: 13, fontWeight: "600", maxWidth: "55%", textAlign: "right" },
-  primaryBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 14, paddingVertical: 16, marginTop: 16 },
-  primaryBtnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
-  secondaryBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 14, marginTop: 8 },
-  secondaryBtnText: { fontSize: 15, fontWeight: "600" },
-  successCard: { borderRadius: 20, borderWidth: 1, padding: 28, alignItems: "center", gap: 12, marginTop: 20 },
-  successTitle: { fontSize: 24, fontWeight: "800" },
-  successText: { fontSize: 14, lineHeight: 22, textAlign: "center" },
+  card: { borderRadius: 16, borderWidth: 1, padding: 16, gap: 10 },
+  selectBtn: { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 14, borderWidth: 1, padding: 14 },
+  selectBtnText: { flex: 1, fontSize: 14, fontWeight: "600" },
+  routeList: { borderRadius: 14, borderWidth: 1, marginTop: 4, overflow: "hidden" },
+  routeItem: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 13 },
+  routeLabel: { fontSize: 14, fontWeight: "600" },
+  trainCard: { flexDirection: "row", alignItems: "center", borderRadius: 14, borderWidth: 2, padding: 14, marginBottom: 8 },
+  trainLabel: { fontSize: 14, fontWeight: "700" },
+  trainDesc: { fontSize: 12, marginTop: 2 },
+  radioOuter: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, alignItems: "center", justifyContent: "center" },
+  radioInner: { width: 10, height: 10, borderRadius: 5 },
+  counterRow: { flexDirection: "row", alignItems: "center", gap: 16 },
+  counterBtn: { width: 42, height: 42, borderRadius: 12, borderWidth: 1, alignItems: "center", justifyContent: "center" },
+  counterNum: { fontSize: 22, fontWeight: "800", width: 32, textAlign: "center" },
+  confirmCard: { borderRadius: 16, borderWidth: 1, overflow: "hidden", marginBottom: 16 },
+  confirmRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1 },
+  confirmKey: { fontSize: 12, width: 90 },
+  confirmVal: { fontSize: 13, fontWeight: "700", flex: 1, textAlign: "right" },
+  summaryRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, paddingHorizontal: 14 },
+  summaryIcon: { width: 32, height: 32, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  summaryLabel: { width: 70, fontSize: 12 },
+  summaryValue: { flex: 1, fontSize: 13, fontWeight: "700", textAlign: "right" },
+  smsBtn: { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 16, padding: 16, marginBottom: 10 },
+  smsBtnIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" },
+  smsBtnNum: { color: "#fff", fontSize: 15, fontWeight: "800" },
+  smsBtnLabel: { color: "rgba(255,255,255,0.8)", fontSize: 11, marginTop: 2 },
+  noteBox: { flexDirection: "row", alignItems: "flex-start", gap: 10, borderRadius: 12, borderWidth: 1, padding: 12, marginTop: 4 },
+  noteText: { flex: 1, fontSize: 12, lineHeight: 18 },
+  btnRow: { flexDirection: "row", gap: 10, marginTop: 16 },
+  primaryBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 16, paddingVertical: 16, marginTop: 14 },
+  primaryBtnText: { color: "#fff", fontSize: 15, fontWeight: "800" },
+  secondaryBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 12, marginTop: 4 },
+  secondaryBtnText: { fontSize: 14, fontWeight: "600" },
+  backBtnRow: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingVertical: 16, paddingHorizontal: 20, borderWidth: 1 },
+  successCard: { borderRadius: 20, borderWidth: 1.5, padding: 28, alignItems: "center", gap: 12, marginTop: 16 },
+  successTitle: { fontSize: 22, fontWeight: "800" },
+  successText: { fontSize: 14, lineHeight: 20, textAlign: "center" },
 });
