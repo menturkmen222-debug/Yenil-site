@@ -48,7 +48,7 @@ export default function HelpScreen() {
         <Text style={styles.headerTitle}>Kömek / FAQ</Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 34 : 100 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 110 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Köp soralýan soraglar</Text>
 
         {faqs.map((f, i) => (

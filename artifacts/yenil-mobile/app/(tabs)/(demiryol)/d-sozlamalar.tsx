@@ -31,7 +31,7 @@ export default function DemiryolSozlamalarScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 34 : 120 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 120 }}
         showsVerticalScrollIndicator={false}
       >
         <Text style={[styles.groupTitle, { color: colors.mutedForeground }]}>HABARNAMALAR</Text>

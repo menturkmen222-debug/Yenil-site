@@ -238,7 +238,7 @@ export default function KonumScreen() {
 
       {tab === "create" ? (
         <ScrollView
-          contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 32 : 110 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 110 }}
           showsVerticalScrollIndicator={false}
         >
           <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -336,7 +336,7 @@ export default function KonumScreen() {
         </ScrollView>
       ) : (
         <ScrollView
-          contentContainerStyle={{ padding: 20, paddingBottom: isWeb ? 32 : 110 }}
+          contentContainerStyle={{ padding: 20, paddingBottom: isWeb ? 110 : 110 }}
           showsVerticalScrollIndicator={false}
         >
           {liveStatus === "idle" || liveStatus === "requesting" ? (

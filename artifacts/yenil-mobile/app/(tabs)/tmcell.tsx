@@ -612,7 +612,7 @@ export default function TmcellScreen() {
         </View>
       </ScrollView>
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 34 : 100 }}
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 110 }}
         keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         {tab === "bp-buy" && <BonusBuySection colors={colors} />}
         {tab === "bp-sell" && <BonusSellSection colors={colors} />}

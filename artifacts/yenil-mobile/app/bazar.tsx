@@ -361,7 +361,7 @@ export default function BazarScreen() {
         </View>
       )}
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: isWeb ? 40 : 100 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: isWeb ? 110 : 110 }}>
         {/* CATEGORIES */}
         <ScrollView
           horizontal

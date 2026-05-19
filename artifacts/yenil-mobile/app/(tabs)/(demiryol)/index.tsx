@@ -211,7 +211,7 @@ export default function DemiryolScreen() {
         ) : null}
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 34 : 120 }}
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 120 }}
         keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
         {section === "info" && (

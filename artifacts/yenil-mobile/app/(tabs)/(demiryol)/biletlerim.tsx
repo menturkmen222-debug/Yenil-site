@@ -106,7 +106,7 @@ export default function BiletlerimScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 34 : 120 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 120 }}
         showsVerticalScrollIndicator={false}
       >
         {activeTab === "saved" && (

@@ -190,7 +190,7 @@ export default function EkitapScreen() {
       </ScrollView>
 
       <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 34 : 100 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 110 }}
         showsVerticalScrollIndicator={false}
       >
         {filtered.length === 0 && (

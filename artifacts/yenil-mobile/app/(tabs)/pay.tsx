@@ -279,7 +279,7 @@ export default function PayScreen() {
       )}
 
       {(mode === "buy" || mode === "sell") && (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 34 : 100 }}
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 110 }}
           keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <Pressable onPress={() => setMode("main")} style={s.backRow}>
             <Feather name="arrow-left" size={16} color={colors.primary} />

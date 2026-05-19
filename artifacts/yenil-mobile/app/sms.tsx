@@ -26,7 +26,7 @@ export default function SmsScreen() {
         <Text style={styles.headerTitle}>SMS arkaly sargyt</Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 34 : 100 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 110 }} showsVerticalScrollIndicator={false}>
         <View style={[styles.heroBanner, { backgroundColor: colors.primary + "12", borderColor: colors.primary }]}>
           <Ionicons name="chatbubble-ellipses-outline" size={32} color={colors.primary} />
           <View style={{ flex: 1 }}>

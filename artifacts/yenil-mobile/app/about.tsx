@@ -30,7 +30,7 @@ export default function AboutScreen() {
         <Text style={styles.headerTitle}>Ýeňil hakynda</Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 34 : 100 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 110 }} showsVerticalScrollIndicator={false}>
         {/* About card */}
         <View style={[styles.aboutCard, { backgroundColor: colors.primary }]}>
           <Text style={styles.aboutTitle}>Ýeňil</Text>

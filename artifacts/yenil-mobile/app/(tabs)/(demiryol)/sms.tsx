@@ -91,7 +91,7 @@ export default function SmsScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 40 : 120 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 120 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >

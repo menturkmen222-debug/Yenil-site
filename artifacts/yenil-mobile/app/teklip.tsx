@@ -69,7 +69,7 @@ export default function TeklipScreen() {
           </Pressable>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 34 : 100 }}
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 110 }}
           keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={[styles.heroBanner, { backgroundColor: colors.primary + "12", borderColor: colors.primary }]}>
             <Ionicons name="bulb-outline" size={32} color={colors.primary} />

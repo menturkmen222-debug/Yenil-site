@@ -246,7 +246,7 @@ export default function StatistikaScreen() {
         </View>
       ) : (
         <ScrollView
-          contentContainerStyle={{ padding: 14, paddingBottom: isWeb ? 34 : 100, gap: 20 }}
+          contentContainerStyle={{ padding: 14, paddingBottom: isWeb ? 110 : 110, gap: 20 }}
           showsVerticalScrollIndicator={false}
         >
           {grouped.map(group => (
