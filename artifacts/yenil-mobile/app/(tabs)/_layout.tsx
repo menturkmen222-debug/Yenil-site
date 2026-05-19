@@ -65,14 +65,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="pay"
+        name="statistika"
         options={{
-          title: "Töleg",
+          title: "Statistika",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="arrow.left.arrow.right" tintColor={color} size={24} />
+              <SymbolView name="chart.bar" tintColor={color} size={24} />
             ) : (
-              <Ionicons name="swap-horizontal-outline" size={22} color={color} />
+              <Ionicons name="bar-chart-outline" size={22} color={color} />
             ),
         }}
       />
@@ -99,6 +99,10 @@ export default function TabLayout() {
               <Feather name="menu" size={22} color={color} />
             ),
         }}
+      />
+      <Tabs.Screen
+        name="pay"
+        options={{ href: null }}
       />
     </Tabs>
   );

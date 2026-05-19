@@ -11,6 +11,7 @@ import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { saveOrder } from "@/lib/firebase";
 import { uploadImage } from "@/lib/upload";
+import { addToHistory } from "@/lib/orderHistory";
 
 const PAYMENT_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
 const BP_AMOUNTS = [50, 100, 200, 500];
@@ -39,6 +40,14 @@ function BonusBuySection({ colors }: { colors: ReturnType<typeof useColors> }) {
     setLoading(true);
     try {
       await saveOrder("bonus-orders", { deviceId, amount: selected, userPhone: phone, status: "pending" });
+      await addToHistory({
+        type: "bonus-buy",
+        title: "BP Satyn almak",
+        details: `${selected} BP · ${phone}`,
+        amount: selected,
+        amountLabel: `${selected} BP`,
+        phone,
+      });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setDone(true);
     } catch { Alert.alert("Ýalňyşlyk", "Bilinmeýän ýalňyşlyk"); }
@@ -128,6 +137,14 @@ function BonusSellSection({ colors }: { colors: ReturnType<typeof useColors> }) 
     setLoading(true);
     try {
       await saveOrder("bonus-sell-orders", { deviceId, amount: amt, userPhone: phone, status: "pending" });
+      await addToHistory({
+        type: "bonus-sell",
+        title: "BP Satmak",
+        details: `${amt} BP · ${phone}`,
+        amount: amt,
+        amountLabel: `${amt} BP`,
+        phone,
+      });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setDone(true);
     } catch { Alert.alert("Ýalňyşlyk", "Bilinmeýän ýalňyşlyk"); }
@@ -220,6 +237,17 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
         type: mode === "buy" ? "pay-buy" : "pay-sell", crypto, currency,
         amount: parseFloat(amount), totalPrice: calcTotal(), phone, walletId,
         secretCode, proofType, smsText, screenshotUrl,
+      });
+      await addToHistory({
+        type: mode === "buy" ? "currency-buy" : "currency-sell",
+        title: mode === "buy" ? "Walýuta almak" : "Walýuta satmak",
+        details: `${amount} ${currency?.toUpperCase()} · ${crypto === "payeer" ? "Payeer" : crypto === "perfect" ? "Perfect Money" : "WebMoney"} · ${phone}`,
+        amount: parseFloat(amount) || 0,
+        amountLabel: `${calcTotal().toFixed(2)} TMT`,
+        phone,
+        walletId,
+        crypto,
+        currency,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setDone(true);
@@ -386,6 +414,16 @@ function SimSection({ colors }: { colors: ReturnType<typeof useColors> }) {
         if (!ok) { Alert.alert("Ýalňyşlyk", "Bonus pul aýyrmak başartmady!"); setLoading(false); return; }
       }
       await saveOrder("sim-topup-orders", { operator, simPhone, amount: selected, tmtAmount, payMethod, payPhone: payMethod === "terminal" ? payPhone : undefined, deviceId, status: "pending" });
+      await addToHistory({
+        type: "sim",
+        title: "SIM Kart töleg",
+        details: `${UZ_OPERATORS.find(o => o.id === operator)?.name} · ${simPhone} · ${selected} UZS`,
+        amount: selected,
+        amountLabel: `${tmtAmount} TMT`,
+        phone: payMethod === "terminal" ? payPhone : undefined,
+        simPhone,
+        operator,
+      });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setDone(true);
     } catch { Alert.alert("Ýalňyşlyk", "Bilinmeýän ýalňyşlyk"); }
