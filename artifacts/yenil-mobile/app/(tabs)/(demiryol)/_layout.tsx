@@ -1,8 +1,8 @@
 import { BlurView } from "expo-blur";
-import { Tabs, router } from "expo-router";
-import { Ionicons, Feather } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Platform, StyleSheet, View, Pressable, Text, useColorScheme } from "react-native";
+import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 import { useColors } from "@/hooks/useColors";
 
 export default function DemiryolLayout() {
@@ -62,8 +62,7 @@ export default function DemiryolLayout() {
       <Tabs.Screen
         name="sms"
         options={{
-          title: "SMS sargyt",
-          tabBarIcon: ({ color }) => <Ionicons name="chatbubble-ellipses-outline" size={22} color={color} />,
+          href: null,
         }}
       />
     </Tabs>

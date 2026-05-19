@@ -69,14 +69,9 @@ function AgentChatModal({ visible, onClose }: { visible: boolean; onClose: () =>
               <Text style={chatStyles.agentStatus}>Synag görnüşi • Onlaýn</Text>
             </View>
           </View>
-          <View style={{ flexDirection: "row", gap: 6 }}>
-            <Pressable style={chatStyles.headerBtn}>
-              <Ionicons name="settings-outline" size={20} color="rgba(255,255,255,0.85)" />
-            </Pressable>
-            <Pressable style={chatStyles.headerBtn} onPress={onClose}>
-              <Ionicons name="close" size={20} color="rgba(255,255,255,0.85)" />
-            </Pressable>
-          </View>
+          <Pressable style={chatStyles.headerBtn} onPress={onClose}>
+            <Ionicons name="close" size={20} color="rgba(255,255,255,0.85)" />
+          </Pressable>
         </View>
 
         <FlatList
@@ -124,21 +119,6 @@ function AgentChatModal({ visible, onClose }: { visible: boolean; onClose: () =>
   );
 }
 
-// Futuristic corner bracket decoration
-function CornerBrackets({ color }: { color: string }) {
-  const s = 14;
-  const t = 2;
-  const br = { borderColor: color };
-  return (
-    <>
-      <View style={{ position: "absolute", top: 8, left: 8, width: s, height: s, borderTopWidth: t, borderLeftWidth: t, ...br }} />
-      <View style={{ position: "absolute", top: 8, right: 8, width: s, height: s, borderTopWidth: t, borderRightWidth: t, ...br }} />
-      <View style={{ position: "absolute", bottom: 8, left: 8, width: s, height: s, borderBottomWidth: t, borderLeftWidth: t, ...br }} />
-      <View style={{ position: "absolute", bottom: 8, right: 8, width: s, height: s, borderBottomWidth: t, borderRightWidth: t, ...br }} />
-    </>
-  );
-}
-
 export default function HomeScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -151,11 +131,7 @@ export default function HomeScreen() {
     router.push(path as Href);
   };
 
-  // Futuristic card always uses dark palette
-  const CARD_BG = "#0b1a12";
-  const CARD_BORDER = colors.primary + "70";
-  const GRID = colors.primary + "10";
-
+  const topPad = (isWeb ? 0 : insets.top) + 20;
 
   return (
     <>
@@ -165,164 +141,86 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* HERO */}
-        <View style={[styles.hero, { backgroundColor: colors.primary, paddingTop: (isWeb ? 0 : insets.top) + 24 }]}>
-          <Text style={styles.heroTitle}>Ýeňil</Text>
-          <Text style={styles.heroSub}>Türkmenistanda iň ynamly onlayn hyzmatlar</Text>
-          <View style={styles.balanceBadge}>
-            <Ionicons name="wallet-outline" size={16} color="#fff" />
-            <Text style={styles.balanceText}>{balance.toFixed(2)} BP</Text>
-          </View>
-        </View>
+        {/* ── HERO + AI AGENT merged panel ── */}
+        <View style={[styles.hero, { backgroundColor: colors.primary, paddingTop: topPad }]}>
 
-        {/* ── FUTURISTIC AI AGENT CARD ── */}
-        <View style={{ marginHorizontal: 16, marginTop: -20, zIndex: 10 }}>
+          {/* Top row: Logo + Balance */}
+          <View style={styles.heroTopRow}>
+            <View>
+              <Text style={styles.heroTitle}>Ýeňil</Text>
+              <Text style={styles.heroSub}>Türkmenistanda iň ynamly onlayn hyzmatlar</Text>
+            </View>
+            <Pressable
+              style={styles.balancePill}
+              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+            >
+              <Ionicons name="wallet-outline" size={14} color="#fff" />
+              <Text style={styles.balanceText}>{balance.toFixed(2)} BP</Text>
+            </Pressable>
+          </View>
+
+          {/* AI Agent Card — inside hero */}
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               setChatOpen(true);
             }}
-            style={({ pressed }) => [{
-              backgroundColor: CARD_BG,
-              borderRadius: 20,
-              borderWidth: 1.5,
-              borderColor: CARD_BORDER,
-              overflow: "hidden",
-              opacity: pressed ? 0.92 : 1,
-              shadowColor: colors.primary,
-              shadowOpacity: 0.35,
-              shadowRadius: 18,
-              shadowOffset: { width: 0, height: 4 },
-              elevation: 10,
-            }]}
+            style={({ pressed }) => [styles.agentCard, { opacity: pressed ? 0.92 : 1 }]}
           >
-            {/* Corner brackets */}
-            <CornerBrackets color={colors.primary + "90"} />
-
-            {/* Subtle scan line grid overlay */}
-            <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-              pointerEvents="none">
-              {[...Array(6)].map((_, i) => (
-                <View key={i} style={{
-                  position: "absolute", left: 0, right: 0,
-                  top: i * 34, height: 1, backgroundColor: GRID,
-                }} />
-              ))}
-            </View>
-
-            {/* TOP ROW */}
-            <View style={{ flexDirection: "row", alignItems: "center", padding: 14, gap: 12 }}>
+            {/* Agent header row */}
+            <View style={styles.agentTopRow}>
               {/* Avatar */}
-              <View style={{ position: "relative", width: 46, height: 46 }}>
-                <View style={{
-                  position: "absolute", top: -4, bottom: -4, left: -4, right: -4,
-                  borderRadius: 9999, borderWidth: 1,
-                  borderColor: colors.primary + "28",
-                }} />
-                <View style={{
-                  width: 46, height: 46, borderRadius: 15,
-                  backgroundColor: colors.primary + "25",
-                  borderWidth: 1.5, borderColor: colors.primary + "55",
-                  alignItems: "center", justifyContent: "center",
-                }}>
-                  <MaterialCommunityIcons name="robot-outline" size={24} color={colors.primary} />
+              <View style={styles.agentAvatarOuter}>
+                <View style={styles.agentAvatar}>
+                  <MaterialCommunityIcons name="robot-outline" size={22} color={colors.primary} />
                 </View>
-                <View style={{
-                  position: "absolute", bottom: 1, right: 1,
-                  width: 10, height: 10, borderRadius: 5,
-                  backgroundColor: "#4ade80", borderWidth: 2, borderColor: CARD_BG,
-                }} />
+                <View style={styles.agentOnlineDot} />
               </View>
 
               {/* Name + badge */}
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
-                  <Text style={{ color: "#fff", fontSize: 15, fontWeight: "800", letterSpacing: 0.2 }}>
-                    Ýeňil AI Agent
-                  </Text>
-                  <View style={{
-                    backgroundColor: "#f59e0b1a", borderRadius: 5,
-                    paddingHorizontal: 6, paddingVertical: 2,
-                    borderWidth: 1, borderColor: "#f59e0b50",
-                  }}>
-                    <Text style={{ color: "#fbbf24", fontSize: 8, fontWeight: "800", letterSpacing: 1 }}>SYNAG</Text>
+                  <Text style={styles.agentName}>Ýeňil AI Agent</Text>
+                  <View style={styles.synagBadge}>
+                    <Text style={styles.synagText}>SYNAG</Text>
                   </View>
                 </View>
-                <Text style={{ color: colors.primary + "90", fontSize: 10, fontWeight: "600", marginTop: 2 }}>
-                  Intellektual AI kömekçi
-                </Text>
+                <Text style={styles.agentSub}>Intellektual AI kömekçi</Text>
               </View>
 
-              {/* Online indicator */}
-              <View style={{ alignItems: "center", gap: 3 }}>
-                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#4ade80" }} />
-                <Text style={{ color: "#4ade80", fontSize: 8, fontWeight: "700" }}>ONLAÝN</Text>
+              {/* Status */}
+              <View style={styles.onlineRow}>
+                <View style={styles.onlinePulse} />
+                <Text style={styles.onlineText}>Onlaýn</Text>
               </View>
             </View>
 
-            {/* Thin divider */}
-            <View style={{ height: 1, backgroundColor: colors.primary + "20", marginHorizontal: 14 }} />
+            {/* Divider */}
+            <View style={styles.agentDivider} />
 
             {/* Action row */}
-            <View style={{
-              flexDirection: "row", gap: 8,
-              paddingHorizontal: 14, paddingBottom: 14, paddingTop: 12,
-            }}>
-              {/* Main chat button */}
+            <View style={styles.agentActions}>
               <Pressable
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   setChatOpen(true);
                 }}
-                style={({ pressed }) => ({
-                  flex: 1, borderRadius: 13,
-                  backgroundColor: colors.primary,
-                  paddingVertical: 12, paddingHorizontal: 14,
-                  flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-                  opacity: pressed ? 0.85 : 1,
-                  shadowColor: colors.primary,
-                  shadowOpacity: 0.5,
-                  shadowRadius: 8,
-                  shadowOffset: { width: 0, height: 2 },
-                })}
+                style={styles.chatBtn}
               >
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <View style={{
-                    width: 22, height: 22, borderRadius: 11,
-                    backgroundColor: "rgba(255,255,255,0.25)",
-                    alignItems: "center", justifyContent: "center",
-                  }}>
-                    <Ionicons name="add" size={15} color="#fff" />
-                  </View>
-                  <Text style={{ color: "#fff", fontWeight: "700", fontSize: 14 }}>Täze söhbet</Text>
-                </View>
-                <MaterialCommunityIcons name="robot-outline" size={17} color="rgba(255,255,255,0.65)" />
+                <Ionicons name="add-circle-outline" size={17} color="#fff" />
+                <Text style={styles.chatBtnText}>Täze söhbet</Text>
               </Pressable>
-
-              {/* History */}
               <Pressable
                 onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-                style={{
-                  width: 44, height: 44, borderRadius: 13,
-                  backgroundColor: colors.primary + "18",
-                  borderWidth: 1, borderColor: colors.primary + "35",
-                  alignItems: "center", justifyContent: "center",
-                }}
+                style={styles.agentIconBtn}
               >
-                <Ionicons name="time-outline" size={18} color={colors.primary} />
+                <Ionicons name="time-outline" size={18} color="rgba(255,255,255,0.7)" />
               </Pressable>
-
-              {/* Mic */}
               <Pressable
                 onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-                style={{
-                  width: 44, height: 44, borderRadius: 13,
-                  backgroundColor: colors.primary + "18",
-                  borderWidth: 1, borderColor: colors.primary + "35",
-                  alignItems: "center", justifyContent: "center",
-                }}
+                style={styles.agentIconBtn}
               >
-                <Ionicons name="mic-outline" size={18} color={colors.primary} />
+                <Ionicons name="mic-outline" size={18} color="rgba(255,255,255,0.7)" />
               </Pressable>
             </View>
           </Pressable>
@@ -402,11 +300,6 @@ const chatStyles = StyleSheet.create({
   },
   agentInfo: { flexDirection: "row", alignItems: "center", gap: 12 },
   agentAvatarWrap: { position: "relative" },
-  agentAvatar: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.25)",
-    alignItems: "center", justifyContent: "center",
-  },
   onlineDot: {
     position: "absolute", bottom: 0, right: 0,
     width: 10, height: 10, borderRadius: 5,
@@ -440,25 +333,89 @@ const chatStyles = StyleSheet.create({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  hero: {
-    paddingHorizontal: 20, paddingBottom: 38,
-    borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
-  },
-  heroTitle: { fontSize: 36, fontWeight: "800", color: "#fff", marginBottom: 6 },
-  heroSub: { fontSize: 14, color: "rgba(255,255,255,0.85)", marginBottom: 14 },
-  balanceBadge: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    backgroundColor: "rgba(255,255,255,0.2)", paddingHorizontal: 14,
-    paddingVertical: 8, borderRadius: 50, alignSelf: "flex-start",
-  },
-  balanceText: { color: "#fff", fontWeight: "700", fontSize: 15 },
 
-  sectionTitle: { fontSize: 17, fontWeight: "700", marginLeft: 16, marginTop: 20, marginBottom: 12 },
+  // Hero
+  hero: {
+    paddingHorizontal: 18,
+    paddingBottom: 24,
+  },
+  heroTopRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  heroTitle: { fontSize: 34, fontWeight: "800", color: "#fff", letterSpacing: -0.5 },
+  heroSub: { fontSize: 13, color: "rgba(255,255,255,0.75)", marginTop: 3 },
+  balancePill: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    paddingHorizontal: 12, paddingVertical: 7,
+    borderRadius: 50,
+    marginTop: 4,
+  },
+  balanceText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+
+  // AI Agent Card (inside hero)
+  agentCard: {
+    backgroundColor: "rgba(0,0,0,0.22)",
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+    overflow: "hidden",
+  },
+  agentTopRow: {
+    flexDirection: "row", alignItems: "center",
+    gap: 12, padding: 14,
+  },
+  agentAvatarOuter: { position: "relative" },
+  agentAvatar: {
+    width: 44, height: 44, borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    alignItems: "center", justifyContent: "center",
+  },
+  agentOnlineDot: {
+    position: "absolute", bottom: 1, right: 1,
+    width: 11, height: 11, borderRadius: 6,
+    backgroundColor: "#4ade80", borderWidth: 2, borderColor: "rgba(0,0,0,0.3)",
+  },
+  agentName: { color: "#fff", fontSize: 15, fontWeight: "800" },
+  agentSub: { color: "rgba(255,255,255,0.65)", fontSize: 11, marginTop: 2 },
+  synagBadge: {
+    backgroundColor: "rgba(251,191,36,0.2)", borderRadius: 5,
+    paddingHorizontal: 6, paddingVertical: 2,
+    borderWidth: 1, borderColor: "rgba(251,191,36,0.4)",
+  },
+  synagText: { color: "#fbbf24", fontSize: 8, fontWeight: "800", letterSpacing: 0.8 },
+  onlineRow: { alignItems: "center", gap: 3 },
+  onlinePulse: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#4ade80" },
+  onlineText: { color: "#4ade80", fontSize: 9, fontWeight: "700" },
+  agentDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.1)", marginHorizontal: 14 },
+  agentActions: {
+    flexDirection: "row", gap: 8,
+    paddingHorizontal: 14, paddingBottom: 14, paddingTop: 12,
+  },
+  chatBtn: {
+    flex: 1, flexDirection: "row", alignItems: "center", gap: 8,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderRadius: 12, paddingVertical: 11, paddingHorizontal: 14,
+  },
+  chatBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+  agentIconBtn: {
+    width: 42, height: 42, borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    alignItems: "center", justifyContent: "center",
+  },
+
+  // Services
+  sectionTitle: { fontSize: 17, fontWeight: "700", marginLeft: 16, marginTop: 22, marginBottom: 12 },
   servicesGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12, paddingHorizontal: 16, marginBottom: 16 },
   serviceCard: { width: "47%", borderRadius: 16, padding: 16, borderWidth: 1, gap: 8 },
   serviceIconBg: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   serviceTitle: { fontSize: 14, fontWeight: "700" },
   serviceDesc: { fontSize: 12 },
+
+  // Banners
   banner: {
     marginHorizontal: 16, marginBottom: 12, borderRadius: 16, padding: 16,
     flexDirection: "row", alignItems: "center", gap: 14,

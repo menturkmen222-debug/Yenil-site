@@ -238,7 +238,14 @@ export default function DemiryolScreen() {
       {/* ── HEADER ── */}
       <View style={[s.header, { paddingTop: topPad, backgroundColor: colors.primary }]}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          {main !== "choose" && (
+          {main === "choose" ? (
+            <Pressable onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.back();
+            }} style={s.backBtn}>
+              <Ionicons name="arrow-back" size={20} color="#fff" />
+            </Pressable>
+          ) : (
             <Pressable onPress={() => {
               goBack("choose");
               if (main === "direct") setDirectStep("form");
@@ -264,11 +271,10 @@ export default function DemiryolScreen() {
       >
 
         {/* ══════════════════════════════════════════
-            CHOOSE SCREEN — 3 service cards
+            CHOOSE SCREEN — 3 iOS-style service cards
         ══════════════════════════════════════════ */}
         {main === "choose" && (
           <View>
-            {/* Subtitle */}
             <Text style={[s.chooseTitle, { color: colors.foreground }]}>Hyzmat saýlaň</Text>
             <Text style={[s.chooseSub, { color: colors.mutedForeground }]}>
               Size laýyk görnüşde bilet alyberiş hyzmatyny saýlaň
@@ -277,112 +283,194 @@ export default function DemiryolScreen() {
             {/* Card 1 — Direct */}
             <Pressable
               onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setMain("direct"); }}
-              style={({ pressed }) => [s.serviceCard, {
-                backgroundColor: colors.card, borderColor: colors.primary + "50",
-                borderWidth: 1.5, opacity: pressed ? 0.9 : 1,
-                shadowColor: colors.primary, shadowOpacity: 0.12, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, elevation: 4,
+              style={({ pressed }) => [{
+                backgroundColor: colors.card,
+                borderRadius: 20,
+                marginBottom: 12,
+                overflow: "hidden" as const,
+                opacity: pressed ? 0.92 : 1,
+                shadowColor: "#000",
+                shadowOpacity: 0.07,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 4 },
+                elevation: 3,
+                borderWidth: 1,
+                borderColor: colors.border,
               }]}
             >
-              {/* Accent stripe */}
-              <View style={[s.cardStripe, { backgroundColor: colors.primary }]} />
-              <View style={{ flex: 1, paddingLeft: 16 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10 }}>
-                  <View style={[s.cardIconBg, { backgroundColor: colors.primary + "18" }]}>
-                    <Ionicons name="flash-outline" size={26} color={colors.primary} />
+              {/* Top colored band */}
+              <View style={{ backgroundColor: colors.primary + "0d", padding: 18, paddingBottom: 14 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                  <View style={{
+                    width: 56, height: 56, borderRadius: 16,
+                    backgroundColor: colors.primary,
+                    alignItems: "center", justifyContent: "center",
+                    shadowColor: colors.primary, shadowOpacity: 0.35,
+                    shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 4,
+                  }}>
+                    <Ionicons name="flash" size={28} color="#fff" />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[s.cardTitle, { color: colors.foreground }]}>Göni özim almakçy</Text>
-                    <View style={[s.cardBadge, { backgroundColor: colors.primary + "18" }]}>
-                      <Text style={[s.cardBadgeText, { color: colors.primary }]}>Dessine</Text>
+                    <Text style={{ fontSize: 17, fontWeight: "800", color: colors.foreground, marginBottom: 4 }}>
+                      Göni özim almakçy
+                    </Text>
+                    <View style={{
+                      flexDirection: "row", alignItems: "center", gap: 6,
+                      backgroundColor: colors.primary + "15",
+                      paddingHorizontal: 9, paddingVertical: 4,
+                      borderRadius: 20, alignSelf: "flex-start",
+                    }}>
+                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.primary }} />
+                      <Text style={{ color: colors.primary, fontSize: 11, fontWeight: "700" }}>Dessine</Text>
                     </View>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+                  <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} />
                 </View>
-                <Text style={[s.cardDesc, { color: colors.mutedForeground }]}>
-                  Bilet çykan dessine özüňiz alyp bilersiňiz. Garaşmazdan, bilet satışa çykandan şol bada al.
+              </View>
+              <View style={{ height: 1, backgroundColor: colors.border }} />
+              {/* Feature list */}
+              <View style={{ padding: 16, gap: 10 }}>
+                <Text style={{ color: colors.mutedForeground, fontSize: 13, lineHeight: 19, marginBottom: 4 }}>
+                  Bilet çykan dessine özüňiz alyp bilersiňiz. Garaşmazdan, şol bada al.
                 </Text>
-                <View style={[s.cardFeatures, { borderTopColor: colors.border }]}>
-                  {["Şol bada sargyt", "Töleg öňünden", "1 sagat içinde SMS"].map((f, i) => (
-                    <View key={i} style={s.cardFeatureItem}>
-                      <Ionicons name="checkmark-circle" size={13} color={colors.primary} />
-                      <Text style={[s.cardFeatureText, { color: colors.mutedForeground }]}>{f}</Text>
-                    </View>
-                  ))}
-                </View>
+                {[
+                  { icon: "checkmark-circle" as const, label: "Şol bada sargyt", color: colors.primary },
+                  { icon: "time-outline" as const, label: "1 sagat içinde SMS", color: colors.primary },
+                  { icon: "card-outline" as const, label: "Töleg öňünden", color: colors.primary },
+                ].map((f, i) => (
+                  <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                    <Ionicons name={f.icon} size={16} color={f.color} />
+                    <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: "500" }}>{f.label}</Text>
+                  </View>
+                ))}
               </View>
             </Pressable>
 
             {/* Card 2 — Agent */}
             <Pressable
               onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setMain("agent"); setAgentDone(false); }}
-              style={({ pressed }) => [s.serviceCard, {
-                backgroundColor: colors.card, borderColor: "#8b5cf6" + "50",
-                borderWidth: 1.5, opacity: pressed ? 0.9 : 1,
-                shadowColor: "#8b5cf6", shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, elevation: 4,
+              style={({ pressed }) => [{
+                backgroundColor: colors.card,
+                borderRadius: 20,
+                marginBottom: 12,
+                overflow: "hidden" as const,
+                opacity: pressed ? 0.92 : 1,
+                shadowColor: "#000",
+                shadowOpacity: 0.07,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 4 },
+                elevation: 3,
+                borderWidth: 1,
+                borderColor: colors.border,
               }]}
             >
-              <View style={[s.cardStripe, { backgroundColor: "#8b5cf6" }]} />
-              <View style={{ flex: 1, paddingLeft: 16 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10 }}>
-                  <View style={[s.cardIconBg, { backgroundColor: "#8b5cf6" + "18" }]}>
-                    <MaterialCommunityIcons name="robot-outline" size={26} color="#8b5cf6" />
+              <View style={{ backgroundColor: "#8b5cf6" + "0d", padding: 18, paddingBottom: 14 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                  <View style={{
+                    width: 56, height: 56, borderRadius: 16,
+                    backgroundColor: "#8b5cf6",
+                    alignItems: "center", justifyContent: "center",
+                    shadowColor: "#8b5cf6", shadowOpacity: 0.35,
+                    shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 4,
+                  }}>
+                    <MaterialCommunityIcons name="robot-outline" size={28} color="#fff" />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[s.cardTitle, { color: colors.foreground }]}>Size tabşyrmakçy</Text>
-                    <View style={[s.cardBadge, { backgroundColor: "#8b5cf6" + "18" }]}>
-                      <Text style={[s.cardBadgeText, { color: "#8b5cf6" }]}>7/24 kuzatuw</Text>
+                    <Text style={{ fontSize: 17, fontWeight: "800", color: colors.foreground, marginBottom: 4 }}>
+                      Size tabşyrmakçy
+                    </Text>
+                    <View style={{
+                      flexDirection: "row", alignItems: "center", gap: 6,
+                      backgroundColor: "#8b5cf6" + "15",
+                      paddingHorizontal: 9, paddingVertical: 4,
+                      borderRadius: 20, alignSelf: "flex-start",
+                    }}>
+                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: "#8b5cf6" }} />
+                      <Text style={{ color: "#8b5cf6", fontSize: 11, fontWeight: "700" }}>7/24 kuzatuw</Text>
                     </View>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color="#8b5cf6" />
+                  <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} />
                 </View>
-                <Text style={[s.cardDesc, { color: colors.mutedForeground }]}>
-                  Bilet maglumatlaryňyzy bize aýdyň — biz tarifymyza görä 7/24 kuzatyp, ýer çykandan dessine alyp bereris.
+              </View>
+              <View style={{ height: 1, backgroundColor: colors.border }} />
+              <View style={{ padding: 16, gap: 10 }}>
+                <Text style={{ color: colors.mutedForeground, fontSize: 13, lineHeight: 19, marginBottom: 4 }}>
+                  Bilet maglumatlaryňyzy bize aýdyň — 7/24 kuzatyp, ýer çykanda alyp bereris.
                 </Text>
-                <View style={[s.cardFeatures, { borderTopColor: colors.border }]}>
-                  {["7/24 awtomat kuzatuw", "Ýer çyksa dessine alýas", "Tarife görä hyzmat"].map((f, i) => (
-                    <View key={i} style={s.cardFeatureItem}>
-                      <Ionicons name="checkmark-circle" size={13} color="#8b5cf6" />
-                      <Text style={[s.cardFeatureText, { color: colors.mutedForeground }]}>{f}</Text>
-                    </View>
-                  ))}
-                </View>
+                {[
+                  { icon: "checkmark-circle" as const, label: "7/24 awtomat kuzatuw", color: "#8b5cf6" },
+                  { icon: "flash-outline" as const, label: "Ýer çyksa dessine alýas", color: "#8b5cf6" },
+                  { icon: "pricetag-outline" as const, label: "Tarife görä hyzmat", color: "#8b5cf6" },
+                ].map((f, i) => (
+                  <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                    <Ionicons name={f.icon} size={16} color={f.color} />
+                    <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: "500" }}>{f.label}</Text>
+                  </View>
+                ))}
               </View>
             </Pressable>
 
             {/* Card 3 — SMS */}
             <Pressable
               onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setMain("sms"); setSmsStep(1); }}
-              style={({ pressed }) => [s.serviceCard, {
-                backgroundColor: colors.card, borderColor: "#0ea5e9" + "50",
-                borderWidth: 1.5, opacity: pressed ? 0.9 : 1,
-                shadowColor: "#0ea5e9", shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, elevation: 4,
+              style={({ pressed }) => [{
+                backgroundColor: colors.card,
+                borderRadius: 20,
+                marginBottom: 12,
+                overflow: "hidden" as const,
+                opacity: pressed ? 0.92 : 1,
+                shadowColor: "#000",
+                shadowOpacity: 0.07,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 4 },
+                elevation: 3,
+                borderWidth: 1,
+                borderColor: colors.border,
               }]}
             >
-              <View style={[s.cardStripe, { backgroundColor: "#0ea5e9" }]} />
-              <View style={{ flex: 1, paddingLeft: 16 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10 }}>
-                  <View style={[s.cardIconBg, { backgroundColor: "#0ea5e9" + "18" }]}>
-                    <Ionicons name="chatbubble-ellipses-outline" size={26} color="#0ea5e9" />
+              <View style={{ backgroundColor: "#0ea5e9" + "0d", padding: 18, paddingBottom: 14 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                  <View style={{
+                    width: 56, height: 56, borderRadius: 16,
+                    backgroundColor: "#0ea5e9",
+                    alignItems: "center", justifyContent: "center",
+                    shadowColor: "#0ea5e9", shadowOpacity: 0.35,
+                    shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 4,
+                  }}>
+                    <Ionicons name="chatbubble-ellipses" size={26} color="#fff" />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[s.cardTitle, { color: colors.foreground }]}>SMS zaýawka</Text>
-                    <View style={[s.cardBadge, { backgroundColor: "#0ea5e9" + "18" }]}>
-                      <Text style={[s.cardBadgeText, { color: "#0ea5e9" }]}>Internetsiz</Text>
+                    <Text style={{ fontSize: 17, fontWeight: "800", color: colors.foreground, marginBottom: 4 }}>
+                      SMS zaýawka
+                    </Text>
+                    <View style={{
+                      flexDirection: "row", alignItems: "center", gap: 6,
+                      backgroundColor: "#0ea5e9" + "15",
+                      paddingHorizontal: 9, paddingVertical: 4,
+                      borderRadius: 20, alignSelf: "flex-start",
+                    }}>
+                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: "#0ea5e9" }} />
+                      <Text style={{ color: "#0ea5e9", fontSize: 11, fontWeight: "700" }}>Internetsiz</Text>
                     </View>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color="#0ea5e9" />
+                  <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} />
                 </View>
-                <Text style={[s.cardDesc, { color: colors.mutedForeground }]}>
-                  Internet bolmanda hem SMS arkaly bilet sargyt ediň. Maglumatlarňyzy dolduryň, SMS ugradyň.
+              </View>
+              <View style={{ height: 1, backgroundColor: colors.border }} />
+              <View style={{ padding: 16, gap: 10 }}>
+                <Text style={{ color: colors.mutedForeground, fontSize: 13, lineHeight: 19, marginBottom: 4 }}>
+                  Internet bolmanda hem SMS arkaly bilet sargyt ediň. Dolduryň, ugradyň.
                 </Text>
-                <View style={[s.cardFeatures, { borderTopColor: colors.border }]}>
-                  {["Internetsiz işleýär", "SMS arkaly tassyklanýar", "15-30 min içinde jaň"].map((f, i) => (
-                    <View key={i} style={s.cardFeatureItem}>
-                      <Ionicons name="checkmark-circle" size={13} color="#0ea5e9" />
-                      <Text style={[s.cardFeatureText, { color: colors.mutedForeground }]}>{f}</Text>
-                    </View>
-                  ))}
-                </View>
+                {[
+                  { icon: "checkmark-circle" as const, label: "Internetsiz işleýär", color: "#0ea5e9" },
+                  { icon: "chatbubble-outline" as const, label: "SMS arkaly tassyklanýar", color: "#0ea5e9" },
+                  { icon: "call-outline" as const, label: "15-30 min içinde jaň", color: "#0ea5e9" },
+                ].map((f, i) => (
+                  <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                    <Ionicons name={f.icon} size={16} color={f.color} />
+                    <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: "500" }}>{f.label}</Text>
+                  </View>
+                ))}
               </View>
             </Pressable>
           </View>
