@@ -237,6 +237,13 @@ export default function HomeScreen() {
             color={colors.primary}
           />
           <ServiceCard
+            icon={<Ionicons name="airplane-outline" size={28} color="#0ea5e9" />}
+            title="Howaýollary"
+            desc="Içerki & Halkara uçuş"
+            onPress={() => nav("/howa")}
+            color="#0ea5e9"
+          />
+          <ServiceCard
             icon={<MaterialCommunityIcons name="currency-usd" size={28} color="#0ea5e9" />}
             title="Ýeňil Pay"
             desc="Walýuta çalyşmak"
