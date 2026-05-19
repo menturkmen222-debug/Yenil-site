@@ -54,28 +54,11 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="(demiryol)"
-        options={{
-          title: "Demirýol",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="tram" tintColor={color} size={24} />
-            ) : (
-              <Ionicons name="train-outline" size={22} color={color} />
-            ),
-          tabBarStyle: { display: "none" },
-        }}
+        options={{ href: null, tabBarStyle: { display: "none" } }}
       />
       <Tabs.Screen
         name="tmcell"
-        options={{
-          title: "TMCell",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="simcard" tintColor={color} size={24} />
-            ) : (
-              <Ionicons name="phone-portrait-outline" size={22} color={color} />
-            ),
-        }}
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="more"

@@ -173,6 +173,21 @@ export default function HomeScreen() {
         </View>
         <Feather name="arrow-right" size={20} color="#fff" />
       </Pressable>
+
+      {/* SANLY BAZAR BANNER */}
+      <Pressable
+        onPress={() => nav("/bazar")}
+        style={({ pressed }) => [styles.banner, { opacity: pressed ? 0.9 : 1, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border }]}
+      >
+        <View style={[styles.bannerIcon, { backgroundColor: colors.primary + "20" }]}>
+          <Ionicons name="storefront-outline" size={26} color={colors.primary} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.bannerTitle, { color: colors.foreground }]}>Sanly bazar</Text>
+          <Text style={[styles.bannerDesc, { color: colors.mutedForeground }]}>Akkauntlar we sanly harytlar</Text>
+        </View>
+        <Feather name="arrow-right" size={20} color={colors.primary} />
+      </Pressable>
     </ScrollView>
   );
 }
