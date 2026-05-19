@@ -244,13 +244,6 @@ export default function HomeScreen() {
             color="#0ea5e9"
           />
           <ServiceCard
-            icon={<Ionicons name="phone-portrait-outline" size={28} color="#8b5cf6" />}
-            title="TMCell"
-            desc="Bonus pul & SIM"
-            onPress={() => nav("/tmcell")}
-            color="#8b5cf6"
-          />
-          <ServiceCard
             icon={<Ionicons name="apps-outline" size={28} color="#f59e0b" />}
             title="Ulgamlar"
             desc="Aydym, Belet we ş.m."
