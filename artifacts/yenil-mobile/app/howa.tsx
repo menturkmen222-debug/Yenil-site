@@ -22,6 +22,7 @@ const DOMESTIC = [
 ];
 
 const INTERNATIONAL = [
+  { code: "ASB", city: "Aşgabat (TM)", flag: "🇹🇲" },
   { code: "SVO", city: "Moskwa", flag: "🇷🇺" },
   { code: "IST", city: "Stambul", flag: "🇹🇷" },
   { code: "FRA", city: "Frankfurt", flag: "🇩🇪" },
@@ -43,10 +44,21 @@ const CARD_TYPES = ["Visa", "MasterCard", "MIR", "Altyn Asyr"];
 const PAYMENT_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
 const MERCHANT_CARD = "8600 **** **** 4219";
 
+const INTL_CURRENCIES = [
+  { code: "USD", name: "Dollar", flag: "🇺🇸", symbol: "$" },
+  { code: "EUR", name: "Ýewro", flag: "🇪🇺", symbol: "€" },
+  { code: "GBP", name: "Funt sterling", flag: "🇬🇧", symbol: "£" },
+  { code: "RUB", name: "Rus rubly", flag: "🇷🇺", symbol: "₽" },
+  { code: "TRY", name: "Türk lirasy", flag: "🇹🇷", symbol: "₺" },
+  { code: "AED", name: "Dirhem", flag: "🇦🇪", symbol: "د.إ" },
+  { code: "CNY", name: "Hytaý ýuany", flag: "🇨🇳", symbol: "¥" },
+];
+
+type OrderMode = "" | "tabshyr" | "goni";
 type FlightType = "içerki" | "daşarky";
 type TripType = "baryş" | "baryş-gelişli";
-type Step = "search" | "passenger" | "payment" | "success";
-type PayMethod = "" | "terminal" | "bonus" | "card";
+type Step = "method" | "search" | "passenger" | "payment" | "success";
+type PayMethod = "" | "terminal" | "bonus" | "card" | "waluta" | "intcard";
 type Picker = "from" | "to" | null;
 
 interface City { code: string; city: string; flag: string; }
@@ -129,13 +141,20 @@ export default function HowaScreen() {
   const [pasBirth, setPasBirth] = useState("");
   const [pasPhone, setPasPhone] = useState("");
 
+  // Order mode
+  const [orderMode, setOrderMode] = useState<OrderMode>("");
+
   // Payment
   const [payMethod, setPayMethod] = useState<PayMethod>("");
   const [cardBank, setCardBank] = useState("");
   const [cardType, setCardType] = useState("");
   const [cardLast4, setCardLast4] = useState("");
+  const [walutaCurrency, setWalutaCurrency] = useState("");
+  const [walutaAmount, setWalutaAmount] = useState("");
+  const [intCardType, setIntCardType] = useState("");
+  const [intCardLast4, setIntCardLast4] = useState("");
 
-  const [step, setStep] = useState<Step>("search");
+  const [step, setStep] = useState<Step>("method");
   const [loading, setLoading] = useState(false);
   const [bookingId, setBookingId] = useState("");
 
@@ -174,12 +193,19 @@ export default function HowaScreen() {
     if (payMethod === "bonus" && balance < 50) {
       Alert.alert("Ýeterlik BP ýok", `Balansyňyz: ${balance} BP. Azyndan 50 BP gerekli.`); return;
     }
+    if (payMethod === "waluta" && (!walutaCurrency || !walutaAmount.trim())) {
+      Alert.alert("Walýuta maglumatlary", "Walýuta görnüşi we mukdary giriziň!"); return;
+    }
+    if (payMethod === "intcard" && (!intCardType || intCardLast4.length < 4)) {
+      Alert.alert("Kart maglumatlary", "Kart görnüşi we soňky 4 san girizmeli!"); return;
+    }
     setLoading(true);
     try {
       const id = `HW-${Date.now().toString(36).toUpperCase()}`;
       await saveOrder("howa-bilet-orders", {
         deviceId,
         bookingId: id,
+        orderMode,
         flightType,
         tripType,
         from: from?.code,
@@ -192,6 +218,8 @@ export default function HowaScreen() {
         passenger: { name: pasName, passport: pasPassport, birth: pasBirth, phone: pasPhone },
         payMethod,
         cardInfo: payMethod === "card" ? { bank: cardBank, type: cardType, last4: cardLast4 } : null,
+        walutaInfo: payMethod === "waluta" ? { currency: walutaCurrency, amount: walutaAmount } : null,
+        intCardInfo: payMethod === "intcard" ? { type: intCardType, last4: intCardLast4 } : null,
         status: "pending",
       });
       await addToHistory({
@@ -212,12 +240,14 @@ export default function HowaScreen() {
   }
 
   function resetAll() {
-    setStep("search");
+    setStep("method");
+    setOrderMode("");
     setFrom(null); setTo(null);
     setDepDate(""); setRetDate("");
     setPassengers(1);
     setPasName(""); setPasPassport(""); setPasBirth(""); setPasPhone("");
     setPayMethod(""); setCardBank(""); setCardType(""); setCardLast4("");
+    setWalutaCurrency(""); setWalutaAmount(""); setIntCardType(""); setIntCardLast4("");
     setBookingId("");
   }
 
@@ -240,28 +270,31 @@ export default function HowaScreen() {
           </View>
         </View>
 
-        {/* Step indicators */}
-        <View style={s.steps}>
-          {(["search", "passenger", "payment", "success"] as Step[]).map((st, i) => {
-            const labels = ["Gözleg", "Ýolagçy", "Töleg", "Tamamlady"];
-            const done = ["search", "passenger", "payment", "success"].indexOf(step) > i;
-            const active = step === st;
-            return (
-              <View key={st} style={s.stepItem}>
-                <View style={[s.stepDot, {
-                  backgroundColor: active ? "#fff" : done ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.25)",
-                  width: active ? 28 : 20,
-                  height: active ? 28 : 20,
-                }]}>
-                  {done
-                    ? <Ionicons name="checkmark" size={12} color="#0ea5e9" />
-                    : <Text style={[s.stepNum, { color: active ? "#0ea5e9" : "rgba(255,255,255,0.6)", fontSize: active ? 12 : 10 }]}>{i + 1}</Text>}
+        {/* Step indicators — hidden on method step */}
+        {step !== "method" && step !== "success" && (
+          <View style={s.steps}>
+            {(["search", "passenger", "payment"] as Step[]).map((st, i) => {
+              const labels = ["Gözleg", "Ýolagçy", "Töleg"];
+              const order = ["search", "passenger", "payment"];
+              const done = order.indexOf(step) > i;
+              const active = step === st;
+              return (
+                <View key={st} style={s.stepItem}>
+                  <View style={[s.stepDot, {
+                    backgroundColor: active ? "#fff" : done ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.25)",
+                    width: active ? 28 : 20,
+                    height: active ? 28 : 20,
+                  }]}>
+                    {done
+                      ? <Ionicons name="checkmark" size={12} color="#0ea5e9" />
+                      : <Text style={[s.stepNum, { color: active ? "#0ea5e9" : "rgba(255,255,255,0.6)", fontSize: active ? 12 : 10 }]}>{i + 1}</Text>}
+                  </View>
+                  {active && <Text style={s.stepLabel}>{labels[i]}</Text>}
                 </View>
-                {active && <Text style={s.stepLabel}>{labels[i]}</Text>}
-              </View>
-            );
-          })}
-        </View>
+              );
+            })}
+          </View>
+        )}
       </View>
 
       <ScrollView
@@ -269,6 +302,80 @@ export default function HowaScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
+        {/* ── STEP: METHOD ── */}
+        {step === "method" && (
+          <>
+            <Text style={[s.methodGreet, { color: colors.mutedForeground }]}>
+              Uçuş biledini nähili almak isleýärsiňiz?
+            </Text>
+
+            {/* Tabşyrmak option */}
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                setOrderMode("tabshyr");
+                setStep("search");
+              }}
+              style={({ pressed }) => [s.methodCard, {
+                backgroundColor: colors.card,
+                borderColor: "#0ea5e9",
+                opacity: pressed ? 0.92 : 1,
+              }]}
+            >
+              <View style={[s.methodIconCircle, { backgroundColor: "#0ea5e920" }]}>
+                <Ionicons name="people-outline" size={32} color="#0ea5e9" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[s.methodTitle, { color: colors.foreground }]}>Bize tabşyrmak</Text>
+                <Text style={[s.methodDesc, { color: colors.mutedForeground }]}>
+                  Bilet gözlegini we satyn almagyny hünärmenlerimiz ýerine ýetirer. Siz diňe zerur maglumatlary girizýärsiňiz.
+                </Text>
+                <View style={[s.methodBadge, { backgroundColor: "#0ea5e920" }]}>
+                  <Ionicons name="checkmark-circle-outline" size={13} color="#0ea5e9" />
+                  <Text style={[s.methodBadgeText, { color: "#0ea5e9" }]}>Töleg tassyklanandan soň bilet berilýär</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={22} color="#0ea5e9" />
+            </Pressable>
+
+            {/* Göni almak option */}
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                setOrderMode("goni");
+                setStep("search");
+              }}
+              style={({ pressed }) => [s.methodCard, {
+                backgroundColor: colors.card,
+                borderColor: "#10b981",
+                opacity: pressed ? 0.92 : 1,
+              }]}
+            >
+              <View style={[s.methodIconCircle, { backgroundColor: "#10b98120" }]}>
+                <Ionicons name="flash-outline" size={32} color="#10b981" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[s.methodTitle, { color: colors.foreground }]}>Göni almak</Text>
+                <Text style={[s.methodDesc, { color: colors.mutedForeground }]}>
+                  Uçuş uguryny özüňiz saýlap, göni sargyt ediň. Tiz we ýönekeý tertip.
+                </Text>
+                <View style={[s.methodBadge, { backgroundColor: "#10b98120" }]}>
+                  <Ionicons name="flash-outline" size={13} color="#10b981" />
+                  <Text style={[s.methodBadgeText, { color: "#10b981" }]}>Tiz işlenip, habarlaşylýar</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={22} color="#10b981" />
+            </Pressable>
+
+            <View style={[s.noticeBox, { backgroundColor: "#f59e0b10", borderColor: "#f59e0b40", marginTop: 8 }]}>
+              <Ionicons name="shield-checkmark-outline" size={16} color="#f59e0b" />
+              <Text style={[s.noticeText, { color: "#f59e0b" }]}>
+                Iki usulda hem sargydyňyz howpsuz saklanýar we işlenenden soň size habar berilýär.
+              </Text>
+            </View>
+          </>
+        )}
+
         {/* ── STEP: SEARCH ── */}
         {step === "search" && (
           <>
@@ -440,6 +547,11 @@ export default function HowaScreen() {
               <Ionicons name="search-outline" size={18} color="#fff" />
               <Text style={s.primaryBtnText}>Gözleg & Dowam etmek</Text>
             </Pressable>
+
+            <Pressable onPress={() => setStep("method")} style={s.backRow}>
+              <Ionicons name="chevron-back" size={16} color={colors.mutedForeground} />
+              <Text style={[s.backText, { color: colors.mutedForeground }]}>Yza</Text>
+            </Pressable>
           </>
         )}
 
@@ -588,10 +700,14 @@ export default function HowaScreen() {
 
             {/* Payment options */}
             {([
-              { id: "card", label: "Kartdan töle", desc: "Bank karty bilen töleg", icon: "card-outline", color: "#6366f1", emoji: "💳" },
-              { id: "terminal", label: "TMCELL Terminal", desc: "Berilýän nomere pul geçiriň", icon: "phone-portrait-outline", color: "#0ea5e9", emoji: "📱" },
-              { id: "bonus", label: "Bonus Pul (BP)", desc: `Balansyňyz: ${balance.toFixed(2)} BP`, icon: "star-outline", color: "#f59e0b", emoji: "⭐" },
-            ] as { id: PayMethod; label: string; desc: string; icon: any; color: string; emoji: string }[]).map((pm) => (
+              { id: "card", label: "Kartdan töle", desc: "TM bank karty bilen töleg", icon: "card-outline", color: "#6366f1" },
+              { id: "terminal", label: "TMCELL Terminal", desc: "Görkezilen nomere pul geçiriň", icon: "phone-portrait-outline", color: "#0ea5e9" },
+              { id: "bonus", label: "Bonus Pul (BP)", desc: `Balansyňyz: ${balance.toFixed(2)} BP`, icon: "star-outline", color: "#f59e0b" },
+              ...(flightType === "daşarky" ? [
+                { id: "waluta" as PayMethod, label: "Walýuta bilen", desc: "USD, EUR, GBP, RUB we ş.m.", icon: "cash-outline" as any, color: "#10b981" },
+                { id: "intcard" as PayMethod, label: "Halkara kart", desc: "Daşary ýurt Visa / MasterCard", icon: "globe-outline" as any, color: "#ec4899" },
+              ] : []),
+            ] as { id: PayMethod; label: string; desc: string; icon: any; color: string }[]).map((pm) => (
               <Pressable
                 key={pm.id}
                 onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setPayMethod(pm.id); }}
@@ -708,17 +824,117 @@ export default function HowaScreen() {
               </View>
             )}
 
+            {/* Walýuta payment details */}
+            {payMethod === "waluta" && (
+              <View style={[s.detailCard, { backgroundColor: colors.card, borderColor: "#10b98140" }]}>
+                <Text style={[s.detailCardTitle, { color: colors.foreground }]}>Walýuta bilen töleg</Text>
+                <Text style={[s.detailCardSub, { color: colors.mutedForeground }]}>
+                  Haýsy walýutada tölemek isleýärsiňiz? Mukdary girizenden soň admin tassyklar.
+                </Text>
+                <View style={s.currencyGrid}>
+                  {INTL_CURRENCIES.map((c) => (
+                    <Pressable
+                      key={c.code}
+                      onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setWalutaCurrency(c.code); }}
+                      style={[s.currencyPill, {
+                        backgroundColor: walutaCurrency === c.code ? "#10b981" : colors.muted,
+                        borderColor: walutaCurrency === c.code ? "#10b981" : colors.border,
+                      }]}
+                    >
+                      <Text style={s.currencyFlag}>{c.flag}</Text>
+                      <View>
+                        <Text style={[s.currencyCode, { color: walutaCurrency === c.code ? "#fff" : colors.foreground }]}>{c.code}</Text>
+                        <Text style={[s.currencySymbol, { color: walutaCurrency === c.code ? "rgba(255,255,255,0.8)" : colors.mutedForeground }]}>{c.symbol}</Text>
+                      </View>
+                    </Pressable>
+                  ))}
+                </View>
+                {walutaCurrency !== "" && (
+                  <>
+                    <Text style={[s.fieldLabel2, { color: colors.mutedForeground, marginTop: 14, marginBottom: 8 }]}>
+                      Töleg mukdary ({walutaCurrency})
+                    </Text>
+                    <TextInput
+                      value={walutaAmount}
+                      onChangeText={setWalutaAmount}
+                      placeholder={`Mukdar (${INTL_CURRENCIES.find(c => c.code === walutaCurrency)?.symbol})`}
+                      placeholderTextColor={colors.mutedForeground}
+                      keyboardType="numeric"
+                      style={[s.cardLast4Input, { backgroundColor: colors.muted, borderColor: walutaAmount ? "#10b981" : colors.border, color: colors.foreground, fontSize: 18, letterSpacing: 2 }]}
+                    />
+                    <View style={[s.noticeBox, { backgroundColor: "#10b98110", borderColor: "#10b98140", marginTop: 12 }]}>
+                      <Ionicons name="information-circle-outline" size={14} color="#10b981" />
+                      <Text style={[s.noticeText, { color: "#10b981", fontSize: 11 }]}>
+                        Töleg ammarlary: admin bilen habarlaşylanda görkeziler.
+                      </Text>
+                    </View>
+                  </>
+                )}
+              </View>
+            )}
+
+            {/* International card details */}
+            {payMethod === "intcard" && (
+              <View style={[s.detailCard, { backgroundColor: colors.card, borderColor: "#ec489940" }]}>
+                <Text style={[s.detailCardTitle, { color: colors.foreground }]}>Halkara kart bilen töleg</Text>
+                <Text style={[s.detailCardSub, { color: colors.mutedForeground }]}>
+                  Daşary ýurt Visa ýa MasterCard kart bilen töläp bilersiňiz. Admin töleg salgysy iberer.
+                </Text>
+
+                <Text style={[s.fieldLabel2, { color: colors.mutedForeground, marginTop: 8, marginBottom: 8 }]}>Kart görnüşi</Text>
+                <View style={s.bankGrid}>
+                  {["Visa (halkara)", "MasterCard (halkara)"].map((ct) => (
+                    <Pressable
+                      key={ct}
+                      onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setIntCardType(ct); }}
+                      style={[s.bankPill, {
+                        backgroundColor: intCardType === ct ? "#ec4899" : colors.muted,
+                        borderColor: intCardType === ct ? "#ec4899" : colors.border,
+                      }]}
+                    >
+                      <Text style={[s.bankPillText, { color: intCardType === ct ? "#fff" : colors.foreground }]}>{ct}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+
+                <Text style={[s.fieldLabel2, { color: colors.mutedForeground, marginTop: 14, marginBottom: 8 }]}>
+                  Kartyňyzyň soňky 4 sany
+                </Text>
+                <TextInput
+                  value={intCardLast4}
+                  onChangeText={(t) => setIntCardLast4(t.replace(/\D/g, "").slice(0, 4))}
+                  placeholder="XXXX"
+                  placeholderTextColor={colors.mutedForeground}
+                  keyboardType="number-pad"
+                  maxLength={4}
+                  style={[s.cardLast4Input, { backgroundColor: colors.muted, borderColor: intCardLast4.length === 4 ? "#ec4899" : colors.border, color: colors.foreground }]}
+                />
+                <View style={[s.noticeBox, { backgroundColor: "#ec489910", borderColor: "#ec489940", marginTop: 12 }]}>
+                  <Ionicons name="shield-checkmark-outline" size={14} color="#ec4899" />
+                  <Text style={[s.noticeText, { color: "#ec4899", fontSize: 11 }]}>
+                    Howpsuzlyk üçin diňe soňky 4 san sorulýar. Doly kart belgisi hiç wagt soralmaýar.
+                  </Text>
+                </View>
+              </View>
+            )}
+
             {loading
               ? <ActivityIndicator color="#0ea5e9" style={{ marginTop: 24 }} />
               : payMethod !== "" && (
                 <Pressable
                   onPress={handleBooking}
-                  style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#0ea5e9", opacity: pressed ? 0.85 : 1, marginTop: 8 }]}
+                  style={({ pressed }) => [s.primaryBtn, {
+                    backgroundColor: payMethod === "waluta" ? "#10b981" : payMethod === "intcard" ? "#ec4899" : "#0ea5e9",
+                    opacity: pressed ? 0.85 : 1, marginTop: 8,
+                  }]}
                 >
                   <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />
                   <Text style={s.primaryBtnText}>
                     {payMethod === "card" ? "Töleg geçirdim, Tassykla" :
-                     payMethod === "terminal" ? "Töleg geçirdim" : "Balansdan töle"}
+                     payMethod === "terminal" ? "Töleg geçirdim" :
+                     payMethod === "bonus" ? "Balansdan töle" :
+                     payMethod === "waluta" ? "Walýuta tölegini tassykla" :
+                     "Halkara kart bilen tassykla"}
                   </Text>
                 </Pressable>
               )}
@@ -942,4 +1158,23 @@ const s = StyleSheet.create({
   bookingArrow: { alignItems: "center", justifyContent: "center" },
   bookingMeta: { flexDirection: "row", justifyContent: "space-between" },
   bookingMetaText: { color: "rgba(255,255,255,0.85)", fontSize: 12, fontWeight: "700" },
+
+  // Method selection step
+  methodGreet: { fontSize: 14, fontWeight: "600", textAlign: "center", marginBottom: 20, marginTop: 4 },
+  methodCard: {
+    flexDirection: "row", alignItems: "center", gap: 16,
+    borderRadius: 22, borderWidth: 2, padding: 18, marginBottom: 16,
+  },
+  methodIconCircle: { width: 60, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center" },
+  methodTitle: { fontSize: 18, fontWeight: "800", marginBottom: 6 },
+  methodDesc: { fontSize: 13, lineHeight: 18, marginBottom: 10 },
+  methodBadge: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 99, alignSelf: "flex-start" },
+  methodBadgeText: { fontSize: 11, fontWeight: "700" },
+
+  // Currency grid (walýuta payment)
+  currencyGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 4 },
+  currencyPill: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 14, borderWidth: 1.5, minWidth: 80 },
+  currencyFlag: { fontSize: 20 },
+  currencyCode: { fontSize: 13, fontWeight: "800" },
+  currencySymbol: { fontSize: 11, fontWeight: "600" },
 });
