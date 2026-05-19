@@ -156,13 +156,6 @@ export default function HomeScreen() {
   const CARD_BORDER = colors.primary + "70";
   const GRID = colors.primary + "10";
 
-  const CAPS = [
-    { icon: "train-outline" as const, label: "Bilet", color: colors.primary },
-    { icon: "cash-outline" as const, label: "Töleg", color: "#38bdf8" },
-    { icon: "phone-portrait-outline" as const, label: "TMCell", color: "#a78bfa" },
-    { icon: "search-outline" as const, label: "Gözleg", color: "#fbbf24" },
-    { icon: "apps-outline" as const, label: "Ulgam", color: "#34d399" },
-  ];
 
   return (
     <>
@@ -218,99 +211,62 @@ export default function HomeScreen() {
             </View>
 
             {/* TOP ROW */}
-            <View style={{ flexDirection: "row", alignItems: "center", padding: 16, gap: 12 }}>
-              {/* Avatar with rings */}
-              <View style={{ position: "relative", width: 52, height: 52 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", padding: 14, gap: 12 }}>
+              {/* Avatar */}
+              <View style={{ position: "relative", width: 46, height: 46 }}>
                 <View style={{
-                  position: "absolute", top: -5, bottom: -5, left: -5, right: -5,
+                  position: "absolute", top: -4, bottom: -4, left: -4, right: -4,
                   borderRadius: 9999, borderWidth: 1,
-                  borderColor: colors.primary + "30",
+                  borderColor: colors.primary + "28",
                 }} />
                 <View style={{
-                  width: 52, height: 52, borderRadius: 18,
+                  width: 46, height: 46, borderRadius: 15,
                   backgroundColor: colors.primary + "25",
-                  borderWidth: 1.5, borderColor: colors.primary + "60",
+                  borderWidth: 1.5, borderColor: colors.primary + "55",
                   alignItems: "center", justifyContent: "center",
                 }}>
-                  <MaterialCommunityIcons name="robot-outline" size={26} color={colors.primary} />
+                  <MaterialCommunityIcons name="robot-outline" size={24} color={colors.primary} />
                 </View>
-                {/* Online dot */}
                 <View style={{
                   position: "absolute", bottom: 1, right: 1,
-                  width: 12, height: 12, borderRadius: 6,
+                  width: 10, height: 10, borderRadius: 5,
                   backgroundColor: "#4ade80", borderWidth: 2, borderColor: CARD_BG,
                 }} />
               </View>
 
-              {/* Name + status */}
+              {/* Name + badge */}
               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
                   <Text style={{ color: "#fff", fontSize: 15, fontWeight: "800", letterSpacing: 0.2 }}>
                     Ýeňil AI Agent
                   </Text>
                   <View style={{
-                    backgroundColor: "#f59e0b22", borderRadius: 5,
+                    backgroundColor: "#f59e0b1a", borderRadius: 5,
                     paddingHorizontal: 6, paddingVertical: 2,
-                    borderWidth: 1, borderColor: "#f59e0b55",
+                    borderWidth: 1, borderColor: "#f59e0b50",
                   }}>
                     <Text style={{ color: "#fbbf24", fontSize: 8, fontWeight: "800", letterSpacing: 1 }}>SYNAG</Text>
                   </View>
                 </View>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: "#4ade80" }} />
-                  <Text style={{ color: colors.primary + "cc", fontSize: 11, fontWeight: "600" }}>
-                    Onlaýn • Taýýar
-                  </Text>
-                </View>
+                <Text style={{ color: colors.primary + "90", fontSize: 10, fontWeight: "600", marginTop: 2 }}>
+                  Intellektual AI kömekçi
+                </Text>
               </View>
 
-              {/* Settings icon */}
-              <Pressable
-                onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-                style={{
-                  width: 34, height: 34, borderRadius: 10,
-                  backgroundColor: colors.primary + "15",
-                  borderWidth: 1, borderColor: colors.primary + "30",
-                  alignItems: "center", justifyContent: "center",
-                }}
-              >
-                <Ionicons name="settings-outline" size={16} color={colors.primary + "cc"} />
-              </Pressable>
+              {/* Online indicator */}
+              <View style={{ alignItems: "center", gap: 3 }}>
+                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#4ade80" }} />
+                <Text style={{ color: "#4ade80", fontSize: 8, fontWeight: "700" }}>ONLAÝN</Text>
+              </View>
             </View>
 
-            {/* Divider with label */}
-            <View style={{
-              flexDirection: "row", alignItems: "center",
-              marginHorizontal: 16, marginBottom: 10, gap: 8,
-            }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.primary + "25" }} />
-              <Text style={{ color: colors.primary + "80", fontSize: 9, fontWeight: "700", letterSpacing: 1.5 }}>
-                MÜMKINÇILIKLER
-              </Text>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.primary + "25" }} />
-            </View>
-
-            {/* Capability chips */}
-            <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 16, marginBottom: 14, gap: 6 }}>
-              {CAPS.map((cap, i) => (
-                <View key={i} style={{ alignItems: "center", gap: 5 }}>
-                  <View style={{
-                    width: 36, height: 36, borderRadius: 10,
-                    backgroundColor: cap.color + "18",
-                    borderWidth: 1, borderColor: cap.color + "35",
-                    alignItems: "center", justifyContent: "center",
-                  }}>
-                    <Ionicons name={cap.icon} size={15} color={cap.color} />
-                  </View>
-                  <Text style={{ color: cap.color + "cc", fontSize: 9, fontWeight: "700" }}>{cap.label}</Text>
-                </View>
-              ))}
-            </View>
+            {/* Thin divider */}
+            <View style={{ height: 1, backgroundColor: colors.primary + "20", marginHorizontal: 14 }} />
 
             {/* Action row */}
             <View style={{
               flexDirection: "row", gap: 8,
-              paddingHorizontal: 14, paddingBottom: 14, paddingTop: 2,
+              paddingHorizontal: 14, paddingBottom: 14, paddingTop: 12,
             }}>
               {/* Main chat button */}
               <Pressable

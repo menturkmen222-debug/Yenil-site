@@ -10,8 +10,6 @@ import { useColors } from "@/hooks/useColors";
 
 const OPERATORS = [
   { id: "tmcell", label: "TMCell", color: "#15803d", icon: "phone-portrait-outline" as const },
-  { id: "altyn", label: "Altyn Asyr", color: "#f59e0b", icon: "cellular-outline" as const },
-  { id: "mts", label: "MTS", color: "#ef4444", icon: "radio-outline" as const },
 ];
 
 const ROUTES = [
@@ -99,11 +97,11 @@ export default function SmsScreen() {
           <>
             <Section title="ŞAHSY MAGLUMAT" />
             <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>Adyňyz</Text>
+              <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>Adyňyz we Familýaňyz</Text>
               <TextInput
                 value={name}
                 onChangeText={setName}
-                placeholder="Doly adyňyz"
+                placeholder="Doly adyňyz we familýaňyz"
                 placeholderTextColor={colors.mutedForeground}
                 style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]}
               />
@@ -117,28 +115,6 @@ export default function SmsScreen() {
                 keyboardType="phone-pad"
                 style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]}
               />
-            </View>
-
-            <Section title="OPERATORYŇYZ" />
-            <View style={styles.optionRow}>
-              {OPERATORS.map((op) => (
-                <Pressable
-                  key={op.id}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setOperator(op.id); }}
-                  style={[
-                    styles.optionCard,
-                    {
-                      backgroundColor: operator === op.id ? op.color : colors.card,
-                      borderColor: operator === op.id ? op.color : colors.border,
-                    },
-                  ]}
-                >
-                  <Ionicons name={op.icon} size={20} color={operator === op.id ? "#fff" : op.color} />
-                  <Text style={[styles.optionLabel, { color: operator === op.id ? "#fff" : colors.foreground }]}>
-                    {op.label}
-                  </Text>
-                </Pressable>
-              ))}
             </View>
 
             <Pressable
