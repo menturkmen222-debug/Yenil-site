@@ -31,6 +31,7 @@ function RootLayoutNav() {
       <Stack.Screen name="about" options={{ headerShown: false }} />
       <Stack.Screen name="sms" options={{ headerShown: false }} />
       <Stack.Screen name="ekitap" options={{ headerShown: false }} />
+      <Stack.Screen name="smm" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

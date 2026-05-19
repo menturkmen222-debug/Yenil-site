@@ -250,6 +250,13 @@ export default function HomeScreen() {
             onPress={() => nav("/ulgamlar")}
             color="#f59e0b"
           />
+          <ServiceCard
+            icon={<MaterialCommunityIcons name="bullhorn-outline" size={28} color="#e11d48" />}
+            title="SMM & Dizaýn"
+            desc="Marketing, Reklama, Designer"
+            onPress={() => nav("/smm")}
+            color="#e11d48"
+          />
         </View>
 
         {/* E-KITAP BANNER */}
