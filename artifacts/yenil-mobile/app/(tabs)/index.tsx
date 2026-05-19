@@ -70,11 +70,11 @@ export default function HomeScreen() {
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={{ paddingBottom: 120, paddingTop: isWeb ? 67 : insets.top }}
+      contentContainerStyle={{ paddingBottom: 120 }}
       showsVerticalScrollIndicator={false}
     >
       {/* HERO */}
-      <View style={[styles.hero, { backgroundColor: colors.primary }]}>
+      <View style={[styles.hero, { backgroundColor: colors.primary, paddingTop: (isWeb ? 67 : insets.top) + 24 }]}>
         <Text style={styles.heroTitle}>Ýeňil</Text>
         <Text style={styles.heroSub}>Türkmenistanda iň ynamly onlayn hyzmatlar</Text>
         <View style={styles.balanceBadge}>
@@ -111,7 +111,7 @@ export default function HomeScreen() {
           icon={<MaterialCommunityIcons name="currency-usd" size={28} color="#0ea5e9" />}
           title="Ýeňil Pay"
           desc="Walýuta çalyşmak"
-          onPress={() => nav("/pay")}
+          onPress={() => nav("/tmcell")}
           color="#0ea5e9"
         />
         <ServiceCard
@@ -196,7 +196,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   hero: {
-    paddingHorizontal: 20, paddingVertical: 32, paddingTop: 24,
+    paddingHorizontal: 20, paddingBottom: 32,
     borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
   },
   heroTitle: { fontSize: 36, fontWeight: "800", color: "#fff", marginBottom: 6 },

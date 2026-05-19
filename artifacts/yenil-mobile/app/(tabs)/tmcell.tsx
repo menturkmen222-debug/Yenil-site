@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
-  Alert, ActivityIndicator, Platform, Image,
+  Alert, ActivityIndicator, Platform, Image, Dimensions,
 } from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -12,6 +12,8 @@ import { useBonusPul } from "@/contexts/BonusPulContext";
 import { saveOrder } from "@/lib/firebase";
 import { uploadImage } from "@/lib/upload";
 import { addToHistory } from "@/lib/orderHistory";
+
+const OP_CARD_W = (Dimensions.get("window").width - 32 - 12) / 2;
 
 const PAYMENT_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
 const BP_AMOUNTS = [50, 100, 200, 500];
@@ -79,6 +81,7 @@ function BonusBuySection({ colors }: { colors: ReturnType<typeof useColors> }) {
             {BP_AMOUNTS.map(a => (
               <Pressable key={a} onPress={() => setSelected(a)}
                 style={[s.amountCard, {
+                  width: OP_CARD_W,
                   backgroundColor: selected === a ? colors.primary + "15" : colors.card,
                   borderColor: selected === a ? colors.primary : colors.border,
                   borderWidth: selected === a ? 2 : 1,
@@ -449,11 +452,17 @@ function SimSection({ colors }: { colors: ReturnType<typeof useColors> }) {
       <View style={s.operatorGrid}>
         {UZ_OPERATORS.map(op => (
           <Pressable key={op.id} onPress={() => setOperator(op.id)}
-            style={({ pressed }) => [s.operatorCard, { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.85 : 1 }]}>
+            style={({ pressed }) => [s.operatorCard, {
+              width: OP_CARD_W,
+              backgroundColor: colors.card,
+              borderColor: op.color + "60",
+              borderWidth: 1.5,
+              opacity: pressed ? 0.85 : 1,
+            }]}>
             <View style={[s.opIcon, { backgroundColor: op.color }]}>
-              <Ionicons name="signal-outline" size={20} color="#fff" />
+              <Ionicons name="cellular-outline" size={22} color="#fff" />
             </View>
-            <Text style={[{ fontWeight: "700", fontSize: 12, color: colors.foreground, textAlign: "center" }]}>{op.name}</Text>
+            <Text style={[{ fontWeight: "800", fontSize: 13, color: colors.foreground, textAlign: "center" }]}>{op.name}</Text>
           </Pressable>
         ))}
       </View>
@@ -470,7 +479,7 @@ function SimSection({ colors }: { colors: ReturnType<typeof useColors> }) {
       </Pressable>
       <View style={[{ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, backgroundColor: opColor + "15", borderRadius: 12, marginBottom: 16 }]}>
         <View style={[s.opIcon, { backgroundColor: opColor }]}>
-          <Ionicons name="signal-outline" size={20} color="#fff" />
+          <Ionicons name="cellular-outline" size={20} color="#fff" />
         </View>
         <Text style={[{ fontWeight: "700", color: colors.foreground }]}>{UZ_OPERATORS.find(o => o.id === operator)?.name}</Text>
       </View>
@@ -486,6 +495,7 @@ function SimSection({ colors }: { colors: ReturnType<typeof useColors> }) {
         {UZS_AMOUNTS.map(a => (
           <Pressable key={a} onPress={() => setSelected(a)}
             style={[s.amountCard, {
+              width: OP_CARD_W,
               backgroundColor: selected === a ? colors.primary + "15" : colors.card,
               borderColor: selected === a ? colors.primary : colors.border,
               borderWidth: selected === a ? 2 : 1,
@@ -581,15 +591,25 @@ export default function TmcellScreen() {
       </View>
 
       {/* Tabs */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}
-        style={{ backgroundColor: colors.card, borderBottomColor: colors.border, borderBottomWidth: 1 }}
-        contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 8, gap: 8, flexDirection: "row" }}>
-        {tabs.map(t => (
-          <Pressable key={t.id} onPress={() => setTab(t.id)}
-            style={[s.tabChip, { backgroundColor: tab === t.id ? colors.primary : colors.background, borderColor: tab === t.id ? colors.primary : colors.border }]}>
-            <Text style={[{ fontWeight: "700", fontSize: 12, color: tab === t.id ? "#fff" : colors.foreground }]}>{t.label}</Text>
-          </Pressable>
-        ))}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ backgroundColor: colors.card, borderBottomColor: colors.border, borderBottomWidth: 1, flexGrow: 0, flexShrink: 0 }}
+        contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 10, gap: 8, alignItems: "center" }}
+      >
+        <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+          {tabs.map(t => (
+            <Pressable key={t.id} onPress={() => setTab(t.id)}
+              style={[s.tabChip, {
+                backgroundColor: tab === t.id ? colors.primary : "transparent",
+                borderColor: tab === t.id ? colors.primary : colors.mutedForeground + "50",
+              }]}>
+              <Text style={{ fontWeight: "700", fontSize: 13, color: tab === t.id ? "#fff" : colors.mutedForeground }}>
+                {t.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       </ScrollView>
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 34 : 100 }}
@@ -613,7 +633,7 @@ const s = StyleSheet.create({
   tabBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center" },
   subTitle: { fontSize: 13, lineHeight: 20, marginBottom: 16 },
   amountGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  amountCard: { width: "47%", borderRadius: 14, padding: 14, alignItems: "center", gap: 4 },
+  amountCard: { borderRadius: 14, padding: 14, alignItems: "center", gap: 4 },
   amountVal: { fontSize: 22, fontWeight: "800" },
   amountLabel: { fontSize: 11, textAlign: "center" },
   infoBox: { borderWidth: 1, borderRadius: 12, padding: 14, marginBottom: 8 },
@@ -626,6 +646,6 @@ const s = StyleSheet.create({
   proofCard: { flex: 1, borderRadius: 12, borderWidth: 2, padding: 14, alignItems: "center", gap: 6 },
   cryptoChip: { flex: 1, borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 10, alignItems: "center" },
   operatorGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
-  operatorCard: { width: "47%", borderRadius: 14, borderWidth: 1, padding: 16, alignItems: "center", gap: 10 },
-  opIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  operatorCard: { borderRadius: 14, padding: 16, alignItems: "center", gap: 10 },
+  opIcon: { width: 50, height: 50, borderRadius: 15, alignItems: "center", justifyContent: "center" },
 });
