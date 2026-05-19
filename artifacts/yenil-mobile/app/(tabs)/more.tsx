@@ -14,8 +14,6 @@ const menuItems = [
   { icon: "apps-outline" as const, label: "Içerki ulgamlar", desc: "Aydym, Belet film, Belet music", href: "/ulgamlar", color: "#f59e0b" },
   { icon: "bulb-outline" as const, label: "Teklip ibermek", desc: "Öz hyzmatyňyzy teklip ediň", href: "/teklip", color: "#15803d" },
   { icon: "storefront-outline" as const, label: "Sanly bazar", desc: "Akkauntlar we sanly harytlar", href: "/bazar", color: "#8b5cf6" },
-  { icon: "help-circle-outline" as const, label: "Kömek / FAQ", desc: "Sorag-jogap we goldaw", href: "/help", color: "#0ea5e9" },
-  { icon: "information-circle-outline" as const, label: "Hakynda", desc: "Kompaniýa barada maglumat", href: "/about", color: "#10b981" },
   { icon: "chatbubble-outline" as const, label: "SMS arkaly sargyt", desc: "Offline sargyt gollanmasy", href: "/sms", color: "#6366f1" },
 ];
 

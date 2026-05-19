@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
-  View, Text, ScrollView, StyleSheet, Pressable, Linking,
-  Platform, useColorScheme,
+  View, Text, ScrollView, StyleSheet, Pressable, Platform,
 } from "react-native";
 import { router, type Href } from "expo-router";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -9,14 +8,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
-
-const reviews = [
-  { author: "Amangül", text: "Bilet almak aňsat eken, 2 sagadyň içinde bilet alyp berdiler!" },
-  { author: "Didar", text: "Ýeňil sag bol, indi otran ýerimden hem kösenmän bilet alýan." },
-  { author: "Jeren", text: "Ynamymy ödediler, 4 sagadyň içinde SMS iberildi." },
-  { author: "Gözel", text: "Örän gowy hyzmat, gyssagly ýagdaýda hem kömek etdiler." },
-  { author: "Myrat", text: "Ýeňil bilen her zat ýeňil bolýar, maslahat berýärin!" },
-];
 
 function ServiceCard({ icon, title, desc, onPress, color }: {
   icon: React.ReactNode; title: string; desc: string; onPress: () => void; color: string;
@@ -40,7 +31,6 @@ export default function HomeScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { balance } = useBonusPul();
-  const colorScheme = useColorScheme();
   const isWeb = Platform.OS === "web";
 
   const [nums, setNums] = useState({ users: 0, orders: 0, rating: 0 });
@@ -183,70 +173,6 @@ export default function HomeScreen() {
         </View>
         <Feather name="arrow-right" size={20} color="#fff" />
       </Pressable>
-
-      {/* BAZAR BANNER */}
-      <Pressable
-        onPress={() => nav("/bazar")}
-        style={({ pressed }) => [styles.banner, { opacity: pressed ? 0.9 : 1, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border }]}
-      >
-        <View style={[styles.bannerIcon, { backgroundColor: colors.primary + "20" }]}>
-          <Ionicons name="storefront-outline" size={26} color={colors.primary} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.bannerTitle, { color: colors.foreground }]}>Sanly bazar</Text>
-          <Text style={[styles.bannerDesc, { color: colors.mutedForeground }]}>Akkauntlar we sanly harytlar</Text>
-        </View>
-        <Feather name="arrow-right" size={20} color={colors.primary} />
-      </Pressable>
-
-      {/* TEKLIP BANNER */}
-      <Pressable
-        onPress={() => nav("/teklip")}
-        style={({ pressed }) => [styles.banner, { opacity: pressed ? 0.9 : 1, backgroundColor: colors.primary }]}
-      >
-        <View style={[styles.bannerIcon, { backgroundColor: "rgba(255,255,255,0.2)" }]}>
-          <Ionicons name="bulb-outline" size={26} color="#fff" />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.bannerTitle}>Öz hyzmatyňyzy teklip ediň</Text>
-          <Text style={styles.bannerDesc}>Teklipleriňize garaşýarys!</Text>
-        </View>
-        <Feather name="arrow-right" size={20} color="#fff" />
-      </Pressable>
-
-      {/* REVIEWS */}
-      <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
-        <Ionicons name="star" size={16} color="#f59e0b" /> Müşderilerimiziň pikirleri
-      </Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingLeft: 16 }}>
-        {reviews.map((r, i) => (
-          <View key={i} style={[styles.reviewCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={styles.reviewHeader}>
-              <View style={[styles.reviewAvatar, { backgroundColor: colors.primary }]}>
-                <Text style={styles.reviewAvatarText}>{r.author[0]}</Text>
-              </View>
-              <View>
-                <Text style={[styles.reviewAuthor, { color: colors.primary }]}>{r.author}</Text>
-                <Text style={{ color: "#f59e0b", fontSize: 11 }}>★★★★★</Text>
-              </View>
-            </View>
-            <Text style={[styles.reviewText, { color: colors.mutedForeground }]}>{r.text}</Text>
-          </View>
-        ))}
-      </ScrollView>
-
-      {/* SOCIAL */}
-      <View style={styles.socialRow}>
-        {[
-          { icon: "logo-instagram" as const, color: "#e1306c", url: "https://www.instagram.com/yenil_tm" },
-          { icon: "paper-plane-outline" as const, color: "#0088cc", url: "http://t.me/yenil_tm" },
-        ].map((s, i) => (
-          <Pressable key={i} onPress={() => Linking.openURL(s.url)}
-            style={[styles.socialBtn, { backgroundColor: s.color }]}>
-            <Ionicons name={s.icon} size={22} color="#fff" />
-          </Pressable>
-        ))}
-      </View>
     </ScrollView>
   );
 }
