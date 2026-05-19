@@ -58,7 +58,6 @@ function AgentChatModal({ visible, onClose }: { visible: boolean; onClose: () =>
         style={{ flex: 1, backgroundColor: colors.background }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        {/* Header */}
         <View style={[chatStyles.header, { backgroundColor: colors.primary, paddingTop: insets.top + 8 }]}>
           <View style={chatStyles.agentInfo}>
             <View style={chatStyles.agentAvatarWrap}>
@@ -80,7 +79,6 @@ function AgentChatModal({ visible, onClose }: { visible: boolean; onClose: () =>
           </View>
         </View>
 
-        {/* Messages */}
         <FlatList
           ref={flatRef}
           data={messages}
@@ -104,7 +102,6 @@ function AgentChatModal({ visible, onClose }: { visible: boolean; onClose: () =>
           )}
         />
 
-        {/* Input */}
         <View style={[chatStyles.inputRow, { borderTopColor: colors.border, backgroundColor: colors.background, paddingBottom: insets.bottom + 8 }]}>
           <TextInput
             value={input}
@@ -127,6 +124,21 @@ function AgentChatModal({ visible, onClose }: { visible: boolean; onClose: () =>
   );
 }
 
+// Futuristic corner bracket decoration
+function CornerBrackets({ color }: { color: string }) {
+  const s = 14;
+  const t = 2;
+  const br = { borderColor: color };
+  return (
+    <>
+      <View style={{ position: "absolute", top: 8, left: 8, width: s, height: s, borderTopWidth: t, borderLeftWidth: t, ...br }} />
+      <View style={{ position: "absolute", top: 8, right: 8, width: s, height: s, borderTopWidth: t, borderRightWidth: t, ...br }} />
+      <View style={{ position: "absolute", bottom: 8, left: 8, width: s, height: s, borderBottomWidth: t, borderLeftWidth: t, ...br }} />
+      <View style={{ position: "absolute", bottom: 8, right: 8, width: s, height: s, borderBottomWidth: t, borderRightWidth: t, ...br }} />
+    </>
+  );
+}
+
 export default function HomeScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -138,6 +150,19 @@ export default function HomeScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(path as Href);
   };
+
+  // Futuristic card always uses dark palette
+  const CARD_BG = "#0b1a12";
+  const CARD_BORDER = colors.primary + "70";
+  const GRID = colors.primary + "10";
+
+  const CAPS = [
+    { icon: "train-outline" as const, label: "Bilet", color: colors.primary },
+    { icon: "cash-outline" as const, label: "Töleg", color: "#38bdf8" },
+    { icon: "phone-portrait-outline" as const, label: "TMCell", color: "#a78bfa" },
+    { icon: "search-outline" as const, label: "Gözleg", color: "#fbbf24" },
+    { icon: "apps-outline" as const, label: "Ulgam", color: "#34d399" },
+  ];
 
   return (
     <>
@@ -157,91 +182,194 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* YENIL AI AGENT CARD */}
-        <View style={[styles.agentSection, { marginHorizontal: 16, marginTop: -18 }]}>
-          <View style={[styles.agentCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            {/* Top row */}
-            <View style={styles.agentTopRow}>
-              <View style={styles.agentAvatarGroup}>
-                <View style={[styles.agentAvatar, { backgroundColor: colors.primary }]}>
-                  <MaterialCommunityIcons name="robot-outline" size={26} color="#fff" />
+        {/* ── FUTURISTIC AI AGENT CARD ── */}
+        <View style={{ marginHorizontal: 16, marginTop: -20, zIndex: 10 }}>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setChatOpen(true);
+            }}
+            style={({ pressed }) => [{
+              backgroundColor: CARD_BG,
+              borderRadius: 20,
+              borderWidth: 1.5,
+              borderColor: CARD_BORDER,
+              overflow: "hidden",
+              opacity: pressed ? 0.92 : 1,
+              shadowColor: colors.primary,
+              shadowOpacity: 0.35,
+              shadowRadius: 18,
+              shadowOffset: { width: 0, height: 4 },
+              elevation: 10,
+            }]}
+          >
+            {/* Corner brackets */}
+            <CornerBrackets color={colors.primary + "90"} />
+
+            {/* Subtle scan line grid overlay */}
+            <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+              pointerEvents="none">
+              {[...Array(6)].map((_, i) => (
+                <View key={i} style={{
+                  position: "absolute", left: 0, right: 0,
+                  top: i * 34, height: 1, backgroundColor: GRID,
+                }} />
+              ))}
+            </View>
+
+            {/* TOP ROW */}
+            <View style={{ flexDirection: "row", alignItems: "center", padding: 16, gap: 12 }}>
+              {/* Avatar with rings */}
+              <View style={{ position: "relative", width: 52, height: 52 }}>
+                <View style={{
+                  position: "absolute", top: -5, bottom: -5, left: -5, right: -5,
+                  borderRadius: 9999, borderWidth: 1,
+                  borderColor: colors.primary + "30",
+                }} />
+                <View style={{
+                  width: 52, height: 52, borderRadius: 18,
+                  backgroundColor: colors.primary + "25",
+                  borderWidth: 1.5, borderColor: colors.primary + "60",
+                  alignItems: "center", justifyContent: "center",
+                }}>
+                  <MaterialCommunityIcons name="robot-outline" size={26} color={colors.primary} />
                 </View>
-                <View style={styles.agentOnline} />
+                {/* Online dot */}
+                <View style={{
+                  position: "absolute", bottom: 1, right: 1,
+                  width: 12, height: 12, borderRadius: 6,
+                  backgroundColor: "#4ade80", borderWidth: 2, borderColor: CARD_BG,
+                }} />
               </View>
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <Text style={[styles.agentName, { color: colors.foreground }]}>Ýeňil AI Agent</Text>
-                  <View style={[styles.testBadge, { backgroundColor: "#f59e0b22" }]}>
-                    <Text style={[styles.testBadgeText, { color: "#f59e0b" }]}>SYNAG</Text>
+
+              {/* Name + status */}
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                  <Text style={{ color: "#fff", fontSize: 15, fontWeight: "800", letterSpacing: 0.2 }}>
+                    Ýeňil AI Agent
+                  </Text>
+                  <View style={{
+                    backgroundColor: "#f59e0b22", borderRadius: 5,
+                    paddingHorizontal: 6, paddingVertical: 2,
+                    borderWidth: 1, borderColor: "#f59e0b55",
+                  }}>
+                    <Text style={{ color: "#fbbf24", fontSize: 8, fontWeight: "800", letterSpacing: 1 }}>SYNAG</Text>
                   </View>
                 </View>
-                <Text style={[styles.agentDesc, { color: colors.mutedForeground }]}>
-                  Ähli işleri sorag esasynda ýerine ýetirýän intellektual kömekçi
-                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: "#4ade80" }} />
+                  <Text style={{ color: colors.primary + "cc", fontSize: 11, fontWeight: "600" }}>
+                    Onlaýn • Taýýar
+                  </Text>
+                </View>
               </View>
+
               {/* Settings icon */}
               <Pressable
                 onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-                style={[styles.agentIconBtn, { backgroundColor: colors.background, borderColor: colors.border }]}
+                style={{
+                  width: 34, height: 34, borderRadius: 10,
+                  backgroundColor: colors.primary + "15",
+                  borderWidth: 1, borderColor: colors.primary + "30",
+                  alignItems: "center", justifyContent: "center",
+                }}
               >
-                <Ionicons name="settings-outline" size={17} color={colors.mutedForeground} />
+                <Ionicons name="settings-outline" size={16} color={colors.primary + "cc"} />
               </Pressable>
             </View>
 
-            {/* Capabilities */}
-            <View style={[styles.capabilityRow, { borderTopColor: colors.border }]}>
-              {[
-                { icon: "train-outline", label: "Bilet", color: colors.primary },
-                { icon: "cash-outline", label: "Töleg", color: "#0ea5e9" },
-                { icon: "phone-portrait-outline", label: "TMCell", color: "#8b5cf6" },
-                { icon: "search-outline", label: "Gözleg", color: "#f59e0b" },
-                { icon: "apps-outline", label: "Ulgam", color: "#10b981" },
-              ].map((cap, i) => (
-                <View key={i} style={styles.capItem}>
-                  <View style={[styles.capIcon, { backgroundColor: cap.color + "18" }]}>
-                    <Ionicons name={cap.icon as any} size={14} color={cap.color} />
+            {/* Divider with label */}
+            <View style={{
+              flexDirection: "row", alignItems: "center",
+              marginHorizontal: 16, marginBottom: 10, gap: 8,
+            }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.primary + "25" }} />
+              <Text style={{ color: colors.primary + "80", fontSize: 9, fontWeight: "700", letterSpacing: 1.5 }}>
+                MÜMKINÇILIKLER
+              </Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.primary + "25" }} />
+            </View>
+
+            {/* Capability chips */}
+            <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 16, marginBottom: 14, gap: 6 }}>
+              {CAPS.map((cap, i) => (
+                <View key={i} style={{ alignItems: "center", gap: 5 }}>
+                  <View style={{
+                    width: 36, height: 36, borderRadius: 10,
+                    backgroundColor: cap.color + "18",
+                    borderWidth: 1, borderColor: cap.color + "35",
+                    alignItems: "center", justifyContent: "center",
+                  }}>
+                    <Ionicons name={cap.icon} size={15} color={cap.color} />
                   </View>
-                  <Text style={[styles.capLabel, { color: colors.mutedForeground }]}>{cap.label}</Text>
+                  <Text style={{ color: cap.color + "cc", fontSize: 9, fontWeight: "700" }}>{cap.label}</Text>
                 </View>
               ))}
             </View>
 
-            {/* Action buttons */}
-            <View style={styles.agentBtnRow}>
-              {/* + New Chat button */}
+            {/* Action row */}
+            <View style={{
+              flexDirection: "row", gap: 8,
+              paddingHorizontal: 14, paddingBottom: 14, paddingTop: 2,
+            }}>
+              {/* Main chat button */}
               <Pressable
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   setChatOpen(true);
                 }}
-                style={({ pressed }) => [styles.newChatBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.88 : 1 }]}
+                style={({ pressed }) => ({
+                  flex: 1, borderRadius: 13,
+                  backgroundColor: colors.primary,
+                  paddingVertical: 12, paddingHorizontal: 14,
+                  flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+                  opacity: pressed ? 0.85 : 1,
+                  shadowColor: colors.primary,
+                  shadowOpacity: 0.5,
+                  shadowRadius: 8,
+                  shadowOffset: { width: 0, height: 2 },
+                })}
               >
-                <View style={styles.newChatBtnInner}>
-                  <View style={styles.plusCircle}>
-                    <Ionicons name="add" size={16} color={colors.primary} />
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <View style={{
+                    width: 22, height: 22, borderRadius: 11,
+                    backgroundColor: "rgba(255,255,255,0.25)",
+                    alignItems: "center", justifyContent: "center",
+                  }}>
+                    <Ionicons name="add" size={15} color="#fff" />
                   </View>
-                  <Text style={styles.newChatBtnText}>Täze söhbet</Text>
+                  <Text style={{ color: "#fff", fontWeight: "700", fontSize: 14 }}>Täze söhbet</Text>
                 </View>
-                <MaterialCommunityIcons name="robot-outline" size={18} color="rgba(255,255,255,0.7)" />
+                <MaterialCommunityIcons name="robot-outline" size={17} color="rgba(255,255,255,0.65)" />
               </Pressable>
 
-              {/* Info/history button */}
+              {/* History */}
               <Pressable
                 onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-                style={[styles.agentSecondBtn, { backgroundColor: colors.background, borderColor: colors.border }]}
+                style={{
+                  width: 44, height: 44, borderRadius: 13,
+                  backgroundColor: colors.primary + "18",
+                  borderWidth: 1, borderColor: colors.primary + "35",
+                  alignItems: "center", justifyContent: "center",
+                }}
               >
-                <Ionicons name="time-outline" size={18} color={colors.mutedForeground} />
+                <Ionicons name="time-outline" size={18} color={colors.primary} />
               </Pressable>
 
-              {/* Mic button */}
+              {/* Mic */}
               <Pressable
                 onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-                style={[styles.agentSecondBtn, { backgroundColor: colors.background, borderColor: colors.border }]}
+                style={{
+                  width: 44, height: 44, borderRadius: 13,
+                  backgroundColor: colors.primary + "18",
+                  borderWidth: 1, borderColor: colors.primary + "35",
+                  alignItems: "center", justifyContent: "center",
+                }}
               >
-                <Ionicons name="mic-outline" size={18} color={colors.mutedForeground} />
+                <Ionicons name="mic-outline" size={18} color={colors.primary} />
               </Pressable>
             </View>
-          </View>
+          </Pressable>
         </View>
 
         {/* SERVICES */}
@@ -357,7 +485,7 @@ const chatStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   container: { flex: 1 },
   hero: {
-    paddingHorizontal: 20, paddingBottom: 36,
+    paddingHorizontal: 20, paddingBottom: 38,
     borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
   },
   heroTitle: { fontSize: 36, fontWeight: "800", color: "#fff", marginBottom: 6 },
@@ -368,57 +496,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8, borderRadius: 50, alignSelf: "flex-start",
   },
   balanceText: { color: "#fff", fontWeight: "700", fontSize: 15 },
-
-  agentSection: { zIndex: 10 },
-  agentCard: {
-    borderRadius: 22, borderWidth: 1,
-    shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 },
-    elevation: 6, overflow: "hidden",
-  },
-  agentTopRow: { flexDirection: "row", alignItems: "flex-start", padding: 16, gap: 0 },
-  agentAvatarGroup: { position: "relative" },
-  agentAvatar: {
-    width: 50, height: 50, borderRadius: 18,
-    alignItems: "center", justifyContent: "center",
-  },
-  agentOnline: {
-    position: "absolute", bottom: 2, right: 2,
-    width: 12, height: 12, borderRadius: 6,
-    backgroundColor: "#4ade80", borderWidth: 2, borderColor: "#fff",
-  },
-  agentName: { fontSize: 15, fontWeight: "800" },
-  agentDesc: { fontSize: 11, marginTop: 3, lineHeight: 15 },
-  testBadge: { borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
-  testBadgeText: { fontSize: 8, fontWeight: "800", letterSpacing: 0.5 },
-  agentIconBtn: {
-    width: 34, height: 34, borderRadius: 11,
-    alignItems: "center", justifyContent: "center",
-    borderWidth: 1, marginLeft: 4,
-  },
-
-  capabilityRow: {
-    flexDirection: "row", paddingHorizontal: 16, paddingVertical: 12,
-    borderTopWidth: 1, justifyContent: "space-between",
-  },
-  capItem: { alignItems: "center", gap: 5 },
-  capIcon: { width: 32, height: 32, borderRadius: 10, alignItems: "center", justifyContent: "center" },
-  capLabel: { fontSize: 9, fontWeight: "600" },
-
-  agentBtnRow: { flexDirection: "row", gap: 8, padding: 14, paddingTop: 0 },
-  newChatBtn: {
-    flex: 1, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14,
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-  },
-  newChatBtnInner: { flexDirection: "row", alignItems: "center", gap: 8 },
-  plusCircle: {
-    width: 24, height: 24, borderRadius: 12,
-    backgroundColor: "#fff", alignItems: "center", justifyContent: "center",
-  },
-  newChatBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
-  agentSecondBtn: {
-    width: 44, height: 44, borderRadius: 14,
-    alignItems: "center", justifyContent: "center", borderWidth: 1,
-  },
 
   sectionTitle: { fontSize: 17, fontWeight: "700", marginLeft: 16, marginTop: 20, marginBottom: 12 },
   servicesGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12, paddingHorizontal: 16, marginBottom: 16 },
