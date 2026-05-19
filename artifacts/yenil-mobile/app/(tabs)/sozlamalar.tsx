@@ -6,6 +6,7 @@ import {
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
+import { router, type Href } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 
@@ -183,6 +184,22 @@ export default function SozlamalarScreen() {
 
         {section("PROGRAMMA")}
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <SettingRow
+            icon="information-circle-outline"
+            iconColor="#0284c7"
+            label="Programmany barada"
+            desc="Wersiýa, şertler we maglumat"
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/about" as Href); }}
+          />
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          <SettingRow
+            icon="help-circle-outline"
+            iconColor="#059669"
+            label="Goldaw & Kömek"
+            desc="Soraglar we jogaplar"
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/help" as Href); }}
+          />
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
           <SettingRow
             icon="refresh-outline"
             iconColor="#10b981"

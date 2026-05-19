@@ -354,20 +354,8 @@ export default function MoreScreen() {
             iconColor="#f59e0b"
             label="Teklip ibermek"
             desc="Öz hyzmatyňyzy teklip ediň"
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/teklip" as Href); }}
-            colors={colors}
-          />
-          <GroupRow
-            icon="megaphone-outline"
-            iconBg="#ffe4e6"
-            iconColor="#e11d48"
-            label="SMM & Dizaýn"
-            desc="Marketing, reklama, designer tapyň"
-            badge="Täze"
-            badgeBg="#dcfce7"
-            badgeColor="#15803d"
             last
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/smm" as Href); }}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/teklip" as Href); }}
             colors={colors}
           />
         </View>
@@ -426,35 +414,6 @@ export default function MoreScreen() {
           </View>
         </Pressable>
 
-        {/* ── SECTION: Programmany barada ── */}
-        <Text style={[s.groupTitle, { color: colors.mutedForeground }]}>PROGRAMMA</Text>
-        <View style={[s.group, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <GroupRow
-            icon="information-circle-outline"
-            iconBg="#f0f9ff"
-            iconColor="#0284c7"
-            label="Programmany barada"
-            desc="Wersiýa, şertler we maglumat"
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/about" as Href); }}
-            colors={colors}
-          />
-          <GroupRow
-            icon="help-circle-outline"
-            iconBg="#f0fdf4"
-            iconColor="#059669"
-            label="Goldaw & Kömek"
-            desc="Soraglar we jogaplar"
-            last
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/help" as Href); }}
-            colors={colors}
-          />
-        </View>
-
-        {/* ── Version badge ── */}
-        <View style={s.versionRow}>
-          <View style={[s.versionDot, { backgroundColor: colors.primary }]} />
-          <Text style={[s.versionText, { color: colors.mutedForeground }]}>Ýeňil v2.4.1 • Ähli hukuklar goralýar</Text>
-        </View>
       </ScrollView>
     </>
   );
