@@ -19,7 +19,7 @@ const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AED
 type FilterType = "all" | OrderType;
 
 const TYPE_META: Record<OrderType, { icon: keyof typeof Ionicons.glyphMap; color: string; label: string }> = {
-  "bonus-buy":      { icon: "arrow-down-circle",    color: "#0d9488", label: "BP Satyn almak" },
+  "bonus-buy":      { icon: "arrow-down-circle",    color: "#15803d", label: "BP Satyn almak" },
   "bonus-sell":     { icon: "arrow-up-circle",      color: "#059669", label: "BP Satmak" },
   "currency-buy":   { icon: "swap-horizontal",      color: "#6366f1", label: "Walýuta almak" },
   "currency-sell":  { icon: "swap-horizontal",      color: "#f59e0b", label: "Walýuta satmak" },
@@ -65,7 +65,7 @@ export default function StatistikaScreen() {
   const [repeatLoading, setRepeatLoading] = useState(false);
   const [repeatDone, setRepeatDone] = useState(false);
 
-  const topPad = (isWeb ? 67 : insets.top) + 12;
+  const topPad = (isWeb ? 0 : insets.top) + 12;
 
   const load = useCallback(async () => {
     setLoading(true);

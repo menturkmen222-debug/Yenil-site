@@ -127,7 +127,7 @@ export default function PayScreen() {
     } finally { setSellLoading(false); }
   }
 
-  const topPad = (isWeb ? 67 : insets.top) + 12;
+  const topPad = (isWeb ? 0 : insets.top) + 12;
 
   function CryptoFields({ isSell }: { isSell: boolean }) {
     const crypto = isSell ? sellCrypto : buyCrypto;

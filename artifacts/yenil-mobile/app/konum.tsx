@@ -208,7 +208,7 @@ export default function KonumScreen() {
 
   return (
     <View style={[s.root, { backgroundColor: colors.background }]}>
-      <LinearGradient colors={["#0f766e", "#0d9488", "#14b8a6"]} style={[s.header, { paddingTop: (isWeb ? 67 : insets.top) + 12 }]}>
+      <LinearGradient colors={["#166534", "#15803d", "#16a34a"]} style={[s.header, { paddingTop: (isWeb ? 0 : insets.top) + 12 }]}>
         <View style={s.headerRow}>
           <Pressable onPress={() => router.back()} style={s.backBtn}>
             <Feather name="arrow-left" size={20} color="#fff" />
@@ -222,14 +222,14 @@ export default function KonumScreen() {
 
         <View style={[s.tabRow]}>
           <Pressable onPress={() => setTab("create")} style={[s.tabBtn, tab === "create" && s.tabActive]}>
-            <Ionicons name="link-outline" size={15} color={tab === "create" ? "#0d9488" : "rgba(255,255,255,0.75)"} />
-            <Text style={[s.tabLabel, tab === "create" ? { color: "#0d9488" } : { color: "rgba(255,255,255,0.75)" }]}>
+            <Ionicons name="link-outline" size={15} color={tab === "create" ? "#15803d" : "rgba(255,255,255,0.75)"} />
+            <Text style={[s.tabLabel, tab === "create" ? { color: "#15803d" } : { color: "rgba(255,255,255,0.75)" }]}>
               Link dörediň
             </Text>
           </Pressable>
           <Pressable onPress={() => setTab("live")} style={[s.tabBtn, tab === "live" && s.tabActive]}>
-            <Ionicons name="radio-outline" size={15} color={tab === "live" ? "#0d9488" : "rgba(255,255,255,0.75)"} />
-            <Text style={[s.tabLabel, tab === "live" ? { color: "#0d9488" } : { color: "rgba(255,255,255,0.75)" }]}>
+            <Ionicons name="radio-outline" size={15} color={tab === "live" ? "#15803d" : "rgba(255,255,255,0.75)"} />
+            <Text style={[s.tabLabel, tab === "live" ? { color: "#15803d" } : { color: "rgba(255,255,255,0.75)" }]}>
               Canlý paýlaş
             </Text>
           </Pressable>
@@ -270,7 +270,7 @@ export default function KonumScreen() {
             style={({ pressed }) => [s.createBtn, { opacity: pressed || creating ? 0.75 : 1 }]}
           >
             <LinearGradient
-              colors={limitReached ? ["#7c3aed", "#a855f7"] : ["#0f766e", "#14b8a6"]}
+              colors={limitReached ? ["#7c3aed", "#a855f7"] : ["#166534", "#16a34a"]}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
               style={s.createBtnInner}
             >
@@ -323,7 +323,7 @@ export default function KonumScreen() {
                       onPress={() => Linking.openURL(getShareUrl(share.token))}
                       style={({ pressed }) => [s.actionBtnPrimary, { opacity: pressed ? 0.7 : 1 }]}
                     >
-                      <LinearGradient colors={["#0f766e", "#14b8a6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={s.actionBtnPrimaryInner}>
+                      <LinearGradient colors={["#166534", "#16a34a"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={s.actionBtnPrimaryInner}>
                         <Ionicons name="open-outline" size={15} color="#fff" />
                         <Text style={s.actionBtnPrimaryText}>Aç</Text>
                       </LinearGradient>
@@ -342,7 +342,7 @@ export default function KonumScreen() {
           {liveStatus === "idle" || liveStatus === "requesting" ? (
             <View style={s.liveIdleBox}>
               <Animated.View style={[s.livePulseOuter, { transform: [{ scale: pulseAnim }] }]}>
-                <LinearGradient colors={["#0f766e", "#14b8a6"]} style={s.livePulseInner}>
+                <LinearGradient colors={["#166534", "#16a34a"]} style={s.livePulseInner}>
                   <Ionicons name="radio" size={44} color="#fff" />
                 </LinearGradient>
               </Animated.View>
@@ -370,7 +370,7 @@ export default function KonumScreen() {
                 disabled={liveStatus === "requesting"}
                 style={({ pressed }) => [s.liveStartBtn, { opacity: pressed || liveStatus === "requesting" ? 0.75 : 1 }]}
               >
-                <LinearGradient colors={["#0f766e", "#14b8a6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={s.liveStartBtnInner}>
+                <LinearGradient colors={["#166534", "#16a34a"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={s.liveStartBtnInner}>
                   {liveStatus === "requesting"
                     ? <ActivityIndicator color="#fff" size="small" />
                     : <Ionicons name="radio" size={22} color="#fff" />
@@ -521,7 +521,7 @@ const s = StyleSheet.create({
   actionBtnPrimaryText: { color: "#fff", fontSize: 13, fontWeight: "700" },
 
   liveIdleBox: { alignItems: "center", gap: 18 },
-  livePulseOuter: { width: 110, height: 110, borderRadius: 55, alignItems: "center", justifyContent: "center", shadowColor: "#0d9488", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.35, shadowRadius: 20, elevation: 12 },
+  livePulseOuter: { width: 110, height: 110, borderRadius: 55, alignItems: "center", justifyContent: "center", shadowColor: "#15803d", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.35, shadowRadius: 20, elevation: 12 },
   livePulseInner: { width: 110, height: 110, borderRadius: 55, alignItems: "center", justifyContent: "center" },
   liveTitle: { fontSize: 20, fontWeight: "800", textAlign: "center" },
   liveDesc: { fontSize: 14, textAlign: "center", lineHeight: 21, maxWidth: 300 },

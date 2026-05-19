@@ -74,7 +74,7 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       {/* HERO */}
-      <View style={[styles.hero, { backgroundColor: colors.primary, paddingTop: (isWeb ? 67 : insets.top) + 24 }]}>
+      <View style={[styles.hero, { backgroundColor: colors.primary, paddingTop: (isWeb ? 0 : insets.top) + 24 }]}>
         <Text style={styles.heroTitle}>Ýeňil</Text>
         <Text style={styles.heroSub}>Türkmenistanda iň ynamly onlayn hyzmatlar</Text>
         <View style={styles.balanceBadge}>

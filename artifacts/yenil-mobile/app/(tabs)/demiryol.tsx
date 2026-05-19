@@ -174,7 +174,7 @@ export default function DemiryolScreen() {
     } finally { setLoading(false); }
   }
 
-  const topPad = (isWeb ? 67 : insets.top) + 12;
+  const topPad = (isWeb ? 0 : insets.top) + 12;
 
   return (
     <View style={[s.container, { backgroundColor: colors.background }]}>

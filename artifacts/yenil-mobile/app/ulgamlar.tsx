@@ -233,7 +233,7 @@ export default function UlgamlarScreen() {
 
   return (
     <View style={[{ flex: 1 }, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: (isWeb ? 67 : insets.top) + 12, backgroundColor: colors.primary }]}>
+      <View style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12, backgroundColor: colors.primary }]}>
         <Pressable onPress={activeApp ? () => setActiveApp(null) : () => router.back()} style={{ padding: 4 }}>
           <Feather name="arrow-left" size={20} color="#fff" />
         </Pressable>

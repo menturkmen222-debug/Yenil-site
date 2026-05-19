@@ -9,7 +9,7 @@ import { useColors } from "@/hooks/useColors";
 const menuItems = [
   { icon: "location-outline" as const, label: "Ýer paýlaşma", desc: "Canlý ýer yzarlama we link paýlaşma", href: "/konum", color: "#4f46e5" },
   { icon: "apps-outline" as const, label: "Içerki ulgamlar", desc: "Aydym, Belet film, Belet music", href: "/ulgamlar", color: "#f59e0b" },
-  { icon: "bulb-outline" as const, label: "Teklip ibermek", desc: "Öz hyzmatyňyzy teklip ediň", href: "/teklip", color: "#0d9488" },
+  { icon: "bulb-outline" as const, label: "Teklip ibermek", desc: "Öz hyzmatyňyzy teklip ediň", href: "/teklip", color: "#15803d" },
   { icon: "storefront-outline" as const, label: "Sanly bazar", desc: "Akkauntlar we sanly harytlar", href: "/bazar", color: "#8b5cf6" },
   { icon: "help-circle-outline" as const, label: "Kömek / FAQ", desc: "Sorag-jogap we goldaw", href: "/help", color: "#0ea5e9" },
   { icon: "information-circle-outline" as const, label: "Hakynda", desc: "Kompaniýa barada maglumat", href: "/about", color: "#10b981" },
@@ -23,7 +23,7 @@ export default function MoreScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: (isWeb ? 67 : insets.top) + 12, backgroundColor: colors.primary }]}>
+      <View style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12, backgroundColor: colors.primary }]}>
         <Text style={styles.headerTitle}>Has köp</Text>
         <Text style={styles.headerSub}>Ähli hyzmatlar</Text>
       </View>

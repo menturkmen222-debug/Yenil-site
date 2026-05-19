@@ -251,7 +251,7 @@ export default function BazarScreen() {
 
   return (
     <View style={[{ flex: 1 }, { backgroundColor: colors.background }]}>
-      <View style={[st.header, { paddingTop: (isWeb ? 67 : insets.top) + 12, backgroundColor: colors.primary }]}>
+      <View style={[st.header, { paddingTop: (isWeb ? 0 : insets.top) + 12, backgroundColor: colors.primary }]}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             <Pressable onPress={() => router.back()} style={{ padding: 4 }}>

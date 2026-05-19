@@ -582,7 +582,7 @@ export default function TmcellScreen() {
 
   return (
     <View style={[{ flex: 1 }, { backgroundColor: colors.background }]}>
-      <View style={[s.header, { paddingTop: (isWeb ? 67 : insets.top) + 12, backgroundColor: colors.primary }]}>
+      <View style={[s.header, { paddingTop: (isWeb ? 0 : insets.top) + 12, backgroundColor: colors.primary }]}>
         <Text style={s.headerTitle}>TMCell & Bonus Pul</Text>
         <View style={s.balanceBadge}>
           <Ionicons name="wallet-outline" size={14} color="#fff" />
