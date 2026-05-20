@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import {
-  WalletIcon, LightbulbIcon, ShoppingBagIcon, TrainIcon,
-  StarIcon, ArrowRightIcon, SparkleIcon, GridIcon,
+  WalletIcon, LightbulbIcon, ShoppingBagIcon,
+  StarIcon, ArrowRightIcon, GridIcon,
 } from "@/components/Icons";
 
 function MapPinIcon({ size = 26, strokeWidth = 1.7 }: { size?: number; strokeWidth?: number }) {
@@ -75,7 +75,6 @@ function ServiceCard({
 
 export default function Home() {
   const [shuffled] = useState(() => shuffle(reviews));
-  const [showModal, setShowModal] = useState(false);
   const { balance } = useBonusPul();
   const [nums, setNums] = useState({ users: 0, orders: 0, rating: 0 });
 
@@ -138,13 +137,38 @@ export default function Home() {
       <section style={{ padding: "0 20px 28px" }}>
         <div className="container">
           <div className="service-grid">
-            <ServiceCard
-              img="/images/logo-demiryol.png"
-              title="Ýeňil demirýollary"
-              desc="Kart tölegsiz demirýol biletlerini tiz we ynamly satyn alyň"
-              onClick={() => setShowModal(true)}
-              delay={0.05}
-            />
+            <Link href="/gatnaw">
+              <div className="service-card-premium animate-in" style={{ animationDelay: "0.05s", cursor: "pointer", gridColumn: "span 2", display: "flex", flexDirection: "row", alignItems: "center", gap: 20, padding: "22px 24px", textAlign: "left" }}>
+                <div style={{
+                  width: 72, height: 72, borderRadius: 20, flexShrink: 0,
+                  background: "linear-gradient(135deg, #0d9488, #14b8a6)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 10px 28px rgba(13,148,136,0.35)", color: "white",
+                }}>
+                  <i className="fas fa-route" style={{ fontSize: "1.7rem" }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 900, fontSize: "1.05rem", color: "var(--primary)", marginBottom: 4, letterSpacing: "0.01em" }}>
+                    Gatnaw we Ulag
+                  </div>
+                  <div style={{ fontSize: "0.8rem", opacity: 0.62, lineHeight: 1.55 }}>
+                    Demirýol, howa, taksi, logistika — 10 kategoriýa, 26 hyzmat
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 10 }}>
+                    <span style={{
+                      fontSize: "0.7rem", fontWeight: 700,
+                      background: "rgba(13,148,136,0.1)",
+                      border: "1px solid rgba(13,148,136,0.2)",
+                      borderRadius: 50, padding: "3px 10px", color: "var(--primary)",
+                    }}>
+                      <i className="fas fa-train" style={{ marginRight: 4 }} />
+                      Demirýol işleýär
+                    </span>
+                    <ArrowRightIcon size={16} strokeWidth={2.5} style={{ color: "var(--primary)" }} />
+                  </div>
+                </div>
+              </div>
+            </Link>
             <ServiceCard
               href="/tmcell"
               img="/images/logo-pay.png"
@@ -294,37 +318,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── DEMIRYOL MODAL ── */}
-      {showModal && (
-        <div
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999, display: "flex", justifyContent: "center", alignItems: "center", padding: 20 }}
-          onClick={() => setShowModal(false)}
-        >
-          <div
-            className="glass-card"
-            style={{ maxWidth: 380, width: "100%", padding: 32, textAlign: "center", animation: "fadeInUp 0.4s ease" }}
-            onClick={e => e.stopPropagation()}
-          >
-            <div style={{ width: 68, height: 68, borderRadius: 20, background: "var(--gradient)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 8px 24px rgba(13,148,136,0.3)", color: "white" }}>
-              <TrainIcon size={30} strokeWidth={1.6} />
-            </div>
-            <h3 style={{ color: "var(--primary)", marginBottom: 10, fontSize: "1.15rem" }}>Ulgam häzirki wagtda işlämeýär</h3>
-            <p style={{ lineHeight: 1.65, opacity: 0.72, marginBottom: 22, fontSize: "0.88rem" }}>
-              Bu bölümde düzeltme işleri dowam edýär. Siziň üçin ýene hem işläp başlaýar!
-            </p>
-            <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-              <Link href="/demiryol">
-                <button className="btn-primary" style={{ padding: "10px 20px", fontSize: "0.88rem" }}>
-                  <i className="fas fa-arrow-right" /> Bilet buýurmak
-                </button>
-              </Link>
-              <button className="btn-secondary" style={{ padding: "10px 20px", fontSize: "0.88rem" }} onClick={() => setShowModal(false)}>
-                Ýap
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
