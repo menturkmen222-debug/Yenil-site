@@ -337,12 +337,6 @@ export default function ToleglarScreen() {
             <Ionicons name="arrow-back" size={20} color="#fff" />
           </Pressable>
 
-          {/* Tag */}
-          <View style={heroStyles.tag}>
-            <Ionicons name="card-outline" size={13} color="rgba(255,255,255,0.9)" />
-            <Text style={heroStyles.tagText}>Töleg Merkezi</Text>
-          </View>
-
           {/* Title */}
           <Text style={heroStyles.title}>Tölegler we{"\n"}Hyzmatlar</Text>
           <Text style={heroStyles.subtitle}>
@@ -356,36 +350,7 @@ export default function ToleglarScreen() {
             <GlassStatCard num={String(activeServices)} label="Işleýär" />
           </View>
 
-          {/* Glassmorphism feature pills */}
-          <View style={heroStyles.pillsRow}>
-            {["Çalt töleg", "Taryh", "Ýatlatma"].map((p, i) => (
-              <View key={i} style={heroStyles.pill}>
-                <Ionicons
-                  name={i === 0 ? "flash-outline" : i === 1 ? "time-outline" : "notifications-outline"}
-                  size={11}
-                  color="rgba(255,255,255,0.85)"
-                />
-                <Text style={heroStyles.pillText}>{p}</Text>
-              </View>
-            ))}
-          </View>
         </LinearGradient>
-
-        {/* ── LEGEND ── */}
-        <View style={[legendStyles.wrap, { borderBottomColor: colors.border, backgroundColor: colors.card }]}>
-          <View style={legendStyles.item}>
-            <View style={[legendStyles.dot, { backgroundColor: "#7c3aed" }]} />
-            <Text style={[legendStyles.text, { color: colors.mutedForeground }]}>Işleýär</Text>
-          </View>
-          <View style={legendStyles.item}>
-            <View style={[legendStyles.dot, { backgroundColor: "#f59e0b" }]} />
-            <Text style={[legendStyles.text, { color: colors.mutedForeground }]}>Ýakynda</Text>
-          </View>
-          <View style={{ flex: 1 }} />
-          <Text style={[legendStyles.total, { color: colors.mutedForeground }]}>
-            {totalServices} hyzmat · {categoryCount} kategoriýa
-          </Text>
-        </View>
 
         {/* ── CATEGORIES ── */}
         <View style={{ paddingHorizontal: 14, paddingTop: 14 }}>

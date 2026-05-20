@@ -314,12 +314,6 @@ export default function GatnawScreen() {
             <Ionicons name="arrow-back" size={20} color="#fff" />
           </Pressable>
 
-          {/* Tag */}
-          <View style={heroStyles.tag}>
-            <Ionicons name="git-network-outline" size={13} color="rgba(255,255,255,0.9)" />
-            <Text style={heroStyles.tagText}>Transport Merkezi</Text>
-          </View>
-
           {/* Title */}
           <Text style={heroStyles.title}>Gatnaw we Ulag</Text>
           <Text style={heroStyles.subtitle}>
@@ -341,17 +335,6 @@ export default function GatnawScreen() {
           </View>
         </LinearGradient>
 
-        {/* ── LEGEND ── */}
-        <View style={[legendStyles.wrap, { borderBottomColor: colors.border }]}>
-          <View style={legendStyles.item}>
-            <View style={[legendStyles.dot, { backgroundColor: colors.primary }]} />
-            <Text style={[legendStyles.text, { color: colors.mutedForeground }]}>Işleýär</Text>
-          </View>
-          <View style={legendStyles.item}>
-            <View style={[legendStyles.dot, { backgroundColor: "#f59e0b" }]} />
-            <Text style={[legendStyles.text, { color: colors.mutedForeground }]}>Ýakynda</Text>
-          </View>
-        </View>
 
         {/* ── CATEGORIES ── */}
         <View style={{ paddingHorizontal: 14, paddingTop: 14 }}>
