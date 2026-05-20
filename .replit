@@ -9,31 +9,9 @@ args = ["pnpm", "store", "prune"]
 env = { "CI" = "true" }
 
 [workflows]
-runButton = "Project"
-
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Yenil Mobile"
-
-[[workflows.workflow]]
-name = "Yenil Mobile"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd artifacts/yenil-mobile && PORT=8081 pnpm dev"
-waitForPort = 8081
 
 [agent]
-stack = "PNPM_WORKSPACE"
+stack = "BEST_EFFORT_FALLBACK"
 expertMode = true
 
 [postMerge]
@@ -65,3 +43,4 @@ localPort = 25068
 externalPort = 4200
 
 [nix]
+channel = "stable-25_05"
