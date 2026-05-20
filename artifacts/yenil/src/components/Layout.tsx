@@ -4,7 +4,7 @@ import { useBonusPul } from "@/contexts/BonusPulContext";
 import {
   WalletIcon, SunIcon, MoonIcon,
   HomeIcon, NavTrainIcon, SimCardIcon, GridIcon, StoreIcon, InfoIcon, HeadphonesIcon,
-  ChevronRightIcon,
+  ChevronRightIcon, UserIcon,
 } from "@/components/Icons";
 
 function useTheme() {
@@ -95,6 +95,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </Link>
               </li>
 
+              {/* Profile link */}
+              <li>
+                <Link href="/profil">
+                  <div className={`profile-nav-btn${location === "/profil" ? " active" : ""}`}>
+                    <UserIcon size={15} strokeWidth={location === "/profil" ? 2.2 : 1.8} />
+                  </div>
+                </Link>
+              </li>
+
               {/* Theme toggle */}
               <li>
                 <button
@@ -165,6 +174,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     </Link>
                   );
                 })}
+
+                {/* Profile link in mobile */}
+                <Link
+                  href="/profil"
+                  onClick={() => setMenuOpen(false)}
+                  className={`mobile-nav-item${location === "/profil" ? " active" : ""}`}
+                >
+                  <div className={`mobile-nav-icon-wrap${location === "/profil" ? " active" : ""}`}>
+                    <UserIcon size={16} strokeWidth={location === "/profil" ? 2.2 : 1.8} />
+                  </div>
+                  <span className="mobile-nav-label">Profilim</span>
+                  <ChevronRightIcon size={13} strokeWidth={2} className="mobile-nav-arrow" />
+                </Link>
               </nav>
 
               <div className="mobile-divider" />

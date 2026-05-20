@@ -16,6 +16,7 @@ import Bazar from "@/pages/Bazar";
 import Konum from "@/pages/Konum";
 import KonumViewer from "@/pages/KonumViewer";
 import Gatnaw from "@/pages/Gatnaw";
+import Profil from "@/pages/Profil";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ function Router() {
             <Route path="/bazar" component={Bazar} />
             <Route path="/konum" component={Konum} />
             <Route path="/gatnaw" component={Gatnaw} />
+            <Route path="/profil" component={Profil} />
             <Route component={NotFound} />
           </Switch>
         </Layout>
