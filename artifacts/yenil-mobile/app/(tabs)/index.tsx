@@ -520,17 +520,61 @@ export default function HomeScreen() {
 
         {/* ── ÝEŇIL HYZMATLARY ── */}
         <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Ýeňil hyzmatlary</Text>
+
+        {/* ── GATNAW WE ULAG — Premium Transport Card ── */}
+        <Pressable
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); nav("/gatnaw"); }}
+          style={({ pressed }) => [gatnawCardStyles.outer, { opacity: pressed ? 0.93 : 1 }]}
+        >
+          <LinearGradient
+            colors={[colors.headerGradientStart, colors.headerGradientEnd] as [string, string]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={gatnawCardStyles.card}
+          >
+            {/* BG pattern overlay */}
+            <View style={gatnawCardStyles.patternOverlay} />
+
+            {/* Top row */}
+            <View style={gatnawCardStyles.topRow}>
+              <View style={gatnawCardStyles.iconWrap}>
+                <Ionicons name="git-network-outline" size={26} color="#fff" />
+              </View>
+              <View style={gatnawCardStyles.activeChip}>
+                <View style={gatnawCardStyles.activePulse} />
+                <Text style={gatnawCardStyles.activeChipText}>Howa · Demir ýol işleýär</Text>
+              </View>
+            </View>
+
+            {/* Title */}
+            <Text style={gatnawCardStyles.title}>Gatnaw we Ulag</Text>
+            <Text style={gatnawCardStyles.desc}>
+              Döwlet, hususy we logistika — 10 kategoriýa, 28 hyzmat bir ýerde
+            </Text>
+
+            {/* Stats + arrow */}
+            <View style={gatnawCardStyles.bottomRow}>
+              <View style={gatnawCardStyles.statsRow}>
+                {[
+                  { n: "10", l: "Kat." },
+                  { n: "28", l: "Hyzmat" },
+                  { n: "2", l: "Işleýär" },
+                ].map((s, i) => (
+                  <View key={i} style={gatnawCardStyles.statItem}>
+                    <Text style={gatnawCardStyles.statNum}>{s.n}</Text>
+                    <Text style={gatnawCardStyles.statLbl}>{s.l}</Text>
+                  </View>
+                ))}
+              </View>
+              <View style={gatnawCardStyles.arrowBtn}>
+                <Ionicons name="arrow-forward" size={18} color="#fff" />
+              </View>
+            </View>
+          </LinearGradient>
+        </Pressable>
+
+        {/* ── OTHER SERVICES GRID ── */}
         <View style={styles.servicesGrid}>
-          <ServiceCard
-            icon={<Ionicons name="train-outline" size={28} color={colors.primary} />}
-            title="Demirýol" desc="Kart tölegsiz bilet"
-            onPress={() => nav("/(demiryol)")} color={colors.primary}
-          />
-          <ServiceCard
-            icon={<Ionicons name="airplane-outline" size={28} color="#0ea5e9" />}
-            title="Howaýollary" desc="Içerki & Halkara uçuş"
-            onPress={() => nav("/howa")} color="#0ea5e9"
-          />
           <ServiceCard
             icon={<MaterialCommunityIcons name="currency-usd" size={28} color="#0ea5e9" />}
             title="Ýeňil Pay" desc="Walýuta çalyşmak"
@@ -807,4 +851,93 @@ const styles = StyleSheet.create({
   addCard: { width: 120, borderRadius: 18, borderWidth: 1, alignItems: "center", justifyContent: "center", gap: 10, padding: 16 },
   addCardIcon: { width: 52, height: 52, borderRadius: 16, alignItems: "center", justifyContent: "center" },
   addCardText: { fontSize: 13, fontWeight: "700", textAlign: "center" },
+});
+
+const gatnawCardStyles = StyleSheet.create({
+  outer: {
+    marginHorizontal: 16,
+    marginBottom: 14,
+    borderRadius: 22,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  card: {
+    borderRadius: 22,
+    padding: 20,
+    overflow: "hidden",
+  },
+  patternOverlay: {
+    position: "absolute",
+    top: -30, right: -30,
+    width: 160, height: 160,
+    borderRadius: 80,
+    backgroundColor: "rgba(255,255,255,0.06)",
+  },
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 14,
+  },
+  iconWrap: {
+    width: 50, height: 50,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.25)",
+  },
+  activeChip: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 50, paddingHorizontal: 12, paddingVertical: 6,
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.2)",
+  },
+  activePulse: {
+    width: 7, height: 7, borderRadius: 4,
+    backgroundColor: "#4ade80",
+  },
+  activeChipText: {
+    color: "rgba(255,255,255,0.92)",
+    fontSize: 11, fontWeight: "700",
+  },
+  title: {
+    color: "#fff",
+    fontSize: 26, fontWeight: "900",
+    letterSpacing: -0.6,
+    marginBottom: 6,
+  },
+  desc: {
+    color: "rgba(255,255,255,0.78)",
+    fontSize: 13, lineHeight: 19,
+    marginBottom: 20,
+  },
+  bottomRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  statsRow: {
+    flexDirection: "row", gap: 8,
+  },
+  statItem: {
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 12, paddingVertical: 8, paddingHorizontal: 12,
+    alignItems: "center",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.18)",
+  },
+  statNum: {
+    color: "#fff", fontSize: 17, fontWeight: "900", letterSpacing: -0.4,
+  },
+  statLbl: {
+    color: "rgba(255,255,255,0.7)", fontSize: 9, fontWeight: "600", marginTop: 1,
+  },
+  arrowBtn: {
+    width: 44, height: 44, borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.25)",
+  },
 });
