@@ -2,15 +2,14 @@ import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Platform, StyleSheet, View, useColorScheme } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { SymbolView } from "expo-symbols";
 
 import { useColors } from "@/hooks/useColors";
 
 export default function TabLayout() {
   const colors = useColors();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = colors.isDark;
   const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
 
@@ -56,10 +55,7 @@ export default function TabLayout() {
         name="(demiryol)"
         options={{ href: null, tabBarStyle: { display: "none" } }}
       />
-      <Tabs.Screen
-        name="tmcell"
-        options={{ href: null }}
-      />
+      <Tabs.Screen name="tmcell" options={{ href: null }} />
       <Tabs.Screen
         name="more"
         options={{

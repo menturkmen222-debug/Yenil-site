@@ -15,6 +15,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { BonusPulProvider } from "@/contexts/BonusPulContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -60,9 +61,11 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <KeyboardProvider>
-              <BonusPulProvider>
-                <RootLayoutNav />
-              </BonusPulProvider>
+              <ThemeProvider>
+                <BonusPulProvider>
+                  <RootLayoutNav />
+                </BonusPulProvider>
+              </ThemeProvider>
             </KeyboardProvider>
           </GestureHandlerRootView>
         </QueryClientProvider>

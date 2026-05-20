@@ -2,13 +2,12 @@ import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Platform, StyleSheet, View, useColorScheme } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { useColors } from "@/hooks/useColors";
 
 export default function DemiryolLayout() {
   const colors = useColors();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = colors.isDark;
   const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
 
@@ -59,12 +58,7 @@ export default function DemiryolLayout() {
           tabBarIcon: ({ color }) => <Ionicons name="settings-outline" size={22} color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="sms"
-        options={{
-          href: null,
-        }}
-      />
+      <Tabs.Screen name="sms" options={{ href: null }} />
     </Tabs>
   );
 }
