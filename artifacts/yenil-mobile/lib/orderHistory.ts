@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HISTORY_KEY = "yenil_order_history_v1";
 
-export type OrderType = "bonus-buy" | "bonus-sell" | "currency-buy" | "currency-sell" | "sim" | "demiryol" | "walýuta";
+export type OrderType = "bonus-buy" | "bonus-sell" | "currency-buy" | "currency-sell" | "sim" | "demiryol" | "walýuta" | "howa-bilet";
 
 export interface OrderHistoryItem {
   id: string;

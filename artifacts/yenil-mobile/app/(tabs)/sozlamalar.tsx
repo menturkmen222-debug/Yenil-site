@@ -384,7 +384,7 @@ export default function SozlamalarScreen() {
           />
           <View style={[styles.divider, { backgroundColor: colors.border }]} />
           <SettingRow
-            icon="logo-telegram"
+            icon="paper-plane-outline"
             iconColor="#0088cc"
             label="Telegram goldawy"
             desc="@yenil_tm"

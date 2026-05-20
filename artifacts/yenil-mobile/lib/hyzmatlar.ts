@@ -80,7 +80,7 @@ export async function getMyHyzmatlar(deviceId: string): Promise<HyzmatItem[]> {
   snap.forEach((child) => {
     const val = child.val() as HyzmatItem;
     if (val.deviceId === deviceId) {
-      all.push({ id: child.key || "", ...val });
+      all.push({ ...val, id: child.key || "" });
     }
   });
   return all.sort((a, b) => b.timestamp - a.timestamp);

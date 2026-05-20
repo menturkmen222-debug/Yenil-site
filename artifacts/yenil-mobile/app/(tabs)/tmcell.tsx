@@ -61,8 +61,8 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
     }
     setBuyLoading(true);
     try {
-      await saveOrder("bonus-orders", { deviceId, amount: selectedBuy, userPhone: buyPhone, payMethod: buyPayMethod || "terminal", cardInfo: buyPayMethod === "card" ? { bank: buyCardBank, type: buyCardType, last4: buyCardLast4 } : null, status: "pending" });
-      await addToHistory({ type: "bonus-buy", title: "BP Satyn almak", details: `${selectedBuy} BP · ${buyPhone}`, amount: selectedBuy, amountLabel: `${selectedBuy} BP`, phone: buyPhone });
+      await saveOrder("bonus-orders", { deviceId, amount: selectedBuy ?? 0, userPhone: buyPhone, payMethod: buyPayMethod || "terminal", cardInfo: buyPayMethod === "card" ? { bank: buyCardBank, type: buyCardType, last4: buyCardLast4 } : null, status: "pending" });
+      await addToHistory({ type: "bonus-buy", title: "BP Satyn almak", details: `${selectedBuy} BP · ${buyPhone}`, amount: selectedBuy ?? 0, amountLabel: `${selectedBuy} BP`, phone: buyPhone });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setBuyDone(true);
     } catch { Alert.alert("Ýalňyşlyk", "Bilinmeýän ýalňyşlyk"); }

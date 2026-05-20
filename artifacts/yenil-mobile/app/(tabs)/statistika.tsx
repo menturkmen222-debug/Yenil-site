@@ -24,6 +24,9 @@ const TYPE_META: Record<OrderType, { icon: keyof typeof Ionicons.glyphMap; color
   "currency-buy":   { icon: "swap-horizontal",      color: "#6366f1", label: "Walýuta almak" },
   "currency-sell":  { icon: "swap-horizontal",      color: "#f59e0b", label: "Walýuta satmak" },
   "sim":            { icon: "phone-portrait",        color: "#e63946", label: "SIM Kart" },
+  "demiryol":       { icon: "train-outline",         color: "#8b5cf6", label: "Demirýol biledi" },
+  "walýuta":        { icon: "repeat-outline",        color: "#06b6d4", label: "Walýuta çalyşmak" },
+  "howa-bilet":     { icon: "airplane-outline",      color: "#0ea5e9", label: "Howa biledi" },
 };
 
 function formatDate(ts: number): string {
@@ -125,7 +128,8 @@ export default function StatistikaScreen() {
           status: "pending",
         });
       }
-      await addToHistory({ ...repeatItem, id: undefined as any, timestamp: undefined as any });
+      const { id: _id, timestamp: _ts, ...repeatRest } = repeatItem;
+      await addToHistory(repeatRest);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setRepeatDone(true);
       load();

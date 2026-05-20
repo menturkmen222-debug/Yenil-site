@@ -226,6 +226,7 @@ export default function HowaScreen() {
         type: "howa-bilet",
         title: "Howa biledi",
         details: `${from?.city} → ${to?.city} · ${depDate} · ${passengers} ýolagçy`,
+        amount: 0,
         amountLabel: "Tassyklanýar",
         phone: pasPhone,
       });
