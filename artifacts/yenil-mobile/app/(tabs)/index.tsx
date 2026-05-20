@@ -532,10 +532,7 @@ export default function HomeScreen() {
             end={{ x: 1, y: 1 }}
             style={gatnawCardStyles.card}
           >
-            {/* BG pattern overlay */}
             <View style={gatnawCardStyles.patternOverlay} />
-
-            {/* Top row */}
             <View style={gatnawCardStyles.topRow}>
               <View style={gatnawCardStyles.iconWrap}>
                 <Ionicons name="git-network-outline" size={26} color="#fff" />
@@ -545,21 +542,13 @@ export default function HomeScreen() {
                 <Text style={gatnawCardStyles.activeChipText}>Howa · Demir ýol işleýär</Text>
               </View>
             </View>
-
-            {/* Title */}
             <Text style={gatnawCardStyles.title}>Gatnaw we Ulag</Text>
             <Text style={gatnawCardStyles.desc}>
               Döwlet, hususy we logistika — 10 kategoriýa, 28 hyzmat bir ýerde
             </Text>
-
-            {/* Stats + arrow */}
             <View style={gatnawCardStyles.bottomRow}>
               <View style={gatnawCardStyles.statsRow}>
-                {[
-                  { n: "10", l: "Kat." },
-                  { n: "28", l: "Hyzmat" },
-                  { n: "2", l: "Işleýär" },
-                ].map((s, i) => (
+                {[{ n: "10", l: "Kat." }, { n: "28", l: "Hyzmat" }, { n: "2", l: "Işleýär" }].map((s, i) => (
                   <View key={i} style={gatnawCardStyles.statItem}>
                     <Text style={gatnawCardStyles.statNum}>{s.n}</Text>
                     <Text style={gatnawCardStyles.statLbl}>{s.l}</Text>
@@ -573,17 +562,61 @@ export default function HomeScreen() {
           </LinearGradient>
         </Pressable>
 
+        {/* ── TÖLEGLER WE HYZMATLAR — Premium Payment Card ── */}
+        <Pressable
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); nav("/toleglar"); }}
+          style={({ pressed }) => [tolegCardStyles.outer, { opacity: pressed ? 0.93 : 1 }]}
+        >
+          <LinearGradient
+            colors={["#4c1d95", "#7c3aed", "#a855f7"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={tolegCardStyles.card}
+          >
+            {/* Decorative circles */}
+            <View style={tolegCardStyles.circle1} />
+            <View style={tolegCardStyles.circle2} />
+
+            {/* Top row */}
+            <View style={tolegCardStyles.topRow}>
+              <View style={tolegCardStyles.iconWrap}>
+                <Ionicons name="card-outline" size={26} color="#fff" />
+              </View>
+              <View style={tolegCardStyles.comingChip}>
+                <Ionicons name="time-outline" size={11} color="rgba(255,255,255,0.85)" />
+                <Text style={tolegCardStyles.comingChipText}>TMCell işleýär</Text>
+              </View>
+            </View>
+
+            {/* Title */}
+            <Text style={tolegCardStyles.title}>Tölegler we Hyzmatlar</Text>
+            <Text style={tolegCardStyles.desc}>
+              Kommunal, döwlet, bilim we sanly tölegler — 11 kategoriýa, bir ýerde
+            </Text>
+
+            {/* Stats + arrow */}
+            <View style={tolegCardStyles.bottomRow}>
+              <View style={tolegCardStyles.statsRow}>
+                {[{ n: "11", l: "Kat." }, { n: "35+", l: "Hyzmat" }, { n: "Ýakynda", l: "" }].map((s, i) => (
+                  <View key={i} style={tolegCardStyles.statItem}>
+                    <Text style={tolegCardStyles.statNum}>{s.n}</Text>
+                    {s.l ? <Text style={tolegCardStyles.statLbl}>{s.l}</Text> : null}
+                  </View>
+                ))}
+              </View>
+              <View style={tolegCardStyles.arrowBtn}>
+                <Ionicons name="arrow-forward" size={18} color="#fff" />
+              </View>
+            </View>
+          </LinearGradient>
+        </Pressable>
+
         {/* ── OTHER SERVICES GRID ── */}
         <View style={styles.servicesGrid}>
           <ServiceCard
             icon={<MaterialCommunityIcons name="currency-usd" size={28} color="#0ea5e9" />}
             title="Ýeňil Pay" desc="Walýuta çalyşmak"
             onPress={() => nav("/tmcell")} color="#0ea5e9"
-          />
-          <ServiceCard
-            icon={<Ionicons name="apps-outline" size={28} color="#f59e0b" />}
-            title="Ulgamlar" desc="Aydym, Belet we ş.m."
-            onPress={() => nav("/ulgamlar")} color="#f59e0b"
           />
           <ServiceCard
             icon={<MaterialCommunityIcons name="bullhorn-outline" size={28} color="#e11d48" />}
@@ -939,5 +972,91 @@ const gatnawCardStyles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center", justifyContent: "center",
     borderWidth: 1, borderColor: "rgba(255,255,255,0.25)",
+  },
+});
+
+const tolegCardStyles = StyleSheet.create({
+  outer: {
+    marginHorizontal: 16,
+    marginBottom: 14,
+    borderRadius: 22,
+    shadowColor: "#7c3aed",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.28,
+    shadowRadius: 18,
+    elevation: 10,
+  },
+  card: {
+    borderRadius: 22,
+    padding: 20,
+    overflow: "hidden",
+  },
+  circle1: {
+    position: "absolute",
+    top: -50, right: -40,
+    width: 170, height: 170,
+    borderRadius: 85,
+    backgroundColor: "rgba(255,255,255,0.06)",
+  },
+  circle2: {
+    position: "absolute",
+    bottom: -30, left: -20,
+    width: 120, height: 120,
+    borderRadius: 60,
+    backgroundColor: "rgba(255,255,255,0.05)",
+  },
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 14,
+  },
+  iconWrap: {
+    width: 50, height: 50,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.16)",
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.22)",
+  },
+  comingChip: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderRadius: 50, paddingHorizontal: 12, paddingVertical: 6,
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.2)",
+  },
+  comingChipText: {
+    color: "rgba(255,255,255,0.9)",
+    fontSize: 11, fontWeight: "700",
+  },
+  title: {
+    color: "#fff",
+    fontSize: 26, fontWeight: "900",
+    letterSpacing: -0.6,
+    marginBottom: 6,
+  },
+  desc: {
+    color: "rgba(255,255,255,0.76)",
+    fontSize: 13, lineHeight: 19,
+    marginBottom: 20,
+  },
+  bottomRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  statsRow: { flexDirection: "row", gap: 8 },
+  statItem: {
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderRadius: 12, paddingVertical: 8, paddingHorizontal: 12,
+    alignItems: "center",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.18)",
+  },
+  statNum: { color: "#fff", fontSize: 15, fontWeight: "900", letterSpacing: -0.3 },
+  statLbl: { color: "rgba(255,255,255,0.7)", fontSize: 9, fontWeight: "600", marginTop: 1 },
+  arrowBtn: {
+    width: 44, height: 44, borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.24)",
   },
 });
