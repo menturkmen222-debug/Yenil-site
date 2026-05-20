@@ -39,6 +39,7 @@ export default function TabLayout() {
           ) : null,
       }}
     >
+      {/* 1 — Home */}
       <Tabs.Screen
         name="index"
         options={{
@@ -51,11 +52,29 @@ export default function TabLayout() {
             ),
         }}
       />
+
+      {/* 2 — Amallarym (Transaction History) */}
+      <Tabs.Screen
+        name="amallar"
+        options={{
+          title: "Amallar",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="clock.arrow.circlepath" tintColor={color} size={24} />
+            ) : (
+              <Ionicons name="receipt-outline" size={22} color={color} />
+            ),
+        }}
+      />
+
+      {/* Hidden tabs */}
       <Tabs.Screen
         name="(demiryol)"
         options={{ href: null, tabBarStyle: { display: "none" } }}
       />
       <Tabs.Screen name="tmcell" options={{ href: null }} />
+
+      {/* 3 — Has köp */}
       <Tabs.Screen
         name="more"
         options={{
@@ -68,6 +87,8 @@ export default function TabLayout() {
             ),
         }}
       />
+
+      {/* 4 — Sozlamalar */}
       <Tabs.Screen
         name="sozlamalar"
         options={{
@@ -80,6 +101,8 @@ export default function TabLayout() {
             ),
         }}
       />
+
+      {/* Hidden tabs */}
       <Tabs.Screen name="pay" options={{ href: null }} />
       <Tabs.Screen name="statistika" options={{ href: null }} />
     </Tabs>
