@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { db, ref, onValue, getUserBalance, deductBalance, saveOrder } from "@/lib/firebase";
+import { db, ref, onValue, getUserBalance, deductBalance, saveOrder, transferBP } from "@/lib/firebase";
 import { getDeviceIdAsync } from "@/lib/deviceId";
 
 interface BonusPulContextType {
@@ -9,6 +9,7 @@ interface BonusPulContextType {
   deduct: (amount: number) => Promise<boolean>;
   buyBonusPul: (amount: number, phone: string) => Promise<void>;
   sellBonusPul: (amount: number, phone: string) => Promise<void>;
+  sendBP: (toId: string, amount: number, note?: string) => Promise<{ success: boolean; message: string }>;
 }
 
 const BonusPulContext = createContext<BonusPulContextType>({
@@ -18,6 +19,7 @@ const BonusPulContext = createContext<BonusPulContextType>({
   deduct: async () => false,
   buyBonusPul: async () => {},
   sellBonusPul: async () => {},
+  sendBP: async () => ({ success: false, message: "" }),
 });
 
 export function BonusPulProvider({ children }: { children: React.ReactNode }) {
@@ -59,8 +61,13 @@ export function BonusPulProvider({ children }: { children: React.ReactNode }) {
     await saveOrder("bonus-sell-orders", { deviceId, amount, userPhone: phone, status: "pending" });
   }, [deviceId]);
 
+  const sendBP = useCallback(async (toId: string, amount: number, note = "") => {
+    if (!deviceId) return { success: false, message: "Ulgam taýýar däl" };
+    return transferBP(deviceId, toId, amount, note);
+  }, [deviceId]);
+
   return (
-    <BonusPulContext.Provider value={{ balance, deviceId, refreshBalance, deduct, buyBonusPul, sellBonusPul }}>
+    <BonusPulContext.Provider value={{ balance, deviceId, refreshBalance, deduct, buyBonusPul, sellBonusPul, sendBP }}>
       {children}
     </BonusPulContext.Provider>
   );
