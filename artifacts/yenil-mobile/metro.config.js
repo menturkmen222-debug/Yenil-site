@@ -13,4 +13,20 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, "node_modules"),
 ];
 
+const { blockList } = config.resolver;
+const blockListArr = Array.isArray(blockList)
+  ? blockList
+  : blockList
+  ? [blockList]
+  : [];
+
+config.resolver.blockList = [
+  ...blockListArr,
+  new RegExp(`${escapeRegExp(path.resolve(monorepoRoot, ".local"))}.*`),
+];
+
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 module.exports = config;

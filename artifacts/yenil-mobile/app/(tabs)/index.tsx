@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, Platform, Modal,
   TextInput, KeyboardAvoidingView, FlatList, Alert, ActivityIndicator,
+  Animated,
 } from "react-native";
 import { router, type Href } from "expo-router";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -423,6 +424,9 @@ export default function HomeScreen() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [nickname, setNickname] = useState("");
   const [deviceId, setDeviceId] = useState("");
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifCount] = useState(2);
+  const bellAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     getDeviceIdAsync().then(async (id) => {
@@ -431,6 +435,16 @@ export default function HomeScreen() {
       setNickname(nick);
     });
   }, []);
+
+  const ringBell = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Animated.sequence([
+      Animated.timing(bellAnim, { toValue: 1.25, duration: 80, useNativeDriver: true }),
+      Animated.timing(bellAnim, { toValue: 0.9, duration: 80, useNativeDriver: true }),
+      Animated.timing(bellAnim, { toValue: 1.15, duration: 60, useNativeDriver: true }),
+      Animated.timing(bellAnim, { toValue: 1, duration: 60, useNativeDriver: true }),
+    ]).start(() => setNotifOpen(true));
+  };
 
   // Listen to community services in real-time
   useEffect(() => {
@@ -463,6 +477,42 @@ export default function HomeScreen() {
         onAdded={() => {}}
       />
 
+      {/* ── NOTIFICATION MODAL ── */}
+      <Modal visible={notifOpen} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setNotifOpen(false)}>
+        <View style={{ flex: 1, backgroundColor: colors.background }}>
+          <View style={[notifStyles.header, { borderBottomColor: colors.border, paddingTop: insets.top + 16 }]}>
+            <View style={[notifStyles.handle, { backgroundColor: colors.border }]} />
+            <View style={notifStyles.headerRow}>
+              <Text style={[notifStyles.title, { color: colors.foreground }]}>Bildirişler</Text>
+              <Pressable onPress={() => setNotifOpen(false)} style={[notifStyles.closeBtn, { backgroundColor: colors.muted }]}>
+                <Ionicons name="close" size={18} color={colors.mutedForeground} />
+              </Pressable>
+            </View>
+          </View>
+          <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
+            {[
+              { icon: "checkmark-circle", color: "#16a34a", title: "Sargyt tamamlandy", desc: "Siziň №A-4821 sargydyňyz üstünlikli ýerine ýetirildi.", time: "5 min öň" },
+              { icon: "gift-outline", color: "#7c3aed", title: "Bonus pul alındı!", desc: "Hasabyňyza +5.00 BP bonus goşuldy. Hoş geldiňiz!", time: "1 sagat öň" },
+            ].map((n, i) => (
+              <Pressable
+                key={i}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+                style={({ pressed }) => [notifStyles.card, { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.82 : 1 }]}
+              >
+                <View style={[notifStyles.iconWrap, { backgroundColor: n.color + "18" }]}>
+                  <Ionicons name={n.icon as any} size={22} color={n.color} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[notifStyles.cardTitle, { color: colors.foreground }]}>{n.title}</Text>
+                  <Text style={[notifStyles.cardDesc, { color: colors.mutedForeground }]}>{n.desc}</Text>
+                  <Text style={[notifStyles.cardTime, { color: colors.mutedForeground }]}>{n.time}</Text>
+                </View>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+      </Modal>
+
       <ScrollView
         ref={scrollViewRef}
         onScroll={handleScroll}
@@ -471,9 +521,10 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 130 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── HERO + AI AGENT ── */}
+        {/* ── HERO ── */}
         <View style={[styles.hero, { backgroundColor: colors.primary, paddingTop: topPad }]}>
-          {/* ── NEW 3-PART HEADER ── */}
+
+          {/* ── HEADER ROW: Profile | [bell + balance] ── */}
           <View style={styles.heroTopRow}>
             {/* Left: Profile avatar → settings */}
             <Pressable
@@ -481,53 +532,60 @@ export default function HomeScreen() {
               style={styles.profileBtn}
             >
               <LinearGradient
-                colors={["rgba(255,255,255,0.32)", "rgba(255,255,255,0.14)"]}
+                colors={["rgba(255,255,255,0.30)", "rgba(255,255,255,0.12)"]}
                 style={styles.profileAvatar}
               >
                 {nickname ? (
                   <Text style={styles.profileInitial}>{nickname.charAt(0).toUpperCase()}</Text>
                 ) : (
-                  <Ionicons name="person" size={20} color="#fff" />
+                  <Ionicons name="person" size={19} color="#fff" />
                 )}
               </LinearGradient>
               <View style={styles.profileOnlineDot} />
             </Pressable>
 
-            {/* Center: Ýeňil logo */}
-            <View style={styles.heroCenterWrap}>
-              <Text style={styles.heroTitle}>Ýeňil</Text>
-              <View style={styles.heroTitleUnderline} />
-            </View>
+            {/* Right: Bell + Balance grouped */}
+            <View style={styles.heroRightGroup}>
+              {/* Notification bell */}
+              <Pressable onPress={ringBell} style={styles.bellBtn}>
+                <Animated.View style={{ transform: [{ scale: bellAnim }] }}>
+                  <Ionicons name="notifications" size={20} color="#fff" />
+                </Animated.View>
+                {notifCount > 0 && (
+                  <View style={styles.bellBadge}>
+                    <Text style={styles.bellBadgeText}>{notifCount}</Text>
+                  </View>
+                )}
+              </Pressable>
 
-            {/* Right: BP balance */}
-            <Pressable
-              style={styles.balancePill}
-              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/(tabs)/sozlamalar" as Href); }}
-            >
-              <View style={styles.balanceIconWrap}>
-                <Ionicons name="wallet" size={13} color={colors.primary} />
-              </View>
-              <View>
-                <Text style={styles.balanceLabelText}>Balans</Text>
-                <Text style={styles.balanceText}>{balance.toFixed(2)} BP</Text>
-              </View>
-            </Pressable>
+              {/* Balance pill */}
+              <Pressable
+                style={styles.balancePill}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/(tabs)/sozlamalar" as Href); }}
+              >
+                <View style={styles.balanceIconWrap}>
+                  <Ionicons name="wallet" size={12} color={colors.primary} />
+                </View>
+                <View>
+                  <Text style={styles.balanceLabelText}>Balans</Text>
+                  <Text style={styles.balanceText}>{balance.toFixed(2)} BP</Text>
+                </View>
+              </Pressable>
+            </View>
           </View>
 
-          {/* AI Agent Card */}
+          {/* ── AI AGENT CARD (compact) ── */}
           <Pressable
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setChatOpen(true); }}
             style={({ pressed }) => [styles.agentCard, { opacity: pressed ? 0.92 : 1 }]}
           >
+            {/* Top row: icon + name + badge + online */}
             <View style={styles.agentTopRow}>
-              <View style={styles.agentAvatarOuter}>
-                <View style={styles.agentAvatar}>
-                  <MaterialCommunityIcons name="robot-outline" size={22} color={colors.primary} />
-                </View>
-                <View style={styles.agentOnlineDot} />
+              <View style={styles.agentAvatarSmall}>
+                <MaterialCommunityIcons name="robot-outline" size={17} color="#fff" />
               </View>
               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                   <Text style={styles.agentName}>Ýeňil AI Agent</Text>
                   <View style={styles.synagBadge}>
                     <Text style={styles.synagText}>SYNAG</Text>
@@ -535,31 +593,32 @@ export default function HomeScreen() {
                 </View>
                 <Text style={styles.agentSub}>Intellektual AI kömekçi</Text>
               </View>
-              <View style={styles.onlineRow}>
+              <View style={styles.onlineChip}>
                 <View style={styles.onlinePulse} />
                 <Text style={styles.onlineText}>Onlaýn</Text>
               </View>
             </View>
-            <View style={styles.agentDivider} />
+
+            {/* Compact action bar */}
             <View style={styles.agentActions}>
               <Pressable
                 onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setChatOpen(true); }}
                 style={styles.chatBtn}
               >
-                <Ionicons name="add-circle-outline" size={17} color="#fff" />
+                <Ionicons name="add-circle-outline" size={15} color="#fff" />
                 <Text style={styles.chatBtnText}>Täze söhbet</Text>
               </Pressable>
               <Pressable
                 onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
                 style={styles.agentIconBtn}
               >
-                <Ionicons name="time-outline" size={18} color="rgba(255,255,255,0.7)" />
+                <Ionicons name="time-outline" size={16} color="rgba(255,255,255,0.7)" />
               </Pressable>
               <Pressable
                 onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
                 style={styles.agentIconBtn}
               >
-                <Ionicons name="mic-outline" size={18} color="rgba(255,255,255,0.7)" />
+                <Ionicons name="mic-outline" size={16} color="rgba(255,255,255,0.7)" />
               </Pressable>
             </View>
           </Pressable>
@@ -862,67 +921,89 @@ const hStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   container: { flex: 1 },
 
-  hero: { paddingHorizontal: 18, paddingBottom: 24 },
+  hero: { paddingHorizontal: 16, paddingBottom: 20 },
+
   heroTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 18,
+    flexDirection: "row", alignItems: "center",
+    justifyContent: "space-between", marginBottom: 14,
   },
 
-  profileBtn: { position: "relative", width: 46, height: 46 },
+  profileBtn: { position: "relative", width: 44, height: 44 },
   profileAvatar: {
-    width: 46, height: 46, borderRadius: 23,
+    width: 44, height: 44, borderRadius: 22,
     alignItems: "center", justifyContent: "center",
     borderWidth: 2, borderColor: "rgba(255,255,255,0.35)",
   },
-  profileInitial: { color: "#fff", fontSize: 19, fontWeight: "800", letterSpacing: -0.3 },
+  profileInitial: { color: "#fff", fontSize: 18, fontWeight: "800", letterSpacing: -0.3 },
   profileOnlineDot: {
-    position: "absolute", bottom: 1, right: 1,
+    position: "absolute", bottom: 0, right: 0,
     width: 12, height: 12, borderRadius: 6,
     backgroundColor: "#4ade80",
-    borderWidth: 2, borderColor: "rgba(255,255,255,0.6)",
+    borderWidth: 2, borderColor: "rgba(255,255,255,0.5)",
   },
 
-  heroCenterWrap: { alignItems: "center" },
-  heroTitle: { fontSize: 30, fontWeight: "900", color: "#fff", letterSpacing: -0.8 },
-  heroTitleUnderline: {
-    marginTop: 3, height: 3, width: 32, borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.45)",
+  heroRightGroup: { flexDirection: "row", alignItems: "center", gap: 8 },
+
+  bellBtn: {
+    width: 38, height: 38, borderRadius: 19,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    alignItems: "center", justifyContent: "center",
+    position: "relative",
   },
+  bellBadge: {
+    position: "absolute", top: -2, right: -2,
+    width: 16, height: 16, borderRadius: 8,
+    backgroundColor: "#ef4444",
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1.5, borderColor: "rgba(255,255,255,0.8)",
+  },
+  bellBadgeText: { color: "#fff", fontSize: 8, fontWeight: "800" },
 
   balancePill: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    backgroundColor: "rgba(255,255,255,0.92)",
-    paddingHorizontal: 11, paddingVertical: 8, borderRadius: 16,
+    flexDirection: "row", alignItems: "center", gap: 7,
+    backgroundColor: "rgba(255,255,255,0.94)",
+    paddingHorizontal: 10, paddingVertical: 7, borderRadius: 14,
     shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12, shadowRadius: 6, elevation: 3,
+    shadowOpacity: 0.1, shadowRadius: 5, elevation: 3,
   },
   balanceIconWrap: {
-    width: 26, height: 26, borderRadius: 8,
-    backgroundColor: "rgba(22,163,74,0.12)",
+    width: 24, height: 24, borderRadius: 7,
+    backgroundColor: "rgba(22,163,74,0.13)",
     alignItems: "center", justifyContent: "center",
   },
-  balanceLabelText: { fontSize: 9, fontWeight: "600", color: "rgba(0,0,0,0.4)", letterSpacing: 0.4, textTransform: "uppercase" },
-  balanceText: { color: "#111", fontWeight: "800", fontSize: 13, letterSpacing: -0.3 },
+  balanceLabelText: { fontSize: 8, fontWeight: "700", color: "rgba(0,0,0,0.38)", letterSpacing: 0.5, textTransform: "uppercase" },
+  balanceText: { color: "#111", fontWeight: "800", fontSize: 12, letterSpacing: -0.2 },
 
-  agentCard: { backgroundColor: "rgba(0,0,0,0.22)", borderRadius: 18, borderWidth: 1, borderColor: "rgba(255,255,255,0.15)", overflow: "hidden" },
-  agentTopRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },
-  agentAvatarOuter: { position: "relative" },
-  agentAvatar: { width: 44, height: 44, borderRadius: 14, backgroundColor: "rgba(255,255,255,0.92)", alignItems: "center", justifyContent: "center" },
-  agentOnlineDot: { position: "absolute", bottom: 1, right: 1, width: 11, height: 11, borderRadius: 6, backgroundColor: "#4ade80", borderWidth: 2, borderColor: "rgba(0,0,0,0.3)" },
-  agentName: { color: "#fff", fontSize: 15, fontWeight: "800" },
-  agentSub: { color: "rgba(255,255,255,0.65)", fontSize: 11, marginTop: 2 },
-  synagBadge: { backgroundColor: "rgba(251,191,36,0.2)", borderRadius: 5, paddingHorizontal: 6, paddingVertical: 2, borderWidth: 1, borderColor: "rgba(251,191,36,0.4)" },
-  synagText: { color: "#fbbf24", fontSize: 8, fontWeight: "800", letterSpacing: 0.8 },
-  onlineRow: { alignItems: "center", gap: 3 },
-  onlinePulse: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#4ade80" },
+  agentCard: {
+    backgroundColor: "rgba(0,0,0,0.20)", borderRadius: 16,
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.13)", overflow: "hidden",
+  },
+  agentTopRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 12, paddingTop: 12, paddingBottom: 8 },
+  agentAvatarSmall: {
+    width: 32, height: 32, borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.2)",
+  },
+  agentName: { color: "#fff", fontSize: 13, fontWeight: "800" },
+  agentSub: { color: "rgba(255,255,255,0.6)", fontSize: 10, marginTop: 1 },
+  synagBadge: { backgroundColor: "rgba(251,191,36,0.18)", borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2, borderWidth: 1, borderColor: "rgba(251,191,36,0.35)" },
+  synagText: { color: "#fbbf24", fontSize: 7, fontWeight: "800", letterSpacing: 0.8 },
+  onlineChip: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "rgba(74,222,128,0.15)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20 },
+  onlinePulse: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#4ade80" },
   onlineText: { color: "#4ade80", fontSize: 9, fontWeight: "700" },
-  agentDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.1)", marginHorizontal: 14 },
-  agentActions: { flexDirection: "row", gap: 8, paddingHorizontal: 14, paddingBottom: 14, paddingTop: 12 },
-  chatBtn: { flex: 1, flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "rgba(255,255,255,0.18)", borderRadius: 12, paddingVertical: 11, paddingHorizontal: 14 },
-  chatBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
-  agentIconBtn: { width: 42, height: 42, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center" },
+  agentActions: { flexDirection: "row", gap: 6, paddingHorizontal: 12, paddingBottom: 12 },
+  chatBtn: {
+    flex: 1, flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: "rgba(255,255,255,0.16)", borderRadius: 10,
+    paddingVertical: 8, paddingHorizontal: 12,
+  },
+  chatBtnText: { color: "#fff", fontWeight: "700", fontSize: 12 },
+  agentIconBtn: {
+    width: 36, height: 36, borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    alignItems: "center", justifyContent: "center",
+  },
 
   sectionTitle: { fontSize: 17, fontWeight: "700", marginLeft: 16, marginTop: 22, marginBottom: 12 },
   servicesGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12, paddingHorizontal: 16, marginBottom: 16 },
@@ -957,6 +1038,22 @@ const styles = StyleSheet.create({
   addCard: { width: 120, borderRadius: 18, borderWidth: 1, alignItems: "center", justifyContent: "center", gap: 10, padding: 16 },
   addCardIcon: { width: 52, height: 52, borderRadius: 16, alignItems: "center", justifyContent: "center" },
   addCardText: { fontSize: 13, fontWeight: "700", textAlign: "center" },
+});
+
+const notifStyles = StyleSheet.create({
+  header: { paddingHorizontal: 20, paddingBottom: 16, borderBottomWidth: 1 },
+  handle: { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 14 },
+  headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  title: { fontSize: 22, fontWeight: "800", letterSpacing: -0.4 },
+  closeBtn: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  card: {
+    flexDirection: "row", alignItems: "flex-start", gap: 12,
+    borderRadius: 16, borderWidth: 1, padding: 14,
+  },
+  iconWrap: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  cardTitle: { fontSize: 14, fontWeight: "700", marginBottom: 3 },
+  cardDesc: { fontSize: 12, lineHeight: 17 },
+  cardTime: { fontSize: 11, marginTop: 4 },
 });
 
 const gatnawCardStyles = StyleSheet.create({
