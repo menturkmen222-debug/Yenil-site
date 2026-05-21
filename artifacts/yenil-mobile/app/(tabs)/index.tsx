@@ -561,7 +561,7 @@ export default function HomeScreen() {
               {/* Balance pill */}
               <Pressable
                 style={styles.balancePill}
-                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/(tabs)/sozlamalar" as Href); }}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/(tabs)/tmcell" as Href); }}
               >
                 <View style={styles.balanceIconWrap}>
                   <Ionicons name="wallet" size={12} color={colors.primary} />
@@ -624,8 +624,13 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
+        <LinearGradient
+          colors={[colors.primary, colors.background] as [string, string]}
+          style={{ height: 36 }}
+        />
+
         {/* ── ÝEŇIL HYZMATLARY ── */}
-        <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Ýeňil hyzmatlary</Text>
+        <Text style={[styles.sectionTitle, { color: colors.foreground, marginTop: 2 }]}>Ýeňil hyzmatlary</Text>
 
         {/* ── GATNAW WE ULAG — Premium Transport Card ── */}
         <Pressable

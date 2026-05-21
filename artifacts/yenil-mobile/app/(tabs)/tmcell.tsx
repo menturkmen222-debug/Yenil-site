@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
   Alert, ActivityIndicator, Platform, Image, Dimensions,
@@ -7,9 +7,10 @@ import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
-import { saveOrder } from "@/lib/firebase";
+import { saveOrder, transferBP, getBPTransferHistory, type BPTransfer } from "@/lib/firebase";
 import { uploadImage } from "@/lib/upload";
 import { addToHistory } from "@/lib/orderHistory";
 
@@ -32,10 +33,10 @@ const UZ_OPERATORS = [
 
 type Tab = "bonus" | "currency" | "sim";
 
-// ── Merged Bonus Pul Section (buy + sell) ──────────────────────────
+// ── Merged Bonus Pul Section (buy + sell + transfer) ───────────────
 function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
-  const [mode, setMode] = useState<"buy" | "sell">("buy");
-  const { balance, deviceId } = useBonusPul();
+  const [mode, setMode] = useState<"buy" | "sell" | "transfer">("buy");
+  const { balance, deviceId, sendBP } = useBonusPul();
 
   // buy state
   const [selectedBuy, setSelectedBuy] = useState<number | null>(null);
@@ -87,6 +88,50 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
   const resetBuy = () => { setBuyDone(false); setSelectedBuy(null); setBuyPhone(""); setShowPayment(false); setBuyPayMethod(""); setBuyCardBank(""); setBuyCardType(""); setBuyCardLast4(""); };
   const resetSell = () => { setSellDone(false); setSellAmount(""); setSellPhone(""); };
 
+  // transfer state
+  const [toId, setToId] = useState("");
+  const [transferAmount, setTransferAmount] = useState("");
+  const [transferNote, setTransferNote] = useState("");
+  const [transferSending, setTransferSending] = useState(false);
+  const [transferDone, setTransferDone] = useState(false);
+  const [transferHistory, setTransferHistory] = useState<BPTransfer[]>([]);
+  const [loadingHist, setLoadingHist] = useState(false);
+  const [showTransferHistory, setShowTransferHistory] = useState(false);
+
+  useEffect(() => {
+    if (mode !== "transfer" || !deviceId) return;
+    setLoadingHist(true);
+    getBPTransferHistory(deviceId).then(h => { setTransferHistory(h); setLoadingHist(false); });
+  }, [mode, deviceId]);
+
+  async function handleTransfer() {
+    const id = toId.trim();
+    const amt = parseFloat(transferAmount);
+    if (!id) { Alert.alert("Ýalňyşlyk", "Alyjynyň ID-ni giriziň"); return; }
+    if (!amt || amt <= 0) { Alert.alert("Ýalňyşlyk", "Nädogry mukdar"); return; }
+    if (amt > balance) { Alert.alert("Ýalňyşlyk", `Ýeterlik BP ýok (${balance.toFixed(2)} BP)`); return; }
+    Alert.alert("Tassykla", `${amt} BP geçirilsin my?`, [
+      { text: "Ýok" },
+      { text: "Hawa, iber", onPress: async () => {
+        setTransferSending(true);
+        try {
+          const result = await sendBP(id, amt, transferNote);
+          if (result.success) {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            Alert.alert("✅ Üstünlikli", result.message);
+            setToId(""); setTransferAmount(""); setTransferNote("");
+            setTransferDone(true);
+            getBPTransferHistory(deviceId).then(h => setTransferHistory(h));
+          } else {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            Alert.alert("Ýalňyşlyk", result.message);
+          }
+        } catch { Alert.alert("Ýalňyşlyk", "Geçirme başa barmady"); }
+        finally { setTransferSending(false); }
+      }},
+    ]);
+  }
+
   return (
     <>
       {/* iOS-style segmented control */}
@@ -94,6 +139,7 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
         {([
           { id: "buy" as const, icon: "arrow-down-circle-outline" as const, label: "BP Almak" },
           { id: "sell" as const, icon: "arrow-up-circle-outline" as const, label: "BP Satmak" },
+          { id: "transfer" as const, icon: "paper-plane-outline" as const, label: "BP Geçir" },
         ]).map(t => (
           <Pressable
             key={t.id}
@@ -293,7 +339,7 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
             )}
           </>
         )
-      ) : (
+      ) : mode === "sell" ? (
         sellDone ? (
           <View style={s.successBox}>
             <View style={[s.successIcon, { backgroundColor: "#dbeafe" }]}>
@@ -342,6 +388,118 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
             )}
           </>
         )
+      ) : transferDone ? (
+        <View style={s.successBox}>
+          <View style={[s.successIcon, { backgroundColor: "#d1fae5" }]}>
+            <Ionicons name="checkmark-circle" size={40} color="#059669" />
+          </View>
+          <Text style={[s.successTitle, { color: colors.foreground }]}>Geçirildi!</Text>
+          <Text style={[s.successDesc, { color: colors.mutedForeground }]}>BP üstünlikli iberildi.</Text>
+          <Pressable onPress={() => setTransferDone(false)} style={[s.primaryBtn, { backgroundColor: colors.primary }]}>
+            <Text style={s.primaryBtnText}>Täzeden</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <View style={{ gap: 14 }}>
+          <LinearGradient
+            colors={[colors.headerGradientStart, colors.headerGradientEnd] as [string, string]}
+            style={{ borderRadius: 16, padding: 16, flexDirection: "row", alignItems: "center", gap: 12 }}
+          >
+            <Ionicons name="wallet-outline" size={22} color="rgba(255,255,255,0.85)" />
+            <View>
+              <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: "600" }}>Mowjut balans</Text>
+              <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800" }}>{balance.toFixed(2)} BP</Text>
+            </View>
+          </LinearGradient>
+
+          <View>
+            <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Alyjynyň ID-si *</Text>
+            <TextInput
+              value={toId} onChangeText={setToId}
+              placeholder="dev_... ID giriz"
+              placeholderTextColor={colors.mutedForeground}
+              autoCapitalize="none"
+              style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground, marginTop: 6 }]}
+            />
+          </View>
+
+          <View>
+            <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Mukdar (BP) *</Text>
+            <TextInput
+              value={transferAmount} onChangeText={setTransferAmount}
+              placeholder="Meseläň: 50"
+              placeholderTextColor={colors.mutedForeground}
+              keyboardType="decimal-pad"
+              style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground, marginTop: 6 }]}
+            />
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+              {[10, 25, 50, 100].map(q => (
+                <Pressable
+                  key={q}
+                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setTransferAmount(String(q)); }}
+                  style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: transferAmount === String(q) ? colors.primary : colors.muted, borderWidth: 1, borderColor: transferAmount === String(q) ? colors.primary : colors.border }}
+                >
+                  <Text style={{ fontWeight: "700", color: transferAmount === String(q) ? "#fff" : colors.foreground, fontSize: 13 }}>{q} BP</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          <View>
+            <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Bellik (islege görä)</Text>
+            <TextInput
+              value={transferNote} onChangeText={setTransferNote}
+              placeholder="Sebäp ýa-da bellik..."
+              placeholderTextColor={colors.mutedForeground}
+              style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground, marginTop: 6 }]}
+            />
+          </View>
+
+          {transferSending ? (
+            <ActivityIndicator color={colors.primary} style={{ marginTop: 8 }} />
+          ) : (
+            <Pressable
+              onPress={handleTransfer}
+              style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}
+            >
+              <Ionicons name="paper-plane-outline" size={18} color="#fff" />
+              <Text style={s.primaryBtnText}>{transferAmount && parseFloat(transferAmount) > 0 ? `${transferAmount} BP Geçir` : "Geçir"}</Text>
+            </Pressable>
+          )}
+
+          {transferHistory.length > 0 && (
+            <View style={{ marginTop: 4 }}>
+              <Pressable
+                onPress={() => setShowTransferHistory(v => !v)}
+                style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 8 }}
+              >
+                <Ionicons name={showTransferHistory ? "chevron-up-outline" : "chevron-down-outline"} size={16} color={colors.mutedForeground} />
+                <Text style={{ color: colors.mutedForeground, fontWeight: "600", fontSize: 13 }}>Geçirme taryhy</Text>
+              </Pressable>
+              {showTransferHistory && (
+                <View style={{ gap: 8 }}>
+                  {loadingHist ? <ActivityIndicator color={colors.primary} /> : transferHistory.slice(0, 10).map(t => {
+                    const isOut = t.from === deviceId;
+                    return (
+                      <View key={t.id} style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 12, borderRadius: 12, borderWidth: 1, backgroundColor: colors.card, borderColor: colors.border }}>
+                        <View style={{ width: 32, height: 32, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: isOut ? "#ef444412" : "#05966912" }}>
+                          <Ionicons name={isOut ? "arrow-up-outline" : "arrow-down-outline"} size={16} color={isOut ? "#ef4444" : "#059669"} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ color: colors.foreground, fontWeight: "700", fontSize: 13 }}>
+                            {isOut ? `→ ${t.toNickname || t.to.slice(0, 12) + "..."}` : `← ${t.fromNickname || t.from.slice(0, 12) + "..."}`}
+                          </Text>
+                          {t.note ? <Text style={{ color: colors.mutedForeground, fontSize: 12 }}>{t.note}</Text> : null}
+                        </View>
+                        <Text style={{ fontWeight: "800", color: isOut ? "#ef4444" : "#059669" }}>{isOut ? "-" : "+"}{t.amount} BP</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+            </View>
+          )}
+        </View>
       )}
     </>
   );

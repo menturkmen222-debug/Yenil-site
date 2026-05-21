@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, Switch,
   Alert, Linking, Platform, Modal, TextInput,
@@ -938,6 +939,19 @@ export default function SozlamalarScreen() {
   const [showBPModal, setShowBPModal] = useState(false);
   const [showNickModal, setShowNickModal] = useState(false);
 
+  // PIN state
+  const [pinEnabled, setPinEnabled] = useState(false);
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [pinStage, setPinStage] = useState<"enter" | "confirm">("enter");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPinVal, setConfirmPinVal] = useState("");
+  const [pinError, setPinError] = useState("");
+
+  // Load PIN status
+  useEffect(() => {
+    AsyncStorage.getItem("app_pin_enabled").then(v => { if (v === "true") setPinEnabled(true); });
+  }, []);
+
   // Load nickname + watch reputation
   useEffect(() => {
     if (!deviceId) return;
@@ -945,6 +959,56 @@ export default function SozlamalarScreen() {
     const unsub = watchReputation(deviceId, setRepData);
     return () => unsub();
   }, [deviceId]);
+
+  function openPinModal() {
+    setPinStage("enter"); setNewPin(""); setConfirmPinVal(""); setPinError("");
+    setShowPinModal(true);
+  }
+
+  function handlePinKey(key: string) {
+    if (key === "⌫") {
+      if (pinStage === "enter") setNewPin(p => p.slice(0, -1));
+      else setConfirmPinVal(p => p.slice(0, -1));
+      return;
+    }
+    if (key === "") return;
+    if (pinStage === "enter") {
+      const next = newPin + key;
+      setNewPin(next);
+      if (next.length === 4) setTimeout(() => { setPinStage("confirm"); setPinError(""); }, 180);
+    } else {
+      const next = confirmPinVal + key;
+      setConfirmPinVal(next);
+      if (next.length === 4) {
+        if (next === newPin) {
+          setTimeout(async () => {
+            await AsyncStorage.setItem("app_pin", next);
+            await AsyncStorage.setItem("app_pin_enabled", "true");
+            setPinEnabled(true);
+            setShowPinModal(false);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            Alert.alert("✅ Üstünlikli", "Gizlin kod bellendi!");
+          }, 180);
+        } else {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          setPinError("Parollar gabat gelmeýär!");
+          setTimeout(() => { setPinStage("enter"); setNewPin(""); setConfirmPinVal(""); setPinError(""); }, 1000);
+        }
+      }
+    }
+  }
+
+  async function disablePin() {
+    Alert.alert("Paroly aýyr", "Gizlin kody aýyrmagy isleýärsiňizmi?", [
+      { text: "Ýok" },
+      { text: "Hawa, aýyr", style: "destructive", onPress: async () => {
+        await AsyncStorage.removeItem("app_pin");
+        await AsyncStorage.removeItem("app_pin_enabled");
+        setPinEnabled(false);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }},
+    ]);
+  }
 
   const level = getLevel(repData.score);
   const pct = getProgressPercent(repData.score);
@@ -1092,32 +1156,39 @@ export default function SozlamalarScreen() {
           <Ionicons name="chevron-forward-outline" size={18} color={colors.mutedForeground} />
         </Pressable>
 
-        {/* ══════════ 3. BP TRANSFER ══════════ */}
-        <SectionTitle title="BP GEÇIRMEK" colors={colors} />
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            setShowBPModal(true);
-          }}
-          style={({ pressed }) => [
-            s.featureCard,
-            { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.88 : 1 },
-          ]}
-        >
-          <LinearGradient
-            colors={[colors.headerGradientStart, colors.headerGradientEnd] as [string, string]}
-            style={s.featureIconWrap}
-          >
-            <Ionicons name="paper-plane-outline" size={22} color="#fff" />
-          </LinearGradient>
-          <View style={{ flex: 1 }}>
-            <Text style={[s.featureTitle, { color: colors.foreground }]}>BP Geçirmek</Text>
-            <Text style={[s.featureDesc, { color: colors.mutedForeground }]}>
-              Başga ulanyjylara BP iberiň — mowjut: <Text style={{ color: colors.primary, fontWeight: "700" }}>{balance.toFixed(2)} BP</Text>
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward-outline" size={18} color={colors.mutedForeground} />
-        </Pressable>
+        {/* ══════════ HOWPSUZLYK ══════════ */}
+        <SectionTitle title="HOWPSUZLYK" colors={colors} />
+        <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <SettingRow
+            icon="lock-closed-outline" iconColor="#ef4444"
+            label="Gizlin kod (PIN)"
+            desc={pinEnabled ? "4 sanly gizlin kod işjeň" : "Programma üçin gizlin kod bel"}
+            right={
+              <Switch
+                value={pinEnabled}
+                onValueChange={(v) => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  if (v) openPinModal(); else disablePin();
+                }}
+                trackColor={{ false: colors.border, true: colors.primary }}
+                thumbColor="#fff"
+              />
+            }
+            colors={colors}
+          />
+          {pinEnabled && (
+            <>
+              <Divider colors={colors} />
+              <SettingRow
+                icon="key-outline" iconColor="#f59e0b"
+                label="Paroly üýtget"
+                desc="Täze 4 sanly gizlin kod bel"
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); openPinModal(); }}
+                colors={colors}
+              />
+            </>
+          )}
+        </View>
 
         {/* ══════════ TEMA ══════════ */}
         <SectionTitle title="GÖRÜNIŞ / TEMA" colors={colors} />
@@ -1268,6 +1339,82 @@ export default function SozlamalarScreen() {
       <FriendsModal visible={showFriendsModal} onClose={() => setShowFriendsModal(false)} deviceId={deviceId} colors={colors} />
       <BPTransferModal visible={showBPModal} onClose={() => setShowBPModal(false)} deviceId={deviceId} balance={balance} sendBP={sendBP} colors={colors} />
       <NicknameModal visible={showNickModal} onClose={() => setShowNickModal(false)} deviceId={deviceId} current={nickname} onSaved={setNickname} colors={colors} />
+
+      {/* PIN SETUP MODAL */}
+      <Modal visible={showPinModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowPinModal(false)}>
+        <View style={[s.modalWrap, { backgroundColor: colors.background }]}>
+          <View style={[s.modalHandle, { backgroundColor: colors.border }]} />
+          <View style={[s.modalHeader, { borderBottomColor: colors.border }]}>
+            <View>
+              <Text style={[s.modalTitle, { color: colors.foreground }]}>
+                {pinStage === "enter" ? "Täze gizlin kod" : "Tassyklaň"}
+              </Text>
+              <Text style={[s.modalSub, { color: colors.mutedForeground }]}>
+                {pinStage === "enter" ? "4 sanly gizlin kod giriziň" : "Kody gaýtadan giriziň"}
+              </Text>
+            </View>
+            <Pressable onPress={() => setShowPinModal(false)} style={[s.modalCloseBtn, { backgroundColor: colors.muted }]}>
+              <Ionicons name="close" size={18} color={colors.mutedForeground} />
+            </Pressable>
+          </View>
+
+          <View style={{ flex: 1, alignItems: "center", paddingTop: 48, paddingHorizontal: 32 }}>
+            {/* PIN dots */}
+            <View style={{ flexDirection: "row", gap: 20, marginBottom: 16 }}>
+              {[0, 1, 2, 3].map(i => {
+                const filled = (pinStage === "enter" ? newPin : confirmPinVal).length > i;
+                return (
+                  <View key={i} style={{
+                    width: 22, height: 22, borderRadius: 11,
+                    backgroundColor: filled ? colors.primary : "transparent",
+                    borderWidth: 2.5, borderColor: filled ? colors.primary : colors.border,
+                  }} />
+                );
+              })}
+            </View>
+
+            {pinError ? (
+              <Text style={{ color: "#ef4444", fontSize: 13, textAlign: "center", marginBottom: 8 }}>{pinError}</Text>
+            ) : (
+              <Text style={{ color: colors.mutedForeground, fontSize: 13, marginBottom: 8 }}>
+                {pinStage === "enter" ? "Täze 4 sanly PIN giriziň" : "PIN-i gaýtadan giriziň"}
+              </Text>
+            )}
+
+            {/* Numpad */}
+            <View style={{ marginTop: 32, gap: 14, width: "100%" }}>
+              {[["1","2","3"],["4","5","6"],["7","8","9"],["","0","⌫"]].map((row, ri) => (
+                <View key={ri} style={{ flexDirection: "row", justifyContent: "center", gap: 20 }}>
+                  {row.map((key, ki) => (
+                    <Pressable
+                      key={ki}
+                      onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handlePinKey(key); }}
+                      style={({ pressed }) => ({
+                        width: 80, height: 80, borderRadius: 40,
+                        backgroundColor: key === "" ? "transparent" : key === "⌫" ? colors.muted : colors.card,
+                        borderWidth: key === "" || key === "⌫" ? 0 : 1,
+                        borderColor: colors.border,
+                        alignItems: "center", justifyContent: "center",
+                        opacity: pressed && key !== "" ? 0.65 : 1,
+                        shadowColor: key !== "" && key !== "⌫" ? "#000" : "transparent",
+                        shadowOpacity: 0.06, shadowRadius: 4,
+                        shadowOffset: { width: 0, height: 2 },
+                        elevation: key !== "" && key !== "⌫" ? 2 : 0,
+                      })}
+                    >
+                      {key === "⌫" ? (
+                        <Ionicons name="backspace-outline" size={24} color={colors.foreground} />
+                      ) : (
+                        <Text style={{ fontSize: 26, fontWeight: "600", color: key === "" ? "transparent" : colors.foreground }}>{key}</Text>
+                      )}
+                    </Pressable>
+                  ))}
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* THEME PICKER MODAL */}
       <Modal visible={showThemePicker} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowThemePicker(false)}>
