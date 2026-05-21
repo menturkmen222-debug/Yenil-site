@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, Platform, Modal,
   TextInput, KeyboardAvoidingView, FlatList, Alert, ActivityIndicator,
-  Animated,
+  Animated, Linking,
 } from "react-native";
 import { router, type Href } from "expo-router";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -338,6 +338,13 @@ function HyzmatCard({ item }: { item: HyzmatItem }) {
   const colors = useColors();
   const cat = HYZMAT_CATEGORIES.find((c) => c.key === item.category) ?? HYZMAT_CATEGORIES[7];
 
+  const handleCall = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Linking.openURL(`tel:${item.phone}`).catch(() =>
+      Alert.alert("Jaň etmek mümkin däl", item.phone)
+    );
+  };
+
   return (
     <Pressable
       onPress={() => {
@@ -347,62 +354,64 @@ function HyzmatCard({ item }: { item: HyzmatItem }) {
           `${item.description || "Beýany ýok"}\n\n📍 ${item.location || "Ýer görkezilmedi"}\n💰 ${item.price || "Ylalaşyk"}\n📞 ${item.phone}`,
           [
             { text: "Ýap" },
-            { text: "Jaň et", onPress: () => {} },
+            { text: "📞 Jaň et", onPress: handleCall },
           ]
         );
       }}
       style={({ pressed }) => [
         hStyles.card,
-        { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.85 : 1 },
+        { backgroundColor: colors.card, borderColor: cat.color + "33", opacity: pressed ? 0.87 : 1 },
       ]}
     >
-      {/* Category badge + emoji */}
-      <LinearGradient
-        colors={[cat.color + "cc", cat.color] as [string, string]}
-        style={hStyles.cardTop}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
-        <Text style={hStyles.cardEmoji}>{cat.emoji}</Text>
-        <View style={hStyles.catBadge}>
-          <Text style={hStyles.catBadgeText}>{cat.label}</Text>
-        </View>
-        {item.price ? (
-          <View style={hStyles.priceBadge}>
-            <Text style={hStyles.priceBadgeText}>{item.price}</Text>
-          </View>
-        ) : null}
-      </LinearGradient>
+      {/* Left accent bar */}
+      <View style={[hStyles.accentBar, { backgroundColor: cat.color }]} />
 
-      {/* Info */}
-      <View style={hStyles.cardBody}>
-        <Text style={[hStyles.cardTitle, { color: colors.foreground }]} numberOfLines={2}>
-          {item.title}
-        </Text>
+      {/* Icon */}
+      <View style={[hStyles.iconWrap, { backgroundColor: cat.color + "18" }]}>
+        <Text style={{ fontSize: 24 }}>{cat.emoji}</Text>
+      </View>
+
+      {/* Content */}
+      <View style={{ flex: 1, marginLeft: 12 }}>
+        <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+          <Text style={[hStyles.cardTitle, { color: colors.foreground, flex: 1 }]} numberOfLines={1}>
+            {item.title}
+          </Text>
+          {item.price ? (
+            <View style={[hStyles.pricePill, { backgroundColor: "#10b98118" }]}>
+              <Text style={{ color: "#10b981", fontSize: 11, fontWeight: "800" }}>{item.price}</Text>
+            </View>
+          ) : null}
+        </View>
+
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 }}>
+          <View style={[hStyles.catPill, { backgroundColor: cat.color + "18" }]}>
+            <Text style={{ color: cat.color, fontSize: 10, fontWeight: "700" }}>{cat.label}</Text>
+          </View>
+          {item.location ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+              <Ionicons name="location-outline" size={10} color={colors.mutedForeground} />
+              <Text style={{ color: colors.mutedForeground, fontSize: 10 }} numberOfLines={1}>
+                {item.location}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+
         {item.description ? (
-          <Text style={[hStyles.cardDesc, { color: colors.mutedForeground }]} numberOfLines={2}>
+          <Text style={[hStyles.cardDesc, { color: colors.mutedForeground, marginTop: 4 }]} numberOfLines={2}>
             {item.description}
           </Text>
         ) : null}
-
-        {/* Footer */}
-        <View style={hStyles.cardFooter}>
-          <View style={hStyles.cardMeta}>
-            {item.location ? (
-              <View style={hStyles.metaRow}>
-                <Ionicons name="location-outline" size={11} color={colors.mutedForeground} />
-                <Text style={[hStyles.metaText, { color: colors.mutedForeground }]} numberOfLines={1}>
-                  {item.location}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-          <View style={[hStyles.callBtn, { backgroundColor: cat.color + "18" }]}>
-            <Ionicons name="call-outline" size={13} color={cat.color} />
-            <Text style={[hStyles.callText, { color: cat.color }]}>Jaň</Text>
-          </View>
-        </View>
       </View>
+
+      {/* Call button */}
+      <Pressable
+        onPress={handleCall}
+        style={({ pressed }) => [hStyles.callBtn, { backgroundColor: cat.color, opacity: pressed ? 0.8 : 1 }]}
+      >
+        <Ionicons name="call" size={16} color="#fff" />
+      </Pressable>
     </Pressable>
   );
 }
@@ -426,6 +435,7 @@ export default function HomeScreen() {
   const [deviceId, setDeviceId] = useState("");
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifCount] = useState(2);
+  const [hyzmatSearch, setHyzmatSearch] = useState("");
   const bellAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -459,10 +469,16 @@ export default function HomeScreen() {
 
   const topPad = (isWeb ? 0 : insets.top) + 20;
 
-  const filteredHyzmatlar =
-    hyzmatFilter === "all"
-      ? hyzmatlar
-      : hyzmatlar.filter((h) => h.category === hyzmatFilter);
+  const filteredHyzmatlar = hyzmatlar.filter((h) => {
+    const matchCat = hyzmatFilter === "all" || h.category === hyzmatFilter;
+    const s = hyzmatSearch.toLowerCase();
+    const matchS =
+      !s ||
+      h.title.toLowerCase().includes(s) ||
+      (h.description || "").toLowerCase().includes(s) ||
+      (h.location || "").toLowerCase().includes(s);
+    return matchCat && matchS;
+  });
 
   const handleScroll = (e: any) => {
     setShowScrollTop(e.nativeEvent.contentOffset.y > 320);
@@ -738,57 +754,75 @@ export default function HomeScreen() {
         </Pressable>
 
         {/* ══════════════════════════════════════════════════
-            HYZMATLAR MARKETPLACE
+            HALK HYZMATLARY MARKETPLACE
         ══════════════════════════════════════════════════ */}
-        <View style={styles.hyzmatHeader}>
-          <View>
-            <Text style={[styles.sectionTitle, { color: colors.foreground, marginLeft: 0, marginTop: 0 }]}>
-              Halk hyzmatlary
-            </Text>
-            <Text style={[styles.hyzmatSubTitle, { color: colors.mutedForeground }]}>
-              Ulag · Usta · Gözellik · Nahar we has köp
-            </Text>
+
+        {/* Section header */}
+        <View style={mktStyles.sectionHead}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <View style={[mktStyles.sectionIcon, { backgroundColor: "#6366f118" }]}>
+              <Ionicons name="storefront-outline" size={18} color="#6366f1" />
+            </View>
+            <View>
+              <Text style={[mktStyles.sectionTitle, { color: colors.foreground }]}>Halk hyzmatlary</Text>
+              <Text style={[mktStyles.sectionSub, { color: colors.mutedForeground }]}>
+                {hyzmatlar.length > 0 ? `${hyzmatlar.length} hyzmat bar` : "Ulag · Usta · Gözellik · Nahar"}
+              </Text>
+            </View>
           </View>
           <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              setAddHyzmatOpen(true);
-            }}
-            style={[styles.addHyzmatBtn, { backgroundColor: colors.primary }]}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setAddHyzmatOpen(true); }}
+            style={[mktStyles.addBtn, { backgroundColor: colors.primary }]}
           >
-            <Ionicons name="add" size={20} color="#fff" />
-            <Text style={styles.addHyzmatBtnText}>Goş</Text>
+            <Ionicons name="add" size={18} color="#fff" />
+            <Text style={mktStyles.addBtnText}>Goş</Text>
           </Pressable>
         </View>
 
-        {/* Category filter for marketplace */}
+        {/* Search bar */}
+        <View style={[mktStyles.searchBar, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+          <Ionicons name="search-outline" size={16} color={colors.mutedForeground} />
+          <TextInput
+            value={hyzmatSearch}
+            onChangeText={setHyzmatSearch}
+            placeholder="Hyzmat gözle..."
+            placeholderTextColor={colors.mutedForeground}
+            style={[mktStyles.searchInput, { color: colors.foreground }]}
+          />
+          {hyzmatSearch.length > 0 && (
+            <Pressable onPress={() => setHyzmatSearch("")}>
+              <Ionicons name="close-circle" size={16} color={colors.mutedForeground} />
+            </Pressable>
+          )}
+        </View>
+
+        {/* Category filter */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={styles.hyzmatFilterScroll}
           contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingVertical: 4 }}
         >
           {[{ key: "all" as const, label: "Hemmesi", emoji: "✨", color: "#6366f1" }, ...HYZMAT_CATEGORIES].map((cat) => {
             const isActive = hyzmatFilter === cat.key;
+            const count = cat.key === "all" ? hyzmatlar.length : hyzmatlar.filter((h) => h.category === cat.key).length;
             return (
               <Pressable
                 key={cat.key}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setHyzmatFilter(cat.key as any);
-                }}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setHyzmatFilter(cat.key as any); }}
                 style={[
-                  styles.hyzmatFilterChip,
-                  {
-                    backgroundColor: isActive ? cat.color : colors.muted,
-                    borderColor: isActive ? cat.color : colors.border,
-                  },
+                  mktStyles.filterChip,
+                  { backgroundColor: isActive ? cat.color : colors.muted, borderColor: isActive ? cat.color : colors.border },
                 ]}
               >
-                <Text style={styles.hyzmatFilterEmoji}>{cat.emoji}</Text>
-                <Text style={[styles.hyzmatFilterLabel, { color: isActive ? "#fff" : colors.foreground }]}>
+                <Text style={{ fontSize: 13 }}>{cat.emoji}</Text>
+                <Text style={[mktStyles.filterLabel, { color: isActive ? "#fff" : colors.foreground }]}>
                   {cat.label}
                 </Text>
+                {count > 0 && (
+                  <View style={[mktStyles.filterBadge, { backgroundColor: isActive ? "rgba(255,255,255,0.25)" : colors.border }]}>
+                    <Text style={{ color: isActive ? "#fff" : colors.mutedForeground, fontSize: 9, fontWeight: "700" }}>{count}</Text>
+                  </View>
+                )}
               </Pressable>
             );
           })}
@@ -796,48 +830,38 @@ export default function HomeScreen() {
 
         {/* Service listing */}
         {filteredHyzmatlar.length === 0 ? (
-          <View style={[styles.hyzmatEmpty, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={styles.hyzmatEmptyEmoji}>🏪</Text>
-            <Text style={[styles.hyzmatEmptyTitle, { color: colors.foreground }]}>
-              Heniz hyzmat ýok
+          <View style={[mktStyles.emptyWrap, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={{ fontSize: 40, marginBottom: 10 }}>🏪</Text>
+            <Text style={[mktStyles.emptyTitle, { color: colors.foreground }]}>
+              {hyzmatSearch ? "Netije tapylmady" : "Heniz hyzmat ýok"}
             </Text>
-            <Text style={[styles.hyzmatEmptyDesc, { color: colors.mutedForeground }]}>
-              Ilkinji bolup özüňiziň hyzmatyňyzy goşuň!
+            <Text style={[mktStyles.emptySub, { color: colors.mutedForeground }]}>
+              {hyzmatSearch ? `"${hyzmatSearch}" boýunça hyzmat tapylmady` : "Ilkinji bolup özüňiziň hyzmatyňyzy goşuň!"}
             </Text>
-            <Pressable
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                setAddHyzmatOpen(true);
-              }}
-              style={[styles.hyzmatEmptyBtn, { backgroundColor: colors.primary }]}
-            >
-              <Ionicons name="add-circle-outline" size={16} color="#fff" />
-              <Text style={styles.hyzmatEmptyBtnText}>Hyzmat goş</Text>
-            </Pressable>
+            {!hyzmatSearch && (
+              <Pressable
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setAddHyzmatOpen(true); }}
+                style={[mktStyles.emptyBtn, { backgroundColor: colors.primary }]}
+              >
+                <Ionicons name="add-circle-outline" size={15} color="#fff" />
+                <Text style={mktStyles.emptyBtnText}>Hyzmat goş</Text>
+              </Pressable>
+            )}
           </View>
         ) : (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, gap: 12, paddingVertical: 4 }}
-          >
+          <View style={{ paddingHorizontal: 16, gap: 10, marginTop: 4 }}>
             {filteredHyzmatlar.map((item) => (
               <HyzmatCard key={item.id} item={item} />
             ))}
-            {/* "Goş" card at the end */}
+            {/* Add service row */}
             <Pressable
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                setAddHyzmatOpen(true);
-              }}
-              style={[styles.addCard, { backgroundColor: colors.muted, borderColor: colors.border }]}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setAddHyzmatOpen(true); }}
+              style={[mktStyles.addRowBtn, { backgroundColor: colors.muted, borderColor: colors.border }]}
             >
-              <View style={[styles.addCardIcon, { backgroundColor: colors.primary + "18" }]}>
-                <Ionicons name="add" size={28} color={colors.primary} />
-              </View>
-              <Text style={[styles.addCardText, { color: colors.primary }]}>Hyzmat{"\n"}goş</Text>
+              <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
+              <Text style={[mktStyles.addRowText, { color: colors.primary }]}>Täze hyzmat goş</Text>
             </Pressable>
-          </ScrollView>
+          </View>
         )}
       </ScrollView>
 
@@ -905,22 +929,18 @@ const addStyles = StyleSheet.create({
 });
 
 const hStyles = StyleSheet.create({
-  card: { width: 200, borderRadius: 18, borderWidth: 1, overflow: "hidden" },
-  cardTop: { height: 110, padding: 12, justifyContent: "space-between" },
-  cardEmoji: { fontSize: 36 },
-  catBadge: { position: "absolute", top: 10, right: 10, backgroundColor: "rgba(0,0,0,0.25)", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
-  catBadgeText: { color: "#fff", fontSize: 10, fontWeight: "700" },
-  priceBadge: { alignSelf: "flex-start", backgroundColor: "rgba(255,255,255,0.25)", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
-  priceBadgeText: { color: "#fff", fontSize: 11, fontWeight: "700" },
-  cardBody: { padding: 12 },
-  cardTitle: { fontSize: 14, fontWeight: "800", marginBottom: 4, lineHeight: 18 },
-  cardDesc: { fontSize: 12, lineHeight: 16, marginBottom: 10 },
-  cardFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  cardMeta: { flex: 1 },
-  metaRow: { flexDirection: "row", alignItems: "center", gap: 3 },
-  metaText: { fontSize: 10, flex: 1 },
-  callBtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
-  callText: { fontSize: 12, fontWeight: "700" },
+  card: {
+    flexDirection: "row", alignItems: "center",
+    borderRadius: 18, borderWidth: 1,
+    padding: 14, overflow: "hidden", position: "relative",
+  },
+  accentBar: { width: 4, position: "absolute", left: 0, top: 0, bottom: 0, borderTopLeftRadius: 18, borderBottomLeftRadius: 18 },
+  iconWrap: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center", marginLeft: 6 },
+  cardTitle: { fontSize: 14, fontWeight: "800", lineHeight: 18 },
+  cardDesc: { fontSize: 12, lineHeight: 16 },
+  catPill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
+  pricePill: { paddingHorizontal: 9, paddingVertical: 4, borderRadius: 20 },
+  callBtn: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center", marginLeft: 10 },
 });
 
 const styles = StyleSheet.create({
@@ -1022,27 +1042,40 @@ const styles = StyleSheet.create({
   bannerTitle: { color: "#fff", fontWeight: "700", fontSize: 15 },
   bannerDesc: { color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 2 },
 
-  // Halk hyzmatlary section
-  hyzmatHeader: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", paddingHorizontal: 16, marginTop: 24, marginBottom: 6 },
-  hyzmatSubTitle: { fontSize: 12, marginTop: 2 },
-  addHyzmatBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, marginTop: 2 },
-  addHyzmatBtnText: { color: "#fff", fontWeight: "700", fontSize: 13 },
+});
 
-  hyzmatFilterScroll: { marginBottom: 10 },
-  hyzmatFilterChip: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, borderWidth: 1 },
-  hyzmatFilterEmoji: { fontSize: 14 },
-  hyzmatFilterLabel: { fontSize: 12, fontWeight: "600" },
+// ── Marketplace (Halk Hyzmatlary) Styles ─────────────────────────────
+const mktStyles = StyleSheet.create({
+  sectionHead: {
+    flexDirection: "row", alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16, marginTop: 24, marginBottom: 10,
+  },
+  sectionIcon: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  sectionTitle: { fontSize: 17, fontWeight: "800", letterSpacing: -0.3 },
+  sectionSub: { fontSize: 11, marginTop: 1 },
+  addBtn: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
+  addBtnText: { color: "#fff", fontWeight: "700", fontSize: 13 },
 
-  hyzmatEmpty: { marginHorizontal: 16, borderRadius: 20, borderWidth: 1, padding: 32, alignItems: "center", marginBottom: 8 },
-  hyzmatEmptyEmoji: { fontSize: 48, marginBottom: 12 },
-  hyzmatEmptyTitle: { fontSize: 17, fontWeight: "800", marginBottom: 6 },
-  hyzmatEmptyDesc: { fontSize: 13, textAlign: "center", lineHeight: 20, marginBottom: 16 },
-  hyzmatEmptyBtn: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 16 },
-  hyzmatEmptyBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+  searchBar: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    marginHorizontal: 16, marginBottom: 10,
+    borderRadius: 14, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10,
+  },
+  searchInput: { flex: 1, fontSize: 14, padding: 0 },
 
-  addCard: { width: 120, borderRadius: 18, borderWidth: 1, alignItems: "center", justifyContent: "center", gap: 10, padding: 16 },
-  addCardIcon: { width: 52, height: 52, borderRadius: 16, alignItems: "center", justifyContent: "center" },
-  addCardText: { fontSize: 13, fontWeight: "700", textAlign: "center" },
+  filterChip: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 11, paddingVertical: 7, borderRadius: 20, borderWidth: 1 },
+  filterLabel: { fontSize: 12, fontWeight: "600" },
+  filterBadge: { width: 17, height: 17, borderRadius: 9, alignItems: "center", justifyContent: "center" },
+
+  emptyWrap: { marginHorizontal: 16, borderRadius: 20, borderWidth: 1, padding: 32, alignItems: "center", marginBottom: 8 },
+  emptyTitle: { fontSize: 16, fontWeight: "800", marginBottom: 6 },
+  emptySub: { fontSize: 13, textAlign: "center", lineHeight: 20, marginBottom: 16 },
+  emptyBtn: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 20, paddingVertical: 11, borderRadius: 16 },
+  emptyBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+
+  addRowBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 16, borderWidth: 1, paddingVertical: 14, marginTop: 2, marginBottom: 8 },
+  addRowText: { fontSize: 14, fontWeight: "700" },
 });
 
 const notifStyles = StyleSheet.create({

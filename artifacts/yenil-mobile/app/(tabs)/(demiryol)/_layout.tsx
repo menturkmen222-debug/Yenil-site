@@ -5,6 +5,8 @@ import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { useColors } from "@/hooks/useColors";
 
+const ACTIVE_COLOR = "#10b981";
+
 export default function DemiryolLayout() {
   const colors = useColors();
   const isDark = colors.isDark;
@@ -15,20 +17,31 @@ export default function DemiryolLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
+        tabBarActiveTintColor: ACTIVE_COLOR,
         tabBarInactiveTintColor: colors.mutedForeground,
         tabBarStyle: {
           position: "absolute",
           backgroundColor: isIOS ? "transparent" : colors.background,
-          borderTopWidth: isWeb ? 1 : 0,
-          borderTopColor: colors.border,
+          borderTopWidth: isIOS ? 0 : 0.5,
+          borderTopColor: ACTIVE_COLOR + "44",
           elevation: 0,
-          ...(isWeb ? { height: 84 } : {}),
+          height: isWeb ? 84 : isIOS ? 82 : 72,
+          paddingBottom: isIOS ? 0 : isWeb ? 16 : 6,
+          paddingTop: 6,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "700",
+          letterSpacing: 0.1,
+          marginTop: 1,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 4,
         },
         tabBarBackground: () =>
           isIOS ? (
             <BlurView
-              intensity={100}
+              intensity={95}
               tint={isDark ? "dark" : "light"}
               style={StyleSheet.absoluteFill}
             />
@@ -41,21 +54,39 @@ export default function DemiryolLayout() {
         name="index"
         options={{
           title: "Bilet al",
-          tabBarIcon: ({ color }) => <Ionicons name="train-outline" size={22} color={color} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? "train" : "train-outline"}
+              size={23}
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="biletlerim"
         options={{
           title: "Biletlerim",
-          tabBarIcon: ({ color }) => <Ionicons name="ticket-outline" size={22} color={color} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? "ticket" : "ticket-outline"}
+              size={23}
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="d-sozlamalar"
         options={{
           title: "Sozlamalar",
-          tabBarIcon: ({ color }) => <Ionicons name="settings-outline" size={22} color={color} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? "settings" : "settings-outline"}
+              size={23}
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen name="sms" options={{ href: null }} />

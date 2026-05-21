@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
   Alert, ActivityIndicator, Platform, Modal, FlatList,
@@ -10,7 +10,7 @@ import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { saveOrder } from "@/lib/firebase";
-import { addToHistory } from "@/lib/orderHistory";
+import { addToHistory, getHistory, type OrderHistoryItem } from "@/lib/orderHistory";
 
 // ── Data ────────────────────────────────────────────────────────────
 const DOMESTIC = [
@@ -124,6 +124,7 @@ export default function HowaScreen() {
   const insets = useSafeAreaInsets();
   const { balance, deviceId } = useBonusPul();
   const isWeb = Platform.OS === "web";
+  const isIOS = Platform.OS === "ios";
 
   // Flight config
   const [flightType, setFlightType] = useState<FlightType>("içerki");
@@ -157,6 +158,15 @@ export default function HowaScreen() {
   const [step, setStep] = useState<Step>("method");
   const [loading, setLoading] = useState(false);
   const [bookingId, setBookingId] = useState("");
+
+  // ── Internal bottom tabs ──────────────────────────────────────────
+  const [howaTab, setHowaTab] = useState<"book" | "myflights" | "info">("book");
+  const [ucusHist, setUcusHist] = useState<OrderHistoryItem[]>([]);
+
+  useEffect(() => {
+    if (howaTab !== "myflights") return;
+    getHistory().then((h) => setUcusHist(h.filter((x) => x.type === "howa-bilet")));
+  }, [howaTab]);
 
   const cities = flightType === "içerki" ? DOMESTIC : INTERNATIONAL;
 
@@ -298,8 +308,9 @@ export default function HowaScreen() {
         )}
       </View>
 
+      {howaTab === "book" && (
       <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 120 : 120 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 130 : 130 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -1007,6 +1018,142 @@ export default function HowaScreen() {
           </View>
         )}
       </ScrollView>
+      )}
+
+      {/* ── MY FLIGHTS TAB ── */}
+      {howaTab === "myflights" && (
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 130 }} showsVerticalScrollIndicator={false}>
+          {ucusHist.length === 0 ? (
+            <View style={{ alignItems: "center", paddingTop: 60, gap: 12 }}>
+              <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: "#0ea5e915", alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="airplane-outline" size={40} color="#0ea5e9" />
+              </View>
+              <Text style={{ color: colors.foreground, fontSize: 18, fontWeight: "800", textAlign: "center" }}>Uçuş tapylmady</Text>
+              <Text style={{ color: colors.mutedForeground, fontSize: 14, textAlign: "center", lineHeight: 20 }}>
+                Bilet satyn alansoň,{"\n"}uçuşlaryňyz şu ýerde görüner.
+              </Text>
+            </View>
+          ) : (
+            ucusHist.map((item) => (
+              <View key={item.id} style={{ backgroundColor: colors.card, borderRadius: 18, borderWidth: 1, borderColor: colors.border, padding: 16, marginBottom: 12 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10 }}>
+                  <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: "#0ea5e920", alignItems: "center", justifyContent: "center" }}>
+                    <Ionicons name="airplane" size={22} color="#0ea5e9" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: colors.foreground, fontSize: 15, fontWeight: "800" }}>{item.title}</Text>
+                    <Text style={{ color: colors.mutedForeground, fontSize: 12, marginTop: 2 }}>{item.details}</Text>
+                  </View>
+                  <View style={{ backgroundColor: "#f59e0b18", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4 }}>
+                    <Text style={{ color: "#d97706", fontSize: 11, fontWeight: "700" }}>Garaşylýar</Text>
+                  </View>
+                </View>
+                <View style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 10, flexDirection: "row", justifyContent: "space-between" }}>
+                  <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>
+                    {new Date(item.timestamp).toLocaleDateString("ru-RU")}
+                  </Text>
+                  {item.phone ? (
+                    <Text style={{ color: "#0ea5e9", fontSize: 11, fontWeight: "700" }}>{item.phone}</Text>
+                  ) : null}
+                </View>
+              </View>
+            ))
+          )}
+        </ScrollView>
+      )}
+
+      {/* ── FLIGHT INFO TAB ── */}
+      {howaTab === "info" && (
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 130 }} showsVerticalScrollIndicator={false}>
+          <Text style={{ color: colors.mutedForeground, fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 10 }}>
+            AEROPORT MAGLUMAT
+          </Text>
+          {([
+            { code: "ASB", name: "Aşgabat Halkara Aeroporty", terminal: "T1, T2", icon: "🏙️" },
+            { code: "MYP", name: "Mary Aeroporty", terminal: "T1", icon: "🕌" },
+            { code: "CRZ", name: "Türkmenabat Aeroporty", terminal: "T1", icon: "🌿" },
+            { code: "KRW", name: "Türkmenbaşy Aeroporty", terminal: "T1", icon: "⚓" },
+            { code: "TAZ", name: "Daşoguz Aeroporty", terminal: "T1", icon: "🏛️" },
+          ] as const).map((ap) => (
+            <View key={ap.code} style={{ backgroundColor: colors.card, borderRadius: 16, borderWidth: 1, borderColor: colors.border, padding: 14, marginBottom: 10, flexDirection: "row", alignItems: "center", gap: 14 }}>
+              <Text style={{ fontSize: 28 }}>{ap.icon}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: colors.foreground, fontSize: 14, fontWeight: "800" }}>{ap.name}</Text>
+                <Text style={{ color: colors.mutedForeground, fontSize: 12, marginTop: 2 }}>Terminal: {ap.terminal}</Text>
+              </View>
+              <View style={{ backgroundColor: "#0ea5e918", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5 }}>
+                <Text style={{ color: "#0ea5e9", fontSize: 13, fontWeight: "900" }}>{ap.code}</Text>
+              </View>
+            </View>
+          ))}
+
+          <Text style={{ color: colors.mutedForeground, fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginTop: 16, marginBottom: 10 }}>
+            HABARLAŞMAK
+          </Text>
+          {([
+            { label: "Bilet Merkezi", phone: "+993 12 390200", icon: "call-outline" as const },
+            { label: "Ýük Hyzmaty", phone: "+993 12 390300", icon: "cube-outline" as const },
+            { label: "Kömek Hyzmaty", phone: "+993 12 390100", icon: "help-circle-outline" as const },
+          ] as const).map((c) => (
+            <Pressable
+              key={c.phone}
+              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? colors.muted : colors.card,
+                borderRadius: 14, borderWidth: 1, borderColor: colors.border,
+                padding: 14, marginBottom: 10,
+                flexDirection: "row" as const, alignItems: "center" as const, gap: 12,
+              })}
+            >
+              <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: "#0ea5e918", alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name={c.icon} size={20} color="#0ea5e9" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: colors.foreground, fontSize: 14, fontWeight: "700" }}>{c.label}</Text>
+                <Text style={{ color: "#0ea5e9", fontSize: 13, fontWeight: "800", marginTop: 2 }}>{c.phone}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} />
+            </Pressable>
+          ))}
+        </ScrollView>
+      )}
+
+      {/* ── HOWA INTERNAL TAB BAR ── */}
+      <View style={[howaBarS.bar, {
+        backgroundColor: isIOS ? "transparent" : colors.background,
+        borderTopColor: "#0ea5e930",
+        paddingBottom: isWeb ? 16 : insets.bottom > 0 ? insets.bottom : 12,
+      }]}>
+        {([
+          { id: "book" as const, label: "Uçuş al", icon: "airplane-outline" as const, activeIcon: "airplane" as const },
+          { id: "myflights" as const, label: "Uçuşlarym", icon: "ticket-outline" as const, activeIcon: "ticket" as const },
+          { id: "info" as const, label: "Maglumat", icon: "information-circle-outline" as const, activeIcon: "information-circle" as const },
+        ]).map((tab) => {
+          const active = howaTab === tab.id;
+          return (
+            <Pressable
+              key={tab.id}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setHowaTab(tab.id);
+              }}
+              style={howaBarS.tabItem}
+            >
+              <Ionicons
+                name={active ? tab.activeIcon : tab.icon}
+                size={24}
+                color={active ? "#0ea5e9" : colors.mutedForeground}
+              />
+              <Text style={[howaBarS.tabLabel, {
+                color: active ? "#0ea5e9" : colors.mutedForeground,
+                fontWeight: active ? "700" : "500",
+              }]}>
+                {tab.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
 
       {/* City picker modals */}
       <CityModal
@@ -1026,6 +1173,26 @@ export default function HowaScreen() {
     </View>
   );
 }
+
+// ── Howa Internal Tab Bar Styles ────────────────────────────────────
+const howaBarS = StyleSheet.create({
+  bar: {
+    flexDirection: "row",
+    borderTopWidth: 0.5,
+    paddingTop: 8,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 3,
+    paddingVertical: 4,
+  },
+  tabLabel: {
+    fontSize: 10,
+    letterSpacing: 0.1,
+  },
+});
 
 // ── Styles ───────────────────────────────────────────────────────────
 const s = StyleSheet.create({
