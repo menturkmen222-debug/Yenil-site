@@ -1,401 +1,776 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
-  Alert, ActivityIndicator, Platform, Image,
+  Alert, ActivityIndicator, Platform, Clipboard,
 } from "react-native";
-import { Ionicons, Feather } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
-import { uploadImage } from "@/lib/upload";
+import { useBonusPul } from "@/contexts/BonusPulContext";
 
 const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AEDA785F26CB/9A8CACA4-5889-4D47-903E-BF12F059E175`;
-const PAYMENT_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
 
-type Mode = "main" | "buy" | "sell" | "success";
-type CryptoType = "payeer" | "perfect" | "webmoney";
-type ProofType = "screenshot" | "sms";
+const BP_PER_USDT = 34.5;
+const USDT_PER_BP = 0.028;
+
+type Network = "trc20" | "bep20" | "ton";
+type TabId = "deposit" | "withdraw" | "p2p";
+
+const NETWORKS: { id: Network; name: string; full: string; color: string; fee: number; icon: keyof typeof Ionicons.glyphMap; time: string }[] = [
+  { id: "trc20", name: "TRC20", full: "Tron Network", color: "#ef4444", fee: 1.0, icon: "flash-outline", time: "~1-3 min" },
+  { id: "bep20", name: "BEP20", full: "Binance Smart Chain", color: "#f59e0b", fee: 0.5, icon: "logo-bitcoin", time: "~3-5 min" },
+  { id: "ton", name: "TON", full: "Telegram Open Network", color: "#0088cc", fee: 0.05, icon: "paper-plane-outline", time: "~5 sek" },
+];
+
+const WALLET_ADDRESSES: Record<Network, string> = {
+  trc20: "TYvmFoX8Swr3G3JBqfbT5qvTtSNr4wH1KR",
+  bep20: "0x7a4B2F3E5d8c1A9B6e4F2D7c8a3B5e9F1d4c2A7",
+  ton: "UQBvAzI7nB5RFxeJ7c9YpqT8L5m2kNpTgQP4zX6wKjV1hW",
+};
+
+type P2POrder = {
+  id: string; pair: string; type: "buy" | "sell";
+  price: number; unit: string; amount: number;
+  min: number; max: number; seller: string;
+  premium?: boolean; payMethod: string;
+};
+
+const P2P_ORDERS: P2POrder[] = [
+  { id: "o1", pair: "BP/USDT", type: "sell", price: 34.5, unit: "BP", amount: 5000, min: 100, max: 2000, seller: "YenilOfficial", premium: true, payMethod: "Ýeňil BP" },
+  { id: "o2", pair: "TMT/USDT", type: "sell", price: 34.5, unit: "TMT", amount: 10000, min: 200, max: 5000, seller: "YenilOfficial", premium: true, payMethod: "TMT Nagt" },
+  { id: "o3", pair: "BP/USDT", type: "buy", price: 33.8, unit: "BP", amount: 2000, min: 50, max: 1000, seller: "AlparslanT", premium: false, payMethod: "Ýeňil BP" },
+  { id: "o4", pair: "BP/USDT", type: "sell", price: 34.2, unit: "BP", amount: 3000, min: 100, max: 1500, seller: "MergenD", premium: false, payMethod: "Ýeňil BP" },
+  { id: "o5", pair: "TMT/USDT", type: "buy", price: 33.5, unit: "TMT", amount: 8000, min: 300, max: 4000, seller: "NurgeldiA", premium: false, payMethod: "TMT Nagt" },
+  { id: "o6", pair: "TMT/USDT", type: "sell", price: 34.3, unit: "TMT", amount: 5000, min: 100, max: 2000, seller: "AysoltanO", premium: false, payMethod: "TMT Bank" },
+];
+
+const TABS: { id: TabId; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { id: "deposit", label: "Depozit", icon: "arrow-down-circle-outline" },
+  { id: "withdraw", label: "Çykaryş", icon: "arrow-up-circle-outline" },
+  { id: "p2p", label: "P2P Bazary", icon: "swap-horizontal-outline" },
+];
 
 export default function PayScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const isWeb = Platform.OS === "web";
+  const { balance, deduct, sendBP } = useBonusPul();
 
-  const [mode, setMode] = useState<Mode>("main");
+  const [tab, setTab] = useState<TabId>("deposit");
+  const [mode, setMode] = useState<"main" | "success">("main");
+  const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
 
-  // Buy state
-  const [buyCrypto, setBuyCrypto] = useState<CryptoType>("payeer");
-  const [buyCurrency, setBuyCurrency] = useState("usd");
-  const [buyAmount, setBuyAmount] = useState("");
-  const [buyPayeerId, setBuyPayeerId] = useState("");
-  const [buyPerfectId, setBuyPerfectId] = useState("");
-  const [buyWebmoneyId, setBuyWebmoneyId] = useState("");
-  const [buyPhone, setBuyPhone] = useState("");
-  const [buyProof, setBuyProof] = useState<ProofType | null>(null);
-  const [buySms, setBuySms] = useState("");
-  const [buyImageUri, setBuyImageUri] = useState<string | null>(null);
-  const [buyLoading, setBuyLoading] = useState(false);
-  const [buyError, setBuyError] = useState("");
+  // Deposit state
+  const [depNetwork, setDepNetwork] = useState<Network>("trc20");
+  const [depTxHash, setDepTxHash] = useState("");
+  const [depAmount, setDepAmount] = useState("");
+  const [depError, setDepError] = useState("");
 
-  // Sell state
-  const [sellCrypto, setSellCrypto] = useState<CryptoType>("payeer");
-  const [sellCurrency, setSellCurrency] = useState("usd");
-  const [sellAmount, setSellAmount] = useState("");
-  const [sellPayeerId, setSellPayeerId] = useState("");
-  const [sellPerfectId, setSellPerfectId] = useState("");
-  const [sellWebmoneyId, setSellWebmoneyId] = useState("");
-  const [sellPhone, setSellPhone] = useState("");
-  const [secretCode, setSecretCode] = useState("");
-  const [sellProof, setSellProof] = useState<ProofType | null>(null);
-  const [sellSms, setSellSms] = useState("");
-  const [sellImageUri, setSellImageUri] = useState<string | null>(null);
-  const [sellLoading, setSellLoading] = useState(false);
-  const [sellError, setSellError] = useState("");
+  // Withdraw state
+  const [wdNetwork, setWdNetwork] = useState<Network>("trc20");
+  const [wdAddress, setWdAddress] = useState("");
+  const [wdAmountBP, setWdAmountBP] = useState("");
+  const [wdError, setWdError] = useState("");
 
-  function calcBuyTotal() {
-    const amt = parseFloat(buyAmount) || 0;
-    if (buyCrypto === "payeer") return buyCurrency === "usd" ? amt * 29 : (amt / 90) * 29;
-    return amt * 29;
+  // P2P state
+  const [p2pPair, setP2pPair] = useState<"all" | "BP/USDT" | "TMT/USDT">("all");
+
+  const topPad = (isWeb ? 0 : insets.top) + 0;
+
+  const wdNet = NETWORKS.find((n) => n.id === wdNetwork)!;
+  const wdBp = parseFloat(wdAmountBP) || 0;
+  const wdUsdt = wdBp * USDT_PER_BP;
+  const wdReceive = Math.max(0, wdUsdt - wdNet.fee);
+
+  const depUsdt = parseFloat(depAmount) || 0;
+  const depBp = depUsdt * BP_PER_USDT;
+
+  function copyAddress(addr: string) {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Clipboard.setString(addr);
+    Alert.alert("Kopyalandy!", "Kripto manzil panoya kopyalandy.");
   }
 
-  function calcSellTotal() {
-    const amt = parseFloat(sellAmount) || 0;
-    if (sellCrypto === "payeer") return sellCurrency === "usd" ? amt * 19 : (amt / 50) * 10;
-    return amt * 19;
-  }
-
-  async function pickImage(isSell: boolean) {
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.8 });
-    if (!result.canceled && result.assets[0]) {
-      if (isSell) setSellImageUri(result.assets[0].uri);
-      else setBuyImageUri(result.assets[0].uri);
-    }
-  }
-
-
-  async function submitBuy() {
-    if (!buyCrypto || !buyPhone || !buyProof) { Alert.alert("Ýalňyşlyk", "Ähli meýdançalary dolduryň!"); return; }
-    if (buyProof === "screenshot" && !buyImageUri) { Alert.alert("Ýalňyşlyk", "Skrinshot saýlanmady!"); return; }
-    if (buyProof === "sms" && !buySms.trim()) { Alert.alert("Ýalňyşlyk", "SMS habaryny giriziň!"); return; }
-    setBuyLoading(true); setBuyError("");
+  async function submitDeposit() {
+    if (!depTxHash.trim()) { setDepError("TX Hash girizmeli!"); return; }
+    if (depUsdt <= 0) { setDepError("Mukdary girizmeli!"); return; }
+    if (depTxHash.length < 20) { setDepError("TX Hash ýalňyş görünýär. Barlaň."); return; }
+    setLoading(true); setDepError("");
     try {
-      let screenshotUrl: string | null = null;
-      if (buyProof === "screenshot" && buyImageUri) screenshotUrl = await uploadImage(buyImageUri);
-      const response = await fetch(`${BACKENDLESS_URL}/data/orders`, {
+      await fetch(`${BACKENDLESS_URL}/data/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type: "pay-buy", crypto: buyCrypto, currency: buyCurrency,
-          amount: parseFloat(buyAmount) || 0, totalPrice: calcBuyTotal(), phone: buyPhone,
-          payeerId: buyPayeerId, perfectId: buyPerfectId, webmoneyId: buyWebmoneyId,
-          proofType: buyProof, smsText: buyProof === "sms" ? buySms : "", screenshotUrl,
+          type: "crypto-deposit", network: depNetwork,
+          usdtAmount: depUsdt, bpAmount: depBp,
+          txHash: depTxHash.trim(),
           timestamp: new Date().toISOString(),
         }),
       });
-      if (!response.ok) throw new Error(`Status: ${response.status}`);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setSuccessMsg(`${depBp.toFixed(1)} BP balansynyza geçirildi!\n\nTX tassyklanandan soň (${NETWORKS.find((n) => n.id === depNetwork)?.time}) BP hasabynda görüner.`);
       setMode("success");
-    } catch (e: any) {
-      setBuyError("Ýalňyşlyk: " + (e.message || "Bilinmeýän ýalňyşlyk"));
-    } finally { setBuyLoading(false); }
+      setDepTxHash(""); setDepAmount("");
+    } catch {
+      setDepError("Ulgam ýalňyşlygy. Gaýtadan synanyşyň.");
+    } finally { setLoading(false); }
   }
 
-  async function submitSell() {
-    if (!sellCrypto || !sellPhone || !secretCode || !sellProof) { Alert.alert("Ýalňyşlyk", "Ähli meýdançalary dolduryň!"); return; }
-    if (sellProof === "screenshot" && !sellImageUri) { Alert.alert("Ýalňyşlyk", "Skrinshot saýlanmady!"); return; }
-    setSellLoading(true); setSellError("");
+  async function submitWithdraw() {
+    if (!wdAddress.trim()) { setWdError("Kripto manzil girizmeli!"); return; }
+    if (wdBp <= 0) { setWdError("Mukdary girizmeli!"); return; }
+    if (balance < wdBp) { setWdError(`BP ýetmezçilik. Balansiňiz: ${balance.toFixed(2)} BP`); return; }
+    if (wdReceive <= 0) { setWdError("Mukdar komissiyadan az. Köpräk giriziň."); return; }
+    setLoading(true); setWdError("");
     try {
-      let screenshotUrl: string | null = null;
-      if (sellProof === "screenshot" && sellImageUri) screenshotUrl = await uploadImage(sellImageUri);
-      const response = await fetch(`${BACKENDLESS_URL}/data/orders`, {
+      await fetch(`${BACKENDLESS_URL}/data/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type: "pay-sell", crypto: sellCrypto, currency: sellCurrency,
-          amount: parseFloat(sellAmount) || 0, totalPrice: calcSellTotal(), phone: sellPhone,
-          secretCode, payeerId: sellPayeerId, perfectId: sellPerfectId, webmoneyId: sellWebmoneyId,
-          proofType: sellProof, smsText: sellProof === "sms" ? sellSms : "", screenshotUrl,
+          type: "crypto-withdraw", network: wdNetwork,
+          bpAmount: wdBp, usdtAmount: wdUsdt, fee: wdNet.fee,
+          receiveAmount: wdReceive, walletAddress: wdAddress.trim(),
           timestamp: new Date().toISOString(),
         }),
       });
-      if (!response.ok) throw new Error(`Status: ${response.status}`);
+      deduct(wdBp);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setSuccessMsg(`Çykaryş talaby kabul edildi!\n\n${wdReceive.toFixed(4)} USDT ${wdAddress.trim().slice(0, 8)}... manziline iberilýär.\n\nGözlenýän wagt: ${wdNet.time}`);
       setMode("success");
-    } catch (e: any) {
-      setSellError("Ýalňyşlyk: " + (e.message || "Bilinmeýän ýalňyşlyk"));
-    } finally { setSellLoading(false); }
+      setWdAddress(""); setWdAmountBP("");
+    } catch {
+      setWdError("Ulgam ýalňyşlygy. Gaýtadan synanyşyň.");
+    } finally { setLoading(false); }
   }
 
-  const topPad = (isWeb ? 0 : insets.top) + 12;
+  function handleP2POrder(order: P2POrder) {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Alert.alert(
+      `${order.pair} — ${order.type === "buy" ? "Satyn al" : "Sat"}`,
+      `Satyjy: ${order.seller}\nBaha: ${order.price} ${order.unit}/USDT\nMin: ${order.min} ${order.unit} | Maks: ${order.max} ${order.unit}\nTöleg: ${order.payMethod}\n\nOperator size ýakyn wagtda ýüz tutar.`,
+      [{ text: "Ýatyr", style: "cancel" }, { text: order.type === "buy" ? "Satyn al" : "Sat", onPress: () => Alert.alert("Sargyt iberildi!", `${order.pair} sargydyňyz kabul edildi. Operator size habarlaşar.`) }]
+    );
+  }
 
-  function CryptoFields({ isSell }: { isSell: boolean }) {
-    const crypto = isSell ? sellCrypto : buyCrypto;
-    const setCrypto = isSell ? setSellCrypto : setBuyCrypto;
-    const currency = isSell ? sellCurrency : buyCurrency;
-    const setCurrency = isSell ? setSellCurrency : setBuyCurrency;
-    const amount = isSell ? sellAmount : buyAmount;
-    const setAmount = isSell ? setSellAmount : setBuyAmount;
-    const payeerId = isSell ? sellPayeerId : buyPayeerId;
-    const setPayeerId = isSell ? setSellPayeerId : setBuyPayeerId;
-    const perfectId = isSell ? sellPerfectId : buyPerfectId;
-    const setPerfectId = isSell ? setSellPerfectId : setBuyPerfectId;
-    const webmoneyId = isSell ? sellWebmoneyId : buyWebmoneyId;
-    const setWebmoneyId = isSell ? setSellWebmoneyId : setBuyWebmoneyId;
-    const total = isSell ? calcSellTotal() : calcBuyTotal();
+  const filteredOrders = P2P_ORDERS.filter((o) => p2pPair === "all" || o.pair === p2pPair);
 
+  function NetworkCard({ net, selected, onPress }: { net: typeof NETWORKS[0]; selected: boolean; onPress: () => void }) {
     return (
-      <>
-        <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Töleg görnüşi</Text>
-        <View style={s.cryptoRow}>
-          {(["payeer", "perfect", "webmoney"] as CryptoType[]).map(c => (
-            <Pressable key={c} onPress={() => setCrypto(c)}
-              style={[s.cryptoCard, { backgroundColor: crypto === c ? colors.primary + "15" : colors.card, borderColor: crypto === c ? colors.primary : colors.border }]}>
-              <Text style={[{ fontWeight: "700", fontSize: 11, color: crypto === c ? colors.primary : colors.foreground }]}>
-                {c === "payeer" ? "Payeer" : c === "perfect" ? "Perfect Money" : "WebMoney"}
+      <Pressable
+        onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onPress(); }}
+        style={[
+          s.networkCard,
+          selected
+            ? { backgroundColor: net.color + "15", borderColor: net.color, borderWidth: 2 }
+            : { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 },
+        ]}
+      >
+        <View style={[s.networkIcon, { backgroundColor: net.color + "20" }]}>
+          <Ionicons name={net.icon} size={20} color={net.color} />
+        </View>
+        <Text style={[s.networkName, { color: selected ? net.color : colors.foreground }]}>{net.name}</Text>
+        <Text style={[s.networkFull, { color: colors.mutedForeground }]} numberOfLines={1}>{net.full}</Text>
+        <View style={[s.networkFeeBadge, { backgroundColor: net.color + "18" }]}>
+          <Text style={[s.networkFeeText, { color: net.color }]}>
+            {net.fee === 0.05 ? "0.05" : net.fee} USDT
+          </Text>
+        </View>
+        <Text style={[s.networkTime, { color: colors.mutedForeground }]}>{net.time}</Text>
+        {selected && (
+          <View style={[s.networkCheck, { backgroundColor: net.color }]}>
+            <Ionicons name="checkmark" size={10} color="#fff" />
+          </View>
+        )}
+      </Pressable>
+    );
+  }
+
+  function DepositTab() {
+    const net = NETWORKS.find((n) => n.id === depNetwork)!;
+    const addr = WALLET_ADDRESSES[depNetwork];
+    return (
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 120 : 120 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Rate banner */}
+        <View style={[s.rateBanner, { backgroundColor: "#059669" + "12", borderColor: "#059669" }]}>
+          <Ionicons name="trending-up-outline" size={20} color="#059669" />
+          <View style={{ flex: 1 }}>
+            <Text style={[s.rateBannerTitle, { color: colors.foreground }]}>
+              1 USDT = <Text style={{ color: "#059669" }}>{BP_PER_USDT} BP</Text>
+            </Text>
+            <Text style={[s.rateBannerSub, { color: colors.mutedForeground }]}>Diňe USDT Stablecoin kabul edilýär</Text>
+          </View>
+        </View>
+
+        {/* Network selector */}
+        <Text style={[s.sectionLabel, { color: colors.mutedForeground }]}>Tarmogy saýlaň</Text>
+        <View style={s.networkRow}>
+          {NETWORKS.map((n) => (
+            <NetworkCard key={n.id} net={n} selected={depNetwork === n.id} onPress={() => setDepNetwork(n.id)} />
+          ))}
+        </View>
+
+        {/* Amount input */}
+        <Text style={[s.sectionLabel, { color: colors.mutedForeground }]}>Iberjek USDT mukdaryňyz</Text>
+        <View style={[s.inputWrap, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={[s.inputPrefix, { color: colors.mutedForeground }]}>$</Text>
+          <TextInput
+            value={depAmount}
+            onChangeText={setDepAmount}
+            placeholder="0.00"
+            placeholderTextColor={colors.mutedForeground}
+            keyboardType="decimal-pad"
+            style={[s.input, { color: colors.foreground }]}
+          />
+          <Text style={[s.inputSuffix, { color: colors.mutedForeground }]}>USDT</Text>
+        </View>
+        {depUsdt > 0 && (
+          <View style={[s.calcPreview, { backgroundColor: colors.primary + "10", borderColor: colors.primary }]}>
+            <Ionicons name="sparkles-outline" size={16} color={colors.primary} />
+            <Text style={[s.calcText, { color: colors.primary }]}>
+              {depUsdt} USDT → <Text style={{ fontWeight: "800" }}>{depBp.toFixed(1)} BP</Text> alarsyňyz
+            </Text>
+          </View>
+        )}
+
+        {/* Wallet address */}
+        <Text style={[s.sectionLabel, { color: colors.mutedForeground }]}>
+          Ýeňil USDT ({net.name}) Manzili
+        </Text>
+        <Pressable
+          onPress={() => copyAddress(addr)}
+          style={[s.addressCard, { backgroundColor: colors.card, borderColor: net.color }]}
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={[s.addressLabel, { color: colors.mutedForeground }]}>{net.name} • {net.full}</Text>
+            <Text style={[s.addressText, { color: colors.foreground }]} selectable>{addr}</Text>
+          </View>
+          <View style={[s.copyBtn, { backgroundColor: net.color }]}>
+            <Ionicons name="copy-outline" size={16} color="#fff" />
+          </View>
+        </Pressable>
+        <Text style={[s.addressNote, { color: colors.mutedForeground }]}>
+          ⚠️ Diňe {net.name} tarmagynyň USDT-sini iberiň. Başga token ibermek ýitgä sebäp bolar.
+        </Text>
+
+        {/* TX Hash */}
+        <Text style={[s.sectionLabel, { color: colors.mutedForeground }]}>Tranzaksiýa haşy (TX ID)</Text>
+        <View style={[s.inputWrap, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Ionicons name="receipt-outline" size={16} color={colors.mutedForeground} />
+          <TextInput
+            value={depTxHash}
+            onChangeText={setDepTxHash}
+            placeholder="0x... ýa-da tranzaksiýa ID"
+            placeholderTextColor={colors.mutedForeground}
+            autoCapitalize="none"
+            style={[s.input, { color: colors.foreground }]}
+          />
+        </View>
+        <Text style={[s.addressNote, { color: colors.mutedForeground }]}>
+          Gönderen TX haşyny{" "}
+          <Text style={{ fontWeight: "700" }}>Explorer-de</Text>
+          {" "}tapyp aşakda giriziň. BP {net.time} içinde geçirilýär.
+        </Text>
+
+        {depError ? (
+          <View style={[s.errorBox, { backgroundColor: "#fee2e2" }]}>
+            <Ionicons name="alert-circle-outline" size={16} color="#dc2626" />
+            <Text style={s.errorText}>{depError}</Text>
+          </View>
+        ) : null}
+
+        <Pressable
+          onPress={submitDeposit}
+          disabled={loading}
+          style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#059669", opacity: pressed || loading ? 0.75 : 1 }]}
+        >
+          {loading ? <ActivityIndicator color="#fff" size="small" /> : (
+            <>
+              <Ionicons name="cloud-upload-outline" size={19} color="#fff" />
+              <Text style={s.primaryBtnText}>Tassyklamak we Ibermek</Text>
+            </>
+          )}
+        </Pressable>
+
+        {/* Step guide */}
+        <View style={[s.stepsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={[s.stepsTitle, { color: colors.foreground }]}>Nädip depozit etmeli?</Text>
+          {[
+            { n: "1", t: "Ýokardan tarmagy saýlaň (TRC20 iň arzan)" },
+            { n: "2", t: "Ýeňil manziline USDT iberiň" },
+            { n: "3", t: "TX haşyny giriziň we tassyklaň" },
+            { n: "4", t: "BP balansynyza awtomatik geçer" },
+          ].map((step) => (
+            <View key={step.n} style={s.stepRow}>
+              <View style={[s.stepNum, { backgroundColor: colors.primary }]}>
+                <Text style={s.stepNumText}>{step.n}</Text>
+              </View>
+              <Text style={[s.stepText, { color: colors.foreground }]}>{step.t}</Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    );
+  }
+
+  function WithdrawTab() {
+    return (
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 120 : 120 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Balance display */}
+        <View style={[s.balanceCard, { backgroundColor: colors.primary + "12", borderColor: colors.primary }]}>
+          <Ionicons name="wallet-outline" size={22} color={colors.primary} />
+          <View>
+            <Text style={[s.balanceLabel, { color: colors.mutedForeground }]}>Häzirki balansiňiz</Text>
+            <Text style={[s.balanceValue, { color: colors.primary }]}>{balance.toFixed(2)} BP</Text>
+          </View>
+          <View style={{ flex: 1 }} />
+          <View style={[s.rateTag, { backgroundColor: colors.primary + "18" }]}>
+            <Text style={[s.rateTagText, { color: colors.primary }]}>1 BP = {USDT_PER_BP} USDT</Text>
+          </View>
+        </View>
+
+        {/* Network selector */}
+        <Text style={[s.sectionLabel, { color: colors.mutedForeground }]}>Çykaryş tarmagyňyz</Text>
+        <View style={s.networkRow}>
+          {NETWORKS.map((n) => (
+            <NetworkCard key={n.id} net={n} selected={wdNetwork === n.id} onPress={() => setWdNetwork(n.id)} />
+          ))}
+        </View>
+
+        {/* BP amount */}
+        <Text style={[s.sectionLabel, { color: colors.mutedForeground }]}>Näçe BP çykarmak isleýärsiňiz?</Text>
+        <View style={[s.inputWrap, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Ionicons name="logo-bitcoin" size={16} color={colors.mutedForeground} />
+          <TextInput
+            value={wdAmountBP}
+            onChangeText={setWdAmountBP}
+            placeholder="0"
+            placeholderTextColor={colors.mutedForeground}
+            keyboardType="decimal-pad"
+            style={[s.input, { color: colors.foreground }]}
+          />
+          <Text style={[s.inputSuffix, { color: colors.mutedForeground }]}>BP</Text>
+        </View>
+
+        {/* Fee breakdown */}
+        {wdBp > 0 && (
+          <View style={[s.feeCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[s.feeTitleText, { color: colors.foreground }]}>Töleg hasaplamasy</Text>
+            {[
+              { label: "Çykarylýan BP", value: `${wdBp} BP`, muted: false },
+              { label: "USDT ýakynlaşdyrma", value: `${wdUsdt.toFixed(4)} USDT`, muted: false },
+              { label: `${wdNet.name} Komissiya`, value: `-${wdNet.fee} USDT`, muted: true },
+            ].map((row, i) => (
+              <View key={i} style={s.feeRow}>
+                <Text style={[s.feeRowLabel, { color: colors.mutedForeground }]}>{row.label}</Text>
+                <Text style={[s.feeRowVal, { color: row.muted ? "#ef4444" : colors.foreground }]}>{row.value}</Text>
+              </View>
+            ))}
+            <View style={[s.feeDivider, { backgroundColor: colors.border }]} />
+            <View style={s.feeRow}>
+              <Text style={[s.feeRowLabel, { color: colors.foreground, fontWeight: "700" }]}>Alarsyňyz</Text>
+              <Text style={[s.feeRowVal, { color: "#059669", fontSize: 18, fontWeight: "800" }]}>
+                {wdReceive.toFixed(4)} USDT
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Wallet address */}
+        <Text style={[s.sectionLabel, { color: colors.mutedForeground }]}>
+          {wdNet.name} Kripto Manziliniz
+        </Text>
+        <View style={[s.inputWrap, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Ionicons name="wallet-outline" size={16} color={colors.mutedForeground} />
+          <TextInput
+            value={wdAddress}
+            onChangeText={setWdAddress}
+            placeholder={wdNetwork === "bep20" ? "0x..." : wdNetwork === "ton" ? "UQ..." : "T..."}
+            placeholderTextColor={colors.mutedForeground}
+            autoCapitalize="none"
+            style={[s.input, { color: colors.foreground }]}
+          />
+        </View>
+        <Text style={[s.addressNote, { color: colors.mutedForeground }]}>
+          Manzil ýalňyş girizilse, pul yzyna gaýtarylmaýar. Üns bilen barlaň.
+        </Text>
+
+        {wdError ? (
+          <View style={[s.errorBox, { backgroundColor: "#fee2e2" }]}>
+            <Ionicons name="alert-circle-outline" size={16} color="#dc2626" />
+            <Text style={s.errorText}>{wdError}</Text>
+          </View>
+        ) : null}
+
+        <Pressable
+          onPress={submitWithdraw}
+          disabled={loading}
+          style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed || loading ? 0.75 : 1 }]}
+        >
+          {loading ? <ActivityIndicator color="#fff" size="small" /> : (
+            <>
+              <Ionicons name="send-outline" size={19} color="#fff" />
+              <Text style={s.primaryBtnText}>Çykaryşy Tassyklamak</Text>
+            </>
+          )}
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  function P2PTab() {
+    return (
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: isWeb ? 120 : 120 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Pair filter */}
+        <View style={s.pairFilterRow}>
+          {(["all", "BP/USDT", "TMT/USDT"] as const).map((p) => (
+            <Pressable
+              key={p}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setP2pPair(p); }}
+              style={[
+                s.pairChip,
+                p2pPair === p
+                  ? { backgroundColor: colors.primary }
+                  : { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 },
+              ]}
+            >
+              <Text style={[s.pairChipText, { color: p2pPair === p ? "#fff" : colors.foreground }]}>
+                {p === "all" ? "Hemmesi" : p}
               </Text>
             </Pressable>
           ))}
         </View>
 
-        {crypto === "payeer" && (
-          <>
-            <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 12 }]}>Walýuta</Text>
-            <View style={{ flexDirection: "row", gap: 10, marginBottom: 8 }}>
-              {["usd", "rub"].map(cur => (
-                <Pressable key={cur} onPress={() => setCurrency(cur)}
-                  style={[s.curBtn, { backgroundColor: currency === cur ? colors.primary : colors.card, borderColor: currency === cur ? colors.primary : colors.border }]}>
-                  <Text style={{ color: currency === cur ? "#fff" : colors.foreground, fontWeight: "700", fontSize: 13 }}>
-                    {cur === "usd" ? "USD ($)" : "RUB (₽)"}
-                  </Text>
-                </Pressable>
-              ))}
+        {/* Premium pairs banner */}
+        <View style={[s.premiumBanner, { borderColor: "#f59e0b" }]}>
+          <LinearGradient colors={["#f59e0b18", "#fbbf2418"]} style={s.premiumBannerGrad}>
+            <Ionicons name="star" size={16} color="#f59e0b" />
+            <View style={{ flex: 1 }}>
+              <Text style={[s.premiumBannerTitle, { color: colors.foreground }]}>
+                Premium Jübütler — BP/USDT · TMT/USDT
+              </Text>
+              <Text style={[s.premiumBannerSub, { color: colors.mutedForeground }]}>
+                Escrow goragy bilen ygtybarly söwda. Operator garantiýasy.
+              </Text>
             </View>
-          </>
-        )}
-
-        <View style={{ marginTop: 12 }}>
-          <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>
-            Näçe {crypto === "payeer" && currency === "rub" ? "RUBL" : "USD"} {isSell ? "satmakçysyňyz" : "almakçysyňyz"}?
-          </Text>
-          <TextInput value={amount} onChangeText={setAmount} placeholder="1.00"
-            placeholderTextColor={colors.mutedForeground} keyboardType="decimal-pad"
-            style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
-          />
+          </LinearGradient>
         </View>
 
-        <View style={{ marginTop: 12 }}>
-          <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>
-            {crypto === "payeer" ? "Payeer ID" : crypto === "perfect" ? "Perfect Money Account" : "WebMoney Wallet (WMZ)"}
-          </Text>
-          <TextInput
-            value={crypto === "payeer" ? payeerId : crypto === "perfect" ? perfectId : webmoneyId}
-            onChangeText={crypto === "payeer" ? setPayeerId : crypto === "perfect" ? setPerfectId : setWebmoneyId}
-            placeholder={crypto === "payeer" ? "P1234567890" : crypto === "perfect" ? "U1234567890" : "Z123456789012"}
-            placeholderTextColor={colors.mutedForeground} autoCapitalize="characters"
-            style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
-          />
-        </View>
-
-        {parseFloat(amount) > 0 && (
-          <View style={[s.totalCard, { backgroundColor: colors.primary + "10", borderColor: colors.primary }]}>
-            <Text style={[{ color: colors.primary, fontSize: 26, fontWeight: "800" }]}>{total.toFixed(2)} TMT</Text>
-          </View>
-        )}
-      </>
-    );
-  }
-
-  function ProofSection({ isSell }: { isSell: boolean }) {
-    const proof = isSell ? sellProof : buyProof;
-    const setProof = isSell ? setSellProof : setBuyProof;
-    const sms = isSell ? sellSms : buySms;
-    const setSms = isSell ? setSellSms : setBuySms;
-    const imageUri = isSell ? sellImageUri : buyImageUri;
-
-    return (
-      <>
-        <Text style={[s.sectionHead, { color: colors.foreground }]}>Tölegi tassyklaň</Text>
-        <View style={{ flexDirection: "row", gap: 12 }}>
-          {([{ id: "screenshot" as ProofType, icon: "camera-outline" as const, label: "Skrinshot" },
-            { id: "sms" as ProofType, icon: "chatbubble-outline" as const, label: "SMS habary" }]).map(t => (
-            <Pressable key={t.id} onPress={() => setProof(t.id)}
-              style={[s.proofCard, { backgroundColor: proof === t.id ? colors.primary + "15" : colors.card, borderColor: proof === t.id ? colors.primary : colors.border }]}>
-              <Ionicons name={t.icon} size={22} color={proof === t.id ? colors.primary : colors.mutedForeground} />
-              <Text style={[{ fontWeight: "700", fontSize: 13, color: proof === t.id ? colors.primary : colors.foreground }]}>{t.label}</Text>
+        {/* Orders */}
+        <View style={{ paddingHorizontal: 16, gap: 10 }}>
+          {filteredOrders.map((order) => (
+            <Pressable
+              key={order.id}
+              onPress={() => handleP2POrder(order)}
+              style={({ pressed }) => [
+                s.orderCard,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: order.premium ? "#f59e0b" : colors.border,
+                  borderWidth: order.premium ? 1.5 : 1,
+                  opacity: pressed ? 0.88 : 1,
+                },
+              ]}
+            >
+              {order.premium && (
+                <View style={s.premiumTag}>
+                  <Ionicons name="star" size={9} color="#fff" />
+                  <Text style={s.premiumTagText}>PREMIUM</Text>
+                </View>
+              )}
+              <View style={s.orderTopRow}>
+                <View style={[
+                  s.orderTypeBadge,
+                  { backgroundColor: order.type === "buy" ? "#059669" + "20" : "#0284c7" + "20" },
+                ]}>
+                  <Text style={[
+                    s.orderTypeText,
+                    { color: order.type === "buy" ? "#059669" : "#0284c7" },
+                  ]}>
+                    {order.type === "buy" ? "SATYN ALMAK" : "SATMAK"}
+                  </Text>
+                </View>
+                <Text style={[s.orderPairText, { color: colors.foreground }]}>{order.pair}</Text>
+                <View style={{ flex: 1 }} />
+                <Text style={[s.orderPrice, { color: colors.primary }]}>
+                  {order.price} {order.unit}
+                </Text>
+                <Text style={[s.orderPriceUnit, { color: colors.mutedForeground }]}>/USDT</Text>
+              </View>
+              <View style={s.orderBottomRow}>
+                <View style={s.orderMeta}>
+                  <Ionicons name="person-circle-outline" size={13} color={colors.mutedForeground} />
+                  <Text style={[s.orderMetaText, { color: colors.mutedForeground }]}>{order.seller}</Text>
+                </View>
+                <View style={s.orderMeta}>
+                  <Ionicons name="card-outline" size={13} color={colors.mutedForeground} />
+                  <Text style={[s.orderMetaText, { color: colors.mutedForeground }]}>{order.payMethod}</Text>
+                </View>
+                <View style={{ flex: 1 }} />
+                <Text style={[s.orderLimit, { color: colors.mutedForeground }]}>
+                  {order.min}–{order.max} {order.unit}
+                </Text>
+              </View>
+              <Pressable
+                onPress={() => handleP2POrder(order)}
+                style={[
+                  s.orderBtn,
+                  { backgroundColor: order.type === "buy" ? "#059669" : colors.primary },
+                ]}
+              >
+                <Text style={s.orderBtnText}>
+                  {order.type === "buy" ? "Satmak" : "Satyn al"}
+                </Text>
+              </Pressable>
             </Pressable>
           ))}
         </View>
-        {proof === "sms" && (
-          <TextInput value={sms} onChangeText={setSms} placeholder="SMS haty şu ýere ýazyň..."
-            placeholderTextColor={colors.mutedForeground} multiline numberOfLines={3}
-            style={[s.input, s.textarea, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground, marginTop: 10 }]}
-          />
-        )}
-        {proof === "screenshot" && (
-          <Pressable onPress={() => pickImage(isSell)}
-            style={[{ borderWidth: 2, borderStyle: "dashed", borderColor: colors.primary, borderRadius: 12, padding: 20, alignItems: "center", marginTop: 10, gap: 6 }]}>
-            <Ionicons name="cloud-upload-outline" size={32} color={colors.primary} />
-            <Text style={[{ color: colors.primary, fontWeight: "600" }]}>Suraty ýüklemek üçin üstünden basyň</Text>
+      </ScrollView>
+    );
+  }
+
+  if (mode === "success") {
+    return (
+      <View style={[s.container, { backgroundColor: colors.background }]}>
+        <LinearGradient
+          colors={[colors.primary, colors.primary + "cc"]}
+          style={[s.header, { paddingTop: topPad + 16 }]}
+        >
+          <Text style={s.headerTitle}>Kripto Töleg</Text>
+          <Text style={s.headerSub}>USDT · TRC20 · BEP20 · TON</Text>
+        </LinearGradient>
+        <View style={s.successContainer}>
+          <View style={[s.successIconWrap, { backgroundColor: "#059669" + "15" }]}>
+            <Ionicons name="checkmark-circle" size={64} color="#059669" />
+          </View>
+          <Text style={[s.successTitle, { color: colors.foreground }]}>Üstünlikli!</Text>
+          <Text style={[s.successText, { color: colors.mutedForeground }]}>{successMsg}</Text>
+          <Pressable
+            onPress={() => setMode("main")}
+            style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1, marginTop: 8 }]}
+          >
+            <Ionicons name="home-outline" size={18} color="#fff" />
+            <Text style={s.primaryBtnText}>Baş sahypa</Text>
           </Pressable>
-        )}
-        {imageUri && proof === "screenshot" && (
-          <Image source={{ uri: imageUri }} style={{ height: 160, borderRadius: 12, marginTop: 10, resizeMode: "cover" }} />
-        )}
-      </>
+        </View>
+      </View>
     );
   }
 
   return (
     <View style={[s.container, { backgroundColor: colors.background }]}>
-      <View style={[s.header, { paddingTop: topPad, backgroundColor: colors.primary }]}>
-        <Text style={s.headerTitle}>Ýeňil Pay</Text>
-        <Text style={s.headerSub}>Daşary ýurt walýutasy</Text>
-      </View>
-
-      {mode === "main" && (
-        <View style={{ padding: 16, gap: 14 }}>
-          <View style={[s.rateCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
-            <View style={{ flex: 1 }}>
-              <Text style={[{ color: colors.foreground, fontWeight: "700" }]}>Kurs: <Text style={{ color: colors.primary }}>1 USD = 29 TMT</Text> (satyn almak)</Text>
-              <Text style={[{ color: colors.foreground, fontWeight: "700", marginTop: 2 }]}>Kurs: <Text style={{ color: colors.foreground }}>1 USD = 19 TMT</Text> (satmak)</Text>
-              <Text style={[{ color: colors.mutedForeground, fontSize: 12, marginTop: 4 }]}>Payeer, Perfect Money, WebMoney</Text>
-            </View>
+      {/* HEADER */}
+      <LinearGradient
+        colors={[colors.primary, colors.primary + "dd"]}
+        style={[s.header, { paddingTop: topPad + 16 }]}
+      >
+        <View style={s.headerRow}>
+          <View>
+            <Text style={s.headerTitle}>Kripto Töleg</Text>
+            <Text style={s.headerSub}>USDT · TRC20 · BEP20 · TON</Text>
           </View>
-          <View style={{ flexDirection: "row", gap: 14 }}>
-            <Pressable onPress={() => setMode("buy")}
-              style={({ pressed }) => [s.mainBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}>
-              <Ionicons name="arrow-down-circle-outline" size={28} color="#fff" />
-              <Text style={s.mainBtnText}>Satyn almak</Text>
-            </Pressable>
-            <Pressable onPress={() => setMode("sell")}
-              style={({ pressed }) => [s.mainBtn, { backgroundColor: "#059669", opacity: pressed ? 0.85 : 1 }]}>
-              <Ionicons name="arrow-up-circle-outline" size={28} color="#fff" />
-              <Text style={s.mainBtnText}>Satmak</Text>
-            </Pressable>
+          <View style={s.usdtBadge}>
+            <Ionicons name="logo-bitcoin" size={14} color="#f59e0b" />
+            <Text style={s.usdtBadgeText}>USDT</Text>
           </View>
         </View>
-      )}
 
-      {(mode === "buy" || mode === "sell") && (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 110 }}
-          keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          <Pressable onPress={() => setMode("main")} style={s.backRow}>
-            <Feather name="arrow-left" size={16} color={colors.primary} />
-            <Text style={[{ color: colors.primary, fontWeight: "600" }]}>Yza</Text>
-          </Pressable>
-
-          <Text style={[s.sectionHead, { color: colors.foreground }]}>
-            {mode === "buy" ? "Satyn almak" : "Satmak"}
-          </Text>
-
-          <CryptoFields isSell={mode === "sell"} />
-
-          <View style={{ marginTop: 14 }}>
-            <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Siziň TMCELL nomeriňiz</Text>
-            <TextInput
-              value={mode === "buy" ? buyPhone : sellPhone}
-              onChangeText={mode === "buy" ? setBuyPhone : setSellPhone}
-              placeholder="+993 XX XXXXXX" placeholderTextColor={colors.mutedForeground}
-              keyboardType="phone-pad"
-              style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
-            />
-          </View>
-
-          {mode === "buy" && (
-            <View style={[s.infoBox, { backgroundColor: colors.primary + "10", borderColor: colors.primary }]}>
-              <Text style={[{ fontWeight: "700", color: colors.foreground, marginBottom: 6 }]}>Töleg nomerlerimiz:</Text>
-              {PAYMENT_PHONES.map((p, i) => <Text key={i} style={{ color: colors.primary, fontWeight: "700" }}>{p}</Text>)}
-              <Text style={[{ color: colors.primary, fontWeight: "800", marginTop: 6 }]}>Jemi töleg: {calcBuyTotal().toFixed(2)} TMT</Text>
+        {/* Stats strip */}
+        <View style={s.statsStrip}>
+          {[
+            { label: "BP kurs", value: `1 USDT = ${BP_PER_USDT} BP` },
+            { label: "Çykaryş", value: `1 BP = ${USDT_PER_BP} USDT` },
+            { label: "Min komissiya", value: "0.05 USDT (TON)" },
+          ].map((stat, i) => (
+            <View key={i} style={[s.statItem, i < 2 && { borderRightWidth: 1, borderRightColor: "rgba(255,255,255,0.2)" }]}>
+              <Text style={s.statLabel}>{stat.label}</Text>
+              <Text style={s.statValue}>{stat.value}</Text>
             </View>
-          )}
-
-          {mode === "sell" && (
-            <>
-              <View style={{ marginTop: 14 }}>
-                <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Gizlin kod (biz size ibereris)</Text>
-                <TextInput value={secretCode} onChangeText={setSecretCode} placeholder="Gizlin kod"
-                  placeholderTextColor={colors.mutedForeground}
-                  style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
-                />
-              </View>
-              <View style={[s.infoBox, { backgroundColor: colors.primary + "10", borderColor: colors.primary }]}>
-                <Text style={[{ fontWeight: "700", color: colors.foreground, marginBottom: 4 }]}>Siz şu ID-a pul ibermeli:</Text>
-                <Text style={{ color: colors.primary, fontWeight: "700" }}>P1115509057</Text>
-                <Text style={[{ color: colors.primary, fontWeight: "800", marginTop: 6 }]}>Size iberiljek: {calcSellTotal().toFixed(2)} TMT</Text>
-              </View>
-            </>
-          )}
-
-          <ProofSection isSell={mode === "sell"} />
-
-          {(mode === "buy" ? buyError : sellError) ? (
-            <View style={[{ backgroundColor: "#fee2e2", borderRadius: 10, padding: 12, marginTop: 12 }]}>
-              <Text style={{ color: "#dc2626" }}>{mode === "buy" ? buyError : sellError}</Text>
-            </View>
-          ) : null}
-
-          <Pressable
-            onPress={mode === "buy" ? submitBuy : submitSell}
-            disabled={mode === "buy" ? buyLoading : sellLoading}
-            style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed || (mode === "buy" ? buyLoading : sellLoading) ? 0.7 : 1 }]}
-          >
-            {(mode === "buy" ? buyLoading : sellLoading) ? <ActivityIndicator color="#fff" size="small" /> : (
-              <>
-                <Ionicons name="send-outline" size={18} color="#fff" />
-                <Text style={s.primaryBtnText}>{mode === "buy" ? "Göýbermek we tassyklamak" : "Tassyklamak we ibermek"}</Text>
-              </>
-            )}
-          </Pressable>
-        </ScrollView>
-      )}
-
-      {mode === "success" && (
-        <View style={s.successContainer}>
-          <Ionicons name="trophy-outline" size={64} color={colors.primary} />
-          <Text style={[s.successTitle, { color: colors.foreground }]}>Üstünlikli!</Text>
-          <Text style={[s.successText, { color: colors.mutedForeground }]}>
-            Iň tiz wagtda Ýeňil siz bilen baglanar.
-          </Text>
-          <Pressable onPress={() => {
-            setMode("main");
-            setBuyAmount(""); setSellAmount(""); setBuyProof(null); setSellProof(null);
-            setBuySms(""); setSellSms(""); setBuyImageUri(null); setSellImageUri(null);
-            setBuyError(""); setSellError(""); setSecretCode("");
-          }}
-            style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}>
-            <Ionicons name="home-outline" size={18} color="#fff" />
-            <Text style={s.primaryBtnText}>Baş sahypa</Text>
-          </Pressable>
+          ))}
         </View>
-      )}
+
+        {/* Tabs */}
+        <View style={s.tabRow}>
+          {TABS.map((t) => (
+            <Pressable
+              key={t.id}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setTab(t.id); }}
+              style={[s.tabBtn, tab === t.id && s.tabBtnActive]}
+            >
+              <Ionicons name={t.icon} size={15} color={tab === t.id ? colors.primary : "rgba(255,255,255,0.7)"} />
+              <Text style={[s.tabLabel, { color: tab === t.id ? colors.primary : "rgba(255,255,255,0.85)" }]}>
+                {t.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </LinearGradient>
+
+      {/* CONTENT */}
+      {tab === "deposit" && <DepositTab />}
+      {tab === "withdraw" && <WithdrawTab />}
+      {tab === "p2p" && <P2PTab />}
     </View>
   );
 }
 
 const s = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingHorizontal: 16, paddingBottom: 16 },
+  header: { paddingHorizontal: 16, paddingBottom: 0 },
+  headerRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 },
   headerTitle: { color: "#fff", fontSize: 22, fontWeight: "800" },
-  headerSub: { color: "rgba(255,255,255,0.8)", fontSize: 13, marginTop: 2 },
-  rateCard: { flexDirection: "row", gap: 12, padding: 14, borderRadius: 14, borderWidth: 1, alignItems: "flex-start" },
-  mainBtn: { flex: 1, borderRadius: 16, padding: 20, alignItems: "center", gap: 8 },
-  mainBtnText: { color: "#fff", fontWeight: "800", fontSize: 16 },
-  sectionHead: { fontSize: 16, fontWeight: "700", marginTop: 16, marginBottom: 10 },
-  fieldLabel: { fontSize: 12, fontWeight: "600", marginBottom: 6 },
-  input: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15 },
-  textarea: { height: 80, textAlignVertical: "top" },
-  cryptoRow: { flexDirection: "row", gap: 8 },
-  cryptoCard: { flex: 1, borderRadius: 10, borderWidth: 2, padding: 12, alignItems: "center" },
-  curBtn: { flex: 1, borderRadius: 10, borderWidth: 1, paddingVertical: 10, alignItems: "center" },
-  totalCard: { borderWidth: 1, borderRadius: 14, padding: 16, alignItems: "center", marginTop: 14 },
-  infoBox: { borderWidth: 1, borderRadius: 12, padding: 14, marginTop: 14, gap: 2 },
-  proofCard: { flex: 1, borderRadius: 12, borderWidth: 2, padding: 14, alignItems: "center", gap: 6 },
-  primaryBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 14, paddingVertical: 16, marginTop: 16 },
-  primaryBtnText: { color: "#fff", fontWeight: "700", fontSize: 15 },
-  backRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 },
+  headerSub: { color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 2 },
+  usdtBadge: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    backgroundColor: "#f59e0b20", borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5,
+    borderWidth: 1, borderColor: "#f59e0b50",
+  },
+  usdtBadgeText: { color: "#f59e0b", fontSize: 12, fontWeight: "700" },
+  statsStrip: { flexDirection: "row", backgroundColor: "rgba(255,255,255,0.12)", borderRadius: 14, marginBottom: 14 },
+  statItem: { flex: 1, alignItems: "center", paddingVertical: 9 },
+  statLabel: { color: "rgba(255,255,255,0.65)", fontSize: 9, fontWeight: "600", marginBottom: 2 },
+  statValue: { color: "#fff", fontSize: 10, fontWeight: "700" },
+  tabRow: { flexDirection: "row", gap: 6, paddingBottom: 14 },
+  tabBtn: {
+    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5,
+    paddingVertical: 9, borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.12)",
+  },
+  tabBtnActive: { backgroundColor: "#fff" },
+  tabLabel: { fontSize: 12, fontWeight: "700" },
+
+  // Section label
+  sectionLabel: { fontSize: 11, fontWeight: "700", letterSpacing: 0.6, marginTop: 18, marginBottom: 8 },
+
+  // Network cards
+  networkRow: { flexDirection: "row", gap: 8 },
+  networkCard: { flex: 1, borderRadius: 14, padding: 11, alignItems: "center", gap: 4, position: "relative" },
+  networkIcon: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  networkName: { fontSize: 13, fontWeight: "800" },
+  networkFull: { fontSize: 9, textAlign: "center" },
+  networkFeeBadge: { borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  networkFeeText: { fontSize: 9, fontWeight: "700" },
+  networkTime: { fontSize: 9, fontWeight: "600" },
+  networkCheck: {
+    position: "absolute", top: 7, right: 7,
+    width: 16, height: 16, borderRadius: 8,
+    alignItems: "center", justifyContent: "center",
+  },
+
+  // Rate banner
+  rateBanner: {
+    flexDirection: "row", alignItems: "center", gap: 10,
+    borderRadius: 14, borderWidth: 1, padding: 13,
+  },
+  rateBannerTitle: { fontSize: 14, fontWeight: "700" },
+  rateBannerSub: { fontSize: 11, marginTop: 2 },
+
+  // Input
+  inputWrap: {
+    flexDirection: "row", alignItems: "center", gap: 10,
+    borderWidth: 1, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 13,
+  },
+  input: { flex: 1, fontSize: 15 },
+  inputPrefix: { fontSize: 16, fontWeight: "700" },
+  inputSuffix: { fontSize: 12, fontWeight: "600" },
+
+  calcPreview: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    borderRadius: 12, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 10, marginTop: 8,
+  },
+  calcText: { fontSize: 13, fontWeight: "600" },
+
+  // Address
+  addressCard: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    borderRadius: 14, borderWidth: 1.5, padding: 14,
+  },
+  addressLabel: { fontSize: 11, fontWeight: "600", marginBottom: 4 },
+  addressText: { fontSize: 12, fontFamily: "monospace", letterSpacing: 0.3, lineHeight: 18 },
+  copyBtn: { width: 38, height: 38, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  addressNote: { fontSize: 11, lineHeight: 16, marginTop: 7 },
+
+  // Error
+  errorBox: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 12, padding: 12, marginTop: 10 },
+  errorText: { color: "#dc2626", fontSize: 13, flex: 1 },
+
+  // Primary button
+  primaryBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 8, borderRadius: 16, paddingVertical: 16, marginTop: 20,
+  },
+  primaryBtnText: { color: "#fff", fontWeight: "800", fontSize: 15 },
+
+  // Steps guide
+  stepsCard: { borderRadius: 16, borderWidth: 1, padding: 16, marginTop: 20, gap: 10 },
+  stepsTitle: { fontSize: 13, fontWeight: "700", marginBottom: 4 },
+  stepRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  stepNum: { width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center" },
+  stepNumText: { color: "#fff", fontSize: 11, fontWeight: "800" },
+  stepText: { fontSize: 13, flex: 1 },
+
+  // Balance card
+  balanceCard: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    borderRadius: 16, borderWidth: 1, padding: 14,
+  },
+  balanceLabel: { fontSize: 11, fontWeight: "600" },
+  balanceValue: { fontSize: 22, fontWeight: "800", marginTop: 2 },
+  rateTag: { borderRadius: 8, paddingHorizontal: 9, paddingVertical: 4 },
+  rateTagText: { fontSize: 11, fontWeight: "700" },
+
+  // Fee card
+  feeCard: { borderRadius: 16, borderWidth: 1, padding: 16, marginTop: 12, gap: 8 },
+  feeTitleText: { fontSize: 13, fontWeight: "700", marginBottom: 4 },
+  feeRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  feeRowLabel: { fontSize: 13 },
+  feeRowVal: { fontSize: 13, fontWeight: "700" },
+  feeDivider: { height: 1, marginVertical: 4 },
+
+  // P2P
+  pairFilterRow: { flexDirection: "row", gap: 8, padding: 16, paddingBottom: 8 },
+  pairChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 50 },
+  pairChipText: { fontSize: 13, fontWeight: "600" },
+  premiumBanner: { marginHorizontal: 16, marginBottom: 12, borderRadius: 14, borderWidth: 1.5, overflow: "hidden" },
+  premiumBannerGrad: { flexDirection: "row", alignItems: "center", gap: 10, padding: 13 },
+  premiumBannerTitle: { fontSize: 13, fontWeight: "700" },
+  premiumBannerSub: { fontSize: 11, marginTop: 2 },
+  orderCard: { borderRadius: 16, padding: 14, gap: 10 },
+  premiumTag: {
+    position: "absolute", top: 12, right: 12,
+    flexDirection: "row", alignItems: "center", gap: 3,
+    backgroundColor: "#f59e0b", borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2,
+  },
+  premiumTagText: { color: "#fff", fontSize: 8, fontWeight: "800" },
+  orderTopRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  orderTypeBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
+  orderTypeText: { fontSize: 10, fontWeight: "800" },
+  orderPairText: { fontSize: 14, fontWeight: "700" },
+  orderPrice: { fontSize: 16, fontWeight: "800" },
+  orderPriceUnit: { fontSize: 12, fontWeight: "600" },
+  orderBottomRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  orderMeta: { flexDirection: "row", alignItems: "center", gap: 4 },
+  orderMetaText: { fontSize: 11 },
+  orderLimit: { fontSize: 11, fontWeight: "600" },
+  orderBtn: { borderRadius: 10, paddingVertical: 9, alignItems: "center" },
+  orderBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
+
+  // Success
   successContainer: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32, gap: 16 },
-  successTitle: { fontSize: 24, fontWeight: "800" },
+  successIconWrap: { width: 100, height: 100, borderRadius: 30, alignItems: "center", justifyContent: "center" },
+  successTitle: { fontSize: 26, fontWeight: "800" },
   successText: { fontSize: 14, lineHeight: 22, textAlign: "center" },
 });

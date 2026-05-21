@@ -325,22 +325,24 @@ export default function BazarScreen() {
           </Pressable>
         </View>
 
-        {/* SEARCH */}
-        <View style={[styles.searchBar, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
-          <Ionicons name="search-outline" size={18} color="rgba(255,255,255,0.8)" />
-          <TextInput
-            value={search}
-            onChangeText={setSearch}
-            placeholder="Haryt gözle..."
-            placeholderTextColor="rgba(255,255,255,0.6)"
-            style={styles.searchInput}
-          />
-          {search.length > 0 && (
-            <Pressable onPress={() => setSearch("")}>
-              <Ionicons name="close-circle" size={18} color="rgba(255,255,255,0.8)" />
-            </Pressable>
-          )}
-        </View>
+        {/* ULANYJY BAZARY BUTTON */}
+        <Pressable
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push("/sanly-bazar-sell"); }}
+          style={({ pressed }) => [styles.ulanyjyBtn, { opacity: pressed ? 0.85 : 1 }]}
+        >
+          <View style={styles.ulanyjyBtnLeft}>
+            <View style={styles.ulanyjyIconWrap}>
+              <Ionicons name="people-outline" size={18} color="#059669" />
+            </View>
+            <View>
+              <Text style={styles.ulanyjyBtnTitle}>Ulanyjy Bazary</Text>
+              <Text style={styles.ulanyjyBtnSub}>P2P • Sanly harydy sat / al</Text>
+            </View>
+          </View>
+          <View style={styles.ulanyjyArrow}>
+            <Ionicons name="arrow-forward" size={16} color="#fff" />
+          </View>
+        </Pressable>
       </View>
 
       {/* SORT DROPDOWN */}
@@ -390,18 +392,21 @@ export default function BazarScreen() {
           })}
         </ScrollView>
 
-        {/* TRUST BAR */}
-        <View style={[styles.trustBar, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          {[
-            { icon: "shield-checkmark-outline" as const, text: "Kepillik" },
-            { icon: "flash-outline" as const, text: "Derhal gowşurmak" },
-            { icon: "headset-outline" as const, text: "24/7 goldaw" },
-          ].map((s, i) => (
-            <View key={i} style={styles.trustItem}>
-              <Ionicons name={s.icon} size={14} color={colors.primary} />
-              <Text style={[styles.trustText, { color: colors.foreground }]}>{s.text}</Text>
-            </View>
-          ))}
+        {/* SEARCH BAR */}
+        <View style={[styles.searchBar, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Ionicons name="search-outline" size={18} color={colors.mutedForeground} />
+          <TextInput
+            value={search}
+            onChangeText={setSearch}
+            placeholder="Haryt gözle..."
+            placeholderTextColor={colors.mutedForeground}
+            style={[styles.searchInput, { color: colors.foreground }]}
+          />
+          {search.length > 0 && (
+            <Pressable onPress={() => setSearch("")}>
+              <Ionicons name="close-circle" size={18} color={colors.mutedForeground} />
+            </Pressable>
+          )}
         </View>
 
         {/* RESULT ROW */}
@@ -561,11 +566,29 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center", justifyContent: "center",
   },
+  ulanyjyBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 14,
+    paddingHorizontal: 14, paddingVertical: 11, borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.25)",
+  },
+  ulanyjyBtnLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
+  ulanyjyIconWrap: {
+    width: 34, height: 34, borderRadius: 10,
+    backgroundColor: "#fff", alignItems: "center", justifyContent: "center",
+  },
+  ulanyjyBtnTitle: { color: "#fff", fontSize: 14, fontWeight: "700" },
+  ulanyjyBtnSub: { color: "rgba(255,255,255,0.75)", fontSize: 11, marginTop: 1 },
+  ulanyjyArrow: {
+    width: 30, height: 30, borderRadius: 15,
+    backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center",
+  },
   searchBar: {
     flexDirection: "row", alignItems: "center", gap: 10,
     borderRadius: 14, paddingHorizontal: 14, paddingVertical: 11,
+    marginHorizontal: 16, marginBottom: 10, borderWidth: 1,
   },
-  searchInput: { flex: 1, color: "#fff", fontSize: 14 },
+  searchInput: { flex: 1, fontSize: 14 },
   sortDropdown: {
     position: "absolute", top: 130, right: 16, zIndex: 100,
     borderRadius: 14, borderWidth: 1, overflow: "hidden", minWidth: 190,
