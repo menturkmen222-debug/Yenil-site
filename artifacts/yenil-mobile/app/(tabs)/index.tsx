@@ -710,11 +710,11 @@ export default function HomeScreen() {
           style={({ pressed }) => [styles.banner, { opacity: pressed ? 0.9 : 1, backgroundColor: "#6366f1" }]}
         >
           <View style={[styles.bannerIcon, { backgroundColor: "rgba(255,255,255,0.2)" }]}>
-            <Ionicons name="book-outline" size={26} color="#fff" />
+            <Ionicons name="school-outline" size={26} color="#fff" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.bannerTitle}>E-kitap & Gollanmalar</Text>
-            <Text style={styles.bannerDesc}>Okap öwren · 6 kitap elýeterli</Text>
+            <Text style={styles.bannerTitle}>E-Bilim</Text>
+            <Text style={styles.bannerDesc}>Kurslar · Testler · Makalalar</Text>
           </View>
           <Feather name="arrow-right" size={20} color="#fff" />
         </Pressable>
