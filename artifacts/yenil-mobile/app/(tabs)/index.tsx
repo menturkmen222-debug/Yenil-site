@@ -15,6 +15,7 @@ import {
   type HyzmatItem, type HyzmatCategory,
 } from "@/lib/hyzmatlar";
 import { getDeviceIdAsync } from "@/lib/deviceId";
+import { getUserNickname } from "@/lib/firebase";
 
 // ══════════════════════════════════════════════════════════════════
 // Service card (Ýeňil built-in services)
@@ -420,6 +421,16 @@ export default function HomeScreen() {
   const [hyzmatlar, setHyzmatlar] = useState<HyzmatItem[]>([]);
   const [hyzmatFilter, setHyzmatFilter] = useState<HyzmatCategory | "all">("all");
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [nickname, setNickname] = useState("");
+  const [deviceId, setDeviceId] = useState("");
+
+  useEffect(() => {
+    getDeviceIdAsync().then(async (id) => {
+      setDeviceId(id);
+      const nick = await getUserNickname(id).catch(() => "");
+      setNickname(nick);
+    });
+  }, []);
 
   // Listen to community services in real-time
   useEffect(() => {
@@ -462,17 +473,44 @@ export default function HomeScreen() {
       >
         {/* ── HERO + AI AGENT ── */}
         <View style={[styles.hero, { backgroundColor: colors.primary, paddingTop: topPad }]}>
+          {/* ── NEW 3-PART HEADER ── */}
           <View style={styles.heroTopRow}>
-            <View>
+            {/* Left: Profile avatar → settings */}
+            <Pressable
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/(tabs)/sozlamalar" as Href); }}
+              style={styles.profileBtn}
+            >
+              <LinearGradient
+                colors={["rgba(255,255,255,0.32)", "rgba(255,255,255,0.14)"]}
+                style={styles.profileAvatar}
+              >
+                {nickname ? (
+                  <Text style={styles.profileInitial}>{nickname.charAt(0).toUpperCase()}</Text>
+                ) : (
+                  <Ionicons name="person" size={20} color="#fff" />
+                )}
+              </LinearGradient>
+              <View style={styles.profileOnlineDot} />
+            </Pressable>
+
+            {/* Center: Ýeňil logo */}
+            <View style={styles.heroCenterWrap}>
               <Text style={styles.heroTitle}>Ýeňil</Text>
-              <Text style={styles.heroSub}>Türkmenistanda iň ynamly onlayn hyzmatlar</Text>
+              <View style={styles.heroTitleUnderline} />
             </View>
+
+            {/* Right: BP balance */}
             <Pressable
               style={styles.balancePill}
-              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/(tabs)/sozlamalar" as Href); }}
             >
-              <Ionicons name="wallet-outline" size={14} color="#fff" />
-              <Text style={styles.balanceText}>{balance.toFixed(2)} BP</Text>
+              <View style={styles.balanceIconWrap}>
+                <Ionicons name="wallet" size={13} color={colors.primary} />
+              </View>
+              <View>
+                <Text style={styles.balanceLabelText}>Balans</Text>
+                <Text style={styles.balanceText}>{balance.toFixed(2)} BP</Text>
+              </View>
             </Pressable>
           </View>
 
@@ -825,11 +863,48 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
 
   hero: { paddingHorizontal: 18, paddingBottom: 24 },
-  heroTopRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 },
-  heroTitle: { fontSize: 34, fontWeight: "800", color: "#fff", letterSpacing: -0.5 },
-  heroSub: { fontSize: 13, color: "rgba(255,255,255,0.75)", marginTop: 3 },
-  balancePill: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(255,255,255,0.18)", paddingHorizontal: 12, paddingVertical: 7, borderRadius: 50, marginTop: 4 },
-  balanceText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+  heroTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 18,
+  },
+
+  profileBtn: { position: "relative", width: 46, height: 46 },
+  profileAvatar: {
+    width: 46, height: 46, borderRadius: 23,
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 2, borderColor: "rgba(255,255,255,0.35)",
+  },
+  profileInitial: { color: "#fff", fontSize: 19, fontWeight: "800", letterSpacing: -0.3 },
+  profileOnlineDot: {
+    position: "absolute", bottom: 1, right: 1,
+    width: 12, height: 12, borderRadius: 6,
+    backgroundColor: "#4ade80",
+    borderWidth: 2, borderColor: "rgba(255,255,255,0.6)",
+  },
+
+  heroCenterWrap: { alignItems: "center" },
+  heroTitle: { fontSize: 30, fontWeight: "900", color: "#fff", letterSpacing: -0.8 },
+  heroTitleUnderline: {
+    marginTop: 3, height: 3, width: 32, borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.45)",
+  },
+
+  balancePill: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    paddingHorizontal: 11, paddingVertical: 8, borderRadius: 16,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12, shadowRadius: 6, elevation: 3,
+  },
+  balanceIconWrap: {
+    width: 26, height: 26, borderRadius: 8,
+    backgroundColor: "rgba(22,163,74,0.12)",
+    alignItems: "center", justifyContent: "center",
+  },
+  balanceLabelText: { fontSize: 9, fontWeight: "600", color: "rgba(0,0,0,0.4)", letterSpacing: 0.4, textTransform: "uppercase" },
+  balanceText: { color: "#111", fontWeight: "800", fontSize: 13, letterSpacing: -0.3 },
 
   agentCard: { backgroundColor: "rgba(0,0,0,0.22)", borderRadius: 18, borderWidth: 1, borderColor: "rgba(255,255,255,0.15)", overflow: "hidden" },
   agentTopRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },
