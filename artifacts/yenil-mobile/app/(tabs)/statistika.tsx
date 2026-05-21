@@ -110,7 +110,7 @@ export default function StatistikaScreen() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             type: type === "currency-buy" ? "pay-buy" : "pay-sell",
-            crypto: repeatItem.crypto ?? "payeer",
+            crypto: repeatItem.crypto ?? "usdt",
             currency: repeatItem.currency ?? "usd",
             amount: repeatItem.amount,
             phone: repeatItem.phone ?? "",

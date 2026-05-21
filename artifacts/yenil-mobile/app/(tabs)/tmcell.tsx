@@ -6,7 +6,6 @@ import {
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
@@ -505,247 +504,555 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
   );
 }
 
-// ── Currency / Walýuta Section ─────────────────────────────────────
-const CRYPTOS = [
-  { id: "payeer", label: "Payeer", icon: "P", color: "#1a73e8", bg: "#e8f0fe" },
-  { id: "perfect", label: "Perfect Money", icon: "PM", color: "#e8a020", bg: "#fef3cd" },
-  { id: "webmoney", label: "WebMoney", icon: "WM", color: "#2e7d32", bg: "#e8f5e9" },
+// ── Kripto Walýuta Section (USDT only · TRC20 · BEP20 · TON) ───────
+
+const USDT_NETWORKS = [
+  { id: "trc20" as const, name: "TRC20", full: "Tron Network",           color: "#ef4444", fee: 1.00, time: "~1-3 dak" },
+  { id: "bep20" as const, name: "BEP20", full: "Binance Smart Chain",    color: "#f59e0b", fee: 0.50, time: "~3-5 dak" },
+  { id: "ton"   as const, name: "TON",   full: "Telegram Open Network",  color: "#0088cc", fee: 0.05, time: "~5 sek"  },
+];
+
+const USDT_WALLETS: Record<"trc20"|"bep20"|"ton", string> = {
+  trc20: "TYvmFoX8Swr3G3JBqfbT5qvTtSNr4wH1KR",
+  bep20: "0x7a4B2F3E5d8c1A9B6e4F2D7c8a3B5e9F1d4c2A7",
+  ton:   "UQBvAzI7nB5RFxeJ7c9YpqT8L5m2kNpTgQP4zX6wKjV1hW",
+};
+
+const BP_PER_USDT  = 34.5;
+const USDT_PER_BP  = 0.028;
+
+const P2P_ORDERS_DATA = [
+  { id:"po1", pair:"BP/USDT",  type:"sell" as const, price:34.5, min:100,  max:2000, seller:"YenilOfficial", premium:true,  pay:"Ýeňil BP"  },
+  { id:"po2", pair:"TMT/USDT", type:"sell" as const, price:34.5, min:200,  max:5000, seller:"YenilOfficial", premium:true,  pay:"TMT Nagt"  },
+  { id:"po3", pair:"BP/USDT",  type:"buy"  as const, price:33.8, min:50,   max:1000, seller:"AlparslanT",   premium:false, pay:"Ýeňil BP"  },
+  { id:"po4", pair:"BP/USDT",  type:"sell" as const, price:34.2, min:100,  max:1500, seller:"MergenD",      premium:false, pay:"Ýeňil BP"  },
+  { id:"po5", pair:"TMT/USDT", type:"buy"  as const, price:33.5, min:300,  max:4000, seller:"NurgeldiA",    premium:false, pay:"TMT Nagt"  },
+  { id:"po6", pair:"TMT/USDT", type:"sell" as const, price:34.3, min:100,  max:2000, seller:"AysoltanO",    premium:false, pay:"TMT Bank"  },
 ];
 
 function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
-  const [mode, setMode] = useState<"buy" | "sell">("buy");
-  const [crypto, setCrypto] = useState("payeer");
-  const [currency, setCurrency] = useState("usd");
-  const [amount, setAmount] = useState("");
-  const [walletId, setWalletId] = useState("");
-  const [phone, setPhone] = useState("");
-  const [secretCode, setSecretCode] = useState("");
-  const [proofType, setProofType] = useState<"screenshot" | "sms" | null>(null);
-  const [smsText, setSmsText] = useState("");
-  const [imageUri, setImageUri] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
+  const { balance, deduct } = useBonusPul();
+  type CTab = "deposit" | "withdraw" | "p2p";
+  const [ctab, setCtab] = useState<CTab>("deposit");
 
-  function calcTotal() {
-    const amt = parseFloat(amount) || 0;
-    if (mode === "buy") {
-      if (crypto === "payeer") return currency === "usd" ? amt * 29 : (amt / 90) * 29;
-      return amt * 29;
-    } else {
-      if (crypto === "payeer") return currency === "usd" ? amt * 19 : (amt / 50) * 10;
-      return amt * 19;
-    }
-  }
+  // deposit
+  const [depNet, setDepNet] = useState<"trc20"|"bep20"|"ton">("trc20");
+  const [depUsdt, setDepUsdt] = useState("");
+  const [depTx, setDepTx] = useState("");
+  const [depLoading, setDepLoading] = useState(false);
+  const [depDone, setDepDone] = useState(false);
+  const [depErr, setDepErr] = useState("");
 
-  async function pickImage() {
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.8 });
-    if (!result.canceled && result.assets[0]) setImageUri(result.assets[0].uri);
-  }
+  // withdraw
+  const [wdNet, setWdNet] = useState<"trc20"|"bep20"|"ton">("trc20");
+  const [wdBP, setWdBP] = useState("");
+  const [wdAddr, setWdAddr] = useState("");
+  const [wdLoading, setWdLoading] = useState(false);
+  const [wdDone, setWdDone] = useState(false);
+  const [wdErr, setWdErr] = useState("");
 
-  async function handleSubmit() {
-    if (!amount || !phone) { Alert.alert("Ýalňyşlyk", "Ähli meýdançalary dolduryň!"); return; }
-    setLoading(true);
+  // p2p
+  const [p2pPair, setP2pPair] = useState<"all"|"BP/USDT"|"TMT/USDT">("all");
+
+  const depUsdtNum  = parseFloat(depUsdt)  || 0;
+  const depBPCalc   = depUsdtNum * BP_PER_USDT;
+  const wdBPNum     = parseFloat(wdBP)     || 0;
+  const wdUsdtCalc  = wdBPNum * USDT_PER_BP;
+  const wdNetData   = USDT_NETWORKS.find(n => n.id === wdNet)!;
+  const wdReceive   = Math.max(0, wdUsdtCalc - wdNetData.fee);
+
+  async function submitDeposit() {
+    if (depUsdtNum <= 0) { setDepErr("USDT mukdaryny giriziň!"); return; }
+    if (!depTx.trim() || depTx.trim().length < 15) { setDepErr("Dogry TX Hash giriziň!"); return; }
+    setDepLoading(true); setDepErr("");
     try {
-      const screenshotUrl = imageUri && proofType === "screenshot" ? await uploadImage(imageUri, "proof.jpg") : null;
-      await saveOrder("orders", {
-        type: mode === "buy" ? "pay-buy" : "pay-sell", crypto, currency,
-        amount: parseFloat(amount), totalPrice: calcTotal(), phone, walletId,
-        secretCode, proofType, smsText, screenshotUrl,
+      await saveOrder("crypto-deposits", {
+        network: depNet, usdtAmount: depUsdtNum, bpAmount: depBPCalc,
+        txHash: depTx.trim(), timestamp: new Date().toISOString(),
       });
       await addToHistory({
-        type: mode === "buy" ? "currency-buy" : "currency-sell",
-        title: mode === "buy" ? "Walýuta almak" : "Walýuta satmak",
-        details: `${amount} ${currency?.toUpperCase()} · ${crypto === "payeer" ? "Payeer" : crypto === "perfect" ? "Perfect Money" : "WebMoney"} · ${phone}`,
-        amount: parseFloat(amount) || 0, amountLabel: `${calcTotal().toFixed(2)} TMT`,
-        phone, walletId, crypto, currency,
+        type: "currency-buy", title: "Kripto Depozit",
+        details: `${depUsdtNum} USDT (${depNet.toUpperCase()}) → ${depBPCalc.toFixed(1)} BP`,
+        amount: depBPCalc, amountLabel: `+${depBPCalc.toFixed(1)} BP`,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setDone(true);
-    } catch { Alert.alert("Ýalňyşlyk", "Bilinmeýän ýalňyşlyk"); }
-    finally { setLoading(false); }
+      setDepDone(true);
+    } catch { setDepErr("Ulgam ýalňyşlygy. Gaýtadan synanyşyň."); }
+    finally { setDepLoading(false); }
   }
 
-  const reset = () => { setDone(false); setAmount(""); setWalletId(""); setPhone(""); setSmsText(""); setImageUri(null); setSecretCode(""); };
+  async function submitWithdraw() {
+    if (wdBPNum <= 0) { setWdErr("BP mukdaryny giriziň!"); return; }
+    if (balance < wdBPNum) { setWdErr(`BP ýetmezçilik. Balans: ${balance.toFixed(2)} BP`); return; }
+    if (wdReceive <= 0) { setWdErr("Mukdar komissiyadan az. Köpräk giriziň."); return; }
+    if (!wdAddr.trim()) { setWdErr("Kripto manzilinizi giriziň!"); return; }
+    setWdLoading(true); setWdErr("");
+    try {
+      await saveOrder("crypto-withdrawals", {
+        network: wdNet, bpAmount: wdBPNum, usdtAmount: wdUsdtCalc,
+        fee: wdNetData.fee, receiveAmount: wdReceive, walletAddress: wdAddr.trim(),
+        timestamp: new Date().toISOString(),
+      });
+      deduct(wdBPNum);
+      await addToHistory({
+        type: "currency-sell", title: "Kripto Çykaryş",
+        details: `${wdBPNum} BP → ${wdReceive.toFixed(4)} USDT (${wdNet.toUpperCase()})`,
+        amount: wdBPNum, amountLabel: `-${wdBPNum} BP`,
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setWdDone(true);
+    } catch { setWdErr("Ulgam ýalňyşlygy. Gaýtadan synanyşyň."); }
+    finally { setWdLoading(false); }
+  }
 
-  if (done) return (
+  function handleP2P(o: typeof P2P_ORDERS_DATA[0]) {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Alert.alert(
+      `${o.pair} — ${o.type === "buy" ? "Satyn al" : "Sat"}`,
+      `Satyjy: ${o.seller}\nBaha: ${o.price}/USDT\nDiapazon: ${o.min}–${o.max}\nTöleg: ${o.pay}\n\nOperator size ýakyn wagtda ýüz tutar.`,
+      [
+        { text: "Ýatyr", style: "cancel" },
+        { text: o.type === "buy" ? "Satyn al" : "Sat", onPress: () =>
+          Alert.alert("Sargyt iberildi!", `${o.pair} sargydyňyz kabul edildi. Operator habarlaşar.`) },
+      ]
+    );
+  }
+
+  // ─── Deposit done screen ───
+  if (depDone) return (
     <View style={s.successBox}>
-      <View style={[s.successIcon, { backgroundColor: "#ede9fe" }]}>
-        <MaterialCommunityIcons name="check-decagram" size={40} color="#7c3aed" />
+      <View style={[s.successIcon, { backgroundColor: "#d1fae5" }]}>
+        <Ionicons name="checkmark-circle" size={40} color="#059669" />
       </View>
       <Text style={[s.successTitle, { color: colors.foreground }]}>Üstünlikli!</Text>
-      <Text style={[s.successDesc, { color: colors.mutedForeground }]}>Iň tiz wagtda Ýeňil siz bilen baglanar.</Text>
-      <Pressable onPress={reset} style={[s.primaryBtn, { backgroundColor: colors.primary }]}>
+      <Text style={[s.successDesc, { color: colors.mutedForeground }]}>
+        {depBPCalc.toFixed(1)} BP TX tassyklanandan soň ({USDT_NETWORKS.find(n=>n.id===depNet)?.time}) balansynyza goşular.
+      </Text>
+      <Pressable onPress={() => { setDepDone(false); setDepUsdt(""); setDepTx(""); }} style={[s.primaryBtn, { backgroundColor: colors.primary }]}>
         <Text style={s.primaryBtnText}>Täzeden</Text>
       </Pressable>
     </View>
   );
 
-  const selectedCrypto = CRYPTOS.find(c => c.id === crypto)!;
+  // ─── Withdraw done screen ───
+  if (wdDone) return (
+    <View style={s.successBox}>
+      <View style={[s.successIcon, { backgroundColor: "#dbeafe" }]}>
+        <Ionicons name="send" size={36} color="#2563eb" />
+      </View>
+      <Text style={[s.successTitle, { color: colors.foreground }]}>Çykaryş iberildi!</Text>
+      <Text style={[s.successDesc, { color: colors.mutedForeground }]}>
+        {wdReceive.toFixed(4)} USDT {wdAddr.slice(0,10)}... manziline iberilýär.{"\n"}Garaşylýan wagt: {wdNetData.time}
+      </Text>
+      <Pressable onPress={() => { setWdDone(false); setWdBP(""); setWdAddr(""); }} style={[s.primaryBtn, { backgroundColor: colors.primary }]}>
+        <Text style={s.primaryBtnText}>Täzeden</Text>
+      </Pressable>
+    </View>
+  );
 
   return (
     <>
-      {/* Mode toggle */}
-      <View style={[s.segment, { backgroundColor: colors.muted }]}>
+      {/* ── Rate hero ── */}
+      <LinearGradient
+        colors={[colors.primary, colors.primary + "bb"] as [string,string]}
+        style={cs.rateHero}
+      >
+        <View style={cs.rateHeroLeft}>
+          <Text style={cs.rateHeroLabel}>Kripto Walýuta · USDT</Text>
+          <Text style={cs.rateHeroVal}>1 USDT = {BP_PER_USDT} BP</Text>
+        </View>
+        <View style={cs.rateHeroBadge}>
+          <Ionicons name="logo-bitcoin" size={13} color="#f59e0b" />
+          <Text style={cs.rateHeroBadgeText}>Stablecoin</Text>
+        </View>
+      </LinearGradient>
+
+      {/* ── Sub-tabs ── */}
+      <View style={[s.segment, { backgroundColor: colors.muted, marginBottom: 16 }]}>
         {([
-          { id: "buy" as const, icon: "arrow-down-circle-outline" as const, label: "Satyn almak" },
-          { id: "sell" as const, icon: "arrow-up-circle-outline" as const, label: "Satmak" },
+          { id: "deposit"  as const, icon: "arrow-down-circle-outline" as const, label: "Depozit"   },
+          { id: "withdraw" as const, icon: "arrow-up-circle-outline"   as const, label: "Çykaryş"   },
+          { id: "p2p"      as const, icon: "swap-horizontal-outline"   as const, label: "P2P Bazar" },
         ]).map(t => (
-          <Pressable key={t.id} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setMode(t.id); }}
-            style={[s.segBtn, { backgroundColor: mode === t.id ? colors.card : "transparent", shadowColor: mode === t.id ? "#000" : "transparent", shadowOpacity: mode === t.id ? 0.1 : 0, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, elevation: mode === t.id ? 2 : 0 }]}>
-            <Ionicons name={t.icon} size={15} color={mode === t.id ? colors.primary : colors.mutedForeground} />
-            <Text style={[s.segBtnText, { color: mode === t.id ? colors.foreground : colors.mutedForeground }]}>{t.label}</Text>
+          <Pressable key={t.id}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setCtab(t.id); }}
+            style={[s.segBtn, {
+              backgroundColor: ctab === t.id ? colors.card : "transparent",
+              shadowColor: ctab === t.id ? "#000" : "transparent",
+              shadowOpacity: ctab === t.id ? 0.1 : 0,
+              shadowRadius: 4, shadowOffset: { width: 0, height: 2 },
+              elevation: ctab === t.id ? 2 : 0,
+            }]}
+          >
+            <Ionicons name={t.icon} size={13} color={ctab === t.id ? colors.primary : colors.mutedForeground} />
+            <Text style={[s.segBtnText, { color: ctab === t.id ? colors.foreground : colors.mutedForeground, fontSize: 11 }]}>{t.label}</Text>
           </Pressable>
         ))}
       </View>
 
-      {/* Rate pill */}
-      <View style={[s.ratePill, { backgroundColor: "#f0fdf4", borderColor: "#bbf7d0" }]}>
-        <MaterialCommunityIcons name="trending-up" size={15} color="#059669" />
-        <Text style={[s.rateText, { color: "#059669" }]}>1 USD = {mode === "buy" ? "29" : "19"} TMT</Text>
-      </View>
+      {/* ════════════ DEPOSIT TAB ════════════ */}
+      {ctab === "deposit" && (
+        <>
+          {/* Network selector */}
+          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginBottom: 8 }]}>Tarmogy saýlaň</Text>
+          <View style={cs.netRow}>
+            {USDT_NETWORKS.map(n => (
+              <Pressable key={n.id} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setDepNet(n.id); }}
+                style={[cs.netCard, depNet === n.id
+                  ? { backgroundColor: n.color + "15", borderColor: n.color, borderWidth: 2 }
+                  : { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }
+                ]}
+              >
+                <View style={[cs.netDot, { backgroundColor: n.color }]} />
+                <Text style={[cs.netName, { color: depNet === n.id ? n.color : colors.foreground }]}>{n.name}</Text>
+                <Text style={[cs.netFee, { color: colors.mutedForeground }]}>{n.fee} USDT</Text>
+                <Text style={[cs.netTime, { color: colors.mutedForeground }]}>{n.time}</Text>
+              </Pressable>
+            ))}
+          </View>
 
-      {/* Payment method — iOS card grid */}
-      <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginBottom: 10 }]}>Töleg görnüşi</Text>
-      <View style={s.cryptoGrid}>
-        {CRYPTOS.map(c => (
-          <Pressable key={c.id} onPress={() => { setCrypto(c.id); setWalletId(""); }}
-            style={[s.cryptoCard, {
-              backgroundColor: crypto === c.id ? c.color : colors.card,
-              borderColor: crypto === c.id ? c.color : colors.border,
-            }]}>
-            <View style={[s.cryptoIconBg, { backgroundColor: crypto === c.id ? "rgba(255,255,255,0.25)" : c.bg }]}>
-              <Text style={[s.cryptoIconText, { color: crypto === c.id ? "#fff" : c.color }]}>{c.icon}</Text>
+          {/* Amount */}
+          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 6 }]}>Iberjek USDT mukdaryňyz</Text>
+          <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[cs.inputPfx, { color: colors.mutedForeground }]}>$</Text>
+            <TextInput value={depUsdt} onChangeText={setDepUsdt} placeholder="0.00"
+              placeholderTextColor={colors.mutedForeground} keyboardType="decimal-pad"
+              style={[cs.inputField, { color: colors.foreground }]} />
+            <Text style={[cs.inputSfx, { color: colors.mutedForeground }]}>USDT</Text>
+          </View>
+          {depUsdtNum > 0 && (
+            <View style={[cs.calcBadge, { backgroundColor: colors.primary + "10", borderColor: colors.primary }]}>
+              <Ionicons name="sparkles-outline" size={14} color={colors.primary} />
+              <Text style={[cs.calcText, { color: colors.primary }]}>
+                {depUsdtNum} USDT → <Text style={{ fontWeight: "800" }}>{depBPCalc.toFixed(1)} BP</Text> alarsyňyz
+              </Text>
             </View>
-            <Text style={[s.cryptoLabel, { color: crypto === c.id ? "#fff" : colors.foreground }]}>{c.label}</Text>
-          </Pressable>
-        ))}
-      </View>
+          )}
 
-      {/* Payeer currency selector */}
-      {crypto === "payeer" && (
-        <View style={{ flexDirection: "row", gap: 10, marginBottom: 14 }}>
-          {([{ id: "usd", flag: "$", name: "USD" }, { id: "rub", flag: "₽", name: "RUB" }]).map(cur => (
-            <Pressable key={cur.id} onPress={() => setCurrency(cur.id)}
-              style={[s.curChip, { flex: 1, backgroundColor: currency === cur.id ? colors.primary + "15" : colors.card, borderColor: currency === cur.id ? colors.primary : colors.border }]}>
-              <Text style={[s.curFlag, { color: currency === cur.id ? colors.primary : colors.mutedForeground }]}>{cur.flag}</Text>
-              <Text style={[s.curName, { color: currency === cur.id ? colors.primary : colors.foreground }]}>{cur.name}</Text>
+          {/* Wallet address */}
+          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 6 }]}>
+            Ýeňil {USDT_NETWORKS.find(n=>n.id===depNet)?.name} USDT Manzili
+          </Text>
+          <Pressable onPress={() => Alert.alert("Manzil", USDT_WALLETS[depNet], [{ text: "Ýap" }])}
+            style={[cs.addrCard, { backgroundColor: colors.card, borderColor: USDT_NETWORKS.find(n=>n.id===depNet)!.color }]}
+          >
+            <View style={{ flex: 1 }}>
+              <Text style={[cs.addrLabel, { color: colors.mutedForeground }]}>
+                {USDT_NETWORKS.find(n=>n.id===depNet)?.full} · USDT
+              </Text>
+              <Text style={[cs.addrText, { color: colors.foreground }]} selectable numberOfLines={2}>
+                {USDT_WALLETS[depNet]}
+              </Text>
+            </View>
+            <View style={[cs.copyBtn, { backgroundColor: USDT_NETWORKS.find(n=>n.id===depNet)!.color }]}>
+              <Ionicons name="copy-outline" size={15} color="#fff" />
+            </View>
+          </Pressable>
+          <Text style={[cs.noteText, { color: colors.mutedForeground }]}>
+            ⚠️ Diňe {USDT_NETWORKS.find(n=>n.id===depNet)?.name} USDT iberiň. Başga token ýitgä sebäp bolar.
+          </Text>
+
+          {/* TX Hash */}
+          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 6 }]}>Tranzaksiýa haşy (TX ID)</Text>
+          <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Ionicons name="receipt-outline" size={15} color={colors.mutedForeground} />
+            <TextInput value={depTx} onChangeText={setDepTx} placeholder="0x... ýa-da TX ID"
+              placeholderTextColor={colors.mutedForeground} autoCapitalize="none"
+              style={[cs.inputField, { color: colors.foreground }]} />
+          </View>
+
+          {depErr ? (
+            <View style={cs.errBox}>
+              <Ionicons name="alert-circle-outline" size={15} color="#dc2626" />
+              <Text style={cs.errText}>{depErr}</Text>
+            </View>
+          ) : null}
+
+          {depLoading ? <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} /> : (
+            <Pressable onPress={submitDeposit}
+              style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#059669", opacity: pressed ? 0.85 : 1, marginTop: 16 }]}>
+              <Ionicons name="cloud-upload-outline" size={17} color="#fff" />
+              <Text style={s.primaryBtnText}>Tassyklamak we Ibermek</Text>
             </Pressable>
-          ))}
-        </View>
-      )}
+          )}
 
-      {/* Amount */}
-      <View style={{ marginBottom: 14 }}>
-        <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Mukdar</Text>
-        <TextInput value={amount} onChangeText={setAmount} placeholder="0.00"
-          placeholderTextColor={colors.mutedForeground} keyboardType="decimal-pad"
-          style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
-        />
-      </View>
-
-      {/* Wallet */}
-      <View style={{ marginBottom: 14 }}>
-        <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Wallet ID</Text>
-        <TextInput value={walletId} onChangeText={setWalletId}
-          placeholder={crypto === "payeer" ? "P1234567890" : crypto === "perfect" ? "U1234567890" : "Z123456789012"}
-          placeholderTextColor={colors.mutedForeground} autoCapitalize="characters"
-          style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
-        />
-      </View>
-
-      {/* Phone */}
-      <View style={{ marginBottom: 14 }}>
-        <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Telefon nomeriňiz</Text>
-        <TextInput value={phone} onChangeText={setPhone} placeholder="+993 XX XXXXXX"
-          placeholderTextColor={colors.mutedForeground} keyboardType="phone-pad"
-          style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
-        />
-      </View>
-
-      {/* Secret (sell only) */}
-      {mode === "sell" && (
-        <View style={{ marginBottom: 14 }}>
-          <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Gizlin kod (biz ibereris)</Text>
-          <TextInput value={secretCode} onChangeText={setSecretCode} placeholder="Gizlin kod"
-            placeholderTextColor={colors.mutedForeground}
-            style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
-          />
-        </View>
-      )}
-
-      {/* Total */}
-      {parseFloat(amount) > 0 && (
-        <View style={[s.totalBox, { backgroundColor: colors.primary + "10", borderColor: colors.primary + "40" }]}>
-          <Text style={[s.totalLabel, { color: colors.mutedForeground }]}>Jemi</Text>
-          <Text style={[s.totalVal, { color: colors.primary }]}>{calcTotal().toFixed(2)} TMT</Text>
-        </View>
-      )}
-
-      {/* Payment destination */}
-      {mode === "buy" && (
-        <View style={[s.iosCard, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 14 }]}>
-          <View style={[s.iosCardIcon, { backgroundColor: colors.primary + "15" }]}>
-            <Ionicons name="call-outline" size={20} color={colors.primary} />
+          {/* Steps guide */}
+          <View style={[cs.stepsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[cs.stepsTitle, { color: colors.foreground }]}>Nädip depozit etmeli?</Text>
+            {[
+              "Tarmogy saýlaň (TON iň arzan: 0.05 USDT)",
+              "Ýeňil manziline USDT iberiň",
+              "TX haşyny giriziň we tassyklaň",
+              "BP balansynyza awtomatik geçer",
+            ].map((step, i) => (
+              <View key={i} style={cs.stepRow}>
+                <View style={[cs.stepNum, { backgroundColor: colors.primary }]}>
+                  <Text style={cs.stepNumText}>{i + 1}</Text>
+                </View>
+                <Text style={[cs.stepText, { color: colors.foreground }]}>{step}</Text>
+              </View>
+            ))}
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[s.iosCardTitle, { color: colors.foreground }]}>Şu nomerlere pul geçiriň</Text>
-            {PAYMENT_PHONES.map((p, i) => <Text key={i} style={[s.phoneNum, { color: colors.primary }]}>{p}</Text>)}
-          </View>
-        </View>
-      )}
-      {mode === "sell" && (
-        <View style={[s.iosCard, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 14 }]}>
-          <View style={[s.iosCardIcon, { backgroundColor: "#e8f0fe" }]}>
-            <MaterialCommunityIcons name="wallet-outline" size={20} color="#1a73e8" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[s.iosCardTitle, { color: colors.foreground }]}>Siz şu Payeer ID-a pul ibermeli</Text>
-            <Text style={[s.phoneNum, { color: "#1a73e8" }]}>P1115509057</Text>
-          </View>
-        </View>
+        </>
       )}
 
-      {/* Proof */}
-      <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginBottom: 10 }]}>Tölegi tassyklaň</Text>
-      <View style={{ flexDirection: "row", gap: 10, marginBottom: 14 }}>
-        {([
-          { id: "screenshot" as const, icon: "camera-outline" as const, label: "Skrinshot" },
-          { id: "sms" as const, icon: "chatbubble-outline" as const, label: "SMS" },
-        ]).map(t => (
-          <Pressable key={t.id} onPress={() => setProofType(t.id)}
-            style={[s.proofCard, { backgroundColor: proofType === t.id ? colors.primary + "15" : colors.card, borderColor: proofType === t.id ? colors.primary : colors.border }]}>
-            <Ionicons name={t.icon} size={20} color={proofType === t.id ? colors.primary : colors.mutedForeground} />
-            <Text style={[{ fontWeight: "600", fontSize: 12, color: proofType === t.id ? colors.primary : colors.foreground }]}>{t.label}</Text>
-          </Pressable>
-        ))}
-      </View>
-      {proofType === "sms" && (
-        <TextInput value={smsText} onChangeText={setSmsText} placeholder="SMS haty ýazyň..."
-          placeholderTextColor={colors.mutedForeground} multiline numberOfLines={3}
-          style={[s.input, s.textarea, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground, marginBottom: 14 }]}
-        />
-      )}
-      {proofType === "screenshot" && (
-        <Pressable onPress={pickImage}
-          style={[{ borderWidth: 2, borderStyle: "dashed", borderColor: colors.primary, borderRadius: 14, padding: 18, alignItems: "center", marginBottom: 14, gap: 6 }]}>
-          <Ionicons name="cloud-upload-outline" size={28} color={colors.primary} />
-          <Text style={{ color: colors.primary, fontWeight: "600" }}>{imageUri ? "Surat saýlandy ✓" : "Skrinshot saýlaň"}</Text>
-        </Pressable>
-      )}
-      {imageUri && proofType === "screenshot" && (
-        <Image source={{ uri: imageUri }} style={{ height: 120, borderRadius: 12, marginBottom: 14, resizeMode: "cover" }} />
+      {/* ════════════ WITHDRAW TAB ════════════ */}
+      {ctab === "withdraw" && (
+        <>
+          {/* Balance */}
+          <View style={[cs.balCard, { backgroundColor: colors.primary + "12", borderColor: colors.primary }]}>
+            <Ionicons name="wallet-outline" size={20} color={colors.primary} />
+            <View style={{ flex: 1 }}>
+              <Text style={[cs.balLabel, { color: colors.mutedForeground }]}>Häzirki balansiňiz</Text>
+              <Text style={[cs.balVal, { color: colors.primary }]}>{balance.toFixed(2)} BP</Text>
+            </View>
+            <View style={[cs.rateTag, { backgroundColor: colors.primary + "18" }]}>
+              <Text style={[cs.rateTagText, { color: colors.primary }]}>1 BP = {USDT_PER_BP} $</Text>
+            </View>
+          </View>
+
+          {/* Network */}
+          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 8 }]}>Çykaryş tarmagyňyz</Text>
+          <View style={cs.netRow}>
+            {USDT_NETWORKS.map(n => (
+              <Pressable key={n.id} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setWdNet(n.id); }}
+                style={[cs.netCard, wdNet === n.id
+                  ? { backgroundColor: n.color + "15", borderColor: n.color, borderWidth: 2 }
+                  : { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }
+                ]}
+              >
+                <View style={[cs.netDot, { backgroundColor: n.color }]} />
+                <Text style={[cs.netName, { color: wdNet === n.id ? n.color : colors.foreground }]}>{n.name}</Text>
+                <Text style={[cs.netFee, { color: colors.mutedForeground }]}>{n.fee} USDT</Text>
+                <Text style={[cs.netTime, { color: colors.mutedForeground }]}>{n.time}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {/* BP amount */}
+          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 6 }]}>Näçe BP çykarmak isleýärsiňiz?</Text>
+          <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Ionicons name="logo-bitcoin" size={15} color={colors.mutedForeground} />
+            <TextInput value={wdBP} onChangeText={setWdBP} placeholder="0"
+              placeholderTextColor={colors.mutedForeground} keyboardType="decimal-pad"
+              style={[cs.inputField, { color: colors.foreground }]} />
+            <Text style={[cs.inputSfx, { color: colors.mutedForeground }]}>BP</Text>
+          </View>
+
+          {/* Fee breakdown */}
+          {wdBPNum > 0 && (
+            <View style={[cs.feeCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[cs.feeTitleTxt, { color: colors.foreground }]}>Töleg hasaplamasy</Text>
+              {[
+                { label: "Çykarylýan BP",             val: `${wdBPNum} BP`,                  red: false },
+                { label: "USDT ýakynlaşdyrma",         val: `${wdUsdtCalc.toFixed(4)} USDT`,  red: false },
+                { label: `${wdNetData.name} Komissiya`, val: `-${wdNetData.fee} USDT`,          red: true  },
+              ].map((row, i) => (
+                <View key={i} style={cs.feeRow}>
+                  <Text style={[cs.feeRowLabel, { color: colors.mutedForeground }]}>{row.label}</Text>
+                  <Text style={[cs.feeRowVal, { color: row.red ? "#ef4444" : colors.foreground }]}>{row.val}</Text>
+                </View>
+              ))}
+              <View style={[cs.feeDivider, { backgroundColor: colors.border }]} />
+              <View style={cs.feeRow}>
+                <Text style={[cs.feeRowLabel, { color: colors.foreground, fontWeight: "700" }]}>Alarsyňyz</Text>
+                <Text style={[cs.feeRowVal, { color: "#059669", fontSize: 17, fontWeight: "800" }]}>
+                  {wdReceive.toFixed(4)} USDT
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {/* Wallet address */}
+          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 6 }]}>
+            {wdNetData.name} Kripto Manziliniz
+          </Text>
+          <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Ionicons name="wallet-outline" size={15} color={colors.mutedForeground} />
+            <TextInput value={wdAddr} onChangeText={setWdAddr}
+              placeholder={wdNet === "bep20" ? "0x..." : wdNet === "ton" ? "UQ..." : "T..."}
+              placeholderTextColor={colors.mutedForeground} autoCapitalize="none"
+              style={[cs.inputField, { color: colors.foreground }]} />
+          </View>
+          <Text style={[cs.noteText, { color: colors.mutedForeground }]}>
+            Manzil ýalňyş girizilse pul yzyna gaýtarylmaýar. Üns bilen barlaň.
+          </Text>
+
+          {wdErr ? (
+            <View style={cs.errBox}>
+              <Ionicons name="alert-circle-outline" size={15} color="#dc2626" />
+              <Text style={cs.errText}>{wdErr}</Text>
+            </View>
+          ) : null}
+
+          {wdLoading ? <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} /> : (
+            <Pressable onPress={submitWithdraw}
+              style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1, marginTop: 16 }]}>
+              <Ionicons name="send-outline" size={17} color="#fff" />
+              <Text style={s.primaryBtnText}>Çykaryşy Tassyklamak</Text>
+            </Pressable>
+          )}
+        </>
       )}
 
-      {loading ? <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} /> : (
-        <Pressable onPress={handleSubmit}
-          style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}>
-          <Ionicons name="paper-plane-outline" size={18} color="#fff" />
-          <Text style={s.primaryBtnText}>Göýbermek</Text>
-        </Pressable>
+      {/* ════════════ P2P TAB ════════════ */}
+      {ctab === "p2p" && (
+        <>
+          {/* Pair chips */}
+          <View style={cs.pairRow}>
+            {(["all", "BP/USDT", "TMT/USDT"] as const).map(p => (
+              <Pressable key={p}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setP2pPair(p); }}
+                style={[cs.pairChip, p2pPair === p
+                  ? { backgroundColor: colors.primary }
+                  : { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }
+                ]}
+              >
+                <Text style={[cs.pairChipTxt, { color: p2pPair === p ? "#fff" : colors.foreground }]}>
+                  {p === "all" ? "Hemmesi" : p}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {/* Premium banner */}
+          <View style={[cs.premBanner, { borderColor: "#f59e0b" }]}>
+            <LinearGradient colors={["#f59e0b15","#fbbf2415"]} style={cs.premBannerGrad}>
+              <Ionicons name="star" size={15} color="#f59e0b" />
+              <View style={{ flex: 1 }}>
+                <Text style={[cs.premBannerTitle, { color: colors.foreground }]}>Premium Jübütler — BP/USDT · TMT/USDT</Text>
+                <Text style={[cs.premBannerSub, { color: colors.mutedForeground }]}>Escrow goragy · Operator kepilligi</Text>
+              </View>
+            </LinearGradient>
+          </View>
+
+          {/* Orders */}
+          <View style={{ gap: 10 }}>
+            {P2P_ORDERS_DATA
+              .filter(o => p2pPair === "all" || o.pair === p2pPair)
+              .map(order => (
+                <Pressable key={order.id} onPress={() => handleP2P(order)}
+                  style={({ pressed }) => [cs.orderCard, {
+                    backgroundColor: colors.card,
+                    borderColor: order.premium ? "#f59e0b" : colors.border,
+                    borderWidth: order.premium ? 1.5 : 1,
+                    opacity: pressed ? 0.88 : 1,
+                  }]}
+                >
+                  {order.premium && (
+                    <View style={cs.premTag}>
+                      <Ionicons name="star" size={8} color="#fff" />
+                      <Text style={cs.premTagTxt}>PREMIUM</Text>
+                    </View>
+                  )}
+                  <View style={cs.orderTop}>
+                    <View style={[cs.orderTypeBadge, { backgroundColor: order.type === "buy" ? "#05966920" : "#0284c720" }]}>
+                      <Text style={[cs.orderTypeText, { color: order.type === "buy" ? "#059669" : "#0284c7" }]}>
+                        {order.type === "buy" ? "ALMAK" : "SATMAK"}
+                      </Text>
+                    </View>
+                    <Text style={[cs.orderPair, { color: colors.foreground }]}>{order.pair}</Text>
+                    <View style={{ flex: 1 }} />
+                    <Text style={[cs.orderPrice, { color: colors.primary }]}>{order.price}</Text>
+                    <Text style={[cs.orderPriceUnit, { color: colors.mutedForeground }]}>/USDT</Text>
+                  </View>
+                  <View style={cs.orderBottom}>
+                    <Text style={[cs.orderMeta, { color: colors.mutedForeground }]}>
+                      <Ionicons name="person-outline" size={11} /> {order.seller}
+                    </Text>
+                    <Text style={[cs.orderMeta, { color: colors.mutedForeground }]}>  ·  {order.pay}</Text>
+                    <View style={{ flex: 1 }} />
+                    <Text style={[cs.orderLimit, { color: colors.mutedForeground }]}>{order.min}–{order.max}</Text>
+                  </View>
+                  <Pressable onPress={() => handleP2P(order)}
+                    style={[cs.orderBtn, { backgroundColor: order.type === "buy" ? "#059669" : colors.primary }]}>
+                    <Text style={cs.orderBtnTxt}>{order.type === "buy" ? "Satmak" : "Satyn al"}</Text>
+                  </Pressable>
+                </Pressable>
+              ))}
+          </View>
+        </>
       )}
     </>
   );
 }
+
+const cs = StyleSheet.create({
+  rateHero: { borderRadius: 14, padding: 14, flexDirection: "row", alignItems: "center", marginBottom: 16 },
+  rateHeroLeft: { flex: 1 },
+  rateHeroLabel: { color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: "600" },
+  rateHeroVal: { color: "#fff", fontSize: 18, fontWeight: "800", marginTop: 2 },
+  rateHeroBadge: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#f59e0b20", borderRadius: 10, paddingHorizontal: 9, paddingVertical: 4 },
+  rateHeroBadgeText: { color: "#f59e0b", fontSize: 11, fontWeight: "700" },
+
+  netRow: { flexDirection: "row", gap: 7 },
+  netCard: { flex: 1, borderRadius: 12, padding: 10, alignItems: "center", gap: 3 },
+  netDot: { width: 8, height: 8, borderRadius: 4 },
+  netName: { fontSize: 12, fontWeight: "800" },
+  netFee: { fontSize: 9, fontWeight: "600" },
+  netTime: { fontSize: 9 },
+
+  inputRow: { flexDirection: "row", alignItems: "center", gap: 10, borderWidth: 1, borderRadius: 12, paddingHorizontal: 13, paddingVertical: 12 },
+  inputField: { flex: 1, fontSize: 14 },
+  inputPfx: { fontSize: 15, fontWeight: "700" },
+  inputSfx: { fontSize: 12, fontWeight: "600" },
+
+  calcBadge: { flexDirection: "row", alignItems: "center", gap: 7, borderRadius: 10, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 9, marginTop: 7 },
+  calcText: { fontSize: 12, fontWeight: "600" },
+
+  addrCard: { flexDirection: "row", alignItems: "center", gap: 10, borderRadius: 12, borderWidth: 1.5, padding: 12 },
+  addrLabel: { fontSize: 10, fontWeight: "600", marginBottom: 3 },
+  addrText: { fontSize: 11, lineHeight: 17 },
+  copyBtn: { width: 34, height: 34, borderRadius: 9, alignItems: "center", justifyContent: "center" },
+  noteText: { fontSize: 11, lineHeight: 16, marginTop: 6 },
+
+  errBox: { flexDirection: "row", alignItems: "center", gap: 7, backgroundColor: "#fee2e2", borderRadius: 10, padding: 11, marginTop: 9 },
+  errText: { color: "#dc2626", fontSize: 12, flex: 1 },
+
+  stepsCard: { borderRadius: 14, borderWidth: 1, padding: 14, marginTop: 18, gap: 9 },
+  stepsTitle: { fontSize: 12, fontWeight: "700", marginBottom: 2 },
+  stepRow: { flexDirection: "row", alignItems: "center", gap: 9 },
+  stepNum: { width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  stepNumText: { color: "#fff", fontSize: 10, fontWeight: "800" },
+  stepText: { fontSize: 12, flex: 1 },
+
+  balCard: { flexDirection: "row", alignItems: "center", gap: 11, borderRadius: 14, borderWidth: 1, padding: 13 },
+  balLabel: { fontSize: 10, fontWeight: "600" },
+  balVal: { fontSize: 20, fontWeight: "800", marginTop: 2 },
+  rateTag: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
+  rateTagText: { fontSize: 10, fontWeight: "700" },
+
+  feeCard: { borderRadius: 14, borderWidth: 1, padding: 14, marginTop: 10, gap: 7 },
+  feeTitleTxt: { fontSize: 12, fontWeight: "700", marginBottom: 2 },
+  feeRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  feeRowLabel: { fontSize: 12 },
+  feeRowVal: { fontSize: 12, fontWeight: "700" },
+  feeDivider: { height: 1, marginVertical: 3 },
+
+  pairRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
+  pairChip: { paddingHorizontal: 13, paddingVertical: 7, borderRadius: 50 },
+  pairChipTxt: { fontSize: 12, fontWeight: "600" },
+
+  premBanner: { borderRadius: 12, borderWidth: 1.5, overflow: "hidden", marginBottom: 10 },
+  premBannerGrad: { flexDirection: "row", alignItems: "center", gap: 9, padding: 11 },
+  premBannerTitle: { fontSize: 12, fontWeight: "700" },
+  premBannerSub: { fontSize: 10, marginTop: 1 },
+
+  orderCard: { borderRadius: 14, padding: 12, gap: 8 },
+  premTag: { position: "absolute", top: 10, right: 10, flexDirection: "row", alignItems: "center", gap: 2, backgroundColor: "#f59e0b", borderRadius: 5, paddingHorizontal: 5, paddingVertical: 2 },
+  premTagTxt: { color: "#fff", fontSize: 8, fontWeight: "800" },
+  orderTop: { flexDirection: "row", alignItems: "center", gap: 6 },
+  orderTypeBadge: { borderRadius: 7, paddingHorizontal: 7, paddingVertical: 3 },
+  orderTypeText: { fontSize: 9, fontWeight: "800" },
+  orderPair: { fontSize: 13, fontWeight: "700" },
+  orderPrice: { fontSize: 15, fontWeight: "800" },
+  orderPriceUnit: { fontSize: 11, fontWeight: "600" },
+  orderBottom: { flexDirection: "row", alignItems: "center" },
+  orderMeta: { fontSize: 11 },
+  orderLimit: { fontSize: 11, fontWeight: "600" },
+  orderBtn: { borderRadius: 9, paddingVertical: 8, alignItems: "center" },
+  orderBtnTxt: { color: "#fff", fontSize: 12, fontWeight: "700" },
+});
 
 // ── SIM Kart Section ───────────────────────────────────────────────
 function SimSection({ colors }: { colors: ReturnType<typeof useColors> }) {
