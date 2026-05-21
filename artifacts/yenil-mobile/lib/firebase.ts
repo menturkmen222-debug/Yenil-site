@@ -1,7 +1,7 @@
 import { initializeApp, getApps } from "firebase/app";
 import {
   getDatabase, ref, set, get, push, onValue, update, remove,
-  query, orderByChild, limitToLast,
+  query, orderByChild, limitToLast, equalTo,
 } from "firebase/database";
 
 const firebaseConfig = {
@@ -28,6 +28,8 @@ export async function saveOrder(path: string, data: Record<string, unknown>): Pr
   return newRef.key || "";
 }
 
+// ─── Balance ──────────────────────────────────────────────────────────────────
+
 export async function getUserBalance(deviceId: string): Promise<number> {
   try {
     const snap = await get(ref(db, `user-balances/${deviceId}`));
@@ -36,6 +38,14 @@ export async function getUserBalance(deviceId: string): Promise<number> {
   } catch {
     return 0;
   }
+}
+
+export async function addBalance(deviceId: string, amount: number): Promise<void> {
+  const current = await getUserBalance(deviceId);
+  await set(ref(db, `user-balances/${deviceId}`), {
+    balance: current + amount,
+    updatedAt: new Date().toISOString(),
+  });
 }
 
 export async function deductBalance(deviceId: string, amount: number): Promise<boolean> {
@@ -110,6 +120,14 @@ export function watchReputation(deviceId: string, cb: (data: ReputationData) => 
     }
     cb({ score: val.score ?? 20, entries });
   });
+}
+
+export async function saveReputationEntry(deviceId: string, entry: ReputationEntry): Promise<void> {
+  const current = await getReputation(deviceId);
+  const newScore = Math.max(0, Math.min(100, current.score + entry.delta));
+  const histRef = push(ref(db, `reputation/${deviceId}/history`));
+  await set(histRef, entry);
+  await set(ref(db, `reputation/${deviceId}/score`), newScore);
 }
 
 // ─── Disputes ────────────────────────────────────────────────────────────────
@@ -256,5 +274,720 @@ export async function getBPTransferHistory(deviceId: string): Promise<BPTransfer
     return result.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   } catch {
     return [];
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  PUL GAZAN — EARN MONEY ECOSYSTEM
+// ══════════════════════════════════════════════════════════════════
+
+// ─── Referral System ─────────────────────────────────────────────────────────
+
+export interface ReferralStats {
+  code: string;
+  totalJoins: number;
+  totalEarned: number;
+  passiveEarned: number;
+}
+
+function makeReferralCode(deviceId: string): string {
+  const base = deviceId.replace(/[^a-z0-9]/gi, "").toUpperCase().slice(0, 6);
+  const suffix = Math.random().toString(36).toUpperCase().slice(2, 4);
+  return (base + suffix).slice(0, 8);
+}
+
+export async function getOrCreateReferralCode(deviceId: string): Promise<string> {
+  try {
+    const snap = await get(ref(db, `user-profiles/${deviceId}/referralCode`));
+    if (snap.exists()) return String(snap.val());
+    const code = makeReferralCode(deviceId);
+    await set(ref(db, `user-profiles/${deviceId}/referralCode`), code);
+    await set(ref(db, `referral-codes/${code}`), { ownerDeviceId: deviceId, createdAt: new Date().toISOString() });
+    return code;
+  } catch {
+    return makeReferralCode(deviceId);
+  }
+}
+
+export async function applyReferralCode(newUserDeviceId: string, code: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const codeSnap = await get(ref(db, `referral-codes/${code.trim().toUpperCase()}`));
+    if (!codeSnap.exists()) return { success: false, message: "Nädogry referral kod" };
+    const { ownerDeviceId } = codeSnap.val() as { ownerDeviceId: string };
+    if (ownerDeviceId === newUserDeviceId) return { success: false, message: "Öz kodunuzy ulanyp bilmersiňiz" };
+
+    const alreadyUsed = await get(ref(db, `user-profiles/${newUserDeviceId}/referredBy`));
+    if (alreadyUsed.exists()) return { success: false, message: "Siz eýýäm referral kod ulanypsyňyz" };
+
+    await set(ref(db, `user-profiles/${newUserDeviceId}/referredBy`), ownerDeviceId);
+    await set(ref(db, `referral-joins/${ownerDeviceId}/${newUserDeviceId}`), { joinedAt: new Date().toISOString() });
+
+    const joinBonus = 0.5;
+    await addBalance(ownerDeviceId, joinBonus);
+    await saveReputationEntry(ownerDeviceId, {
+      type: "positive",
+      reason: "Täze agza çagyryldy (Referral)",
+      delta: 1,
+      timestamp: new Date().toISOString(),
+      isPublic: true,
+    });
+
+    return { success: true, message: `Üstünlikli! ${ownerDeviceId.slice(0, 8)}... 0.5 BP aldy` };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk ýüz berdi" };
+  }
+}
+
+export async function getReferralStats(deviceId: string): Promise<ReferralStats> {
+  try {
+    const [codeSnap, joinsSnap, earningsSnap] = await Promise.all([
+      get(ref(db, `user-profiles/${deviceId}/referralCode`)),
+      get(ref(db, `referral-joins/${deviceId}`)),
+      get(ref(db, `referral-earnings/${deviceId}`)),
+    ]);
+    const code = codeSnap.exists() ? String(codeSnap.val()) : await getOrCreateReferralCode(deviceId);
+    const totalJoins = joinsSnap.exists() ? Object.keys(joinsSnap.val()).length : 0;
+    const earnings = earningsSnap.exists() ? earningsSnap.val() : { total: 0, passive: 0 };
+    return {
+      code,
+      totalJoins,
+      totalEarned: earnings.total ?? 0,
+      passiveEarned: earnings.passive ?? 0,
+    };
+  } catch {
+    return { code: "", totalJoins: 0, totalEarned: 0, passiveEarned: 0 };
+  }
+}
+
+export async function addPassiveReferralCommission(deviceId: string, amount = 0.2): Promise<void> {
+  try {
+    const referredBySnap = await get(ref(db, `user-profiles/${deviceId}/referredBy`));
+    if (!referredBySnap.exists()) return;
+    const referrerId = String(referredBySnap.val());
+    await addBalance(referrerId, amount);
+    const earningsSnap = await get(ref(db, `referral-earnings/${referrerId}`));
+    const cur = earningsSnap.exists() ? earningsSnap.val() : { total: 0, passive: 0 };
+    await set(ref(db, `referral-earnings/${referrerId}`), {
+      total: (cur.total ?? 0) + amount,
+      passive: (cur.passive ?? 0) + amount,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch {
+  }
+}
+
+// ─── Agent Deposit (TMT → BP) ─────────────────────────────────────────────────
+
+export const ADMIN_CARD_NUMBER = "8600 3497 5521 7384";
+export const ADMIN_CARD_HOLDER = "Ý. Haýytjanow";
+export const BP_BONUS_PERCENT = 15;
+
+export interface AgentDeposit {
+  id: string;
+  deviceId: string;
+  tmtAmount: number;
+  bpAmount: number;
+  status: "pending" | "confirmed" | "rejected";
+  createdAt: string;
+  confirmedAt?: string;
+  note?: string;
+}
+
+export async function createAgentDeposit(deviceId: string, tmtAmount: number): Promise<string> {
+  const bpAmount = tmtAmount * (1 + BP_BONUS_PERCENT / 100);
+  const r = push(ref(db, "agent-deposits"));
+  await set(r, {
+    deviceId,
+    tmtAmount,
+    bpAmount: Math.round(bpAmount * 100) / 100,
+    status: "pending",
+    createdAt: new Date().toISOString(),
+  });
+  return r.key || "";
+}
+
+export function watchAgentDeposits(deviceId: string, cb: (deps: AgentDeposit[]) => void): () => void {
+  const r = ref(db, "agent-deposits");
+  return onValue(r, snap => {
+    if (!snap.exists()) { cb([]); return; }
+    const result: AgentDeposit[] = [];
+    snap.forEach(child => {
+      const val = child.val();
+      if (val.deviceId === deviceId) result.push({ id: child.key || "", ...val });
+    });
+    result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    cb(result);
+  });
+}
+
+// ─── Road Reports — Informator ────────────────────────────────────────────────
+
+export type RoadReportType = "gai" | "probka" | "yopyk" | "basha";
+
+export interface RoadReport {
+  id: string;
+  type: RoadReportType;
+  location: string;
+  description: string;
+  reporterDeviceId: string;
+  reporterNickname: string;
+  upvotes: Record<string, boolean>;
+  upvoteCount: number;
+  rewarded: boolean;
+  active: boolean;
+  createdAt: string;
+}
+
+export async function createRoadReport(
+  reporterDeviceId: string,
+  type: RoadReportType,
+  location: string,
+  description: string
+): Promise<string> {
+  const nickname = await getUserNickname(reporterDeviceId);
+  const r = push(ref(db, "road-reports"));
+  await set(r, {
+    type,
+    location: location.trim(),
+    description: description.trim(),
+    reporterDeviceId,
+    reporterNickname: nickname || reporterDeviceId.slice(0, 10),
+    upvotes: {},
+    upvoteCount: 0,
+    rewarded: false,
+    active: true,
+    createdAt: new Date().toISOString(),
+  });
+  return r.key || "";
+}
+
+export async function upvoteRoadReport(reportId: string, voterDeviceId: string): Promise<{ rewarded: boolean }> {
+  try {
+    const reportSnap = await get(ref(db, `road-reports/${reportId}`));
+    if (!reportSnap.exists()) return { rewarded: false };
+    const report = reportSnap.val() as Omit<RoadReport, "id">;
+
+    if (report.reporterDeviceId === voterDeviceId) return { rewarded: false };
+    if (report.upvotes?.[voterDeviceId]) return { rewarded: false };
+
+    const newCount = (report.upvoteCount ?? 0) + 1;
+    await update(ref(db, `road-reports/${reportId}`), {
+      [`upvotes/${voterDeviceId}`]: true,
+      upvoteCount: newCount,
+    });
+
+    if (newCount >= 3 && !report.rewarded) {
+      await update(ref(db, `road-reports/${reportId}`), { rewarded: true });
+      await addBalance(report.reporterDeviceId, 1);
+      await saveReputationEntry(report.reporterDeviceId, {
+        type: "positive",
+        reason: "Informator sylagy — 3 tassyklama aldy",
+        delta: 2,
+        timestamp: new Date().toISOString(),
+        isPublic: true,
+      });
+      return { rewarded: true };
+    }
+    return { rewarded: false };
+  } catch {
+    return { rewarded: false };
+  }
+}
+
+export function watchRoadReports(cb: (reports: RoadReport[]) => void): () => void {
+  const r = query(ref(db, "road-reports"), orderByChild("createdAt"), limitToLast(30));
+  return onValue(r, snap => {
+    if (!snap.exists()) { cb([]); return; }
+    const result: RoadReport[] = [];
+    snap.forEach(child => {
+      const val = child.val();
+      if (val.active) result.push({ id: child.key || "", ...val });
+    });
+    result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    cb(result);
+  });
+}
+
+// ─── Crypto P2P — USDT ↔ BP ──────────────────────────────────────────────────
+
+export type CryptoAdType = "sell_usdt" | "buy_usdt";
+
+export interface CryptoAd {
+  id: string;
+  type: CryptoAdType;
+  ownerDeviceId: string;
+  ownerNickname: string;
+  ownerRepScore: number;
+  usdtAmount: number;
+  bpPerUsdt: number;
+  totalBP: number;
+  status: "open" | "locked" | "completed" | "cancelled";
+  escrow?: {
+    buyerDeviceId: string;
+    lockedBP: number;
+    lockedAt: string;
+  };
+  createdAt: string;
+}
+
+export async function createCryptoAd(
+  ownerDeviceId: string,
+  type: CryptoAdType,
+  usdtAmount: number,
+  bpPerUsdt: number
+): Promise<{ success: boolean; message: string; id?: string }> {
+  try {
+    const rep = await getReputation(ownerDeviceId);
+    if (rep.score < 45) {
+      return { success: false, message: "Kripto birjasy üçin abraý derejeniz ýeterlik däl (min 45 bal)" };
+    }
+    const nickname = await getUserNickname(ownerDeviceId);
+    const totalBP = usdtAmount * bpPerUsdt;
+
+    if (type === "sell_usdt") {
+      const deducted = await deductBalance(ownerDeviceId, totalBP);
+      if (!deducted) return { success: false, message: `Ýeterlik BP ýok (${totalBP.toFixed(2)} BP gerek)` };
+    }
+
+    const r = push(ref(db, "crypto-ads"));
+    await set(r, {
+      type,
+      ownerDeviceId,
+      ownerNickname: nickname || ownerDeviceId.slice(0, 10),
+      ownerRepScore: rep.score,
+      usdtAmount,
+      bpPerUsdt,
+      totalBP: Math.round(totalBP * 100) / 100,
+      status: "open",
+      createdAt: new Date().toISOString(),
+    });
+    return { success: true, message: "E'lon ýerleşdirildi!", id: r.key || "" };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk ýüz berdi" };
+  }
+}
+
+export async function initiateCryptoTrade(
+  adId: string,
+  buyerDeviceId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const adSnap = await get(ref(db, `crypto-ads/${adId}`));
+    if (!adSnap.exists()) return { success: false, message: "E'lon tapylmady" };
+    const ad = adSnap.val() as Omit<CryptoAd, "id">;
+
+    if (ad.status !== "open") return { success: false, message: "Bu e'lon eýýäm band" };
+    if (ad.ownerDeviceId === buyerDeviceId) return { success: false, message: "Öz e'lonyňyzy satyn alyp bilmersiňiz" };
+
+    if (ad.type === "buy_usdt") {
+      const deducted = await deductBalance(buyerDeviceId, ad.totalBP);
+      if (!deducted) return { success: false, message: `Ýeterlik BP ýok (${ad.totalBP.toFixed(2)} BP gerek)` };
+    }
+
+    await update(ref(db, `crypto-ads/${adId}`), {
+      status: "locked",
+      escrow: {
+        buyerDeviceId,
+        lockedBP: ad.totalBP,
+        lockedAt: new Date().toISOString(),
+      },
+    });
+
+    await push(ref(db, "crypto-chat"), {
+      adId,
+      from: "system",
+      text: `Söwda başlandy. BP eskroda saklanýar. Admin tassyklamasyny garaşyň.`,
+      timestamp: new Date().toISOString(),
+    });
+
+    return { success: true, message: "Söwda başlandy! Admin tassyklamasyny garaşyň." };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk ýüz berdi" };
+  }
+}
+
+export function watchCryptoAds(cb: (ads: CryptoAd[]) => void): () => void {
+  const r = query(ref(db, "crypto-ads"), orderByChild("createdAt"), limitToLast(50));
+  return onValue(r, snap => {
+    if (!snap.exists()) { cb([]); return; }
+    const result: CryptoAd[] = [];
+    snap.forEach(child => {
+      const val = child.val();
+      if (val.status === "open" || val.status === "locked") {
+        result.push({ id: child.key || "", ...val });
+      }
+    });
+    result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    cb(result);
+  });
+}
+
+export async function cancelCryptoAd(adId: string, ownerDeviceId: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const adSnap = await get(ref(db, `crypto-ads/${adId}`));
+    if (!adSnap.exists()) return { success: false, message: "Tapylmady" };
+    const ad = adSnap.val() as Omit<CryptoAd, "id">;
+    if (ad.ownerDeviceId !== ownerDeviceId) return { success: false, message: "Rugsat ýok" };
+    if (ad.status !== "open") return { success: false, message: "Diňe açyk e'lonlary ýatyrsa bolýar" };
+
+    if (ad.type === "sell_usdt") {
+      await addBalance(ownerDeviceId, ad.totalBP);
+    }
+    await update(ref(db, `crypto-ads/${adId}`), { status: "cancelled" });
+    return { success: true, message: "E'lon ýatyryldy" };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk" };
+  }
+}
+
+// ─── Nagt Cashout — Cash P2P ──────────────────────────────────────────────────
+
+export type NagtOrderStatus = "open" | "matched" | "completed" | "cancelled";
+
+export interface NagtOrder {
+  id: string;
+  userDeviceId: string;
+  userNickname: string;
+  bpAmount: number;
+  tmtEquivalent: number;
+  city: string;
+  status: NagtOrderStatus;
+  agentDeviceId?: string;
+  agentNickname?: string;
+  createdAt: string;
+  matchedAt?: string;
+}
+
+export const NAGT_RATE = 1;
+
+export async function createNagtOrder(
+  userDeviceId: string,
+  bpAmount: number,
+  city: string
+): Promise<{ success: boolean; message: string; id?: string }> {
+  try {
+    if (bpAmount < 10) return { success: false, message: "Minimum 10 BP çykaryp bolýar" };
+    const deducted = await deductBalance(userDeviceId, bpAmount);
+    if (!deducted) return { success: false, message: `Ýeterlik BP ýok (${bpAmount} BP gerek)` };
+
+    const nickname = await getUserNickname(userDeviceId);
+    const r = push(ref(db, "nagt-orders"));
+    await set(r, {
+      userDeviceId,
+      userNickname: nickname || userDeviceId.slice(0, 10),
+      bpAmount,
+      tmtEquivalent: bpAmount * NAGT_RATE,
+      city: city.trim(),
+      status: "open",
+      createdAt: new Date().toISOString(),
+    });
+    return { success: true, message: "Sargyt ýerleşdirildi!", id: r.key || "" };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk ýüz berdi" };
+  }
+}
+
+export async function acceptNagtOrder(
+  orderId: string,
+  agentDeviceId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const orderSnap = await get(ref(db, `nagt-orders/${orderId}`));
+    if (!orderSnap.exists()) return { success: false, message: "Sargyt tapylmady" };
+    const order = orderSnap.val() as Omit<NagtOrder, "id">;
+
+    if (order.status !== "open") return { success: false, message: "Bu sargyt eýýäm band" };
+    if (order.userDeviceId === agentDeviceId) return { success: false, message: "Öz sargytyňyzy kabul edip bilmersiňiz" };
+
+    const rep = await getReputation(agentDeviceId);
+    if (rep.score < 30) return { success: false, message: "Agent bolmak üçin abraý derejeniz ýeterlik däl (min 30 bal)" };
+
+    const agentNickname = await getUserNickname(agentDeviceId);
+    await update(ref(db, `nagt-orders/${orderId}`), {
+      status: "matched",
+      agentDeviceId,
+      agentNickname: agentNickname || agentDeviceId.slice(0, 10),
+      matchedAt: new Date().toISOString(),
+    });
+    return { success: true, message: "Sargyt kabul edildi! Ulanyjy bilen habarlaşyň." };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk ýüz berdi" };
+  }
+}
+
+export async function completeNagtOrder(
+  orderId: string,
+  agentDeviceId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const orderSnap = await get(ref(db, `nagt-orders/${orderId}`));
+    if (!orderSnap.exists()) return { success: false, message: "Tapylmady" };
+    const order = orderSnap.val() as Omit<NagtOrder, "id">;
+    if (order.agentDeviceId !== agentDeviceId) return { success: false, message: "Rugsat ýok" };
+    if (order.status !== "matched") return { success: false, message: "Sargyt dürli ýagdaýda" };
+
+    await addBalance(agentDeviceId, order.bpAmount);
+    await update(ref(db, `nagt-orders/${orderId}`), { status: "completed", completedAt: new Date().toISOString() });
+    await saveReputationEntry(agentDeviceId, {
+      type: "positive", reason: "Nagt P2P söwda tamamlandy", delta: 2,
+      timestamp: new Date().toISOString(), isPublic: true,
+    });
+    await saveReputationEntry(order.userDeviceId, {
+      type: "positive", reason: "Nagt P2P söwda tamamlandy", delta: 1,
+      timestamp: new Date().toISOString(), isPublic: true,
+    });
+    return { success: true, message: "Söwda tamamlandy!" };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk" };
+  }
+}
+
+export function watchNagtOrders(cb: (orders: NagtOrder[]) => void): () => void {
+  const r = query(ref(db, "nagt-orders"), orderByChild("createdAt"), limitToLast(40));
+  return onValue(r, snap => {
+    if (!snap.exists()) { cb([]); return; }
+    const result: NagtOrder[] = [];
+    snap.forEach(child => {
+      const val = child.val();
+      if (val.status === "open" || val.status === "matched") {
+        result.push({ id: child.key || "", ...val });
+      }
+    });
+    result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    cb(result);
+  });
+}
+
+// ─── Micro-tasks — Kuryer ─────────────────────────────────────────────────────
+
+export type MicroTaskStatus = "open" | "taken" | "completed" | "cancelled";
+
+export interface MicroTask {
+  id: string;
+  from: string;
+  to: string;
+  description: string;
+  reward: number;
+  weight?: string;
+  posterDeviceId: string;
+  posterNickname: string;
+  courierDeviceId?: string;
+  courierNickname?: string;
+  status: MicroTaskStatus;
+  createdAt: string;
+  completedAt?: string;
+}
+
+export async function createMicroTask(
+  posterDeviceId: string,
+  from: string,
+  to: string,
+  description: string,
+  reward: number,
+  weight?: string
+): Promise<{ success: boolean; message: string; id?: string }> {
+  try {
+    if (reward < 5) return { success: false, message: "Minimum sylag 5 BP" };
+    const deducted = await deductBalance(posterDeviceId, reward);
+    if (!deducted) return { success: false, message: `Ýeterlik BP ýok (${reward} BP gerek)` };
+
+    const nickname = await getUserNickname(posterDeviceId);
+    const r = push(ref(db, "micro-tasks"));
+    await set(r, {
+      from: from.trim(),
+      to: to.trim(),
+      description: description.trim(),
+      reward,
+      weight: weight?.trim() || "",
+      posterDeviceId,
+      posterNickname: nickname || posterDeviceId.slice(0, 10),
+      status: "open",
+      createdAt: new Date().toISOString(),
+    });
+    return { success: true, message: "Tapşyryk ýerleşdirildi!", id: r.key || "" };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk ýüz berdi" };
+  }
+}
+
+export async function acceptMicroTask(
+  taskId: string,
+  courierDeviceId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const taskSnap = await get(ref(db, `micro-tasks/${taskId}`));
+    if (!taskSnap.exists()) return { success: false, message: "Tapşyryk tapylmady" };
+    const task = taskSnap.val() as Omit<MicroTask, "id">;
+    if (task.status !== "open") return { success: false, message: "Bu tapşyryk eýýäm band" };
+    if (task.posterDeviceId === courierDeviceId) return { success: false, message: "Öz tapşyrygyňyzy kabul edip bilmersiňiz" };
+
+    const nickname = await getUserNickname(courierDeviceId);
+    await update(ref(db, `micro-tasks/${taskId}`), {
+      status: "taken",
+      courierDeviceId,
+      courierNickname: nickname || courierDeviceId.slice(0, 10),
+      takenAt: new Date().toISOString(),
+    });
+    return { success: true, message: "Tapşyryk kabul edildi! Buýrujy bilen habarlaşyň." };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk ýüz berdi" };
+  }
+}
+
+export async function completeMicroTask(
+  taskId: string,
+  courierDeviceId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const taskSnap = await get(ref(db, `micro-tasks/${taskId}`));
+    if (!taskSnap.exists()) return { success: false, message: "Tapylmady" };
+    const task = taskSnap.val() as Omit<MicroTask, "id">;
+    if (task.courierDeviceId !== courierDeviceId) return { success: false, message: "Rugsat ýok" };
+    if (task.status !== "taken") return { success: false, message: "Tapşyryk dürli ýagdaýda" };
+
+    await addBalance(courierDeviceId, task.reward);
+    await update(ref(db, `micro-tasks/${taskId}`), { status: "completed", completedAt: new Date().toISOString() });
+    await saveReputationEntry(courierDeviceId, {
+      type: "positive", reason: "Kuryer tapşyrygy tamamlandy",
+      delta: 3, timestamp: new Date().toISOString(), isPublic: true,
+    });
+    await saveReputationEntry(task.posterDeviceId, {
+      type: "positive", reason: "Kuryer tapşyrygyny buýurdyňyz",
+      delta: 1, timestamp: new Date().toISOString(), isPublic: true,
+    });
+    return { success: true, message: `${task.reward} BP hasabyňyza geçirildi!` };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk" };
+  }
+}
+
+export function watchMicroTasks(cb: (tasks: MicroTask[]) => void): () => void {
+  const r = query(ref(db, "micro-tasks"), orderByChild("createdAt"), limitToLast(40));
+  return onValue(r, snap => {
+    if (!snap.exists()) { cb([]); return; }
+    const result: MicroTask[] = [];
+    snap.forEach(child => {
+      const val = child.val();
+      if (val.status === "open" || val.status === "taken") {
+        result.push({ id: child.key || "", ...val });
+      }
+    });
+    result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    cb(result);
+  });
+}
+
+// ─── Sanly Bazar — Digital Listings ──────────────────────────────────────────
+
+export type DigitalCategory = "vpn" | "gaming" | "software" | "education" | "other";
+
+export interface DigitalListing {
+  id: string;
+  title: string;
+  category: DigitalCategory;
+  description: string;
+  price: number;
+  sellerDeviceId: string;
+  sellerNickname: string;
+  sellerRepScore: number;
+  deliveryMethod: string;
+  status: "active" | "sold" | "cancelled";
+  createdAt: string;
+  buyerDeviceId?: string;
+}
+
+export async function createDigitalListing(
+  sellerDeviceId: string,
+  title: string,
+  category: DigitalCategory,
+  description: string,
+  price: number,
+  deliveryMethod: string
+): Promise<{ success: boolean; message: string; id?: string }> {
+  try {
+    if (price < 1) return { success: false, message: "Minimum baha 1 BP" };
+    const [nickname, rep] = await Promise.all([
+      getUserNickname(sellerDeviceId),
+      getReputation(sellerDeviceId),
+    ]);
+    const r = push(ref(db, "digital-listings"));
+    await set(r, {
+      title: title.trim(),
+      category,
+      description: description.trim(),
+      price,
+      sellerDeviceId,
+      sellerNickname: nickname || sellerDeviceId.slice(0, 10),
+      sellerRepScore: rep.score,
+      deliveryMethod: deliveryMethod.trim(),
+      status: "active",
+      createdAt: new Date().toISOString(),
+    });
+    return { success: true, message: "Haryt ýerleşdirildi!", id: r.key || "" };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk ýüz berdi" };
+  }
+}
+
+export async function buyDigitalListing(
+  listingId: string,
+  buyerDeviceId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const snap = await get(ref(db, `digital-listings/${listingId}`));
+    if (!snap.exists()) return { success: false, message: "Haryt tapylmady" };
+    const listing = snap.val() as Omit<DigitalListing, "id">;
+
+    if (listing.status !== "active") return { success: false, message: "Bu haryt eýýäm satyldy" };
+    if (listing.sellerDeviceId === buyerDeviceId) return { success: false, message: "Öz harydyňyzy satyn alyp bilmersiňiz" };
+
+    const deducted = await deductBalance(buyerDeviceId, listing.price);
+    if (!deducted) return { success: false, message: `Ýeterlik BP ýok (${listing.price} BP gerek)` };
+
+    await addBalance(listing.sellerDeviceId, listing.price);
+    await update(ref(db, `digital-listings/${listingId}`), {
+      status: "sold",
+      buyerDeviceId,
+      soldAt: new Date().toISOString(),
+    });
+
+    await addPassiveReferralCommission(listing.sellerDeviceId, 0.2);
+
+    await saveReputationEntry(listing.sellerDeviceId, {
+      type: "positive", reason: "Sanly bazar: haryt satyldy",
+      delta: 2, timestamp: new Date().toISOString(), isPublic: true,
+    });
+
+    return { success: true, message: "Üstünlikli satyn alyndy! Satyjy size haryt ýollar." };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk ýüz berdi" };
+  }
+}
+
+export function watchDigitalListings(cb: (listings: DigitalListing[]) => void): () => void {
+  const r = query(ref(db, "digital-listings"), orderByChild("createdAt"), limitToLast(50));
+  return onValue(r, snap => {
+    if (!snap.exists()) { cb([]); return; }
+    const result: DigitalListing[] = [];
+    snap.forEach(child => {
+      const val = child.val();
+      if (val.status === "active") result.push({ id: child.key || "", ...val });
+    });
+    result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    cb(result);
+  });
+}
+
+export async function cancelDigitalListing(listingId: string, sellerDeviceId: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const snap = await get(ref(db, `digital-listings/${listingId}`));
+    if (!snap.exists()) return { success: false, message: "Tapylmady" };
+    const listing = snap.val() as Omit<DigitalListing, "id">;
+    if (listing.sellerDeviceId !== sellerDeviceId) return { success: false, message: "Rugsat ýok" };
+    if (listing.status !== "active") return { success: false, message: "Diňe işjeň harytlary ýatyryp bolýar" };
+    await update(ref(db, `digital-listings/${listingId}`), { status: "cancelled" });
+    return { success: true, message: "Haryt ýatyryldy" };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk" };
   }
 }

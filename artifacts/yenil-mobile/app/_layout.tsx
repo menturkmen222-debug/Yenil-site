@@ -36,6 +36,14 @@ function RootLayoutNav() {
       <Stack.Screen name="howa" options={{ headerShown: false }} />
       <Stack.Screen name="gatnaw" options={{ headerShown: false }} />
       <Stack.Screen name="toleglar" options={{ headerShown: false }} />
+      <Stack.Screen name="pul-gazan" options={{ headerShown: false }} />
+      <Stack.Screen name="agent-topup" options={{ headerShown: false }} />
+      <Stack.Screen name="referal" options={{ headerShown: false }} />
+      <Stack.Screen name="informator" options={{ headerShown: false }} />
+      <Stack.Screen name="kripto-birja" options={{ headerShown: false }} />
+      <Stack.Screen name="nagt-cashout" options={{ headerShown: false }} />
+      <Stack.Screen name="kuryer" options={{ headerShown: false }} />
+      <Stack.Screen name="sanly-bazar-sell" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

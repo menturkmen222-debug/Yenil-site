@@ -1277,7 +1277,7 @@ export default function SozlamalarScreen() {
           <Divider colors={colors} />
           <SettingRow icon="star-outline" iconColor="#f59e0b" label="Baha ber" desc="Programmamyzy App Store-da bahalandyryň" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); Alert.alert("Baha ber", "Siziň pikiriňiz biziň üçin gymmatly!", [{ text: "Soň" }, { text: "Hawa", onPress: () => Linking.openURL("https://yenil.tm") }]); }} colors={colors} />
           <Divider colors={colors} />
-          <SettingRow icon="share-social-outline" iconColor="#6366f1" label="Dostlaryňa paýlaş" desc="Ýeňil programmany doslaryňa tanyşdyr" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Alert.alert("Paýlaş", "Baglanyşygy göçürmek isleýärsiňizmi?", [{ text: "Ýok" }, { text: "Kopirle", onPress: () => Alert.alert("Üstünlikli", "Baglanyşyk kopirlenildi!") }]); }} colors={colors} />
+          <SettingRow icon="share-social-outline" iconColor="#6366f1" label="Dostlaryňa paýlaş" desc="Referal koduňyzy paýlaşyň, her dost üçin 0.5 BP + passiv daromad gazanyň" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/referal" as Href); }} colors={colors} />
         </View>
 
         {/* ══════════ GOLDAW ══════════ */}

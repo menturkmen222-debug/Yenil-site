@@ -338,6 +338,30 @@ export default function MoreScreen() {
 
         {/* ── SECTION: Hyzmatlar ── */}
         <Text style={[s.groupTitle, { color: colors.mutedForeground }]}>HYZMATLAR</Text>
+
+        {/* Pul Gazan card — top of HYZMATLAR */}
+        <Pressable
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push("/pul-gazan" as Href); }}
+          style={({ pressed }) => [pulGazanCard.wrap, { opacity: pressed ? 0.92 : 1 }]}
+        >
+          <View style={pulGazanCard.gradient}>
+            <View style={pulGazanCard.iconWrap}>
+              <Ionicons name="cash-outline" size={24} color="#fff" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Text style={pulGazanCard.title}>Pul Gazan 💰</Text>
+                <View style={pulGazanCard.hotBadge}>
+                  <Ionicons name="flame" size={9} color="#fff" />
+                  <Text style={pulGazanCard.hotText}>HOT</Text>
+                </View>
+              </View>
+              <Text style={pulGazanCard.desc}>7 usul bilen BP gazanyň — Agent, Referal, Kuryer we beýlekiler</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
+          </View>
+        </Pressable>
+
         <View style={[s.group, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <GroupRow
             icon="location-outline"
@@ -508,6 +532,32 @@ const gr = StyleSheet.create({
   badge: { borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2 },
   badgeText: { fontSize: 10, fontWeight: "800" },
   sep: { position: "absolute", bottom: 0, right: 0, height: 0.5, backgroundColor: "transparent" },
+});
+
+const pulGazanCard = StyleSheet.create({
+  wrap: {
+    marginHorizontal: 16, marginBottom: 10, borderRadius: 18, overflow: "hidden",
+    shadowColor: "#059669", shadowOpacity: 0.22, shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 }, elevation: 5,
+  },
+  gradient: {
+    flexDirection: "row", alignItems: "center", gap: 14,
+    padding: 18,
+    backgroundColor: "#059669",
+  },
+  iconWrap: {
+    width: 48, height: 48, borderRadius: 15,
+    backgroundColor: "rgba(255,255,255,0.22)",
+    alignItems: "center", justifyContent: "center",
+  },
+  title: { color: "#fff", fontSize: 17, fontWeight: "800" },
+  desc: { color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 3, lineHeight: 17 },
+  hotBadge: {
+    flexDirection: "row", alignItems: "center", gap: 3,
+    backgroundColor: "#ef4444", borderRadius: 6,
+    paddingHorizontal: 6, paddingVertical: 2,
+  },
+  hotText: { color: "#fff", fontSize: 8, fontWeight: "800" },
 });
 
 const s = StyleSheet.create({
