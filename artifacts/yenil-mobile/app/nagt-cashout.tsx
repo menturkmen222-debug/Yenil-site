@@ -15,10 +15,9 @@ import {
   NAGT_RATE, type NagtOrder,
 } from "@/lib/firebase";
 import { formatRelativeTime } from "@/lib/reputation";
+import { REP_THRESHOLDS, MIN_CASHOUT_BP } from "@/lib/payments";
 
 const CITIES = ["Aşgabat", "Türkmenabat", "Mary", "Balkanabat", "Daşoguz", "Tejen", "Serdar", "Türkmenbaşy"];
-const MIN_BP = 10;
-const MIN_REP_AGENT = 30;
 
 const STATUS_COLORS: Record<NagtOrder["status"], string> = {
   open: "#059669",
@@ -60,13 +59,13 @@ export default function NagtCashoutScreen() {
 
   const bp = parseFloat(bpAmt) || 0;
   const tmt = Math.round(bp * NAGT_RATE * 100) / 100;
-  const canBeAgent = myRep >= MIN_REP_AGENT;
+  const canBeAgent = myRep >= REP_THRESHOLDS.MIN_AGENT;
 
   const myOrders = orders.filter(o => o.userDeviceId === deviceId);
   const otherOrders = orders.filter(o => o.userDeviceId !== deviceId && o.status === "open");
 
   async function handleCreate() {
-    if (bp < MIN_BP) { Alert.alert("Ýalňyşlyk", `Minimum ${MIN_BP} BP çykaryp bolýar`); return; }
+    if (bp < MIN_CASHOUT_BP) { Alert.alert("Ýalňyşlyk", `Minimum ${MIN_CASHOUT_BP} BP çykaryp bolýar`); return; }
     if (bp > balance) { Alert.alert("Ýalňyşlyk", `Ýeterlik BP ýok (${balance.toFixed(2)} BP)`); return; }
     setSubmitting(true);
     const result = await createNagtOrder(deviceId, bp, city);
@@ -237,7 +236,7 @@ export default function NagtCashoutScreen() {
           <View style={[s.agentGate, { backgroundColor: "#0284c7" + "10", borderColor: "#0284c7" + "25" }]}>
             <Ionicons name="shield-outline" size={18} color="#0284c7" />
             <Text style={[s.agentGateText, { color: colors.foreground }]}>
-              Agent bolmak üçin abraý derejeniz <Text style={{ color: "#0284c7", fontWeight: "800" }}>{MIN_REP_AGENT}+</Text> bolmaly. Häzir: {myRep}
+              Agent bolmak üçin abraý derejeniz <Text style={{ color: "#0284c7", fontWeight: "800" }}>{REP_THRESHOLDS.MIN_AGENT}+</Text> bolmaly. Häzir: {myRep}
             </Text>
           </View>
         )}
@@ -294,7 +293,7 @@ export default function NagtCashoutScreen() {
 
           <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
             <View style={{ gap: 6 }}>
-              <Text style={[s.inputLabel, { color: colors.foreground }]}>BP Mukdary (min {MIN_BP} BP)</Text>
+              <Text style={[s.inputLabel, { color: colors.foreground }]}>BP Mukdary (min {MIN_CASHOUT_BP} BP)</Text>
               <TextInput
                 style={[s.input, { backgroundColor: colors.input, borderColor: colors.border, color: colors.foreground }]}
                 value={bpAmt}
@@ -305,7 +304,7 @@ export default function NagtCashoutScreen() {
               />
             </View>
 
-            {bp >= MIN_BP && (
+            {bp >= MIN_CASHOUT_BP && (
               <View style={[s.calcBox, { backgroundColor: "#0284c7" + "08", borderColor: "#0284c7" + "20" }]}>
                 <View style={s.calcRow}>
                   <Text style={[s.calcLabel, { color: colors.mutedForeground }]}>Beriljek BP:</Text>
@@ -345,8 +344,8 @@ export default function NagtCashoutScreen() {
 
             <Pressable
               onPress={handleCreate}
-              disabled={submitting || bp < MIN_BP || bp > balance}
-              style={[s.btnPrimary, { backgroundColor: "#0284c7", opacity: (bp < MIN_BP || bp > balance) ? 0.5 : 1 }]}
+              disabled={submitting || bp < MIN_CASHOUT_BP || bp > balance}
+              style={[s.btnPrimary, { backgroundColor: "#0284c7", opacity: (bp < MIN_CASHOUT_BP || bp > balance) ? 0.5 : 1 }]}
             >
               {submitting
                 ? <ActivityIndicator size="small" color="#fff" />

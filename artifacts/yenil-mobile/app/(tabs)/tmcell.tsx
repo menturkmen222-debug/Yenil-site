@@ -10,6 +10,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { saveOrder, transferBP, getBPTransferHistory, createTMCellCashout, deductBalanceAtomic, type BPTransfer } from "@/lib/firebase";
+import { COMMISSION_RATES } from "@/lib/payments";
 import BPCheckoutModal from "@/components/BPCheckoutModal";
 import { addToHistory } from "@/lib/orderHistory";
 
@@ -573,8 +574,8 @@ const USDT_WALLETS: Record<"trc20"|"bep20"|"ton", string> = {
   ton:   "UQBvAzI7nB5RFxeJ7c9YpqT8L5m2kNpTgQP4zX6wKjV1hW",
 };
 
-const BP_PER_USDT  = 34.5;
-const USDT_PER_BP  = 0.028;
+const BP_PER_USDT  = COMMISSION_RATES.crypto_bp_per_usdt;
+const USDT_PER_BP  = COMMISSION_RATES.crypto_usdt_per_bp;
 
 const P2P_ORDERS_DATA = [
   { id:"po1", pair:"BP/USDT",  type:"sell" as const, price:34.5, min:100,  max:2000, seller:"YenilOfficial", premium:true,  pay:"Ýeňil BP"  },

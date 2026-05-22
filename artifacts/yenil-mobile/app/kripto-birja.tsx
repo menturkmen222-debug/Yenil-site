@@ -15,8 +15,7 @@ import {
   type CryptoAd, type CryptoAdType,
 } from "@/lib/firebase";
 import { getLevel, formatRelativeTime } from "@/lib/reputation";
-
-const MIN_REP_TO_POST = 45;
+import { REP_THRESHOLDS } from "@/lib/payments";
 
 export default function KriptoBirjaScreen() {
   const colors = useColors();
@@ -45,7 +44,7 @@ export default function KriptoBirjaScreen() {
   }, [deviceId]);
 
   const filtered = tab === "all" ? ads : ads.filter(a => a.type === tab);
-  const canPost = myRep >= MIN_REP_TO_POST;
+  const canPost = myRep >= REP_THRESHOLDS.MIN_P2P_POST;
 
   async function handleCreate() {
     const usdt = parseFloat(usdtAmt);
@@ -207,7 +206,7 @@ export default function KriptoBirjaScreen() {
             <Text style={{ fontSize: 28, marginBottom: 4 }}>🔐</Text>
             <Text style={[s.repGateTitle, { color: colors.foreground }]}>E'lon ýerleşdirmek üçin</Text>
             <Text style={[s.repGateDesc, { color: colors.mutedForeground }]}>
-              Abraý derejeniz <Text style={{ color: "#7c3aed", fontWeight: "800" }}>{MIN_REP_TO_POST}+</Text> bolmaly. Häzir: <Text style={{ color: "#7c3aed", fontWeight: "800" }}>{myRep}</Text>
+              Abraý derejeniz <Text style={{ color: "#7c3aed", fontWeight: "800" }}>{REP_THRESHOLDS.MIN_P2P_POST}+</Text> bolmaly. Häzir: <Text style={{ color: "#7c3aed", fontWeight: "800" }}>{myRep}</Text>
             </Text>
           </View>
         )}

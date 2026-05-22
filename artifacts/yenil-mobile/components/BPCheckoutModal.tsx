@@ -7,6 +7,12 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { addBalance, deductBalanceAtomic, saveOrder } from "@/lib/firebase";
+import {
+  COMMISSION_RATES,
+  calcMissingBP,
+  calcTopUpTotal,
+  calcCommissionAmount,
+} from "@/lib/payments";
 
 export interface BPCheckoutModalProps {
   visible: boolean;
@@ -18,9 +24,6 @@ export interface BPCheckoutModalProps {
   onPaymentComplete: () => void;
 }
 
-const TMCELL_COMMISSION = 0.30;
-const CARD_COMMISSION = 0.15;
-
 export default function BPCheckoutModal({
   visible, onClose, serviceName, serviceAmount, currentBalance, deviceId, onPaymentComplete,
 }: BPCheckoutModalProps) {
@@ -29,9 +32,9 @@ export default function BPCheckoutModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const missingBP = Math.max(0, parseFloat((serviceAmount - currentBalance).toFixed(2)));
-  const cardTotal = parseFloat((missingBP * (1 + CARD_COMMISSION)).toFixed(2));
-  const tmcellTotal = parseFloat((missingBP * (1 + TMCELL_COMMISSION)).toFixed(2));
+  const missingBP   = calcMissingBP(serviceAmount, currentBalance);
+  const cardTotal   = calcTopUpTotal(missingBP, "bank");
+  const tmcellTotal = calcTopUpTotal(missingBP, "tmcell");
 
   function handleClose() {
     if (loading) return;
@@ -46,7 +49,9 @@ export default function BPCheckoutModal({
     setError("");
     try {
       await addBalance(deviceId, missingBP);
-      const commissionRate = selected === "card" ? CARD_COMMISSION : TMCELL_COMMISSION;
+      const commissionRate = selected === "card"
+        ? COMMISSION_RATES.bank_topup
+        : COMMISSION_RATES.tmcell_topup;
       const tmtPaid = selected === "card" ? cardTotal : tmcellTotal;
       await saveOrder("inline-topup-orders", {
         deviceId,
@@ -122,9 +127,9 @@ export default function BPCheckoutModal({
               iconBg: "#6366f115",
               iconColor: "#6366f1",
               label: "Bank kartasy",
-              sublabel: `+15% komissiya`,
+              sublabel: `+${(COMMISSION_RATES.bank_topup * 100).toFixed(0)}% komissiýa`,
               total: cardTotal,
-              badge: "15%",
+              badge: `${(COMMISSION_RATES.bank_topup * 100).toFixed(0)}%`,
             },
             {
               id: "tmcell" as const,
@@ -132,9 +137,9 @@ export default function BPCheckoutModal({
               iconBg: "#059669" + "15",
               iconColor: "#059669",
               label: "TMCell balans",
-              sublabel: "+30% komissiya",
+              sublabel: `+${(COMMISSION_RATES.tmcell_topup * 100).toFixed(0)}% komissiýa`,
               total: tmcellTotal,
-              badge: "30%",
+              badge: `${(COMMISSION_RATES.tmcell_topup * 100).toFixed(0)}%`,
             },
           ] as const).map((m) => {
             const isSelected = selected === m.id;

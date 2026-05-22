@@ -3,6 +3,7 @@ import {
   getDatabase, ref, set, get, push, onValue, update, remove,
   query, orderByChild, limitToLast, equalTo, runTransaction,
 } from "firebase/database";
+import { COMMISSION_RATES, MIN_CASHOUT_BP } from "@/lib/payments";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCc3EdDkk_Bhvw8TphLj60aJSXtyWwWpZw",
@@ -1025,7 +1026,7 @@ export async function createInlineTopUpOrder(
   serviceName: string
 ): Promise<{ success: boolean }> {
   try {
-    const commissionRate = method === "card" ? 0.15 : 0.30;
+    const commissionRate = method === "card" ? COMMISSION_RATES.bank_topup : COMMISSION_RATES.tmcell_topup;
     const tmtAmount = parseFloat((missingBP * (1 + commissionRate)).toFixed(2));
     await addBalance(deviceId, missingBP);
     await saveOrder("inline-topup-orders", {
@@ -1046,10 +1047,10 @@ export async function createTMCellCashout(
   phone: string
 ): Promise<{ success: boolean; message: string; commission?: number; receiveAmount?: number }> {
   try {
-    if (bpAmount < 10) return { success: false, message: "Minimum 10 BP çykaryp bolýar" };
+    if (bpAmount < MIN_CASHOUT_BP) return { success: false, message: `Minimum ${MIN_CASHOUT_BP} BP çykaryp bolýar` };
     const result = await deductBalanceAtomic(deviceId, bpAmount);
     if (!result.success) return { success: false, message: `Ýeterlik BP ýok (${bpAmount} BP gerek)` };
-    const commission = parseFloat((bpAmount * 0.005).toFixed(2));
+    const commission = parseFloat((bpAmount * COMMISSION_RATES.tmcell_cashout).toFixed(2));
     const receiveAmount = parseFloat((bpAmount - commission).toFixed(2));
     await saveOrder("tmcell-cashout-orders", {
       deviceId, bpAmount, commission, receiveAmount, phone, status: "pending",

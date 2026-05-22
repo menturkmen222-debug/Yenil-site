@@ -10,10 +10,9 @@ import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 
-const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AEDA785F26CB/9A8CACA4-5889-4D47-903E-BF12F059E175`;
+import { COMMISSION_RATES, calcCryptoDepositBP, calcCryptoWithdrawUSDT, getCryptoDepositRatePct } from "@/lib/payments";
 
-const BP_PER_USDT = 34.5;
-const USDT_PER_BP = 0.028;
+const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AEDA785F26CB/9A8CACA4-5889-4D47-903E-BF12F059E175`;
 
 type Network = "trc20" | "bep20" | "ton";
 type TabId = "deposit" | "withdraw" | "p2p";
@@ -82,11 +81,11 @@ export default function PayScreen() {
 
   const wdNet = NETWORKS.find((n) => n.id === wdNetwork)!;
   const wdBp = parseFloat(wdAmountBP) || 0;
-  const wdUsdt = wdBp * USDT_PER_BP;
+  const wdUsdt = wdBp * COMMISSION_RATES.crypto_usdt_per_bp;
   const wdReceive = Math.max(0, wdUsdt - wdNet.fee);
 
   const depUsdt = parseFloat(depAmount) || 0;
-  const depBp = depUsdt * BP_PER_USDT;
+  const depBp = calcCryptoDepositBP(depUsdt);
 
   function copyAddress(addr: string) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -202,7 +201,7 @@ export default function PayScreen() {
           <Ionicons name="trending-up-outline" size={20} color="#059669" />
           <View style={{ flex: 1 }}>
             <Text style={[s.rateBannerTitle, { color: colors.foreground }]}>
-              1 USDT = <Text style={{ color: "#059669" }}>{BP_PER_USDT} BP</Text>
+              1 USDT = <Text style={{ color: "#059669" }}>{COMMISSION_RATES.crypto_bp_per_usdt} BP</Text>
             </Text>
             <Text style={[s.rateBannerSub, { color: colors.mutedForeground }]}>Diňe USDT Stablecoin kabul edilýär</Text>
           </View>
@@ -335,7 +334,7 @@ export default function PayScreen() {
           </View>
           <View style={{ flex: 1 }} />
           <View style={[s.rateTag, { backgroundColor: colors.primary + "18" }]}>
-            <Text style={[s.rateTagText, { color: colors.primary }]}>1 BP = {USDT_PER_BP} USDT</Text>
+            <Text style={[s.rateTagText, { color: colors.primary }]}>1 BP = {COMMISSION_RATES.crypto_usdt_per_bp} USDT</Text>
           </View>
         </View>
 
@@ -591,8 +590,8 @@ export default function PayScreen() {
         {/* Stats strip */}
         <View style={s.statsStrip}>
           {[
-            { label: "BP kurs", value: `1 USDT = ${BP_PER_USDT} BP` },
-            { label: "Çykaryş", value: `1 BP = ${USDT_PER_BP} USDT` },
+            { label: "BP kurs", value: `1 USDT = ${COMMISSION_RATES.crypto_bp_per_usdt} BP` },
+            { label: "Çykaryş", value: `1 BP = ${COMMISSION_RATES.crypto_usdt_per_bp} USDT` },
             { label: "Min komissiya", value: "0.05 USDT (TON)" },
           ].map((stat, i) => (
             <View key={i} style={[s.statItem, i < 2 && { borderRightWidth: 1, borderRightColor: "rgba(255,255,255,0.2)" }]}>
