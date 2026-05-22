@@ -1,0 +1,45 @@
+Bizning Mobil ilovamizga (WEB SAYT EMAS) yani tizim, loyihamizga fundamental iqtisodiy va o'quv ekosistemasini to'liq integratsiya qil va hech qayerda chala kod yoki "// TODO" qoldirmasdan bu shart ishni to'liq bajar har bir bolimni birma bir tegshirib bajar eng yaxshi eng yukori sifatda chroyli va zamonaviy qilib.
+
+Quyidagi tizimlarni va ularning o'zaro bog'liqlik mantig'ini (logic) to'liq shakllantiring:
+
+2. "E-Bilim" Intellektual Bo'limi to'liq qayta ishlansin
+
+- **UI/UX Dizayn:** Bosh sahifada Apple Books yoki Udemy uslubida eng yaxshi eng yukori sifatda chroyli va zamonaviy qilib dizayn qilinishi shart, toza kategoriya kartochkalari yaratilsin:
+  1. *Ýeňil Akademiya:* Ilovadan foydalanish, P2P-da pul ishlash bo'yicha vizual qo'llanmalar va boshqalar.
+  2. *Texno-Hacker & Smart Hardware:* Wi-Fi parolini o'zgartirish, DIY antennalar, eski kompyuterlarni optimizatsiya qilish va boshqa darslari.
+  3. *Digital Kasblar:* Treyding, YouTube va TikTok-da evergreen kontent yaratish v boshqa, algoritmlar sirlari kurslari.
+  4. *Zukko Ota-ona:* Bolalar neyrobiologiyasi va raqamli gigiyena haqida qisqa ilmiy maqolalar va boshqalar
+5. "AI Savodxonlik" (Emeliňň Aň) — Kelajak Savodi
+​2028-yilda oddiy Google qidiruvidan ko'ra AI Agentlar bilan ishlash muhimroq bo'ladi. Odamlarga buni o'rgatish kerak.
+​Prompt Engineering asoslari: AI-ga qanday qilib to'g'ri topshiriq berish kerak? (Matn yozish, rasm chizdirish, kod yozdirish).
+​AI yordamida pul ishlash: Neyrotarmoqlar orqali dizayn tayyorlash, SMM matnlari va YouTube ssenariylarini yozish bo'yicha amaliy, qisqa qo'llanmalar.
+6. Global Freelance va Masofaviy Ish (Remote Work)
+​Biznesingda P2P Kripto (USDT) va P2P hakamlik tizimini rejalashtirding. Odamlarda shu USDT-ni ishlash motivatsiyasi bo'lishi kerak.
+​Chet el bozori: Uydan turib, xalqaro platformalarda (Fiverr, Upwork yoki muqobil yo'llar bilan) qanday qilib buyurtma olish va xizmat ko'rsatish sirlari.
+​Portfoliýo yaratish: IT, dizayn yoki tarjimonlik sohasida boshlang'ich mutaxassislar uchun o'z ishlarini to'g'ri taqdim etish qo'llanmasi.
+7. Kripto-Xavfsizlik va Anti-Skam (Moliyaviy Savodxonlik)
+​Ilovang ichida moliyaviy aylanma ko'p bo'ladi. Mijlarning xavfsizligi — sening xavfsizliging.
+​Firibgarlardan himoya: Internetda, Telegram kanallarda yoki P2P savdolarda "skamerlar" (firibgarlar) tuzog'iga tushmaslik qoidalari.
+​Kripto hamyonlar bilan ishlash: Shaxsiy kripto hamyonlarni qanday xavfsiz saqlash, parollarni (seed-phrase) yo'qotmaslik texnikasi.
+
+.
+- **Gamifikasiya va Kontent Yuklamasi:**
+  * Ma'lumotlar juda qisqa, 1 daqiqalik "Kartochkalar" (cards) formatida bo'lsin. Videolar YouTube "Unlisted" iFrame orqali, kitoblar esa Lazy Load orqali serverdan yuklansin (App hajmi kattalashib ketmasligi uchun).
+  * *Learn & Earn (O'qi va Ishla):* Bepul darslarni o'qib, yakuniy kichik testdan (Quiz) o'tgan foydalanuvchiga tizim avtomatik 0.05 dan 0.3 BP gacha sovg'a qilsin.
+  * *Premium Kurslar:* Qulf (Lock) holatida bo'lib, faqat ma'lum miqdordagi BP yoki Abray/Ynam evaziga ochilsin.
+
+ 3. Ynam/Abraý (Reputation) Konstitutsiyasi
+- **Qat'iy qoida:** `reputationPoints` ballarini hech qanday usul bilan pulga yoki BP-ga sotib olib bo'lmaydi (Hardcoded block).
+- **Ball yig'ish mantiqi:** Abraý faqat tizim ichida muvaffaqiyatli bajarilgan real ishlar (bajarilgan taksi buyurtmasi, xatosiz yakunlangan P2P bitimi, tasdiqlangan "Informator" xabari va boshqalar) orqali avtomatik oshadi. Yuqori Abraý egalarigagina P2P Arbitrajda o'z e'lonlarini joylashtirish huquqi beriladi.
+
+ 4. P2P Earn, Referal va Informator Integratsiyasi
+- **SMS API Anti-Spoofing:** P2P agentlari uchun keladigan bank SMS-larini tekshirish algoritmini yozing. Algoritm faqat rasmiy bank qisqa raqamidan kelgan SMS-ni filtrlasin. Transaksiya ID (Hash), Summa va Vaqt DB-dagi so'rov bilan 100% mos kelsagina balans avtomat tasdiqlansin. Soxta SMS yuborgan foydalanuvchining Abraý balli nolga tushirilsin va bloklansin.
+- **Ýeňil Referal:** Taklif qilingan har bir yangi foydalanuvchi tizimda bilet olganda yoki taksi yurganda, uni taklif qilgan odamga (odam chiqargan puliga qarab bir qismining) avtomatik 0.1 BP yoki 0.5 BP (chiqargan puliga qarab) doimiy passiv daromad o'tib tursin (Ilova ichidagi barcha ichki amallar va o'tkazmalar esa BP 0% komissiyada ishlasin).
+
+ Texnik Talablar:
+- State boshqaruvini (Context/Redux) shunday quringki, yuqoridagi barcha tizimlar bir xil `balanceBP` va `reputationPoints` maydonlariga tayansin.
+- To'lov ekranlarida dinamik chek (Checkout Reciept) daryo kabi real vaqtda komissiyalarni aniq hisoblab ko'rsatsin. Hammasi xatosiz va ishlab chiqarishga (production) tayyor bo'lsin. 
+
+Barcha to'lov tranzaksiyalarida qat'iy blokirovka (Pessimistic Lock) funksiyasi ishlatilsin. Mijoz to'lov tugmasini bir marta bosgandan so'ng, tizim API orqali javob qaytarguncha UI tugmasi to'liq 'Disabled' (O'chirilgan) va 'Loading' holatiga o'tsin, pul takroran yechilib ketishiga mutlaqo yo'l qo'yilmasin.
+
+Yukoridagilarni yaxshilab chungan bolsang har bir qilgan qadamingni yaxshilab aqilliy oylab bos va qerakli narsalarni hammasini qil eng yaxshi eng yukori sifatda chroyli va zamonaviy qilib bajar ios uslubida 
