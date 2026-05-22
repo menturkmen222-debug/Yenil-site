@@ -586,7 +586,7 @@ const P2P_ORDERS_DATA = [
 ];
 
 function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
-  const { balance, deduct } = useBonusPul();
+  const { balance, deduct, deviceId } = useBonusPul();
   type CTab = "deposit" | "withdraw" | "p2p";
   const [ctab, setCtab] = useState<CTab>("deposit");
 
@@ -605,6 +605,7 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
   const [wdLoading, setWdLoading] = useState(false);
   const [wdDone, setWdDone] = useState(false);
   const [wdErr, setWdErr] = useState("");
+  const [wdShowCheckout, setWdShowCheckout] = useState(false);
 
   // p2p
   const [p2pPair, setP2pPair] = useState<"all"|"BP/USDT"|"TMT/USDT">("all");
@@ -638,7 +639,7 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
 
   async function submitWithdraw() {
     if (wdBPNum <= 0) { setWdErr("BP mukdaryny giriziň!"); return; }
-    if (balance < wdBPNum) { setWdErr(`BP ýetmezçilik. Balans: ${balance.toFixed(2)} BP`); return; }
+    if (balance < wdBPNum) { setWdShowCheckout(true); return; }
     if (wdReceive <= 0) { setWdErr("Mukdar komissiyadan az. Köpräk giriziň."); return; }
     if (!wdAddr.trim()) { setWdErr("Kripto manzilinizi giriziň!"); return; }
     setWdLoading(true); setWdErr("");
@@ -748,8 +749,24 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
       {/* ════════════ DEPOSIT TAB ════════════ */}
       {ctab === "deposit" && (
         <>
+          {/* Rate summary card */}
+          <View style={[cs.depSummaryCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={cs.depSummaryRow}>
+              <View style={[cs.depSummaryIcon, { backgroundColor: "#05966915" }]}>
+                <Ionicons name="arrow-down-circle" size={22} color="#059669" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[cs.depSummaryLabel, { color: colors.mutedForeground }]}>Depozit kursy</Text>
+                <Text style={[cs.depSummaryVal, { color: colors.foreground }]}>1 USDT = <Text style={{ color: colors.primary, fontWeight: "800" }}>{BP_PER_USDT} BP</Text></Text>
+              </View>
+              <View style={[cs.depRateBadge, { backgroundColor: "#05966912", borderColor: "#05966930" }]}>
+                <Text style={{ color: "#059669", fontSize: 11, fontWeight: "700" }}>Anyk kurs</Text>
+              </View>
+            </View>
+          </View>
+
           {/* Network selector */}
-          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginBottom: 8 }]}>Tarmogy saýlaň</Text>
+          <Text style={[cs.depSectionLabel, { color: colors.mutedForeground }]}>Tarmogy saýlaň</Text>
           <View style={cs.netRow}>
             {USDT_NETWORKS.map(n => (
               <Pressable key={n.id} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setDepNet(n.id); }}
@@ -760,60 +777,83 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
               >
                 <View style={[cs.netDot, { backgroundColor: n.color }]} />
                 <Text style={[cs.netName, { color: depNet === n.id ? n.color : colors.foreground }]}>{n.name}</Text>
-                <Text style={[cs.netFee, { color: colors.mutedForeground }]}>{n.fee} USDT</Text>
-                <Text style={[cs.netTime, { color: colors.mutedForeground }]}>{n.time}</Text>
+                <Text style={[cs.netFee, { color: colors.mutedForeground }]}>{n.fee} kom.</Text>
+                <Text style={[cs.netTime, { color: depNet === n.id ? n.color + "bb" : colors.mutedForeground }]}>{n.time}</Text>
               </Pressable>
             ))}
           </View>
 
-          {/* Amount */}
-          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 6 }]}>Iberjek USDT mukdaryňyz</Text>
-          <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[cs.inputPfx, { color: colors.mutedForeground }]}>$</Text>
+          {/* Amount input */}
+          <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Iberjek USDT mukdaryňyz</Text>
+          <View style={[cs.depInputWrap, { backgroundColor: colors.card, borderColor: depUsdtNum > 0 ? colors.primary : colors.border }]}>
+            <View style={[cs.depInputIcon, { backgroundColor: "#2563eb15" }]}>
+              <Text style={{ color: "#2563eb", fontSize: 13, fontWeight: "800" }}>$</Text>
+            </View>
             <TextInput value={depUsdt} onChangeText={setDepUsdt} placeholder="0.00"
               placeholderTextColor={colors.mutedForeground} keyboardType="decimal-pad"
-              style={[cs.inputField, { color: colors.foreground }]} />
-            <Text style={[cs.inputSfx, { color: colors.mutedForeground }]}>USDT</Text>
+              style={[cs.depInputField, { color: colors.foreground }]} />
+            <View style={[cs.depInputSuffix, { backgroundColor: colors.muted }]}>
+              <Text style={{ color: colors.mutedForeground, fontSize: 12, fontWeight: "700" }}>USDT</Text>
+            </View>
           </View>
+
+          {/* Conversion preview */}
           {depUsdtNum > 0 && (
-            <View style={[cs.calcBadge, { backgroundColor: colors.primary + "10", borderColor: colors.primary }]}>
-              <Ionicons name="sparkles-outline" size={14} color={colors.primary} />
-              <Text style={[cs.calcText, { color: colors.primary }]}>
-                {depUsdtNum} USDT → <Text style={{ fontWeight: "800" }}>{depBPCalc.toFixed(1)} BP</Text> alarsyňyz
-              </Text>
+            <View style={[cs.depConvCard, { backgroundColor: colors.primary + "0e", borderColor: colors.primary + "30" }]}>
+              <View style={cs.depConvRow}>
+                <View style={cs.depConvItem}>
+                  <Text style={[cs.depConvLbl, { color: colors.mutedForeground }]}>Iberýärsiňiz</Text>
+                  <Text style={[cs.depConvVal, { color: colors.foreground }]}>{depUsdtNum} USDT</Text>
+                </View>
+                <View style={[cs.depConvArrow, { backgroundColor: colors.primary + "20" }]}>
+                  <Ionicons name="arrow-forward" size={14} color={colors.primary} />
+                </View>
+                <View style={[cs.depConvItem, { alignItems: "flex-end" }]}>
+                  <Text style={[cs.depConvLbl, { color: colors.mutedForeground }]}>Alarsyňyz</Text>
+                  <Text style={[cs.depConvVal, { color: colors.primary, fontWeight: "800" }]}>{depBPCalc.toFixed(1)} BP</Text>
+                </View>
+              </View>
             </View>
           )}
 
           {/* Wallet address */}
-          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 6 }]}>
-            Ýeňil {USDT_NETWORKS.find(n=>n.id===depNet)?.name} USDT Manzili
+          <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>
+            Ýeňil {USDT_NETWORKS.find(n=>n.id===depNet)?.name} Manzili
           </Text>
-          <Pressable onPress={() => Alert.alert("Manzil", USDT_WALLETS[depNet], [{ text: "Ýap" }])}
-            style={[cs.addrCard, { backgroundColor: colors.card, borderColor: USDT_NETWORKS.find(n=>n.id===depNet)!.color }]}
+          <Pressable
+            onPress={() => Alert.alert("Manzil", USDT_WALLETS[depNet], [{ text: "Ýap" }])}
+            style={[cs.depAddrCard, { backgroundColor: colors.card, borderColor: USDT_NETWORKS.find(n=>n.id===depNet)!.color + "50" }]}
           >
-            <View style={{ flex: 1 }}>
-              <Text style={[cs.addrLabel, { color: colors.mutedForeground }]}>
-                {USDT_NETWORKS.find(n=>n.id===depNet)?.full} · USDT
-              </Text>
-              <Text style={[cs.addrText, { color: colors.foreground }]} selectable numberOfLines={2}>
-                {USDT_WALLETS[depNet]}
+            <View style={[cs.depAddrNet, { backgroundColor: USDT_NETWORKS.find(n=>n.id===depNet)!.color + "18" }]}>
+              <View style={[cs.netDot, { backgroundColor: USDT_NETWORKS.find(n=>n.id===depNet)!.color, width: 10, height: 10, borderRadius: 5 }]} />
+              <Text style={[{ fontSize: 10, fontWeight: "800", color: USDT_NETWORKS.find(n=>n.id===depNet)!.color }]}>
+                {USDT_NETWORKS.find(n=>n.id===depNet)?.name}
               </Text>
             </View>
-            <View style={[cs.copyBtn, { backgroundColor: USDT_NETWORKS.find(n=>n.id===depNet)!.color }]}>
-              <Ionicons name="copy-outline" size={15} color="#fff" />
+            <Text style={[cs.addrText, { color: colors.foreground, marginTop: 6, fontSize: 12, lineHeight: 18 }]} selectable numberOfLines={2}>
+              {USDT_WALLETS[depNet]}
+            </Text>
+            <View style={[cs.depCopyRow, { borderTopColor: colors.border }]}>
+              <Ionicons name="copy-outline" size={13} color={USDT_NETWORKS.find(n=>n.id===depNet)!.color} />
+              <Text style={[{ fontSize: 11, fontWeight: "700", color: USDT_NETWORKS.find(n=>n.id===depNet)!.color }]}>Göçür</Text>
             </View>
           </Pressable>
-          <Text style={[cs.noteText, { color: colors.mutedForeground }]}>
-            ⚠️ Diňe {USDT_NETWORKS.find(n=>n.id===depNet)?.name} USDT iberiň. Başga token ýitgä sebäp bolar.
-          </Text>
+          <View style={[cs.depWarningRow, { backgroundColor: "#fef9c3", borderColor: "#fde047" }]}>
+            <Ionicons name="warning-outline" size={14} color="#ca8a04" />
+            <Text style={[cs.depWarningText, { color: "#92400e" }]}>
+              Diňe {USDT_NETWORKS.find(n=>n.id===depNet)?.name} USDT iberiň. Başga token ýitgä sebäp bolar.
+            </Text>
+          </View>
 
           {/* TX Hash */}
-          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 6 }]}>Tranzaksiýa haşy (TX ID)</Text>
-          <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Ionicons name="receipt-outline" size={15} color={colors.mutedForeground} />
+          <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Tranzaksiýa haşy (TX ID)</Text>
+          <View style={[cs.depInputWrap, { backgroundColor: colors.card, borderColor: depTx.length > 10 ? "#059669" : colors.border }]}>
+            <View style={[cs.depInputIcon, { backgroundColor: "#05966915" }]}>
+              <Ionicons name="receipt-outline" size={15} color="#059669" />
+            </View>
             <TextInput value={depTx} onChangeText={setDepTx} placeholder="0x... ýa-da TX ID"
               placeholderTextColor={colors.mutedForeground} autoCapitalize="none"
-              style={[cs.inputField, { color: colors.foreground }]} />
+              style={[cs.depInputField, { color: colors.foreground }]} />
           </View>
 
           {depErr ? (
@@ -823,28 +863,37 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
             </View>
           ) : null}
 
-          {depLoading ? <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} /> : (
+          {depLoading ? (
+            <View style={[cs.depLoadingWrap]}>
+              <ActivityIndicator color={colors.primary} />
+              <Text style={{ color: colors.mutedForeground, fontSize: 12, marginTop: 6 }}>Tassyklanýar...</Text>
+            </View>
+          ) : (
             <Pressable onPress={submitDeposit}
-              style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#059669", opacity: pressed ? 0.85 : 1, marginTop: 16 }]}>
-              <Ionicons name="cloud-upload-outline" size={17} color="#fff" />
+              style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#059669", opacity: pressed ? 0.85 : 1, marginTop: 18 }]}>
+              <Ionicons name="cloud-upload-outline" size={18} color="#fff" />
               <Text style={s.primaryBtnText}>Tassyklamak we Ibermek</Text>
             </Pressable>
           )}
 
-          {/* Steps guide */}
-          <View style={[cs.stepsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[cs.stepsTitle, { color: colors.foreground }]}>Nädip depozit etmeli?</Text>
+          {/* How-to guide */}
+          <View style={[cs.stepsCard, { backgroundColor: colors.card, borderColor: colors.border, marginTop: 20 }]}>
+            <View style={cs.stepsTitleRow}>
+              <Ionicons name="information-circle-outline" size={16} color={colors.primary} />
+              <Text style={[cs.stepsTitle, { color: colors.foreground }]}>Nädip depozit etmeli?</Text>
+            </View>
             {[
-              "Tarmogy saýlaň (TON iň arzan: 0.05 USDT)",
-              "Ýeňil manziline USDT iberiň",
-              "TX haşyny giriziň we tassyklaň",
-              "BP balansynyza awtomatik geçer",
+              { icon: "layers-outline" as const, text: "Tarmogy saýlaň (TON iň arzan: 0.05 USDT)" },
+              { icon: "send-outline" as const, text: "Ýeňil manziline USDT iberiň" },
+              { icon: "receipt-outline" as const, text: "TX haşyny giriziň we tassyklaň" },
+              { icon: "checkmark-circle-outline" as const, text: "BP balansynyza awtomatik geçer" },
             ].map((step, i) => (
               <View key={i} style={cs.stepRow}>
                 <View style={[cs.stepNum, { backgroundColor: colors.primary }]}>
                   <Text style={cs.stepNumText}>{i + 1}</Text>
                 </View>
-                <Text style={[cs.stepText, { color: colors.foreground }]}>{step}</Text>
+                <Ionicons name={step.icon} size={13} color={colors.mutedForeground} style={{ marginRight: 2 }} />
+                <Text style={[cs.stepText, { color: colors.foreground, flex: 1 }]}>{step.text}</Text>
               </View>
             ))}
           </View>
@@ -854,20 +903,24 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
       {/* ════════════ WITHDRAW TAB ════════════ */}
       {ctab === "withdraw" && (
         <>
-          {/* Balance */}
-          <View style={[cs.balCard, { backgroundColor: colors.primary + "12", borderColor: colors.primary }]}>
-            <Ionicons name="wallet-outline" size={20} color={colors.primary} />
+          {/* Balance hero card */}
+          <View style={[cs.wdBalHero, { backgroundColor: colors.primary, shadowColor: colors.primary }]}>
             <View style={{ flex: 1 }}>
-              <Text style={[cs.balLabel, { color: colors.mutedForeground }]}>Häzirki balansiňiz</Text>
-              <Text style={[cs.balVal, { color: colors.primary }]}>{balance.toFixed(2)} BP</Text>
+              <Text style={cs.wdBalHeroLabel}>Balansiňiz</Text>
+              <Text style={cs.wdBalHeroVal}>{balance.toFixed(2)} <Text style={{ fontSize: 16, fontWeight: "600", opacity: 0.85 }}>BP</Text></Text>
             </View>
-            <View style={[cs.rateTag, { backgroundColor: colors.primary + "18" }]}>
-              <Text style={[cs.rateTagText, { color: colors.primary }]}>1 BP = {USDT_PER_BP} $</Text>
+            <View style={cs.wdBalHeroRight}>
+              <View style={cs.wdRatePill}>
+                <Text style={cs.wdRatePillText}>1 BP = {USDT_PER_BP} USDT</Text>
+              </View>
+              <View style={cs.wdBalIconWrap}>
+                <Ionicons name="wallet" size={24} color="rgba(255,255,255,0.9)" />
+              </View>
             </View>
           </View>
 
-          {/* Network */}
-          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 8 }]}>Çykaryş tarmagyňyz</Text>
+          {/* Network selector */}
+          <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 4 }]}>Çykaryş tarmagyňyz</Text>
           <View style={cs.netRow}>
             {USDT_NETWORKS.map(n => (
               <Pressable key={n.id} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setWdNet(n.id); }}
@@ -879,59 +932,84 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
                 <View style={[cs.netDot, { backgroundColor: n.color }]} />
                 <Text style={[cs.netName, { color: wdNet === n.id ? n.color : colors.foreground }]}>{n.name}</Text>
                 <Text style={[cs.netFee, { color: colors.mutedForeground }]}>{n.fee} USDT</Text>
-                <Text style={[cs.netTime, { color: colors.mutedForeground }]}>{n.time}</Text>
+                <Text style={[cs.netTime, { color: wdNet === n.id ? n.color + "bb" : colors.mutedForeground }]}>{n.time}</Text>
               </Pressable>
             ))}
           </View>
 
-          {/* BP amount */}
-          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 6 }]}>Näçe BP çykarmak isleýärsiňiz?</Text>
-          <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Ionicons name="logo-bitcoin" size={15} color={colors.mutedForeground} />
+          {/* BP amount input */}
+          <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Näçe BP çykarmak isleýärsiňiz?</Text>
+          <View style={[cs.depInputWrap, { backgroundColor: colors.card, borderColor: wdBPNum > 0 ? colors.primary : colors.border }]}>
+            <View style={[cs.depInputIcon, { backgroundColor: colors.primary + "15" }]}>
+              <Ionicons name="logo-bitcoin" size={15} color={colors.primary} />
+            </View>
             <TextInput value={wdBP} onChangeText={setWdBP} placeholder="0"
               placeholderTextColor={colors.mutedForeground} keyboardType="decimal-pad"
-              style={[cs.inputField, { color: colors.foreground }]} />
-            <Text style={[cs.inputSfx, { color: colors.mutedForeground }]}>BP</Text>
+              style={[cs.depInputField, { color: colors.foreground }]} />
+            <View style={[cs.depInputSuffix, { backgroundColor: colors.muted }]}>
+              <Text style={{ color: colors.mutedForeground, fontSize: 12, fontWeight: "700" }}>BP</Text>
+            </View>
           </View>
 
-          {/* Fee breakdown */}
+          {/* Fee breakdown — shown when amount entered */}
           {wdBPNum > 0 && (
-            <View style={[cs.feeCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={[cs.feeTitleTxt, { color: colors.foreground }]}>Töleg hasaplamasy</Text>
-              {[
-                { label: "Çykarylýan BP",             val: `${wdBPNum} BP`,                  red: false },
-                { label: "USDT ýakynlaşdyrma",         val: `${wdUsdtCalc.toFixed(4)} USDT`,  red: false },
-                { label: `${wdNetData.name} Komissiya`, val: `-${wdNetData.fee} USDT`,          red: true  },
-              ].map((row, i) => (
-                <View key={i} style={cs.feeRow}>
-                  <Text style={[cs.feeRowLabel, { color: colors.mutedForeground }]}>{row.label}</Text>
-                  <Text style={[cs.feeRowVal, { color: row.red ? "#ef4444" : colors.foreground }]}>{row.val}</Text>
+            <>
+              <View style={[cs.wdFeeCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <View style={cs.wdFeeTitleRow}>
+                  <Ionicons name="calculator-outline" size={14} color={colors.primary} />
+                  <Text style={[cs.feeTitleTxt, { color: colors.foreground }]}>Töleg hasaplamasy</Text>
                 </View>
-              ))}
-              <View style={[cs.feeDivider, { backgroundColor: colors.border }]} />
-              <View style={cs.feeRow}>
-                <Text style={[cs.feeRowLabel, { color: colors.foreground, fontWeight: "700" }]}>Alarsyňyz</Text>
-                <Text style={[cs.feeRowVal, { color: "#059669", fontSize: 17, fontWeight: "800" }]}>
-                  {wdReceive.toFixed(4)} USDT
+                {[
+                  { label: "Çykarylýan BP",              val: `${wdBPNum} BP`,                 accent: false },
+                  { label: "USDT deňeri",                val: `${wdUsdtCalc.toFixed(4)} USDT`, accent: false },
+                  { label: `${wdNetData.name} tarmak komissiyasy`, val: `-${wdNetData.fee} USDT`, accent: true },
+                ].map((row, i) => (
+                  <View key={i} style={[cs.feeRow, i > 0 && { borderTopWidth: 1, borderTopColor: colors.border + "60", paddingTop: 7 }]}>
+                    <Text style={[cs.feeRowLabel, { color: colors.mutedForeground }]}>{row.label}</Text>
+                    <Text style={[cs.feeRowVal, { color: row.accent ? "#ef4444" : colors.foreground }]}>{row.val}</Text>
+                  </View>
+                ))}
+                <View style={[cs.feeDivider, { backgroundColor: colors.border, marginVertical: 6 }]} />
+                <View style={cs.feeRow}>
+                  <Text style={[cs.feeRowLabel, { color: colors.foreground, fontWeight: "700" }]}>Alarsyňyz</Text>
+                  <Text style={[cs.feeRowVal, { color: "#059669", fontSize: 18, fontWeight: "800" }]}>
+                    {wdReceive.toFixed(4)} USDT
+                  </Text>
+                </View>
+              </View>
+
+              {/* Plain-language summary */}
+              <View style={[cs.wdSummaryBanner, { backgroundColor: "#f0fdf4", borderColor: "#bbf7d0" }]}>
+                <Ionicons name="information-circle" size={16} color="#059669" />
+                <Text style={[cs.wdSummaryText, { color: "#166534" }]}>
+                  Siz <Text style={{ fontWeight: "800" }}>{wdBPNum} BP</Text> çykarýarsyňyz.{" "}
+                  {wdNetData.name} tarmagynyň komissiyasy{" "}
+                  <Text style={{ fontWeight: "800", color: "#dc2626" }}>{wdNetData.fee} USDT</Text>.{" "}
+                  Hamyonyňyza <Text style={{ fontWeight: "800" }}>{wdReceive.toFixed(4)} USDT</Text> geler.
                 </Text>
               </View>
-            </View>
+            </>
           )}
 
           {/* Wallet address */}
-          <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 6 }]}>
+          <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>
             {wdNetData.name} Kripto Manziliniz
           </Text>
-          <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Ionicons name="wallet-outline" size={15} color={colors.mutedForeground} />
+          <View style={[cs.depInputWrap, { backgroundColor: colors.card, borderColor: wdAddr.length > 5 ? wdNetData.color : colors.border }]}>
+            <View style={[cs.depInputIcon, { backgroundColor: wdNetData.color + "15" }]}>
+              <Ionicons name="wallet-outline" size={15} color={wdNetData.color} />
+            </View>
             <TextInput value={wdAddr} onChangeText={setWdAddr}
               placeholder={wdNet === "bep20" ? "0x..." : wdNet === "ton" ? "UQ..." : "T..."}
               placeholderTextColor={colors.mutedForeground} autoCapitalize="none"
-              style={[cs.inputField, { color: colors.foreground }]} />
+              style={[cs.depInputField, { color: colors.foreground }]} />
           </View>
-          <Text style={[cs.noteText, { color: colors.mutedForeground }]}>
-            Manzil ýalňyş girizilse pul yzyna gaýtarylmaýar. Üns bilen barlaň.
-          </Text>
+          <View style={[cs.depWarningRow, { backgroundColor: "#fef9c3", borderColor: "#fde047" }]}>
+            <Ionicons name="warning-outline" size={14} color="#ca8a04" />
+            <Text style={[cs.depWarningText, { color: "#92400e" }]}>
+              Manzil ýalňyş girizilse pul yzyna gaýtarylmaýar. Üns bilen barlaň.
+            </Text>
+          </View>
 
           {wdErr ? (
             <View style={cs.errBox}>
@@ -940,15 +1018,31 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
             </View>
           ) : null}
 
-          {wdLoading ? <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} /> : (
+          {wdLoading ? (
+            <View style={[cs.depLoadingWrap]}>
+              <ActivityIndicator color={colors.primary} />
+              <Text style={{ color: colors.mutedForeground, fontSize: 12, marginTop: 6 }}>Iberilýär...</Text>
+            </View>
+          ) : (
             <Pressable onPress={submitWithdraw}
-              style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1, marginTop: 16 }]}>
-              <Ionicons name="send-outline" size={17} color="#fff" />
+              style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1, marginTop: 18 }]}>
+              <Ionicons name="send-outline" size={18} color="#fff" />
               <Text style={s.primaryBtnText}>Çykaryşy Tassyklamak</Text>
             </Pressable>
           )}
         </>
       )}
+
+      {/* BP Checkout Modal for crypto withdrawal */}
+      <BPCheckoutModal
+        visible={wdShowCheckout}
+        onClose={() => setWdShowCheckout(false)}
+        serviceName={`Kripto Çykaryş · ${wdBPNum} BP`}
+        serviceAmount={wdBPNum}
+        currentBalance={balance}
+        deviceId={deviceId}
+        onPaymentComplete={() => { setWdShowCheckout(false); submitWithdraw(); }}
+      />
 
       {/* ════════════ P2P TAB ════════════ */}
       {ctab === "p2p" && (
@@ -1083,6 +1177,45 @@ const cs = StyleSheet.create({
   feeRowLabel: { fontSize: 12 },
   feeRowVal: { fontSize: 12, fontWeight: "700" },
   feeDivider: { height: 1, marginVertical: 3 },
+
+  // ── Deposit redesign styles ──
+  depSummaryCard: { borderRadius: 16, borderWidth: 1, padding: 14, marginBottom: 16 },
+  depSummaryRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  depSummaryIcon: { width: 44, height: 44, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  depSummaryLabel: { fontSize: 11, fontWeight: "600", marginBottom: 2 },
+  depSummaryVal: { fontSize: 15, fontWeight: "700" },
+  depRateBadge: { borderRadius: 8, borderWidth: 1, paddingHorizontal: 9, paddingVertical: 5 },
+  depSectionLabel: { fontSize: 12, fontWeight: "700", marginBottom: 8 },
+  depInputWrap: { flexDirection: "row", alignItems: "center", borderWidth: 1.5, borderRadius: 14, overflow: "hidden" },
+  depInputIcon: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
+  depInputField: { flex: 1, fontSize: 15, paddingHorizontal: 10, paddingVertical: 12 },
+  depInputSuffix: { paddingHorizontal: 12, paddingVertical: 13, alignItems: "center", justifyContent: "center" },
+  depConvCard: { borderRadius: 12, borderWidth: 1, padding: 14, marginTop: 8 },
+  depConvRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
+  depConvItem: { flex: 1 },
+  depConvArrow: { width: 28, height: 28, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  depConvLbl: { fontSize: 10, fontWeight: "600", marginBottom: 3 },
+  depConvVal: { fontSize: 14, fontWeight: "700" },
+  depAddrCard: { borderRadius: 14, borderWidth: 1.5, padding: 14, marginBottom: 8 },
+  depAddrNet: { flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 },
+  depCopyRow: { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 10, paddingTop: 10, borderTopWidth: 1 },
+  depWarningRow: { flexDirection: "row", alignItems: "flex-start", gap: 7, borderRadius: 10, borderWidth: 1, padding: 10, marginBottom: 4 },
+  depWarningText: { fontSize: 11, flex: 1, lineHeight: 16 },
+  depLoadingWrap: { alignItems: "center", paddingVertical: 24 },
+  stepsTitleRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 },
+
+  // ── Withdraw redesign styles ──
+  wdBalHero: { borderRadius: 18, padding: 18, flexDirection: "row", alignItems: "center", marginBottom: 18, shadowOpacity: 0.25, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 6 },
+  wdBalHeroLabel: { color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: "600", marginBottom: 4 },
+  wdBalHeroVal: { color: "#fff", fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
+  wdBalHeroRight: { alignItems: "flex-end", gap: 8 },
+  wdRatePill: { backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 },
+  wdRatePillText: { color: "#fff", fontSize: 10, fontWeight: "700" },
+  wdBalIconWrap: { width: 44, height: 44, borderRadius: 13, backgroundColor: "rgba(255,255,255,0.15)", alignItems: "center", justifyContent: "center" },
+  wdFeeCard: { borderRadius: 14, borderWidth: 1, padding: 14, marginTop: 10, gap: 8 },
+  wdFeeTitleRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 2 },
+  wdSummaryBanner: { borderRadius: 12, borderWidth: 1, padding: 12, marginTop: 8, flexDirection: "row", gap: 8, alignItems: "flex-start" },
+  wdSummaryText: { fontSize: 12, lineHeight: 18, flex: 1 },
 
   pairRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
   pairChip: { paddingHorizontal: 13, paddingVertical: 7, borderRadius: 50 },
