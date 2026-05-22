@@ -5,7 +5,6 @@ import {
 } from "react-native";
 import { router, type Href } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
@@ -363,32 +362,6 @@ export default function MoreScreen() {
           </View>
         </Pressable>
 
-        {/* E-Bilim card */}
-        <Pressable
-          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push("/e-bilim" as Href); }}
-          style={({ pressed }) => [eBilimCard.wrap, { opacity: pressed ? 0.92 : 1 }]}
-        >
-          <LinearGradient
-            colors={["#1e1b4b", "#6366f1"]}
-            style={eBilimCard.inner}
-            start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-          >
-            <View style={eBilimCard.iconWrap}>
-              <Text style={{ fontSize: 26 }}>📚</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <Text style={eBilimCard.title}>E-Bilim 📚</Text>
-                <View style={eBilimCard.newBadge}>
-                  <Text style={eBilimCard.newText}>TÄZE</Text>
-                </View>
-              </View>
-              <Text style={eBilimCard.desc}>O'qi, test ber, BP gazan — 7 ugur 25+ sapak</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
-          </LinearGradient>
-        </Pressable>
-
         <View style={[s.group, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <GroupRow
             icon="location-outline"
@@ -726,26 +699,3 @@ const s = StyleSheet.create({
   versionText: { fontSize: 12 },
 });
 
-const eBilimCard = StyleSheet.create({
-  wrap: {
-    marginHorizontal: 16, marginBottom: 10, borderRadius: 18, overflow: "hidden",
-    shadowColor: "#6366f1", shadowOpacity: 0.22, shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 }, elevation: 5,
-  },
-  inner: {
-    flexDirection: "row", alignItems: "center", gap: 14,
-    padding: 18,
-  },
-  iconWrap: {
-    width: 48, height: 48, borderRadius: 15,
-    backgroundColor: "rgba(255,255,255,0.15)",
-    alignItems: "center", justifyContent: "center",
-  },
-  title: { color: "#fff", fontSize: 17, fontWeight: "800" },
-  desc: { color: "rgba(255,255,255,0.78)", fontSize: 12, marginTop: 3 },
-  newBadge: {
-    backgroundColor: "#22d3ee", borderRadius: 6,
-    paddingHorizontal: 6, paddingVertical: 2,
-  },
-  newText: { color: "#fff", fontSize: 8, fontWeight: "800" },
-});

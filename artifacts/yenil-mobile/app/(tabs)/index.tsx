@@ -16,7 +16,8 @@ import {
   type HyzmatItem, type HyzmatCategory,
 } from "@/lib/hyzmatlar";
 import { getDeviceIdAsync } from "@/lib/deviceId";
-import { getUserNickname } from "@/lib/firebase";
+import { getUserNickname, watchCompletedLessons } from "@/lib/firebase";
+import { CATEGORIES, LESSONS } from "@/lib/ebilimData";
 
 // ══════════════════════════════════════════════════════════════════
 // Service card (Ýeňil built-in services)
@@ -436,6 +437,7 @@ export default function HomeScreen() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifCount] = useState(2);
   const [hyzmatSearch, setHyzmatSearch] = useState("");
+  const [eBilimCompleted, setEBilimCompleted] = useState<number>(0);
   const bellAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -445,6 +447,12 @@ export default function HomeScreen() {
       setNickname(nick);
     });
   }, []);
+
+  useEffect(() => {
+    if (!deviceId) return;
+    const unsub = watchCompletedLessons(deviceId, ids => setEBilimCompleted(ids.length));
+    return () => unsub();
+  }, [deviceId]);
 
   const ringBell = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -720,19 +728,105 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* E-KITAP BANNER */}
-        <Pressable
-          onPress={() => nav("/ekitap")}
-          style={({ pressed }) => [styles.banner, { opacity: pressed ? 0.9 : 1, backgroundColor: "#6366f1" }]}
-        >
-          <View style={[styles.bannerIcon, { backgroundColor: "rgba(255,255,255,0.2)" }]}>
-            <Ionicons name="school-outline" size={26} color="#fff" />
-          </View>
+        {/* ── E-BILIM PREMIUM SECTION ── */}
+        <View style={eb.sectionHead}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.bannerTitle}>E-Bilim</Text>
-            <Text style={styles.bannerDesc}>Kurslar · Testler · Makalalar</Text>
+            <Text style={[eb.sectionTitle, { color: colors.foreground }]}>E-Bilim Ekosistemi</Text>
+            <Text style={[eb.sectionSub, { color: colors.mutedForeground }]}>O'qi, test ber, BP gazan</Text>
           </View>
-          <Feather name="arrow-right" size={20} color="#fff" />
+          <Pressable
+            onPress={() => nav("/e-bilim")}
+            style={[eb.seeAllBtn, { backgroundColor: "#6366f1" + "18", borderColor: "#6366f1" + "40" }]}
+          >
+            <Text style={eb.seeAllText}>Barchasi</Text>
+            <Ionicons name="arrow-forward" size={12} color="#6366f1" />
+          </Pressable>
+        </View>
+
+        <Pressable
+          onPress={() => nav("/e-bilim")}
+          style={({ pressed }) => [eb.outer, { opacity: pressed ? 0.93 : 1 }]}
+        >
+          <LinearGradient
+            colors={["#0f0c29", "#302b63", "#6366f1"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={eb.card}
+          >
+            {/* Decorative circles */}
+            <View style={eb.circleA} />
+            <View style={eb.circleB} />
+            <View style={eb.circleC} />
+
+            {/* Title row */}
+            <View style={eb.titleRow}>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 9, marginBottom: 7 }}>
+                  <Text style={eb.title}>E-Bilim 📚</Text>
+                  <View style={eb.earnBadge}>
+                    <Ionicons name="trophy-outline" size={9} color="#fbbf24" />
+                    <Text style={eb.earnBadgeText}>LEARN & EARN</Text>
+                  </View>
+                </View>
+                <Text style={eb.desc}>
+                  Har bir sabaq o'qib, testdan o'tib BP mukofot ol — 7 ugur, {LESSONS.length} + sapak
+                </Text>
+              </View>
+              <View style={eb.arrowBtn}>
+                <Ionicons name="arrow-forward" size={18} color="#fff" />
+              </View>
+            </View>
+
+            {/* Stats row */}
+            <View style={eb.statsRow}>
+              {([
+                { icon: "grid-outline", value: "7", label: "Ugur" },
+                { icon: "book-outline", value: `${LESSONS.length}+`, label: "Sapak" },
+                { icon: "wallet-outline", value: "0.3", label: "BP/sapak" },
+              ] as const).map((st, i) => (
+                <View key={i} style={eb.statItem}>
+                  <Ionicons name={st.icon as any} size={13} color="rgba(255,255,255,0.65)" />
+                  <Text style={eb.statValue}>{st.value}</Text>
+                  <Text style={eb.statLabel}>{st.label}</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Progress bar (shows when user has completed ≥1 lesson) */}
+            {eBilimCompleted > 0 && (
+              <View style={eb.progressBlock}>
+                <View style={eb.progressTopRow}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                    <Ionicons name="checkmark-circle" size={11} color="#4ade80" />
+                    <Text style={eb.progressText}>{eBilimCompleted} tamam</Text>
+                  </View>
+                  <Text style={eb.progressText}>
+                    {Math.round((eBilimCompleted / LESSONS.length) * 100)}%
+                  </Text>
+                </View>
+                <View style={eb.progressTrack}>
+                  <View
+                    style={[
+                      eb.progressFill,
+                      { width: `${Math.min((eBilimCompleted / LESSONS.length) * 100, 100)}%` as any },
+                    ]}
+                  />
+                </View>
+              </View>
+            )}
+
+            {/* Category emoji bubbles */}
+            <View style={eb.catRow}>
+              {CATEGORIES.map(c => (
+                <View key={c.id} style={[eb.catBubble, { backgroundColor: c.color + "25", borderColor: c.color + "40" }]}>
+                  <Text style={{ fontSize: 15 }}>{c.emoji}</Text>
+                </View>
+              ))}
+              <View style={[eb.catBubble, { backgroundColor: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.2)" }]}>
+                <Ionicons name="arrow-forward" size={13} color="rgba(255,255,255,0.7)" />
+              </View>
+            </View>
+          </LinearGradient>
         </Pressable>
 
         {/* SANLY BAZAR BANNER */}
@@ -1042,6 +1136,92 @@ const styles = StyleSheet.create({
   bannerTitle: { color: "#fff", fontWeight: "700", fontSize: 15 },
   bannerDesc: { color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 2 },
 
+});
+
+// ── E-Bilim Section Styles ────────────────────────────────────────────
+const eb = StyleSheet.create({
+  sectionHead: {
+    flexDirection: "row", alignItems: "center",
+    paddingHorizontal: 16, marginTop: 22, marginBottom: 12,
+  },
+  sectionTitle: { fontSize: 19, fontWeight: "800", letterSpacing: -0.4 },
+  sectionSub: { fontSize: 11, marginTop: 2 },
+  seeAllBtn: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    paddingHorizontal: 12, paddingVertical: 7,
+    borderRadius: 20, borderWidth: 1,
+  },
+  seeAllText: { color: "#6366f1", fontSize: 12, fontWeight: "700" },
+
+  outer: {
+    marginHorizontal: 16, marginBottom: 16, borderRadius: 24,
+    shadowColor: "#6366f1", shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.35, shadowRadius: 22, elevation: 14,
+  },
+  card: { borderRadius: 24, padding: 22, overflow: "hidden" },
+
+  circleA: {
+    position: "absolute", top: -55, right: -35,
+    width: 190, height: 190, borderRadius: 95,
+    backgroundColor: "rgba(255,255,255,0.055)",
+  },
+  circleB: {
+    position: "absolute", bottom: -45, left: -35,
+    width: 150, height: 150, borderRadius: 75,
+    backgroundColor: "rgba(139,92,246,0.28)",
+  },
+  circleC: {
+    position: "absolute", top: 40, right: 70,
+    width: 70, height: 70, borderRadius: 35,
+    backgroundColor: "rgba(255,255,255,0.04)",
+  },
+
+  titleRow: {
+    flexDirection: "row", alignItems: "flex-start",
+    gap: 12, marginBottom: 18,
+  },
+  title: { color: "#fff", fontSize: 26, fontWeight: "900", letterSpacing: -0.5 },
+  earnBadge: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    backgroundColor: "rgba(251,191,36,0.18)",
+    borderWidth: 1, borderColor: "rgba(251,191,36,0.35)",
+    borderRadius: 8, paddingHorizontal: 7, paddingVertical: 4,
+    alignSelf: "flex-start",
+  },
+  earnBadgeText: { color: "#fbbf24", fontSize: 8, fontWeight: "800", letterSpacing: 0.6 },
+  desc: { color: "rgba(255,255,255,0.72)", fontSize: 13, lineHeight: 19 },
+  arrowBtn: {
+    width: 44, height: 44, borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.25)",
+    marginTop: 2,
+  },
+
+  statsRow: { flexDirection: "row", gap: 10, marginBottom: 18 },
+  statItem: {
+    flex: 1, alignItems: "center", gap: 4,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 14, paddingVertical: 12,
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.08)",
+  },
+  statValue: { color: "#fff", fontSize: 20, fontWeight: "900", letterSpacing: -0.3 },
+  statLabel: { color: "rgba(255,255,255,0.58)", fontSize: 10, fontWeight: "600" },
+
+  progressBlock: { marginBottom: 16 },
+  progressTopRow: {
+    flexDirection: "row", alignItems: "center",
+    justifyContent: "space-between", marginBottom: 6,
+  },
+  progressText: { color: "rgba(255,255,255,0.68)", fontSize: 11, fontWeight: "600" },
+  progressTrack: { height: 5, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.15)" },
+  progressFill: { height: 5, borderRadius: 3, backgroundColor: "#4ade80" },
+
+  catRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
+  catBubble: {
+    width: 38, height: 38, borderRadius: 11,
+    alignItems: "center", justifyContent: "center", borderWidth: 1,
+  },
 });
 
 // ── Marketplace (Halk Hyzmatlary) Styles ─────────────────────────────
