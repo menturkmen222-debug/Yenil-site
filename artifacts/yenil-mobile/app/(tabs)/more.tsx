@@ -18,7 +18,7 @@ function AiChatModal({ visible, onClose }: { visible: boolean; onClose: () => vo
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<Msg[]>([
-    { id: "0", role: "agent", text: "Salam! Men AI Kömekçi. Size çalt kömek edip bilerin 🤖\n\nSoragy ýazyň!" },
+    { id: "0", role: "agent", text: "Salam! Men AI Kömekçi. Size çalt kömek edip bilerin.\n\nSoragy ýazyň!" },
   ]);
   const [input, setInput] = useState("");
   const flatRef = React.useRef<FlatList>(null);
@@ -29,7 +29,7 @@ function AiChatModal({ visible, onClose }: { visible: boolean; onClose: () => vo
     const agentMsg: Msg = {
       id: (Date.now() + 1).toString(),
       role: "agent",
-      text: "Bu Beta synag görnüşi. Ýakyn wagtda doly işleýän AI kömekçi bolýar! ⚡",
+      text: "Bu Beta synag görnüşi. Ýakyn wagtda doly işleýän AI kömekçi bolýar!",
     };
     setMessages(prev => [...prev, userMsg, agentMsg]);
     setInput("");
@@ -350,7 +350,7 @@ export default function MoreScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <Text style={pulGazanCard.title}>Pul Gazan 💰</Text>
+                <Text style={pulGazanCard.title}>Pul Gazan</Text>
                 <View style={pulGazanCard.hotBadge}>
                   <Ionicons name="flame" size={9} color="#fff" />
                   <Text style={pulGazanCard.hotText}>HOT</Text>

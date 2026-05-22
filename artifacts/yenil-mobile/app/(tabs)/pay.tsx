@@ -255,7 +255,7 @@ export default function PayScreen() {
           </View>
         </Pressable>
         <Text style={[s.addressNote, { color: colors.mutedForeground }]}>
-          ⚠️ Diňe {net.name} tarmagynyň USDT-sini iberiň. Başga token ibermek ýitgä sebäp bolar.
+          Diňe {net.name} tarmagynyň USDT-sini iberiň. Başga token ibermek ýitgä sebäp bolar.
         </Text>
 
         {/* TX Hash */}

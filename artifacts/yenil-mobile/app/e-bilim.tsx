@@ -42,7 +42,6 @@ function CategoryChip({
           : { backgroundColor: colors.card, borderColor: colors.border },
       ]}
     >
-      <Text style={chip.emoji}>{emoji}</Text>
       <Text style={[chip.title, { color: selected ? "#fff" : colors.foreground }]}>{title}</Text>
       <View style={[chip.pill, { backgroundColor: selected ? "rgba(255,255,255,0.22)" : color + "20" }]}>
         <Text style={[chip.pillText, { color: selected ? "#fff" : color }]}>
@@ -114,7 +113,7 @@ function LessonCard({
 
         <View style={lc.bottomRow}>
           <View style={[lc.catPill, { backgroundColor: cat.color + "18" }]}>
-            <Text style={[lc.catPillText, { color: cat.color }]}>{cat.emoji} {cat.title}</Text>
+            <Text style={[lc.catPillText, { color: cat.color }]}>{cat.title}</Text>
           </View>
           <View style={lc.meta}>
             <Ionicons name="time-outline" size={11} color={colors.mutedForeground} />
@@ -272,8 +271,8 @@ export default function EBilimScreen() {
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </Pressable>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={sc.headerTitle}>E-Bilim 📚</Text>
-          <Text style={sc.headerSub}>O'qi, test ber, BP gazan</Text>
+          <Text style={sc.headerTitle}>E-Bilim</Text>
+          <Text style={sc.headerSub}>Öwren, test ber, BP gazan</Text>
         </View>
         <View style={{ gap: 5, alignItems: "flex-end" }}>
           <View style={sc.statChip}>
@@ -324,7 +323,7 @@ export default function EBilimScreen() {
           style={sc.promoBanner}
           start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
         >
-          <Text style={{ fontSize: 30 }}>🎓</Text>
+          <Ionicons name="school-outline" size={30} color="#fff" />
           <View style={{ flex: 1 }}>
             <Text style={sc.promoTitle}>Learn & Earn</Text>
             <Text style={sc.promoSub}>Bir sabaq = 0.05–0.3 BP + Abraý +1</Text>
@@ -380,9 +379,9 @@ export default function EBilimScreen() {
                 <Ionicons name="close" size={20} color="#fff" />
               </Pressable>
               <View style={{ flex: 1, marginLeft: 14 }}>
-                <Text style={mo.catLabel}>{cat.emoji} {cat.title}</Text>
+                <Text style={mo.catLabel}>{cat.title}</Text>
                 <Text style={mo.lessonTitle} numberOfLines={2}>
-                  {selectedLesson.emoji} {selectedLesson.title}
+                  {selectedLesson.title}
                 </Text>
               </View>
               {isCompleted && (
@@ -439,7 +438,7 @@ export default function EBilimScreen() {
                       onPress={handleUnlock}
                       loading={unlockLoading}
                       disabled={balance < (selectedLesson.premiumBPCost ?? 0)}
-                      label={`🔓  ${selectedLesson.premiumBPCost} BP — Açmak`}
+                      label={`${selectedLesson.premiumBPCost} BP — Açmak`}
                       loadingLabel="Açylýar..."
                       color="#f59e0b"
                       style={{ marginTop: 4 }}
@@ -490,7 +489,7 @@ export default function EBilimScreen() {
                     <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
                       <PessimisticButton
                         onPress={startQuiz}
-                        label={isCompleted ? "🔁  Testni täzeden ber" : "📝  Testi başla"}
+                        label={isCompleted ? "Testni täzeden ber" : "Testi başla"}
                         color={cat.color}
                       />
                     </View>
@@ -560,7 +559,7 @@ export default function EBilimScreen() {
                         onPress={submitQuiz}
                         loading={submitLoading}
                         disabled={answers[currentQ] === null}
-                        label="Natijany gör ✓"
+                        label="Natijany gör"
                         loadingLabel="Hisoblanýar..."
                         color={cat.color}
                       />
@@ -583,15 +582,15 @@ export default function EBilimScreen() {
                     {Math.round(quizScore * 100)}%
                   </Text>
                   <Text style={[mo.scoreLabel, { color: colors.mutedForeground }]}>
-                    {Math.round(quizScore * selectedLesson.quiz.length)}/{selectedLesson.quiz.length} to'g'ri
+                    {Math.round(quizScore * selectedLesson.quiz.length)}/{selectedLesson.quiz.length} dogry
                   </Text>
                 </View>
 
                 {/* Result card */}
                 {quizScore >= PASS_THRESHOLD ? (
                   <View style={[mo.resultCard, { backgroundColor: cat.color + "12", borderColor: cat.color + "30" }]}>
-                    <Text style={mo.resultEmoji}>🎉</Text>
-                    <Text style={[mo.resultTitle, { color: cat.color }]}>Ajoyib natija!</Text>
+                    <Ionicons name="trophy-outline" size={36} color={cat.color} />
+                    <Text style={[mo.resultTitle, { color: cat.color }]}>Ajaýyp netije!</Text>
                     {alreadyClaimed ? (
                       <Text style={[mo.resultSub, { color: colors.mutedForeground }]}>
                         Bu sapak üçin BP eýýäm alyndy.
@@ -610,7 +609,7 @@ export default function EBilimScreen() {
                   </View>
                 ) : (
                   <View style={[mo.resultCard, { backgroundColor: "#ef444412", borderColor: "#ef444430" }]}>
-                    <Text style={mo.resultEmoji}>💪</Text>
+                    <Ionicons name="refresh-outline" size={36} color="#ef4444" />
                     <Text style={[mo.resultTitle, { color: "#ef4444" }]}>
                       {Math.round(quizScore * 100)}% — geçme: {PASS_THRESHOLD * 100}%
                     </Text>
@@ -649,7 +648,7 @@ export default function EBilimScreen() {
                         setAnswers(new Array(selectedLesson.quiz.length).fill(null));
                         setModalPhase("quiz");
                       }}
-                      label="🔁  Täzeden synanyşmak"
+                      label="Täzeden synanyşmak"
                       color={cat.color}
                     />
                   )}

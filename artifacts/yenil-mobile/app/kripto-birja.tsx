@@ -70,7 +70,7 @@ export default function KriptoBirjaScreen() {
     const result = await initiateCryptoTrade(adId, deviceId);
     if (result.success) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert("✅ Söwda başlandy", result.message);
+      Alert.alert("Söwda başlandy", result.message);
     } else {
       Alert.alert("Ýalňyşlyk", result.message);
     }
@@ -142,7 +142,7 @@ export default function KriptoBirjaScreen() {
         {/* Trader info */}
         <View style={cc.traderRow}>
           <View style={[cc.traderAvatar, { backgroundColor: lv.bg, borderColor: lv.border }]}>
-            <Text style={{ fontSize: 14 }}>{lv.emoji}</Text>
+            <Ionicons name={lv.icon as any} size={14} color={lv.color} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[cc.traderName, { color: colors.foreground }]}>{ad.ownerNickname}</Text>
@@ -203,7 +203,7 @@ export default function KriptoBirjaScreen() {
         {/* ── Rep gate ── */}
         {!canPost && (
           <View style={[s.repGate, { backgroundColor: "#7c3aed" + "10", borderColor: "#7c3aed" + "25" }]}>
-            <Text style={{ fontSize: 28, marginBottom: 4 }}>🔐</Text>
+            <Ionicons name="lock-closed-outline" size={28} color="#7c3aed" style={{ marginBottom: 4 }} />
             <Text style={[s.repGateTitle, { color: colors.foreground }]}>E'lon ýerleşdirmek üçin</Text>
             <Text style={[s.repGateDesc, { color: colors.mutedForeground }]}>
               Abraý derejeniz <Text style={{ color: "#7c3aed", fontWeight: "800" }}>{REP_THRESHOLDS.MIN_P2P_POST}+</Text> bolmaly. Häzir: <Text style={{ color: "#7c3aed", fontWeight: "800" }}>{myRep}</Text>
@@ -246,7 +246,7 @@ export default function KriptoBirjaScreen() {
         {/* ── Ads ── */}
         {filtered.length === 0 ? (
           <View style={[s.empty, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={{ fontSize: 36, textAlign: "center" }}>💱</Text>
+            <Ionicons name="swap-horizontal-outline" size={48} color={colors.mutedForeground} />
             <Text style={[s.emptyTitle, { color: colors.foreground }]}>E'lon ýok</Text>
             <Text style={[s.emptyDesc, { color: colors.mutedForeground }]}>
               {canPost ? "Ilkinji e'lony siz ýerleşdiriň" : "Heniz elýeterli e'lon ýok"}

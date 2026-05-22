@@ -29,19 +29,19 @@ const APP_VERSION = "2.4.1";
 
 type Language = "tk" | "ru" | "en";
 const LANGUAGES: { code: Language; label: string; flag: string }[] = [
-  { code: "tk", label: "Türkmençe", flag: "🇹🇲" },
-  { code: "ru", label: "Русский", flag: "🇷🇺" },
-  { code: "en", label: "English", flag: "🇬🇧" },
+  { code: "tk", label: "Türkmençe", flag: "TM" },
+  { code: "ru", label: "Русский", flag: "RU" },
+  { code: "en", label: "English", flag: "EN" },
 ];
 
 const THEMES: {
-  key: ThemeKey; label: string; sublabel: string; emoji: string;
+  key: ThemeKey; label: string; sublabel: string; icon: string;
   preview: [string, string]; accent: string; dot: string;
 }[] = [
-  { key: "green", label: "Ýaşyl", sublabel: "Tebigy & Arassa", emoji: "🌿", preview: ["#166534", "#16a34a"], accent: "#16a34a", dot: "#4ade80" },
-  { key: "dark", label: "Garaňky", sublabel: "Gijeki & Göz rahat", emoji: "🌙", preview: ["#111111", "#1e1e1e"], accent: "#22c55e", dot: "#22c55e" },
-  { key: "white", label: "Ak", sublabel: "Arassa & Ýagty", emoji: "☀️", preview: ["#1d4ed8", "#3b82f6"], accent: "#3b82f6", dot: "#93c5fd" },
-  { key: "girls", label: "Gyzlar", sublabel: "Romantic & Owadan", emoji: "🌸", preview: ["#9d174d", "#ec4899"], accent: "#ec4899", dot: "#f9a8d4" },
+  { key: "green", label: "Ýaşyl", sublabel: "Tebigy & Arassa", icon: "leaf-outline", preview: ["#166534", "#16a34a"], accent: "#16a34a", dot: "#4ade80" },
+  { key: "dark", label: "Garaňky", sublabel: "Gijeki & Göz rahat", icon: "moon-outline", preview: ["#111111", "#1e1e1e"], accent: "#22c55e", dot: "#22c55e" },
+  { key: "white", label: "Ak", sublabel: "Arassa & Ýagty", icon: "sunny-outline", preview: ["#1d4ed8", "#3b82f6"], accent: "#3b82f6", dot: "#93c5fd" },
+  { key: "girls", label: "Gyzlar", sublabel: "Romantic & Owadan", icon: "flower-outline", preview: ["#9d174d", "#ec4899"], accent: "#ec4899", dot: "#f9a8d4" },
 ];
 
 // ─── Shared UI helpers ────────────────────────────────────────────────────────
@@ -101,7 +101,7 @@ function LevelBadge({ score, size = "md" }: { score: number; size?: "sm" | "md" 
       paddingHorizontal: px, paddingVertical: py,
       borderWidth: 1.5, borderColor: level.border,
     }}>
-      <Text style={{ fontSize: efs }}>{level.emoji}</Text>
+      <Ionicons name={level.icon as any} size={efs} color={level.color} />
       <Text style={{ fontSize: fs, fontWeight: "700", color: level.color }}>{level.labelTm}</Text>
     </View>
   );
@@ -226,7 +226,7 @@ function ReputationModal({
               const reached = repData.score >= lv.minScore;
               return (
                 <View key={lv.id} style={[s.levelDot, { opacity: active ? 1 : reached ? 0.55 : 0.25 }]}>
-                  <Text style={{ fontSize: 18 }}>{lv.emoji}</Text>
+                  <Ionicons name={lv.icon as any} size={18} color={lv.color} />
                   <Text style={{ fontSize: 9, fontWeight: "700", color: lv.color, marginTop: 2 }}>{lv.label}</Text>
                 </View>
               );
@@ -261,7 +261,7 @@ function ReputationModal({
               <Text style={[s.subHead, { color: colors.foreground }]}>Abraýy nädip ýokarlatmaly?</Text>
               {tips.map((t, i) => (
                 <View key={i} style={[s.tipRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                  <Text style={{ fontSize: 20 }}>{t.icon}</Text>
+                  <Ionicons name={t.icon as any} size={20} color={colors.primary} />
                   <Text style={[s.tipText, { color: colors.foreground }]}>{t.text}</Text>
                 </View>
               ))}
@@ -280,7 +280,7 @@ function ReputationModal({
             <View style={{ gap: 8 }}>
               {repData.entries.length === 0 ? (
                 <View style={s.emptyWrap}>
-                  <Text style={{ fontSize: 36, marginBottom: 8 }}>📋</Text>
+                  <Ionicons name="document-text-outline" size={36} color={colors.mutedForeground} />
                   <Text style={[s.emptyText, { color: colors.mutedForeground }]}>Heniz taryh ýok</Text>
                   <Text style={[s.emptySubText, { color: colors.mutedForeground }]}>
                     Platformada amal edeniňizde bu ýerde görüner
@@ -346,7 +346,7 @@ function ReputationModal({
                     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                         <View style={[s.friendAvatar, { backgroundColor: lvl.bg, borderColor: lvl.border }]}>
-                          <Text style={{ fontSize: 20 }}>{lvl.emoji}</Text>
+                          <Ionicons name={lvl.icon as any} size={20} color={lvl.color} />
                         </View>
                         <View>
                           <Text style={[s.friendName, { color: colors.foreground }]}>
@@ -393,7 +393,7 @@ function ReputationModal({
             <View style={{ gap: 14 }}>
               {dispDone ? (
                 <View style={[s.successBox, { backgroundColor: colors.success + "10", borderColor: colors.success + "28" }]}>
-                  <Text style={{ fontSize: 40, textAlign: "center", marginBottom: 8 }}>✅</Text>
+                  <Ionicons name="checkmark-circle-outline" size={40} color={colors.success} />
                   <Text style={[s.subHead, { color: colors.foreground, textAlign: "center" }]}>Iberildi!</Text>
                   <Text style={[s.subDesc, { color: colors.mutedForeground, textAlign: "center", marginTop: 6 }]}>
                     Siziň ýüz tutmanyňyz alyndy. Toparymyz iň gysga wagtda seredip jogap berer.
@@ -589,7 +589,7 @@ function FriendsModal({
           {/* Friends list */}
           {friends.length === 0 ? (
             <View style={s.emptyWrap}>
-              <Text style={{ fontSize: 44, marginBottom: 10 }}>👥</Text>
+              <Ionicons name="people-outline" size={44} color={colors.mutedForeground} />
               <Text style={[s.emptyText, { color: colors.mutedForeground }]}>Heniz tanyşlaryňyz ýok</Text>
               <Text style={[s.emptySubText, { color: colors.mutedForeground }]}>
                 «Goş» düwmesini basyp ID bilen tanyş goşuň
@@ -603,7 +603,7 @@ function FriendsModal({
                 return (
                   <View key={f.deviceId} style={[s.friendCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
                     <View style={[s.friendAvatar, { backgroundColor: lv.bg, borderColor: lv.border }]}>
-                      <Text style={{ fontSize: 18 }}>{lv.emoji}</Text>
+                      <Ionicons name={lv.icon as any} size={18} color={lv.color} />
                     </View>
                     <View style={{ flex: 1, gap: 2 }}>
                       <Text style={[s.friendName, { color: colors.foreground }]}>{f.nickname}</Text>
@@ -674,7 +674,7 @@ function BPTransferModal({
             const result = await sendBP(id, amt, note);
             if (result.success) {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              Alert.alert("✅ Üstünlikli", result.message);
+              Alert.alert("Üstünlikli", result.message);
               setToId(""); setAmount(""); setNote("");
               const h = await getBPTransferHistory(deviceId);
               setHistory(h);
@@ -812,7 +812,7 @@ function BPTransferModal({
                 </View>
               ) : history.length === 0 ? (
                 <View style={s.emptyWrap}>
-                  <Text style={{ fontSize: 36, marginBottom: 8 }}>💸</Text>
+                  <Ionicons name="cash-outline" size={36} color={colors.mutedForeground} />
                   <Text style={[s.emptyText, { color: colors.mutedForeground }]}>Heniz geçirme ýok</Text>
                 </View>
               ) : history.map(t => {
@@ -987,7 +987,7 @@ export default function SozlamalarScreen() {
             setPinEnabled(true);
             setShowPinModal(false);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Alert.alert("✅ Üstünlikli", "Gizlin kod bellendi!");
+            Alert.alert("Üstünlikli", "Gizlin kod bellendi!");
           }, 180);
         } else {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -1197,7 +1197,7 @@ export default function SozlamalarScreen() {
           style={({ pressed }) => [s.themeCard, { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.88 : 1 }]}
         >
           <LinearGradient colors={currentTheme.preview as [string, string]} style={s.themeCardGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-            <Text style={s.themeCardEmoji}>{currentTheme.emoji}</Text>
+            <Ionicons name={currentTheme.icon as any} size={20} color={currentTheme.accent} />
           </LinearGradient>
           <View style={{ flex: 1, marginLeft: 14 }}>
             <Text style={[s.themeCardLabel, { color: colors.foreground }]}>{currentTheme.label} tema</Text>
@@ -1345,7 +1345,7 @@ export default function SozlamalarScreen() {
                       try {
                         await seedTestAccount(deviceId);
                         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                        Alert.alert("✅ Üstünlikli", "1000 BP we 80 abraý baly goşuldy!");
+                        Alert.alert("Üstünlikli", "1000 BP we 80 abraý baly goşuldy!");
                       } catch {
                         Alert.alert("Ýalňyşlyk", "Synag maglumaty goşup bolmady.");
                       }
@@ -1473,7 +1473,7 @@ export default function SozlamalarScreen() {
                   style={({ pressed }) => [s.themeOption, { backgroundColor: colors.card, borderColor: isActive ? theme.accent : colors.border, borderWidth: isActive ? 2.5 : 1, opacity: pressed ? 0.85 : 1 }]}
                 >
                   <LinearGradient colors={theme.preview as [string, string]} style={s.themePreviewGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-                    <Text style={s.themePreviewEmoji}>{theme.emoji}</Text>
+                    <Ionicons name={theme.icon as any} size={14} color={theme.accent} />
                     <View style={s.mockUi}>
                       <View style={[s.mockBar, { backgroundColor: "rgba(255,255,255,0.4)", width: "68%" }]} />
                       <View style={[s.mockBar, { backgroundColor: "rgba(255,255,255,0.22)", width: "44%", marginTop: 6 }]} />

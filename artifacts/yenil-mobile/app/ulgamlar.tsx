@@ -196,8 +196,8 @@ function AppPaymentFlow({ app, onBack, colors }: { app: AppService; onBack: () =
           {plan && (
             <Text style={[{ color: colors.mutedForeground, fontSize: 12, marginTop: 2 }]}>
               {balance >= plan.amount
-                ? `✓ ${plan.amount} BP aýrylar`
-                : `⚡ ${(plan.amount - balance).toFixed(2)} BP ýetmez — doldurma mümkin`}
+                ? `${plan.amount} BP aýrylar`
+                : `${(plan.amount - balance).toFixed(2)} BP ýetmez — doldurma mümkin`}
             </Text>
           )}
         </View>

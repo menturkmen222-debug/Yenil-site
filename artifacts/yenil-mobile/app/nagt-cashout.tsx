@@ -85,7 +85,7 @@ export default function NagtCashoutScreen() {
     const result = await acceptNagtOrder(orderId, deviceId);
     if (result.success) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert("✅ Kabul edildi", result.message);
+      Alert.alert("Kabul edildi", result.message);
     } else {
       Alert.alert("Ýalňyşlyk", result.message);
     }
@@ -102,7 +102,7 @@ export default function NagtCashoutScreen() {
           const result = await completeNagtOrder(orderId, deviceId);
           if (result.success) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Alert.alert("🎉 Üstünlik!", result.message);
+            Alert.alert("Üstünlik!", result.message);
           } else {
             Alert.alert("Ýalňyşlyk", result.message);
           }
@@ -170,7 +170,7 @@ export default function NagtCashoutScreen() {
               ? <ActivityIndicator size="small" color="#fff" />
               : <Ionicons name="checkmark-circle-outline" size={15} color="#fff" />
             }
-            <Text style={oc.actionBtnText}>Tamamlandı diye belirt</Text>
+            <Text style={oc.actionBtnText}>Tamamlandy diýip belirt</Text>
           </Pressable>
         )}
 
@@ -194,7 +194,7 @@ export default function NagtCashoutScreen() {
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </Pressable>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={s.headerTitle}>Nagt Pul P2P 💵</Text>
+          <Text style={s.headerTitle}>Nagt Pul P2P</Text>
           <Text style={s.headerSub}>BP balansyňyzy nagt TMT-a çalşyň</Text>
         </View>
         <Pressable
@@ -212,13 +212,13 @@ export default function NagtCashoutScreen() {
           <Text style={[s.howTitle, { color: colors.foreground }]}>Binance P2P ýaly işleýär</Text>
           <View style={{ gap: 10, marginTop: 8 }}>
             {[
-              { emoji: "📱", text: "Siz BP mukdaryny we şäheriňizi görkeziň" },
-              { emoji: "🤝", text: "Şäheriňizdäki agent sargydyňyzy kabul eder" },
-              { emoji: "💵", text: "Duşuşyp nagt TMT alyň, agent BP alýar" },
-              { emoji: "✅", text: "Ikitaraplaýyn abraý baly ýokarlanýar" },
+              { icon: "phone-portrait-outline" as const, text: "Siz BP mukdaryny we şäheriňizi görkeziň" },
+              { icon: "people-outline" as const, text: "Şäheriňizdäki agent sargydyňyzy kabul eder" },
+              { icon: "cash-outline" as const, text: "Duşuşyp nagt TMT alyň, agent BP alýar" },
+              { icon: "checkmark-circle-outline" as const, text: "Ikitaraplaýyn abraý baly ýokarlanýar" },
             ].map((item, i) => (
               <View key={i} style={s.howRow}>
-                <Text style={{ fontSize: 18 }}>{item.emoji}</Text>
+                <Ionicons name={item.icon} size={18} color="#0284c7" />
                 <Text style={[s.howText, { color: colors.foreground }]}>{item.text}</Text>
               </View>
             ))}
@@ -257,7 +257,7 @@ export default function NagtCashoutScreen() {
         </Text>
         {otherOrders.length === 0 ? (
           <View style={[s.empty, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={{ fontSize: 36, textAlign: "center" }}>💵</Text>
+            <Ionicons name="cash-outline" size={48} color={colors.mutedForeground} />
             <Text style={[s.emptyTitle, { color: colors.foreground }]}>Häzir açyk sargyt ýok</Text>
             <Text style={[s.emptyDesc, { color: colors.mutedForeground }]}>
               Ilkinji nagt çykaryş sargydy ýerleşdiriň

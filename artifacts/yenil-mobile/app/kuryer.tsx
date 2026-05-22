@@ -82,7 +82,7 @@ export default function KurYerScreen() {
           const result = await acceptMicroTask(taskId, deviceId);
           if (result.success) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Alert.alert("✅ Kabul edildi", result.message);
+            Alert.alert("Kabul edildi", result.message);
           } else {
             Alert.alert("Ýalňyşlyk", result.message);
           }
@@ -102,7 +102,7 @@ export default function KurYerScreen() {
           const result = await completeMicroTask(taskId, deviceId);
           if (result.success) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Alert.alert("🎉 Üstünlik!", result.message);
+            Alert.alert("Üstünlik!", result.message);
           } else {
             Alert.alert("Ýalňyşlyk", result.message);
           }
@@ -161,7 +161,7 @@ export default function KurYerScreen() {
         <View style={tc.footer}>
           <View style={[tc.posterWrap, { backgroundColor: colors.muted }]}>
             <Text style={{ fontSize: 11, color: colors.mutedForeground }}>
-              {isMyTask ? "🙋 Siz" : task.posterNickname}
+              {isMyTask ? "Siz" : task.posterNickname}
             </Text>
           </View>
           {task.courierNickname && (
@@ -217,7 +217,7 @@ export default function KurYerScreen() {
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </Pressable>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={s.headerTitle}>Kuryer Tapşyryklar 📦</Text>
+          <Text style={s.headerTitle}>Kuryer Tapşyryklar</Text>
           <Text style={s.headerSub}>Ýol-ýolakay pul gazan ýa-da eltiş buýur</Text>
         </View>
         <Pressable
@@ -234,7 +234,7 @@ export default function KurYerScreen() {
         <View style={[s.infoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <View style={{ flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
             <View style={[s.infoIcon, { backgroundColor: "#d97706" + "18" }]}>
-              <Text style={{ fontSize: 24 }}>🚌</Text>
+              <Ionicons name="bus-outline" size={24} color="#d97706" />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={[s.infoTitle, { color: colors.foreground }]}>Ýol-ýolakay Kuryer</Text>
@@ -267,7 +267,7 @@ export default function KurYerScreen() {
         {/* ── Task list ── */}
         {filteredTasks.length === 0 ? (
           <View style={[s.empty, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={{ fontSize: 36, textAlign: "center" }}>📦</Text>
+            <Ionicons name="cube-outline" size={48} color={colors.mutedForeground} />
             <Text style={[s.emptyTitle, { color: colors.foreground }]}>Tapşyryk ýok</Text>
             <Text style={[s.emptyDesc, { color: colors.mutedForeground }]}>
               {activeTab === "all" ? "Tapşyryk ýerleşdiriň ýa-da biriniňkini kabul ediň" :

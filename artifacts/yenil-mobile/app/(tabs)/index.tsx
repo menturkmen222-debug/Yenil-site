@@ -50,7 +50,7 @@ function AgentChatModal({ visible, onClose }: { visible: boolean; onClose: () =>
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<Msg[]>([
-    { id: "0", role: "agent", text: "Salam! Men Ýeňil AI Agenti. Size nädip kömek edip bilerin? 🤖" },
+    { id: "0", role: "agent", text: "Salam! Men Ýeňil AI Agenti. Size nädip kömek edip bilerin?" },
   ]);
   const [input, setInput] = useState("");
   const flatRef = useRef<FlatList>(null);
@@ -61,7 +61,7 @@ function AgentChatModal({ visible, onClose }: { visible: boolean; onClose: () =>
     const agentMsg: Msg = {
       id: (Date.now() + 1).toString(),
       role: "agent",
-      text: "Bu synag görnüşi. Ýakyn wagtda doly işleýän AI kömekçi bolýar! 🚀",
+      text: "Bu synag görnüşi. Ýakyn wagtda doly işleýän AI kömekçi bolýar!",
     };
     setMessages((prev) => [...prev, userMsg, agentMsg]);
     setInput("");
@@ -235,7 +235,7 @@ function AddHyzmatModal({
                       },
                     ]}
                   >
-                    <Text style={addStyles.catEmoji}>{cat.emoji}</Text>
+                    <Ionicons name={cat.icon as any} size={13} color={isActive ? "#fff" : cat.color} />
                     <Text style={[addStyles.catLabel, { color: isActive ? "#fff" : colors.foreground }]}>
                       {cat.label}
                     </Text>
@@ -352,10 +352,10 @@ function HyzmatCard({ item }: { item: HyzmatItem }) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         Alert.alert(
           item.title,
-          `${item.description || "Beýany ýok"}\n\n📍 ${item.location || "Ýer görkezilmedi"}\n💰 ${item.price || "Ylalaşyk"}\n📞 ${item.phone}`,
+          `${item.description || "Beýany ýok"}\n\nÝer: ${item.location || "Ýer görkezilmedi"}\nBaha: ${item.price || "Ylalaşyk"}\nTelefon: ${item.phone}`,
           [
             { text: "Ýap" },
-            { text: "📞 Jaň et", onPress: handleCall },
+            { text: "Jaň et", onPress: handleCall },
           ]
         );
       }}
@@ -369,7 +369,7 @@ function HyzmatCard({ item }: { item: HyzmatItem }) {
 
       {/* Icon */}
       <View style={[hStyles.iconWrap, { backgroundColor: cat.color + "18" }]}>
-        <Text style={{ fontSize: 24 }}>{cat.emoji}</Text>
+        <Ionicons name={cat.icon as any} size={24} color={cat.color} />
       </View>
 
       {/* Content */}
@@ -754,7 +754,7 @@ export default function HomeScreen() {
             <Ionicons name="school-outline" size={26} color="#6366f1" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.bannerTitle, { color: colors.foreground }]}>E-Bilim 📚</Text>
+            <Text style={[styles.bannerTitle, { color: colors.foreground }]}>E-Bilim</Text>
             <Text style={[styles.bannerDesc, { color: colors.mutedForeground }]}>O'qi, test ber, BP gazan</Text>
           </View>
           <Feather name="arrow-right" size={20} color="#6366f1" />
@@ -827,7 +827,7 @@ export default function HomeScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingVertical: 4 }}
         >
-          {[{ key: "all" as const, label: "Hemmesi", emoji: "✨", color: "#6366f1" }, ...HYZMAT_CATEGORIES].map((cat) => {
+          {[{ key: "all" as const, label: "Hemmesi", icon: "apps-outline", color: "#6366f1" }, ...HYZMAT_CATEGORIES].map((cat) => {
             const isActive = hyzmatFilter === cat.key;
             const count = cat.key === "all" ? hyzmatlar.length : hyzmatlar.filter((h) => h.category === cat.key).length;
             return (
@@ -839,7 +839,6 @@ export default function HomeScreen() {
                   { backgroundColor: isActive ? cat.color : colors.muted, borderColor: isActive ? cat.color : colors.border },
                 ]}
               >
-                <Text style={{ fontSize: 13 }}>{cat.emoji}</Text>
                 <Text style={[mktStyles.filterLabel, { color: isActive ? "#fff" : colors.foreground }]}>
                   {cat.label}
                 </Text>
@@ -856,7 +855,7 @@ export default function HomeScreen() {
         {/* Service listing */}
         {filteredHyzmatlar.length === 0 ? (
           <View style={[mktStyles.emptyWrap, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={{ fontSize: 40, marginBottom: 10 }}>🏪</Text>
+            <Ionicons name="storefront-outline" size={48} color={colors.mutedForeground} />
             <Text style={[mktStyles.emptyTitle, { color: colors.foreground }]}>
               {hyzmatSearch ? "Netije tapylmady" : "Heniz hyzmat ýok"}
             </Text>

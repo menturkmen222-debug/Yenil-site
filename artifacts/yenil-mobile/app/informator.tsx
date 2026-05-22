@@ -16,11 +16,11 @@ import {
 } from "@/lib/firebase";
 import { formatRelativeTime } from "@/lib/reputation";
 
-const REPORT_TYPES: { id: RoadReportType; label: string; icon: string; color: string; emoji: string }[] = [
-  { id: "gai", label: "GAI / PÝGG Posti", icon: "shield-outline", color: "#ef4444", emoji: "🚔" },
-  { id: "probka", label: "Sykylyk / Probka", icon: "car-outline", color: "#f59e0b", emoji: "🚗" },
-  { id: "yopyk", label: "Ýol Ýapyk", icon: "close-circle-outline", color: "#7c3aed", emoji: "🚧" },
-  { id: "basha", label: "Başga Duýduryş", icon: "warning-outline", color: "#0284c7", emoji: "⚠️" },
+const REPORT_TYPES: { id: RoadReportType; label: string; icon: string; color: string }[] = [
+  { id: "gai", label: "GAI / PÝGG Posti", icon: "shield-outline", color: "#ef4444" },
+  { id: "probka", label: "Sykylyk / Probka", icon: "car-outline", color: "#f59e0b" },
+  { id: "yopyk", label: "Ýol Ýapyk", icon: "close-circle-outline", color: "#7c3aed" },
+  { id: "basha", label: "Başga Duýduryş", icon: "warning-outline", color: "#0284c7" },
 ];
 
 function ReportCard({
@@ -43,7 +43,7 @@ function ReportCard({
     const result = await upvoteRoadReport(report.id, deviceId);
     if (result.rewarded) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert("🎉 Sylag!", "Bu habar tassyklandy! Habary beren 1 BP aldy.");
+      Alert.alert("Sylag!", "Bu habar tassyklandy! Habary beren 1 BP aldy.");
     }
     setVoting(false);
   }
@@ -53,7 +53,7 @@ function ReportCard({
       {/* Type badge + reward */}
       <View style={rc.topRow}>
         <View style={[rc.typeBadge, { backgroundColor: rType.color + "18" }]}>
-          <Text style={{ fontSize: 14 }}>{rType.emoji}</Text>
+          <Ionicons name={rType.icon as any} size={14} color={rType.color} />
           <Text style={[rc.typeBadgeText, { color: rType.color }]}>{rType.label}</Text>
         </View>
         {report.rewarded && (
@@ -84,7 +84,7 @@ function ReportCard({
           <View style={[rc.progressFill, { width: `${pct}%` as any, backgroundColor: rType.color }]} />
         </View>
         <Text style={[rc.progressLabel, { color: colors.mutedForeground }]}>
-          {report.upvoteCount}/3 tassyklama {report.upvoteCount >= 3 ? "✅" : ""}
+          {report.upvoteCount}/3 tassyklama {report.upvoteCount >= 3 ? "(tassyklandy)" : ""}
         </Text>
       </View>
 
@@ -92,7 +92,7 @@ function ReportCard({
       <View style={rc.footer}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
           <View style={[rc.avatar, { backgroundColor: rType.color + "20" }]}>
-            <Text style={{ fontSize: 12 }}>{rType.emoji}</Text>
+            <Ionicons name={rType.icon as any} size={12} color={rType.color} />
           </View>
           <Text style={[rc.reporter, { color: colors.mutedForeground }]}>{report.reporterNickname}</Text>
           <Text style={[rc.time, { color: colors.mutedForeground }]}>· {formatRelativeTime(report.createdAt)}</Text>
@@ -179,7 +179,7 @@ export default function InformatorScreen() {
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </Pressable>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={s.headerTitle}>Informator 🚦</Text>
+          <Text style={s.headerTitle}>Informator</Text>
           <Text style={s.headerSub}>Ýol ýagdaýyny habar beriň — 1 BP gazanyň</Text>
         </View>
         <Pressable
@@ -197,7 +197,7 @@ export default function InformatorScreen() {
           {[
             { label: "Habarlarym", value: myReports.length, icon: "document-text-outline", color: "#f59e0b" },
             { label: "Tassyklandy", value: myReports.filter(r => r.rewarded).length, icon: "checkmark-circle-outline", color: "#059669" },
-            { label: "BP Gazanyldı", value: myReports.filter(r => r.rewarded).length, icon: "wallet-outline", color: "#6366f1" },
+            { label: "BP Gazanyldy", value: myReports.filter(r => r.rewarded).length, icon: "wallet-outline", color: "#6366f1" },
           ].map((st, i) => (
             <View key={i} style={[s.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={[s.statIcon, { backgroundColor: st.color + "18" }]}>
@@ -211,7 +211,7 @@ export default function InformatorScreen() {
 
         {/* ── Info box ── */}
         <View style={[s.infoBox, { backgroundColor: "#f59e0b" + "10", borderColor: "#f59e0b" + "28" }]}>
-          <Text style={{ fontSize: 16 }}>💡</Text>
+          <Ionicons name="information-circle-outline" size={16} color="#f59e0b" />
           <Text style={[s.infoText, { color: colors.foreground }]}>
             Habar bereniňizde ony başga 3 ulanyjy tassyklasa, size <Text style={{ color: "#059669", fontWeight: "800" }}>1 BP</Text> we <Text style={{ color: "#f59e0b", fontWeight: "800" }}>+2 abraý baly</Text> geçirilýär.
           </Text>
@@ -222,7 +222,7 @@ export default function InformatorScreen() {
 
         {reports.length === 0 ? (
           <View style={[s.emptyBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={{ fontSize: 40, textAlign: "center", marginBottom: 8 }}>🛣️</Text>
+            <Ionicons name="navigate-outline" size={48} color={colors.mutedForeground} />
             <Text style={[s.emptyTitle, { color: colors.foreground }]}>Heniz habar ýok</Text>
             <Text style={[s.emptyDesc, { color: colors.mutedForeground }]}>
               Ýoldaky ýagdaý barada ilkinji habar beriň we 1 BP gazanyň!
@@ -285,7 +285,7 @@ export default function InformatorScreen() {
                       },
                     ]}
                   >
-                    <Text style={{ fontSize: 14 }}>{t.emoji}</Text>
+                    <Ionicons name={t.icon as any} size={14} color={selType === t.id ? "#fff" : t.color} />
                     <Text style={[s.typeBtnText, { color: selType === t.id ? "#fff" : colors.foreground }]}>
                       {t.label}
                     </Text>

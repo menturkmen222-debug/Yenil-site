@@ -27,17 +27,17 @@ export interface HyzmatItem {
 export const HYZMAT_CATEGORIES: {
   key: HyzmatCategory;
   label: string;
-  emoji: string;
+  icon: string;
   color: string;
 }[] = [
-  { key: "transport",  label: "Ulag / Transport", emoji: "🚌", color: "#3b82f6" },
-  { key: "repair",     label: "Bejeriş / Usta",   emoji: "🔧", color: "#f59e0b" },
-  { key: "beauty",     label: "Gözellik / Saç",    emoji: "💇", color: "#ec4899" },
-  { key: "food",       label: "Nahar / Kafe",       emoji: "🍽️", color: "#ef4444" },
-  { key: "education",  label: "Bilim / Okuw",       emoji: "📚", color: "#8b5cf6" },
-  { key: "digital",    label: "SMM / Dizaýn",       emoji: "📱", color: "#06b6d4" },
-  { key: "home",       label: "Öý hyzmatlary",      emoji: "🏠", color: "#10b981" },
-  { key: "other",      label: "Beýleki",            emoji: "⚡", color: "#64748b" },
+  { key: "transport",  label: "Ulag / Transport", icon: "bus-outline",           color: "#3b82f6" },
+  { key: "repair",     label: "Bejeriş / Usta",   icon: "construct-outline",     color: "#f59e0b" },
+  { key: "beauty",     label: "Gözellik / Saç",   icon: "cut-outline",           color: "#ec4899" },
+  { key: "food",       label: "Nahar / Kafe",      icon: "restaurant-outline",    color: "#ef4444" },
+  { key: "education",  label: "Bilim / Okuw",      icon: "school-outline",        color: "#8b5cf6" },
+  { key: "digital",    label: "SMM / Dizaýn",      icon: "phone-portrait-outline",color: "#06b6d4" },
+  { key: "home",       label: "Öý hyzmatlary",     icon: "home-outline",          color: "#10b981" },
+  { key: "other",      label: "Beýleki",           icon: "ellipsis-horizontal-outline", color: "#64748b" },
 ];
 
 const PATH = "hyzmatlar-v1";

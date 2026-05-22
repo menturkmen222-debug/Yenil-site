@@ -13,8 +13,8 @@ import { useBonusPul } from "@/contexts/BonusPulContext";
 const METHODS = [
   {
     id: "e-bilim",
-    title: "E-Bilim — O'qi va Ishla",
-    desc: "25+ sapak: AI, Freelance, Kripto, Techno. Testden ot va BP gazan",
+    title: "E-Bilim — Öwren we Gazan",
+    desc: "25+ sapak: AI, Frilanser, Kripto. Synag geç we BP gazan",
     icon: "book-outline" as const,
     badge: "0.05–0.3 BP",
     badgeColor: "#6366f1",
@@ -26,7 +26,7 @@ const METHODS = [
   {
     id: "agent-topup",
     title: "Agent — TMCell Balans",
-    desc: "100 TMT o'tkazsangiz, 115 BP (15% bonus) olasiz",
+    desc: "100 TMT geçirseňiz, 115 BP (15% bonus) alýarsyňyz",
     icon: "phone-portrait-outline" as const,
     badge: "+15% bonus",
     badgeColor: "#10b981",
@@ -38,9 +38,9 @@ const METHODS = [
   {
     id: "referal",
     title: "Ýeňil Referal",
-    desc: "Dostlaryngyzy chaqyryng, har biriniz uchun 0.5 BP + passiv daromad",
+    desc: "Dostlaryňyzy çagyrýarys, her biri üçin 0.5 BP + passiwli gazanç",
     icon: "people-outline" as const,
-    badge: "0.5 BP + passiv",
+    badge: "0.5 BP + passiwli",
     badgeColor: "#6366f1",
     gradient: ["#312e81", "#6366f1"] as [string, string],
     earn: "∞ BP",
@@ -49,10 +49,10 @@ const METHODS = [
   },
   {
     id: "informator",
-    title: "Informator — Yo'l Habarlar",
-    desc: "GAI, probka, yo'l to'siq xabar bering. 3 tasdiqlansa 1 BP oling",
+    title: "Informator — Ýol Habarlary",
+    desc: "GAI, probka, ýol böwet habar beriň. 3 tassyklansa 1 BP alyň",
     icon: "warning-outline" as const,
-    badge: "1 BP / xabar",
+    badge: "1 BP / habar",
     badgeColor: "#f59e0b",
     gradient: ["#78350f", "#f59e0b"] as [string, string],
     earn: "1 BP",
@@ -62,7 +62,7 @@ const METHODS = [
   {
     id: "kripto-birja",
     title: "P2P Kripto Birja",
-    desc: "Yuqori reputatsiyali agentlar USDT ↔ BP almashtiradi",
+    desc: "Ýokary reputasiýaly agentler USDT ↔ BP çalşýar",
     icon: "logo-bitcoin" as const,
     badge: "Elita",
     badgeColor: "#7c3aed",
@@ -73,8 +73,8 @@ const METHODS = [
   },
   {
     id: "nagt-cashout",
-    title: "Nagt Pul Chiqarish",
-    desc: "BP balansni shahar agenti orqali naqd TMT ga aylantiring",
+    title: "Nagt Pul Çykaryş",
+    desc: "BP balansy şäher agenti arkaly nagt TMT-a öwüriň",
     icon: "cash-outline" as const,
     badge: "P2P Nagt",
     badgeColor: "#0284c7",
@@ -85,8 +85,8 @@ const METHODS = [
   },
   {
     id: "kuryer",
-    title: "Yo'l-yo'lakay Kuryer",
-    desc: "Yo'lingizda birovning narsasini olib boring yoki topshiriq bajaring",
+    title: "Ýol Kurýeri",
+    desc: "Ýoluňyzda başgasynyň harydyny eltip beriň ýa-da tabşyryk ýerine ýetiriň",
     icon: "bicycle-outline" as const,
     badge: "50+ BP",
     badgeColor: "#d97706",
@@ -97,8 +97,8 @@ const METHODS = [
   },
   {
     id: "sanly-bazar-sell",
-    title: "Sanly Bazar — Satuvchi",
-    desc: "VPN, PUBG UC, dasturiy ta'minot sating va BP ishlang",
+    title: "Sanly Bazar — Satyjy",
+    desc: "VPN, PUBG UC, programma satyn we BP gazanyň",
     icon: "storefront-outline" as const,
     badge: "Öz bahanyz",
     badgeColor: "#db2777",
@@ -126,8 +126,8 @@ export default function PulGazanScreen() {
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </Pressable>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={s.headerTitle}>Pul Gazan 💰</Text>
-          <Text style={s.headerSub}>7 usul bilan BP va TMT ishlab oling</Text>
+          <Text style={s.headerTitle}>Pul Gazan</Text>
+          <Text style={s.headerSub}>7 usul bilen BP we TMT gazanyň</Text>
         </View>
       </LinearGradient>
 
@@ -146,7 +146,7 @@ export default function PulGazanScreen() {
             <View style={[s.balanceIconWrap, { backgroundColor: "#059669" + "18" }]}>
               <Ionicons name="wallet-outline" size={32} color="#059669" />
             </View>
-            <Text style={[s.balanceTip, { color: colors.mutedForeground }]}>Ishlang & ulanyng</Text>
+            <Text style={[s.balanceTip, { color: colors.mutedForeground }]}>Işläň we ulanyň</Text>
           </View>
         </View>
 

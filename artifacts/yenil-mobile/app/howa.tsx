@@ -15,29 +15,29 @@ import { addToHistory, getHistory, type OrderHistoryItem } from "@/lib/orderHist
 
 // ── Data ────────────────────────────────────────────────────────────
 const DOMESTIC = [
-  { code: "ASB", city: "Aşgabat", flag: "🏙️" },
-  { code: "MYP", city: "Mary", flag: "🕌" },
-  { code: "KRW", city: "Türkmenbaşy", flag: "⚓" },
-  { code: "CRZ", city: "Türkmenabat", flag: "🌿" },
-  { code: "TAZ", city: "Daşoguz", flag: "🏛️" },
+  { code: "ASB", city: "Aşgabat", flag: "" },
+  { code: "MYP", city: "Mary", flag: "" },
+  { code: "KRW", city: "Türkmenbaşy", flag: "" },
+  { code: "CRZ", city: "Türkmenabat", flag: "" },
+  { code: "TAZ", city: "Daşoguz", flag: "" },
 ];
 
 const INTERNATIONAL = [
-  { code: "ASB", city: "Aşgabat (TM)", flag: "🇹🇲" },
-  { code: "SVO", city: "Moskwa", flag: "🇷🇺" },
-  { code: "IST", city: "Stambul", flag: "🇹🇷" },
-  { code: "FRA", city: "Frankfurt", flag: "🇩🇪" },
-  { code: "LHR", city: "Londra", flag: "🇬🇧" },
-  { code: "PEK", city: "Pekin", flag: "🇨🇳" },
-  { code: "DXB", city: "Dubaý", flag: "🇦🇪" },
-  { code: "AUH", city: "Abu-Dabi", flag: "🇦🇪" },
-  { code: "DEL", city: "Deli", flag: "🇮🇳" },
-  { code: "MSQ", city: "Minskde", flag: "🇧🇾" },
-  { code: "KBP", city: "Kiýew", flag: "🇺🇦" },
-  { code: "GYD", city: "Baku", flag: "🇦🇿" },
-  { code: "KZN", city: "Kazan", flag: "🇷🇺" },
-  { code: "ATQ", city: "Amritsar", flag: "🇮🇳" },
-  { code: "BHX", city: "Birmingem", flag: "🇬🇧" },
+  { code: "ASB", city: "Aşgabat (TM)", flag: "" },
+  { code: "SVO", city: "Moskwa", flag: "" },
+  { code: "IST", city: "Stambul", flag: "" },
+  { code: "FRA", city: "Frankfurt", flag: "" },
+  { code: "LHR", city: "Londra", flag: "" },
+  { code: "PEK", city: "Pekin", flag: "" },
+  { code: "DXB", city: "Dubaý", flag: "" },
+  { code: "AUH", city: "Abu-Dabi", flag: "" },
+  { code: "DEL", city: "Deli", flag: "" },
+  { code: "MSQ", city: "Minskde", flag: "" },
+  { code: "KBP", city: "Kiýew", flag: "" },
+  { code: "GYD", city: "Baku", flag: "" },
+  { code: "KZN", city: "Kazan", flag: "" },
+  { code: "ATQ", city: "Amritsar", flag: "" },
+  { code: "BHX", city: "Birmingem", flag: "" },
 ];
 
 const INTL_CURRENCIES_UNUSED = [
@@ -84,7 +84,7 @@ function CityModal({
               onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onSelect(item); onClose(); }}
               style={({ pressed }) => [cm.cityRow, { backgroundColor: pressed ? colors.muted : "transparent" }]}
             >
-              <Text style={cm.cityFlag}>{item.flag}</Text>
+              <Ionicons name="location-outline" size={18} color={colors.mutedForeground} />
               <View style={{ flex: 1 }}>
                 <Text style={[cm.cityName, { color: colors.foreground }]}>{item.city}</Text>
                 <Text style={[cm.cityCode, { color: colors.mutedForeground }]}>IATA: {item.code}</Text>
@@ -416,7 +416,7 @@ export default function HowaScreen() {
                 <View style={{ flex: 1 }}>
                   <Text style={[s.routeLabel, { color: colors.mutedForeground }]}>Ugur (baryş)</Text>
                   <Text style={[s.routeCity, { color: from ? colors.foreground : colors.mutedForeground }]}>
-                    {from ? `${from.flag}  ${from.city}` : "Şäher saýlaň"}
+                    {from ? from.city : "Şäher saýlaň"}
                   </Text>
                   {from && <Text style={[s.routeCode, { color: colors.primary }]}>{from.code}</Text>}
                 </View>
@@ -437,7 +437,7 @@ export default function HowaScreen() {
                 <View style={{ flex: 1 }}>
                   <Text style={[s.routeLabel, { color: colors.mutedForeground }]}>Ugur (baryljak)</Text>
                   <Text style={[s.routeCity, { color: to ? colors.foreground : colors.mutedForeground }]}>
-                    {to ? `${to.flag}  ${to.city}` : "Şäher saýlaň"}
+                    {to ? to.city : "Şäher saýlaň"}
                   </Text>
                   {to && <Text style={[s.routeCode, { color: "#10b981" }]}>{to.code}</Text>}
                 </View>
@@ -794,9 +794,9 @@ export default function HowaScreen() {
                 </View>
               </View>
               <View style={s.bookingMeta}>
-                <Text style={s.bookingMetaText}>📅 {depDate}</Text>
-                <Text style={s.bookingMetaText}>👤 {passengers} ýolagçy</Text>
-                <Text style={s.bookingMetaText}>⭐ BP</Text>
+                <Text style={s.bookingMetaText}>Senesi: {depDate}</Text>
+                <Text style={s.bookingMetaText}>Ýolagçy: {passengers}</Text>
+                <Text style={s.bookingMetaText}>BP</Text>
               </View>
             </View>
 
@@ -873,14 +873,14 @@ export default function HowaScreen() {
             AEROPORT MAGLUMAT
           </Text>
           {([
-            { code: "ASB", name: "Aşgabat Halkara Aeroporty", terminal: "T1, T2", icon: "🏙️" },
-            { code: "MYP", name: "Mary Aeroporty", terminal: "T1", icon: "🕌" },
-            { code: "CRZ", name: "Türkmenabat Aeroporty", terminal: "T1", icon: "🌿" },
-            { code: "KRW", name: "Türkmenbaşy Aeroporty", terminal: "T1", icon: "⚓" },
-            { code: "TAZ", name: "Daşoguz Aeroporty", terminal: "T1", icon: "🏛️" },
+            { code: "ASB", name: "Aşgabat Halkara Aeroporty", terminal: "T1, T2" },
+            { code: "MYP", name: "Mary Aeroporty", terminal: "T1" },
+            { code: "CRZ", name: "Türkmenabat Aeroporty", terminal: "T1" },
+            { code: "KRW", name: "Türkmenbaşy Aeroporty", terminal: "T1" },
+            { code: "TAZ", name: "Daşoguz Aeroporty", terminal: "T1" },
           ] as const).map((ap) => (
             <View key={ap.code} style={{ backgroundColor: colors.card, borderRadius: 16, borderWidth: 1, borderColor: colors.border, padding: 14, marginBottom: 10, flexDirection: "row", alignItems: "center", gap: 14 }}>
-              <Text style={{ fontSize: 28 }}>{ap.icon}</Text>
+              <Ionicons name="airplane-outline" size={28} color={colors.primary} />
               <View style={{ flex: 1 }}>
                 <Text style={{ color: colors.foreground, fontSize: 14, fontWeight: "800" }}>{ap.name}</Text>
                 <Text style={{ color: colors.mutedForeground, fontSize: 12, marginTop: 2 }}>Terminal: {ap.terminal}</Text>
@@ -1004,7 +1004,6 @@ const s = StyleSheet.create({
 
   // Hero
   hero: {
-    background: "transparent",
     paddingHorizontal: 16,
     paddingBottom: 20,
     backgroundColor: "#0ea5e9",

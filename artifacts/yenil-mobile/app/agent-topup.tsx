@@ -90,7 +90,7 @@ export default function AgentTopupScreen() {
         </Pressable>
         <View style={{ flex: 1, marginLeft: 12 }}>
           <Text style={s.headerTitle}>Agent — TMT → BP</Text>
-          <Text style={s.headerSub}>Balansdan pul o'tkazing, +15% bonus BP oling</Text>
+          <Text style={s.headerSub}>Admin kartasyna TMT geçiriň, +15% bonus BP alyň</Text>
         </View>
       </LinearGradient>
 
@@ -198,7 +198,7 @@ export default function AgentTopupScreen() {
               )}
 
               <Text style={[s.warningText, { color: colors.mutedForeground }]}>
-                ⚠️ Pul geçireniňizden SOŇRA sargyt iberiň. Tassyklanmaz öň BP berilmez.
+                Pul geçireniňizden SOŇRA sargyt iberiň. Tassyklanmaz öň BP berilmez.
               </Text>
 
               <Pressable

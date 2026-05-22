@@ -79,7 +79,7 @@ const CATEGORIES: { id: Category; label: string; icon: keyof typeof Ionicons.gly
   { id: "all",      label: "Ählisi",      icon: "apps-outline",     color: "#6366f1" },
   { id: "railway",  label: "Demirýol",    icon: "train-outline",    color: "#10b981" },
   { id: "finance",  label: "Maliýe",      icon: "cash-outline",     color: "#f59e0b" },
-  { id: "tech",     label: "Tehnol.",     icon: "laptop-outline",   color: "#0ea5e9" },
+  { id: "tech",     label: "Tehno.",      icon: "laptop-outline",   color: "#0ea5e9" },
   { id: "language", label: "Dil",         icon: "language-outline", color: "#8b5cf6" },
   { id: "math",     label: "Matematika",  icon: "calculator-outline", color: "#ef4444" },
   { id: "health",   label: "Saglyk",      icon: "heart-outline",    color: "#ec4899" },
@@ -450,7 +450,7 @@ export default function EbilimScreen() {
             <Text style={s.headerSub}>Öwren · Synag et · Ös</Text>
           </View>
           <View style={s.streakBadge}>
-            <Text style={{ fontSize: 14 }}>🔥</Text>
+            <Ionicons name="flame-outline" size={14} color="#fff" />
             <Text style={s.streakText}>{prog.streak}</Text>
           </View>
         </View>
@@ -666,7 +666,7 @@ export default function EbilimScreen() {
                 {/* Progress */}
                 {p.done > 0 && (
                   <View style={[s.progRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                    <Text style={[s.progLabel, { color: colors.foreground }]}>{p.pct === 100 ? "✅ Tamamlandy!" : `Ösüş: ${p.done}/${p.total} sapak`}</Text>
+                    <Text style={[s.progLabel, { color: colors.foreground }]}>{p.pct === 100 ? "Tamamlandy!" : `Ösüş: ${p.done}/${p.total} sapak`}</Text>
                     <View style={[s.progressBar, { backgroundColor: colors.muted, marginTop: 8 }]}>
                       <View style={[s.progressFill, { width: `${p.pct}%` as any, backgroundColor: activeCourse.color }]} />
                     </View>
@@ -729,7 +729,7 @@ export default function EbilimScreen() {
                   onPress={() => {
                     const durMins = parseInt(activeLesson.duration) || 10;
                     markLessonDone(activeCourse.id, activeLesson.id, durMins);
-                    Alert.alert("✅ Tamamlandy!", "Sapak belgilendi!", [{ text: "Ýap" }]);
+                    Alert.alert("Tamamlandy!", "Sapak belgilendi!", [{ text: "Ýap" }]);
                   }}
                   style={({ pressed }) => [s.doneBtn, { backgroundColor: activeCourse.color, opacity: pressed ? 0.85 : 1 }]}>
                   <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
@@ -822,7 +822,7 @@ export default function EbilimScreen() {
                   <Text style={[s.quizResultLabel, { color: colors.mutedForeground }]}>Netije</Text>
                 </View>
                 <Text style={[s.quizResultMsg, { color: colors.foreground }]}>
-                  {quizScore === 100 ? "🏆 Ajaýyp! 100%!" : quizScore >= 80 ? "🎉 Gowy netije!" : quizScore >= 50 ? "📚 Kän öwrenmeli!" : "💪 Täzeden synanyş!"}
+                  {quizScore === 100 ? "Ajaýyp! 100%!" : quizScore >= 80 ? "Gowy netije!" : quizScore >= 50 ? "Kän öwrenmeli!" : "Täzeden synanyş!"}
                 </Text>
                 <Text style={[s.quizResultSub, { color: colors.mutedForeground }]}>
                   {quizAnswers.filter((a, i) => a === activeQuiz.questions[i].correct).length} / {activeQuiz.questions.length} dogry jogap

@@ -16,12 +16,12 @@ import {
 } from "@/lib/firebase";
 import { getLevel, formatRelativeTime } from "@/lib/reputation";
 
-const CATEGORIES: { id: DigitalCategory; label: string; emoji: string; color: string; examples: string }[] = [
-  { id: "vpn", label: "VPN", emoji: "🔒", color: "#0284c7", examples: "1 aý, 3 aý, ýyllyk" },
-  { id: "gaming", label: "Oýun", emoji: "🎮", color: "#7c3aed", examples: "PUBG UC, Free Fire, Steam" },
-  { id: "software", label: "Programma", emoji: "💻", color: "#059669", examples: "Antivirus, Office, ş.m." },
-  { id: "education", label: "Bilim", emoji: "📚", color: "#d97706", examples: "Kurslar, Kitaplar" },
-  { id: "other", label: "Beýleki", emoji: "⭐", color: "#6366f1", examples: "Islendik sanly haryt" },
+const CATEGORIES: { id: DigitalCategory; label: string; icon: string; color: string; examples: string }[] = [
+  { id: "vpn", label: "VPN", icon: "lock-closed-outline", color: "#0284c7", examples: "1 aý, 3 aý, ýyllyk" },
+  { id: "gaming", label: "Oýun", icon: "game-controller-outline", color: "#7c3aed", examples: "PUBG UC, Free Fire, Steam" },
+  { id: "software", label: "Programma", icon: "desktop-outline", color: "#059669", examples: "Antivirus, Office, ş.m." },
+  { id: "education", label: "Bilim", icon: "book-outline", color: "#d97706", examples: "Kurslar, Kitaplar" },
+  { id: "other", label: "Beýleki", icon: "ellipsis-horizontal-outline", color: "#6366f1", examples: "Islendik sanly haryt" },
 ];
 
 export default function SanlyBazarSellScreen() {
@@ -91,7 +91,7 @@ export default function SanlyBazarSellScreen() {
             const result = await buyDigitalListing(listingId, deviceId);
             if (result.success) {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              Alert.alert("✅ Satyn alyndy!", result.message);
+              Alert.alert("Satyn alyndy!", result.message);
             } else {
               Alert.alert("Ýalňyşlyk", result.message);
             }
@@ -126,7 +126,7 @@ export default function SanlyBazarSellScreen() {
         {/* Header */}
         <View style={lc.cardHead}>
           <View style={[lc.catBadge, { backgroundColor: cat.color + "18" }]}>
-            <Text style={{ fontSize: 14 }}>{cat.emoji}</Text>
+            <Ionicons name={cat.icon as any} size={14} color={cat.color} />
             <Text style={[lc.catText, { color: cat.color }]}>{cat.label}</Text>
           </View>
           <View style={[lc.priceBadge, { backgroundColor: cat.color + "15" }]}>
@@ -148,7 +148,7 @@ export default function SanlyBazarSellScreen() {
         {/* Seller */}
         <View style={lc.sellerRow}>
           <View style={[lc.sellerAvatar, { backgroundColor: lv.bg, borderColor: lv.border }]}>
-            <Text style={{ fontSize: 12 }}>{lv.emoji}</Text>
+            <Ionicons name={lv.icon as any} size={12} color={lv.color} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[lc.sellerName, { color: colors.foreground }]}>
@@ -192,7 +192,7 @@ export default function SanlyBazarSellScreen() {
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </Pressable>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={s.headerTitle}>Sanly Bazar 🛍️</Text>
+          <Text style={s.headerTitle}>Sanly Bazar</Text>
           <Text style={s.headerSub}>Sanly haryt sat ýa-da satyn al — BP bilen</Text>
         </View>
         <Pressable
@@ -243,7 +243,6 @@ export default function SanlyBazarSellScreen() {
                 onPress={() => setActiveCategory(c.id)}
                 style={[s.catFilterBtn, { backgroundColor: activeCategory === c.id ? c.color : colors.card, borderColor: activeCategory === c.id ? c.color : colors.border }]}
               >
-                <Text style={{ fontSize: 12 }}>{c.emoji}</Text>
                 <Text style={[s.catFilterText, { color: activeCategory === c.id ? "#fff" : colors.foreground }]}>{c.label}</Text>
               </Pressable>
             ))}
@@ -253,7 +252,7 @@ export default function SanlyBazarSellScreen() {
         {/* ── Listings ── */}
         {filteredListings.length === 0 ? (
           <View style={[s.empty, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={{ fontSize: 40, textAlign: "center" }}>🛍️</Text>
+            <Ionicons name="storefront-outline" size={48} color={colors.mutedForeground} />
             <Text style={[s.emptyTitle, { color: colors.foreground }]}>
               {activeTab === "mine" ? "Siz entek haryt satmadyňyz" : "Bu kategoriýada haryt ýok"}
             </Text>
@@ -313,7 +312,7 @@ export default function SanlyBazarSellScreen() {
                       { backgroundColor: category === c.id ? c.color : colors.card, borderColor: category === c.id ? c.color : colors.border },
                     ]}
                   >
-                    <Text style={{ fontSize: 14 }}>{c.emoji}</Text>
+                    <Ionicons name={c.icon as any} size={14} color={category === c.id ? "#fff" : c.color} />
                     <Text style={[s.catBtnText, { color: category === c.id ? "#fff" : colors.foreground }]}>
                       {c.label}
                     </Text>
@@ -378,7 +377,7 @@ export default function SanlyBazarSellScreen() {
             </View>
 
             <View style={[s.tipBox, { backgroundColor: "#db2777" + "10", borderColor: "#db2777" + "25" }]}>
-              <Text style={{ fontSize: 16 }}>💡</Text>
+              <Ionicons name="information-circle-outline" size={16} color="#db2777" />
               <Text style={[s.tipText, { color: colors.foreground }]}>
                 Haryt satylandan soňra <Text style={{ color: "#db2777", fontWeight: "800" }}>BP hasabyňyza</Text> geçirilýär. Abraý balyňyz hem ýokarlanýar.
               </Text>

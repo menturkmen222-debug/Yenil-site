@@ -79,7 +79,7 @@ export default function ReferalScreen() {
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </Pressable>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={s.headerTitle}>Ýeňil Referal 🔗</Text>
+          <Text style={s.headerTitle}>Ýeňil Referal</Text>
           <Text style={s.headerSub}>Dostlaryngyz üçin BP gazanyň</Text>
         </View>
       </LinearGradient>
@@ -97,7 +97,7 @@ export default function ReferalScreen() {
               {[
                 { label: "Çagyryldy", value: stats?.totalJoins ?? 0, icon: "people-outline", color: "#6366f1" },
                 { label: "Jemi Gazanylan", value: `${(stats?.totalEarned ?? 0).toFixed(1)} BP`, icon: "wallet-outline", color: "#059669" },
-                { label: "Passiv Komissiya", value: `${(stats?.passiveEarned ?? 0).toFixed(1)} BP`, icon: "trending-up-outline", color: "#f59e0b" },
+                { label: "Passiwli Komissiýa", value: `${(stats?.passiveEarned ?? 0).toFixed(1)} BP`, icon: "trending-up-outline", color: "#f59e0b" },
               ].map((st, i) => (
                 <View key={i} style={[s.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
                   <View style={[s.statIcon, { backgroundColor: st.color + "18" }]}>
@@ -151,7 +151,7 @@ export default function ReferalScreen() {
                 {
                   icon: "trending-up-outline",
                   color: "#059669",
-                  title: "Passiv daromad",
+                  title: "Passiwli gazanç",
                   desc: "Dostuňyz her gezek bilet satyn alandan ýa-da taksi çagyrandan 0.2 BP alýarsyňyz",
                 },
                 {

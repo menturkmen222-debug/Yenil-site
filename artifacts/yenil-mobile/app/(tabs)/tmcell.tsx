@@ -130,7 +130,7 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
           const result = await sendBP(id, amt, transferNote);
           if (result.success) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Alert.alert("✅ Üstünlikli", result.message);
+            Alert.alert("Üstünlikli", result.message);
             setToId(""); setTransferAmount(""); setTransferNote("");
             setTransferDone(true);
             getBPTransferHistory(deviceId).then(h => setTransferHistory(h));

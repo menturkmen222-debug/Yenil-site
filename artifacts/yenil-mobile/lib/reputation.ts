@@ -4,7 +4,7 @@ export interface LevelInfo {
   id: ReputationLevel;
   label: string;
   labelTm: string;
-  emoji: string;
+  icon: string;
   color: string;
   bg: string;
   border: string;
@@ -18,7 +18,7 @@ export const LEVELS: LevelInfo[] = [
     id: "yeni",
     label: "Täze",
     labelTm: "Täze Agza",
-    emoji: "🌱",
+    icon: "leaf-outline",
     color: "#64748b",
     bg: "rgba(100,116,139,0.12)",
     border: "rgba(100,116,139,0.3)",
@@ -30,7 +30,7 @@ export const LEVELS: LevelInfo[] = [
     id: "ynamdyr",
     label: "Ynamdyr",
     labelTm: "Ynamly Agza",
-    emoji: "🔵",
+    icon: "shield-outline",
     color: "#2563eb",
     bg: "rgba(37,99,235,0.12)",
     border: "rgba(37,99,235,0.3)",
@@ -42,7 +42,7 @@ export const LEVELS: LevelInfo[] = [
     id: "abrayli",
     label: "Abraýly",
     labelTm: "Abraýly Agza",
-    emoji: "🟢",
+    icon: "shield-checkmark-outline",
     color: "#059669",
     bg: "rgba(5,150,105,0.12)",
     border: "rgba(5,150,105,0.3)",
@@ -54,7 +54,7 @@ export const LEVELS: LevelInfo[] = [
     id: "altyn",
     label: "Altyn",
     labelTm: "Altyn Agza",
-    emoji: "🌟",
+    icon: "star-outline",
     color: "#d97706",
     bg: "rgba(217,119,6,0.12)",
     border: "rgba(217,119,6,0.3)",
@@ -66,7 +66,7 @@ export const LEVELS: LevelInfo[] = [
     id: "elita",
     label: "Elita",
     labelTm: "Elita Agza",
-    emoji: "👑",
+    icon: "trophy-outline",
     color: "#7c3aed",
     bg: "rgba(124,58,237,0.12)",
     border: "rgba(124,58,237,0.3)",
@@ -100,12 +100,12 @@ export function getProgressPercent(score: number): number {
 
 export function getImprovementTips(score: number): Array<{ icon: string; text: string }> {
   const all = [
-    { icon: "✅", text: "Sargyçlary wagtynda tamamlaň (+5 BP her sargyt üçin)" },
-    { icon: "💬", text: "Soraglara jogap beriň we kömek ediň (+3 her jogap)" },
-    { icon: "🤝", text: "Başga agzalar bilen dogrylyk bilen işläň" },
-    { icon: "📋", text: "Doly we dogry maglumat beriň" },
-    { icon: "⏰", text: "Wagt möhletlerini berjaý ediň" },
-    { icon: "🚫", text: "Jedelli ýagdaýlardan gaça duruň (-15 her jedel)" },
+    { icon: "checkmark-circle-outline", text: "Sargyçlary wagtynda tamamlaň (+5 BP her sargyt üçin)" },
+    { icon: "chatbubble-outline", text: "Soraglara jogap beriň we kömek ediň (+3 her jogap)" },
+    { icon: "handshake-outline", text: "Başga agzalar bilen dogrylyk bilen işläň" },
+    { icon: "document-text-outline", text: "Doly we dogry maglumat beriň" },
+    { icon: "time-outline", text: "Wagt möhletlerini berjaý ediň" },
+    { icon: "ban-outline", text: "Jedelli ýagdaýlardan gaça duruň (-15 her jedel)" },
   ];
   if (score < 20) return [all[0], all[2], all[3]];
   if (score < 45) return [all[0], all[1], all[4]];

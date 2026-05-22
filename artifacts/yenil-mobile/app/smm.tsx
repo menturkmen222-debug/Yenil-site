@@ -105,10 +105,10 @@ const BUDGETS = [
 
 // ── Experience levels ──────────────────────────────────────────────
 const EXP_LEVELS = [
-  { id: "junior", label: "0–1 ýyl", icon: "🌱" },
-  { id: "middle", label: "1–3 ýyl", icon: "⚡" },
-  { id: "senior", label: "3–6 ýyl", icon: "🔥" },
-  { id: "expert", label: "6+ ýyl", icon: "💎" },
+  { id: "junior", label: "0–1 ýyl", icon: "leaf-outline" as const },
+  { id: "middle", label: "1–3 ýyl", icon: "flash-outline" as const },
+  { id: "senior", label: "3–6 ýyl", icon: "flame-outline" as const },
+  { id: "expert", label: "6+ ýyl", icon: "diamond-outline" as const },
 ];
 
 // ── Contact prefs ──────────────────────────────────────────────────
@@ -467,7 +467,7 @@ function SellerForm({
                   borderColor: expLevel === el.id ? service.color : colors.border,
                 }]}
               >
-                <Text style={sf.expEmoji}>{el.icon}</Text>
+                <Ionicons name={el.icon} size={18} color={expLevel === el.id ? "#fff" : service?.color ?? "#6366f1"} />
                 <Text style={[sf.expLabel, { color: expLevel === el.id ? "#fff" : colors.foreground }]}>{el.label}</Text>
               </Pressable>
             ))}
@@ -599,7 +599,7 @@ function SuccessScreen({
       </Animated.View>
 
       <Text style={[sf.successTitle, { color: colors.foreground }]}>
-        {role === "buyer" ? "Haýyşnama kabul edildi!" : "Profil iberldi!"}
+        {role === "buyer" ? "Haýyşnama kabul edildi!" : "Profil iberildi!"}
       </Text>
       <Text style={[sf.successDesc, { color: colors.mutedForeground }]}>
         {role === "buyer"
@@ -614,11 +614,11 @@ function SuccessScreen({
         <View style={{ flex: 1 }}>
           <Text style={[{ fontWeight: "700", color: colors.foreground, fontSize: 14 }]}>{service.label}</Text>
           <Text style={[{ color: colors.mutedForeground, fontSize: 12, marginTop: 2 }]}>
-            {role === "buyer" ? "Hizmat alyjy" : "Hünärmen"}
+            {role === "buyer" ? "Hyzmat alyjy" : "Hünärmen"}
           </Text>
         </View>
-        <View style={[{ backgroundColor: "#dcfce7", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 }]}>
-          <Text style={[{ color: "#15803d", fontSize: 11, fontWeight: "700" }]}>✓ Iberildi</Text>
+        <View style={[{ backgroundColor: colors.success + "20", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 }]}>
+          <Text style={[{ color: colors.success, fontSize: 11, fontWeight: "700" }]}>Iberildi</Text>
         </View>
       </View>
 
