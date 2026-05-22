@@ -12,6 +12,18 @@ import { useBonusPul } from "@/contexts/BonusPulContext";
 
 const METHODS = [
   {
+    id: "e-bilim",
+    title: "E-Bilim — O'qi va Ishla",
+    desc: "25+ sapak: AI, Freelance, Kripto, Techno. Testden ot va BP gazan",
+    icon: "book-outline" as const,
+    badge: "0.05–0.3 BP",
+    badgeColor: "#6366f1",
+    gradient: ["#1e1b4b", "#6366f1"] as [string, string],
+    earn: "0.3 BP/sapak",
+    route: "/e-bilim",
+    hot: true,
+  },
+  {
     id: "agent-topup",
     title: "Agent — TMCell Balans",
     desc: "100 TMT o'tkazsangiz, 115 BP (15% bonus) olasiz",

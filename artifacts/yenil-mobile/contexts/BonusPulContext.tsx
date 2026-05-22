@@ -1,10 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { db, ref, onValue, getUserBalance, deductBalance, deductBalanceAtomic, saveOrder, transferBP } from "@/lib/firebase";
+import {
+  db, ref, onValue,
+  getUserBalance, deductBalance, deductBalanceAtomic, saveOrder, transferBP,
+} from "@/lib/firebase";
 import { getDeviceIdAsync } from "@/lib/deviceId";
 
 interface BonusPulContextType {
   balance: number;
   deviceId: string;
+  reputationScore: number;
   refreshBalance: () => void;
   deduct: (amount: number) => Promise<boolean>;
   deductAtomic: (amount: number) => Promise<{ success: boolean; newBalance: number }>;
@@ -16,6 +20,7 @@ interface BonusPulContextType {
 const BonusPulContext = createContext<BonusPulContextType>({
   balance: 0,
   deviceId: "",
+  reputationScore: 20,
   refreshBalance: () => {},
   deduct: async () => false,
   deductAtomic: async () => ({ success: false, newBalance: 0 }),
@@ -27,6 +32,7 @@ const BonusPulContext = createContext<BonusPulContextType>({
 export function BonusPulProvider({ children }: { children: React.ReactNode }) {
   const [balance, setBalance] = useState<number>(0);
   const [deviceId, setDeviceId] = useState<string>("");
+  const [reputationScore, setReputationScore] = useState<number>(20);
 
   useEffect(() => {
     getDeviceIdAsync().then(id => setDeviceId(id));
@@ -34,12 +40,21 @@ export function BonusPulProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!deviceId) return;
+
     const balRef = ref(db, `user-balances/${deviceId}`);
-    const unsub = onValue(balRef, snap => {
-      if (snap.exists()) setBalance(snap.val().balance ?? 0);
-      else setBalance(0);
+    const unsubBal = onValue(balRef, snap => {
+      setBalance(snap.exists() ? (snap.val().balance ?? 0) : 0);
     });
-    return () => unsub();
+
+    const repRef = ref(db, `reputation/${deviceId}/score`);
+    const unsubRep = onValue(repRef, snap => {
+      setReputationScore(snap.exists() ? (snap.val() ?? 20) : 20);
+    });
+
+    return () => {
+      unsubBal();
+      unsubRep();
+    };
   }, [deviceId]);
 
   const refreshBalance = useCallback(async () => {
@@ -74,7 +89,9 @@ export function BonusPulProvider({ children }: { children: React.ReactNode }) {
   }, [deviceId]);
 
   return (
-    <BonusPulContext.Provider value={{ balance, deviceId, refreshBalance, deduct, deductAtomic, buyBonusPul, sellBonusPul, sendBP }}>
+    <BonusPulContext.Provider
+      value={{ balance, deviceId, reputationScore, refreshBalance, deduct, deductAtomic, buyBonusPul, sellBonusPul, sendBP }}
+    >
       {children}
     </BonusPulContext.Provider>
   );

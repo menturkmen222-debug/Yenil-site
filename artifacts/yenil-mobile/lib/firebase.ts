@@ -1076,3 +1076,194 @@ export async function seedTestAccount(deviceId: string): Promise<void> {
     updatedAt: new Date().toISOString(),
   });
 }
+
+// ══════════════════════════════════════════════════════════════════
+//  E-BİLİM — Learn & Earn Ecosystem
+// ══════════════════════════════════════════════════════════════════
+
+export function watchCompletedLessons(
+  deviceId: string,
+  cb: (ids: string[]) => void
+): () => void {
+  const r = ref(db, `e-bilim/${deviceId}/completed`);
+  return onValue(r, snap => {
+    cb(snap.exists() ? Object.keys(snap.val()) : []);
+  });
+}
+
+export function watchUnlockedLessons(
+  deviceId: string,
+  cb: (ids: string[]) => void
+): () => void {
+  const r = ref(db, `e-bilim/${deviceId}/unlocked`);
+  return onValue(r, snap => {
+    cb(snap.exists() ? Object.keys(snap.val()) : []);
+  });
+}
+
+export async function submitQuizAndEarnBP(
+  deviceId: string,
+  lessonId: string,
+  passed: boolean,
+  bpReward: number
+): Promise<{ alreadyClaimed: boolean; bpAwarded: number }> {
+  try {
+    const claimedSnap = await get(ref(db, `e-bilim/${deviceId}/completed/${lessonId}`));
+    if (claimedSnap.exists()) return { alreadyClaimed: true, bpAwarded: 0 };
+
+    await set(ref(db, `e-bilim/${deviceId}/completed/${lessonId}`), {
+      completedAt: new Date().toISOString(),
+      passed,
+      bpAwarded: passed ? bpReward : 0,
+    });
+
+    if (passed) {
+      await addBalance(deviceId, bpReward);
+      const totalSnap = await get(ref(db, `e-bilim/${deviceId}/totalBPEarned`));
+      const prev = totalSnap.exists() ? (totalSnap.val() as number) : 0;
+      await set(ref(db, `e-bilim/${deviceId}/totalBPEarned`), prev + bpReward);
+      await saveReputationEntry(deviceId, {
+        type: "positive",
+        reason: `E-Bilim sapak tamamlandy (+${bpReward.toFixed(2)} BP)`,
+        delta: 1,
+        timestamp: new Date().toISOString(),
+        isPublic: false,
+      });
+    }
+
+    return { alreadyClaimed: false, bpAwarded: passed ? bpReward : 0 };
+  } catch {
+    return { alreadyClaimed: false, bpAwarded: 0 };
+  }
+}
+
+export async function unlockPremiumLesson(
+  deviceId: string,
+  lessonId: string,
+  bpCost: number
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const snap = await get(ref(db, `e-bilim/${deviceId}/unlocked/${lessonId}`));
+    if (snap.exists()) return { success: true, message: "Eýýäm açyk" };
+
+    const result = await deductBalanceAtomic(deviceId, bpCost);
+    if (!result.success) {
+      return { success: false, message: `Ýeterlik BP ýok (${bpCost} BP gerek)` };
+    }
+
+    await set(ref(db, `e-bilim/${deviceId}/unlocked/${lessonId}`), {
+      unlockedAt: new Date().toISOString(),
+      bpSpent: bpCost,
+    });
+
+    return { success: true, message: "Sapak açyldy!" };
+  } catch {
+    return { success: false, message: "Açmak mümkin bolmady" };
+  }
+}
+
+export async function getEBilimStats(
+  deviceId: string
+): Promise<{ completedCount: number; totalBPEarned: number }> {
+  try {
+    const [completedSnap, bpSnap] = await Promise.all([
+      get(ref(db, `e-bilim/${deviceId}/completed`)),
+      get(ref(db, `e-bilim/${deviceId}/totalBPEarned`)),
+    ]);
+    return {
+      completedCount: completedSnap.exists() ? Object.keys(completedSnap.val()).length : 0,
+      totalBPEarned: bpSnap.exists() ? (bpSnap.val() as number) : 0,
+    };
+  } catch {
+    return { completedCount: 0, totalBPEarned: 0 };
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SMS Anti-Spoofing — Agent Deposit Auto-Verification
+// ══════════════════════════════════════════════════════════════════
+
+const TRUSTED_BANK_SHORT_NUMBERS = ["8600", "900", "5000", "1400", "1700", "3600"];
+
+export interface SmsVerificationData {
+  sender: string;
+  amount: number;
+  transactionId: string;
+  timestamp: string;
+}
+
+export async function verifySmsAndConfirmDeposit(
+  deviceId: string,
+  depositId: string,
+  sms: SmsVerificationData
+): Promise<{ verified: boolean; message: string }> {
+  try {
+    const isTrustedSender = TRUSTED_BANK_SHORT_NUMBERS.some(n =>
+      sms.sender.replace(/\s/g, "").includes(n)
+    );
+
+    if (!isTrustedSender) {
+      await saveReputationEntry(deviceId, {
+        type: "negative",
+        reason: "Soxta SMS ibermeye synanyşdy — penaltý",
+        delta: -20,
+        timestamp: new Date().toISOString(),
+        isPublic: false,
+      });
+      await set(ref(db, `sms-violations/${deviceId}`), {
+        lastAttempt: new Date().toISOString(),
+        sender: sms.sender,
+        blocked: true,
+      });
+      return {
+        verified: false,
+        message: "Ynamly bank belgisinden däl. Abraý balyňyz -20 bal düşdi we bloklandy.",
+      };
+    }
+
+    const depositSnap = await get(ref(db, `agent-deposits/${depositId}`));
+    if (!depositSnap.exists()) return { verified: false, message: "Goýum tapylmady" };
+
+    const deposit = depositSnap.val() as {
+      deviceId: string;
+      tmtAmount: number;
+      status: string;
+    };
+
+    if (deposit.deviceId !== deviceId) return { verified: false, message: "Rugsat ýok" };
+    if (deposit.status !== "pending") return { verified: false, message: "Goýum eýýäm işlendi" };
+
+    const amountMatch = Math.abs(deposit.tmtAmount - sms.amount) < 0.01;
+    if (!amountMatch) {
+      await saveReputationEntry(deviceId, {
+        type: "negative",
+        reason: "SMS möçberi goýum bilen gabat gelmedi",
+        delta: -5,
+        timestamp: new Date().toISOString(),
+        isPublic: false,
+      });
+      return {
+        verified: false,
+        message: `SMS-däki möçber gabat gelenok. Abraý balyňyz -5 bal düşdi.`,
+      };
+    }
+
+    const smsAge = Date.now() - new Date(sms.timestamp).getTime();
+    if (smsAge > 30 * 60 * 1000) {
+      return { verified: false, message: "SMS möhleti geçipdir (30 minut çägi)" };
+    }
+
+    const bpAmount = Math.round(deposit.tmtAmount * 1.15 * 100) / 100;
+    await update(ref(db, `agent-deposits/${depositId}`), {
+      status: "confirmed",
+      confirmedAt: new Date().toISOString(),
+      transactionId: sms.transactionId,
+      autoVerified: true,
+    });
+    await addBalance(deviceId, bpAmount);
+
+    return { verified: true, message: `Tassyklandy! +${bpAmount.toFixed(2)} BP goşuldy.` };
+  } catch {
+    return { verified: false, message: "Tassyklama ýerine ýetirilmedi. Täzeden synanyşyň." };
+  }
+}

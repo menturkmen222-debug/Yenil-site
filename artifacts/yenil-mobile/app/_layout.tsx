@@ -44,6 +44,7 @@ function RootLayoutNav() {
       <Stack.Screen name="nagt-cashout" options={{ headerShown: false }} />
       <Stack.Screen name="kuryer" options={{ headerShown: false }} />
       <Stack.Screen name="sanly-bazar-sell" options={{ headerShown: false }} />
+      <Stack.Screen name="e-bilim" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );
