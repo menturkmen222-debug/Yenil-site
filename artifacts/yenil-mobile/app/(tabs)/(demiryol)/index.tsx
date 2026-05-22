@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
-  Alert, ActivityIndicator, Platform, Image, Linking,
+  Alert, ActivityIndicator, Platform, Linking,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
-import { uploadImage } from "@/lib/upload";
+import { deductBalanceAtomic } from "@/lib/firebase";
+import BPCheckoutModal from "@/components/BPCheckoutModal";
 
 const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AEDA785F26CB/9A8CACA4-5889-4D47-903E-BF12F059E175`;
-const PAYMENT_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
+
 const DEMIRYOL_API = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api/demiryol`
   : "/api/demiryol";
@@ -55,7 +55,6 @@ const TRAIN_TYPES = [
 
 type MainSection = "choose" | "direct" | "agent" | "sms";
 type DirectSection = "form" | "payment" | "confirm" | "success";
-type ProofType = "screenshot" | "sms" | "bonus";
 
 function PickerRow({ label, value, onNext, onPrev }: { label: string; value: string; onNext: () => void; onPrev: () => void }) {
   const colors = useColors();
@@ -85,7 +84,7 @@ const pr = StyleSheet.create({
 export default function DemiryolScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { balance, deduct, deviceId } = useBonusPul();
+  const { balance, deviceId } = useBonusPul();
   const isWeb = Platform.OS === "web";
 
   // Main navigation
@@ -104,9 +103,7 @@ export default function DemiryolScreen() {
   const [firstClass, setFirstClass] = useState(false);
   const [secondClass, setSecondClass] = useState(false);
   const [mediaPortal, setMediaPortal] = useState(false);
-  const [proofType, setProofType] = useState<ProofType | null>(null);
-  const [smsText, setSmsText] = useState("");
-  const [screenshotUri, setScreenshotUri] = useState<string | null>(null);
+  const [showTopUp, setShowTopUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -151,11 +148,6 @@ export default function DemiryolScreen() {
   }
   const price = calcPrice();
 
-  async function pickScreenshot() {
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.8 });
-    if (!result.canceled && result.assets[0]) setScreenshotUri(result.assets[0].uri);
-  }
-
   function validateForm() {
     if (!name || !surname || !birthdate || !passport || !travelDate || !clientPhone) {
       Alert.alert("Ýalňyşlyk", "Ähli meýdançalary dolduryň!"); return false;
@@ -164,32 +156,27 @@ export default function DemiryolScreen() {
     return true;
   }
 
-  function validateProof() {
-    if (!proofType) { Alert.alert("Ýalňyşlyk", "Töleg usulyny saýlaň!"); return false; }
-    if (proofType === "sms" && !smsText.trim()) { Alert.alert("Ýalňyşlyk", "SMS habary giriziň!"); return false; }
-    if (proofType === "screenshot" && !screenshotUri) { Alert.alert("Ýalňyşlyk", "Skrinshot saýlanmady!"); return false; }
-    if (proofType === "bonus" && balance < price) { Alert.alert("Ýalňyşlyk", `Ýeterlik bonus pul ýok. Balansyňyz: ${balance} BP. Gerekli: ${price} BP`); return false; }
-    return true;
+
+  async function handlePayWithBP() {
+    if (balance < price) { setShowTopUp(true); return; }
+    setLoading(true);
+    try {
+      const result = await deductBalanceAtomic(deviceId, price);
+      if (!result.success) { setShowTopUp(true); setLoading(false); return; }
+      setDirectStep("confirm");
+    } catch { Alert.alert("Ýalňyşlyk", "BP aýyrmak başartmady!"); }
+    finally { setLoading(false); }
   }
 
   async function handleDirectSubmit() {
-    if (!validateProof()) return;
     setLoading(true); setError("");
     try {
-      if (proofType === "bonus") {
-        const ok = await deduct(price);
-        if (!ok) { setError("Bonus pul aýyrmak başartmady!"); setLoading(false); return; }
-      }
-      const screenshotUrl = proofType === "screenshot" && screenshotUri
-        ? await uploadImage(screenshotUri, "proof.jpg") : null;
       const orderData = {
         type: "demiryol", name, surname, passport, birthdate,
         route: `${CITY_KEYS[fromIdx]}-${CITY_KEYS[toIdx]}`,
         travelDate, totalPrice: price, clientPhone,
-        proofType, paymentMethod: proofType,
-        deviceId: proofType === "bonus" ? deviceId : undefined,
-        smsText: proofType === "sms" ? smsText : null,
-        screenshotUrl, firstClass, secondClass, mediaPortal,
+        paymentMethod: "bonus", deviceId,
+        firstClass, secondClass, mediaPortal,
         timestamp: new Date().toISOString(),
         created: new Date().toISOString(), updated: new Date().toISOString(),
       };
@@ -534,63 +521,61 @@ export default function DemiryolScreen() {
 
         {main === "direct" && directStep === "payment" && (
           <View>
-            <Text style={[s.sectionHead, { color: colors.foreground }]}>Töleg maglumatlary</Text>
-            <View style={[s.infoBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Ionicons name="phone-portrait-outline" size={20} color={colors.primary} />
-              <View style={{ flex: 1 }}>
-                {PAYMENT_PHONES.map((p, i) => (
-                  <Text key={i} style={{ color: colors.foreground, fontWeight: "700", fontSize: 15, marginBottom: 2 }}>{p}</Text>
-                ))}
-                <Text style={{ color: colors.primary, fontWeight: "700", marginTop: 8 }}>Jemi: {price} TMT</Text>
+            {/* iOS-style price card */}
+            <View style={{ borderRadius: 20, overflow: "hidden", marginBottom: 14, backgroundColor: colors.primary, padding: 20 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                <View style={{ width: 52, height: 52, borderRadius: 15, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center" }}>
+                  <Ionicons name="train" size={26} color="#fff" />
+                </View>
+                <View>
+                  <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, fontWeight: "600" }}>Bilet bahasy</Text>
+                  <Text style={{ color: "#fff", fontWeight: "800", fontSize: 30, lineHeight: 36 }}>{price} BP</Text>
+                  <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 11 }}>{CITIES[CITY_KEYS[fromIdx]]} → {CITIES[CITY_KEYS[toIdx]]}</Text>
+                </View>
               </View>
             </View>
-            <Text style={[s.sectionHead, { color: colors.foreground }]}>Töleg usulyny saýlaň</Text>
-            {([
-              { id: "screenshot" as ProofType, icon: "camera-outline" as const, label: "Skrinshot" },
-              { id: "sms" as ProofType, icon: "chatbubble-outline" as const, label: "SMS habary" },
-              { id: "bonus" as ProofType, icon: "wallet-outline" as const, label: `Bonus pul (${balance} BP)` },
-            ]).map(t => (
-              <Pressable key={t.id} onPress={() => setProofType(t.id)}
-                style={[s.proofCard, {
-                  backgroundColor: proofType === t.id ? colors.primary + "15" : colors.card,
-                  borderColor: proofType === t.id ? colors.primary : colors.border,
-                }]}>
-                <Ionicons name={t.icon} size={22} color={proofType === t.id ? colors.primary : colors.mutedForeground} />
-                <Text style={[s.proofLabel, { color: proofType === t.id ? colors.primary : colors.foreground }]}>{t.label}</Text>
-              </Pressable>
-            ))}
-            {proofType === "bonus" && balance < price && (
-              <View style={[s.warnBox, { backgroundColor: "#fee2e2", borderColor: "#ef4444" }]}>
-                <Ionicons name="warning-outline" size={16} color="#ef4444" />
-                <Text style={{ color: "#dc2626", fontSize: 13, flex: 1 }}>Ýeterlik bonus pul ýok ({balance} BP / {price} BP gerek)</Text>
+
+            {/* Balance status */}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 14, borderWidth: 1, marginBottom: 10,
+              backgroundColor: balance >= price ? "#f0fdf4" : "#fff7ed",
+              borderColor: balance >= price ? "#86efac" : "#fed7aa" }}>
+              <Ionicons name="wallet-outline" size={20} color={balance >= price ? "#059669" : "#d97706"} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontWeight: "700", fontSize: 13, color: balance >= price ? "#059669" : "#d97706" }}>
+                  Siziň balansynyz: {balance.toFixed(2)} BP
+                </Text>
+                {balance < price && (
+                  <Text style={{ fontSize: 12, color: "#d97706", marginTop: 2 }}>
+                    Ýetmezçilik: {(price - balance).toFixed(2)} BP • Aşakdaky düwme doldurýar
+                  </Text>
+                )}
               </View>
-            )}
-            {proofType === "sms" && (
-              <View style={{ marginTop: 12 }}>
-                <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>SMS habaryňyzy giriziň</Text>
-                <TextInput value={smsText} onChangeText={setSmsText}
-                  placeholder="SMS haty şu ýere ýazyň..." placeholderTextColor={colors.mutedForeground}
-                  multiline numberOfLines={4}
-                  style={[s.input, s.textarea, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
-                />
-              </View>
-            )}
-            {proofType === "screenshot" && (
-              <Pressable onPress={pickScreenshot}
-                style={{ borderWidth: 2, borderStyle: "dashed", borderColor: colors.primary, borderRadius: 12, padding: 20, alignItems: "center", marginTop: 12, gap: 6 }}>
-                <Ionicons name="cloud-upload-outline" size={32} color={colors.primary} />
-                <Text style={{ color: colors.primary, fontWeight: "600" }}>Suraty ýüklemek üçin üstünden basyň</Text>
-                <Text style={{ color: "#f59e0b", fontSize: 12 }}>JPG, PNG (maksimum 5 MB)</Text>
+              {balance >= price
+                ? <Ionicons name="checkmark-circle" size={20} color="#059669" />
+                : <Ionicons name="alert-circle" size={20} color="#d97706" />
+              }
+            </View>
+
+            {loading ? <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} /> : (
+              <Pressable onPress={handlePayWithBP} disabled={loading}
+                style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1, marginTop: 6 }]}>
+                <Ionicons name="wallet-outline" size={18} color="#fff" />
+                <Text style={s.primaryBtnText}>
+                  {balance >= price ? `${price} BP bilen tölenmek` : "Balans doldur we tölenmek"}
+                </Text>
               </Pressable>
             )}
-            {screenshotUri && proofType === "screenshot" && (
-              <Image source={{ uri: screenshotUri }} style={{ height: 160, borderRadius: 12, marginTop: 10, resizeMode: "cover" }} />
-            )}
-            <Pressable onPress={() => { if (!proofType) { Alert.alert("Saýlaň", "Töleg tassyklamasyny saýlaň!"); return; } setDirectStep("confirm"); }}
-              style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}>
-              <Text style={s.primaryBtnText}>Tassyklamaga geçmek</Text>
-              <Feather name="arrow-right" size={18} color="#fff" />
-            </Pressable>
+
+            <BPCheckoutModal
+              visible={showTopUp}
+              onClose={() => setShowTopUp(false)}
+              serviceName={`Demirýol biledi · ${CITIES[CITY_KEYS[fromIdx]]} → ${CITIES[CITY_KEYS[toIdx]]}`}
+              serviceAmount={price}
+              currentBalance={balance}
+              deviceId={deviceId}
+              onPaymentComplete={() => { setShowTopUp(false); setDirectStep("confirm"); }}
+            />
+
             <Pressable onPress={() => setDirectStep("form")} style={s.secondaryBtn}>
               <Feather name="arrow-left" size={16} color={colors.mutedForeground} />
               <Text style={[s.secondaryBtnText, { color: colors.mutedForeground }]}>Yza</Text>
@@ -607,7 +592,7 @@ export default function DemiryolScreen() {
                 ["Ugur", `${CITIES[CITY_KEYS[fromIdx]]} → ${CITIES[CITY_KEYS[toIdx]]}`],
                 ["Sapar senesi", travelDate], ["Töleg", `${price} TMT`],
                 ["Nomeriňiz", clientPhone],
-                ["Tassyklama", proofType === "screenshot" ? "Skrinshot" : proofType === "sms" ? "SMS habary" : "Bonus pul"],
+                ["Töleg usuly", "Bonus Pul (BP)"],
               ].map(([k, v], i) => (
                 <View key={i} style={[s.confirmRow, { borderBottomColor: colors.border }]}>
                   <Text style={[s.confirmKey, { color: colors.mutedForeground }]}>{k}</Text>
@@ -646,7 +631,7 @@ export default function DemiryolScreen() {
             <Pressable onPress={() => {
               setMain("choose"); setDirectStep("form");
               setName(""); setSurname(""); setPassport(""); setBirthdate(""); setTravelDate("");
-              setClientPhone(""); setProofType(null); setSmsText(""); setScreenshotUri(null);
+              setClientPhone("");
               setFirstClass(false); setSecondClass(false); setMediaPortal(false); setError("");
             }}
               style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#059669", opacity: pressed ? 0.85 : 1 }]}>

@@ -9,7 +9,8 @@ import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
-import { saveOrder } from "@/lib/firebase";
+import { saveOrder, deductBalanceAtomic } from "@/lib/firebase";
+import BPCheckoutModal from "@/components/BPCheckoutModal";
 import { addToHistory, getHistory, type OrderHistoryItem } from "@/lib/orderHistory";
 
 // ── Data ────────────────────────────────────────────────────────────
@@ -39,12 +40,7 @@ const INTERNATIONAL = [
   { code: "BHX", city: "Birmingem", flag: "🇬🇧" },
 ];
 
-const BANKS = ["Halkbank", "Türkmenbaşy bank", "Rysgal bank", "Senagat bank", "Daýhanbank", "MILLI bank"];
-const CARD_TYPES = ["Visa", "MasterCard", "MIR", "Altyn Asyr"];
-const PAYMENT_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
-const MERCHANT_CARD = "8600 **** **** 4219";
-
-const INTL_CURRENCIES = [
+const INTL_CURRENCIES_UNUSED = [
   { code: "USD", name: "Dollar", flag: "🇺🇸", symbol: "$" },
   { code: "EUR", name: "Ýewro", flag: "🇪🇺", symbol: "€" },
   { code: "GBP", name: "Funt sterling", flag: "🇬🇧", symbol: "£" },
@@ -58,7 +54,7 @@ type OrderMode = "" | "tabshyr" | "goni";
 type FlightType = "içerki" | "daşarky";
 type TripType = "baryş" | "baryş-gelişli";
 type Step = "method" | "search" | "passenger" | "payment" | "success";
-type PayMethod = "" | "terminal" | "bonus" | "card" | "waluta" | "intcard";
+type PayMethod = "" | "bonus";
 type Picker = "from" | "to" | null;
 
 interface City { code: string; city: string; flag: string; }
@@ -145,15 +141,9 @@ export default function HowaScreen() {
   // Order mode
   const [orderMode, setOrderMode] = useState<OrderMode>("");
 
-  // Payment
+  // Payment — BP only
   const [payMethod, setPayMethod] = useState<PayMethod>("");
-  const [cardBank, setCardBank] = useState("");
-  const [cardType, setCardType] = useState("");
-  const [cardLast4, setCardLast4] = useState("");
-  const [walutaCurrency, setWalutaCurrency] = useState("");
-  const [walutaAmount, setWalutaAmount] = useState("");
-  const [intCardType, setIntCardType] = useState("");
-  const [intCardLast4, setIntCardLast4] = useState("");
+  const [showHowaTopUp, setShowHowaTopUp] = useState(false);
 
   const [step, setStep] = useState<Step>("method");
   const [loading, setLoading] = useState(false);
@@ -196,58 +186,32 @@ export default function HowaScreen() {
   }
 
   async function handleBooking() {
-    if (!payMethod) { Alert.alert("Töleg usulyny saýlaň", "Töleg usulyny saýlaň!"); return; }
-    if (payMethod === "card" && (!cardBank || !cardType || cardLast4.length < 4)) {
-      Alert.alert("Kart maglumatlary", "Bank, kart görnüşi we soňky 4 san girizmeli!"); return;
-    }
-    if (payMethod === "bonus" && balance < 50) {
-      Alert.alert("Ýeterlik BP ýok", `Balansyňyz: ${balance} BP. Azyndan 50 BP gerekli.`); return;
-    }
-    if (payMethod === "waluta" && (!walutaCurrency || !walutaAmount.trim())) {
-      Alert.alert("Walýuta maglumatlary", "Walýuta görnüşi we mukdary giriziň!"); return;
-    }
-    if (payMethod === "intcard" && (!intCardType || intCardLast4.length < 4)) {
-      Alert.alert("Kart maglumatlary", "Kart görnüşi we soňky 4 san girizmeli!"); return;
-    }
+    if (balance < 50) { setShowHowaTopUp(true); return; }
+    const result = await deductBalanceAtomic(deviceId, 50);
+    if (!result.success) { setShowHowaTopUp(true); return; }
     setLoading(true);
     try {
       const id = `HW-${Date.now().toString(36).toUpperCase()}`;
       await saveOrder("howa-bilet-orders", {
-        deviceId,
-        bookingId: id,
-        orderMode,
-        flightType,
-        tripType,
-        from: from?.code,
-        fromCity: from?.city,
-        to: to?.code,
-        toCity: to?.city,
-        depDate,
-        retDate: tripType === "baryş-gelişli" ? retDate : null,
+        deviceId, bookingId: id, orderMode, flightType, tripType,
+        from: from?.code, fromCity: from?.city,
+        to: to?.code, toCity: to?.city,
+        depDate, retDate: tripType === "baryş-gelişli" ? retDate : null,
         passengers,
         passenger: { name: pasName, passport: pasPassport, birth: pasBirth, phone: pasPhone },
-        payMethod,
-        cardInfo: payMethod === "card" ? { bank: cardBank, type: cardType, last4: cardLast4 } : null,
-        walutaInfo: payMethod === "waluta" ? { currency: walutaCurrency, amount: walutaAmount } : null,
-        intCardInfo: payMethod === "intcard" ? { type: intCardType, last4: intCardLast4 } : null,
-        status: "pending",
+        payMethod: "bonus", status: "pending",
       });
       await addToHistory({
-        type: "howa-bilet",
-        title: "Howa biledi",
+        type: "howa-bilet", title: "Howa biledi",
         details: `${from?.city} → ${to?.city} · ${depDate} · ${passengers} ýolagçy`,
-        amount: 0,
-        amountLabel: "Tassyklanýar",
-        phone: pasPhone,
+        amount: 50, amountLabel: "-50 BP", phone: pasPhone,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setBookingId(id);
       setStep("success");
     } catch {
       Alert.alert("Ýalňyşlyk", "Haýyşnama iberilmedi. Gaýtadan synanyşyň.");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }
 
   function resetAll() {
@@ -257,8 +221,7 @@ export default function HowaScreen() {
     setDepDate(""); setRetDate("");
     setPassengers(1);
     setPasName(""); setPasPassport(""); setPasBirth(""); setPasPhone("");
-    setPayMethod(""); setCardBank(""); setCardType(""); setCardLast4("");
-    setWalutaCurrency(""); setWalutaAmount(""); setIntCardType(""); setIntCardLast4("");
+    setPayMethod(""); setShowHowaTopUp(false);
     setBookingId("");
   }
 
@@ -705,251 +668,94 @@ export default function HowaScreen() {
           </>
         )}
 
-        {/* ── STEP: PAYMENT ── */}
+        {/* ── STEP: PAYMENT (BP only) ── */}
         {step === "payment" && (
           <>
-            <Text style={[s.sectionTitle, { color: colors.mutedForeground }]}>TÖLEG USULYNY SAÝLAŇ</Text>
+            <Text style={[s.sectionTitle, { color: colors.mutedForeground }]}>BONUS PUL BILEN TÖLEG</Text>
 
-            {/* Payment options */}
-            {([
-              { id: "card", label: "Kartdan töle", desc: "TM bank karty bilen töleg", icon: "card-outline", color: "#6366f1" },
-              { id: "terminal", label: "TMCELL Terminal", desc: "Görkezilen nomere pul geçiriň", icon: "phone-portrait-outline", color: "#0ea5e9" },
-              { id: "bonus", label: "Bonus Pul (BP)", desc: `Balansyňyz: ${balance.toFixed(2)} BP`, icon: "star-outline", color: "#f59e0b" },
-              ...(flightType === "daşarky" ? [
-                { id: "waluta" as PayMethod, label: "Walýuta bilen", desc: "USD, EUR, GBP, RUB we ş.m.", icon: "cash-outline" as any, color: "#10b981" },
-                { id: "intcard" as PayMethod, label: "Halkara kart", desc: "Daşary ýurt Visa / MasterCard", icon: "globe-outline" as any, color: "#ec4899" },
-              ] : []),
-            ] as { id: PayMethod; label: string; desc: string; icon: any; color: string }[]).map((pm) => (
-              <Pressable
-                key={pm.id}
-                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setPayMethod(pm.id); }}
-                style={[s.payCard, {
-                  backgroundColor: colors.card,
-                  borderColor: payMethod === pm.id ? pm.color : colors.border,
-                  borderWidth: payMethod === pm.id ? 2 : 1,
-                }]}
-              >
-                <View style={[s.payIconCircle, { backgroundColor: pm.color + "20" }]}>
-                  <Ionicons name={pm.icon} size={22} color={pm.color} />
+            {/* Flight summary banner */}
+            <View style={{ borderRadius: 18, backgroundColor: "#0ea5e9", padding: 18, marginBottom: 14 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10 }}>
+                <View style={{ width: 44, height: 44, borderRadius: 13, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center" }}>
+                  <Ionicons name="airplane" size={22} color="#fff" />
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[s.payLabel, { color: colors.foreground }]}>{pm.label}</Text>
-                  <Text style={[s.payDesc, { color: colors.mutedForeground }]}>{pm.desc}</Text>
+                <View>
+                  <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 11 }}>Howa bilet sargydyňyz</Text>
+                  <Text style={{ color: "#fff", fontWeight: "800", fontSize: 16 }}>{from?.city} → {to?.city}</Text>
                 </View>
-                <View style={[s.radioOuter, { borderColor: payMethod === pm.id ? pm.color : colors.border }]}>
-                  {payMethod === pm.id && <View style={[s.radioInner, { backgroundColor: pm.color }]} />}
-                </View>
-              </Pressable>
-            ))}
-
-            {/* TMCELL terminal details */}
-            {payMethod === "terminal" && (
-              <View style={[s.detailCard, { backgroundColor: colors.card, borderColor: "#0ea5e940" }]}>
-                <Text style={[s.detailCardTitle, { color: colors.foreground }]}>
-                  Şu nomerleriň birine pul geçiriň
-                </Text>
-                <Text style={[s.detailCardSub, { color: colors.mutedForeground }]}>
-                  Geçirenden soň "Töleg geçirdim" basyň
-                </Text>
-                {PAYMENT_PHONES.map((ph, i) => (
-                  <View key={i} style={[s.phonePill, { backgroundColor: "#0ea5e910" }]}>
-                    <Ionicons name="call-outline" size={14} color="#0ea5e9" />
-                    <Text style={[s.phonePillText, { color: "#0ea5e9" }]}>{ph}</Text>
-                  </View>
-                ))}
               </View>
-            )}
-
-            {/* Bonus details */}
-            {payMethod === "bonus" && (
-              <View style={[s.detailCard, { backgroundColor: colors.card, borderColor: "#f59e0b40" }]}>
-                <View style={s.bonusRow}>
-                  <Text style={[s.detailCardTitle, { color: colors.foreground }]}>Balansdan aýrylar</Text>
-                  <Text style={[{ fontSize: 20, fontWeight: "800", color: "#f59e0b" }]}>{balance.toFixed(0)} BP</Text>
-                </View>
-                <Text style={[s.detailCardSub, { color: colors.mutedForeground }]}>
-                  Bilet bahasyna görä degişli mukdar aýrylar. Admin habarlaşar.
-                </Text>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 10, padding: 12 }}>
+                <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}>Hyzmat tölegi</Text>
+                <Text style={{ color: "#fff", fontWeight: "800", fontSize: 18 }}>50 BP</Text>
               </View>
-            )}
+            </View>
 
-            {/* Card payment details */}
-            {payMethod === "card" && (
-              <View style={[s.detailCard, { backgroundColor: colors.card, borderColor: "#6366f140" }]}>
-                <Text style={[s.detailCardTitle, { color: colors.foreground }]}>Kart bilen töleg</Text>
-                <Text style={[s.detailCardSub, { color: colors.mutedForeground }]}>
-                  Şu kart belgimizie geçiriň, soňra aşakdaky maglumatlary dolduryň
+            {/* Balance status */}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 14, borderWidth: 1, marginBottom: 12,
+              backgroundColor: balance >= 50 ? "#f0fdf4" : "#fff7ed",
+              borderColor: balance >= 50 ? "#86efac" : "#fed7aa" }}>
+              <Ionicons name="wallet-outline" size={20} color={balance >= 50 ? "#059669" : "#d97706"} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontWeight: "700", fontSize: 13, color: balance >= 50 ? "#059669" : "#d97706" }}>
+                  Siziň balansynyz: {balance.toFixed(2)} BP
                 </Text>
-                <View style={[s.merchantCard, { backgroundColor: "#6366f1" }]}>
-                  <Text style={s.merchantCardLabel}>Töleg karty</Text>
-                  <Text style={s.merchantCardNum}>{MERCHANT_CARD}</Text>
-                  <Text style={s.merchantCardBank}>Halkbank · Türkmenistan</Text>
-                </View>
-
-                {/* Bank selector */}
-                <Text style={[s.fieldLabel2, { color: colors.mutedForeground, marginTop: 16, marginBottom: 8 }]}>Siziň bankyňyz</Text>
-                <View style={s.bankGrid}>
-                  {BANKS.map((b) => (
-                    <Pressable
-                      key={b}
-                      onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setCardBank(b); }}
-                      style={[s.bankPill, {
-                        backgroundColor: cardBank === b ? "#6366f1" : colors.muted,
-                        borderColor: cardBank === b ? "#6366f1" : colors.border,
-                      }]}
-                    >
-                      <Text style={[s.bankPillText, { color: cardBank === b ? "#fff" : colors.foreground }]}>{b}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-
-                {/* Card type */}
-                <Text style={[s.fieldLabel2, { color: colors.mutedForeground, marginTop: 14, marginBottom: 8 }]}>Kart görnüşi</Text>
-                <View style={[s.bankGrid, { gap: 8 }]}>
-                  {CARD_TYPES.map((ct) => (
-                    <Pressable
-                      key={ct}
-                      onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setCardType(ct); }}
-                      style={[s.bankPill, {
-                        backgroundColor: cardType === ct ? "#6366f1" : colors.muted,
-                        borderColor: cardType === ct ? "#6366f1" : colors.border,
-                      }]}
-                    >
-                      <Text style={[s.bankPillText, { color: cardType === ct ? "#fff" : colors.foreground }]}>{ct}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-
-                {/* Last 4 digits */}
-                <Text style={[s.fieldLabel2, { color: colors.mutedForeground, marginTop: 14, marginBottom: 8 }]}>
-                  Kartyňyzyň soňky 4 sany
-                </Text>
-                <TextInput
-                  value={cardLast4}
-                  onChangeText={(t) => setCardLast4(t.replace(/\D/g, "").slice(0, 4))}
-                  placeholder="XXXX"
-                  placeholderTextColor={colors.mutedForeground}
-                  keyboardType="number-pad"
-                  maxLength={4}
-                  style={[s.cardLast4Input, { backgroundColor: colors.muted, borderColor: cardLast4.length === 4 ? "#6366f1" : colors.border, color: colors.foreground }]}
-                />
-              </View>
-            )}
-
-            {/* Walýuta payment details */}
-            {payMethod === "waluta" && (
-              <View style={[s.detailCard, { backgroundColor: colors.card, borderColor: "#10b98140" }]}>
-                <Text style={[s.detailCardTitle, { color: colors.foreground }]}>Walýuta bilen töleg</Text>
-                <Text style={[s.detailCardSub, { color: colors.mutedForeground }]}>
-                  Haýsy walýutada tölemek isleýärsiňiz? Mukdary girizenden soň admin tassyklar.
-                </Text>
-                <View style={s.currencyGrid}>
-                  {INTL_CURRENCIES.map((c) => (
-                    <Pressable
-                      key={c.code}
-                      onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setWalutaCurrency(c.code); }}
-                      style={[s.currencyPill, {
-                        backgroundColor: walutaCurrency === c.code ? "#10b981" : colors.muted,
-                        borderColor: walutaCurrency === c.code ? "#10b981" : colors.border,
-                      }]}
-                    >
-                      <Text style={s.currencyFlag}>{c.flag}</Text>
-                      <View>
-                        <Text style={[s.currencyCode, { color: walutaCurrency === c.code ? "#fff" : colors.foreground }]}>{c.code}</Text>
-                        <Text style={[s.currencySymbol, { color: walutaCurrency === c.code ? "rgba(255,255,255,0.8)" : colors.mutedForeground }]}>{c.symbol}</Text>
-                      </View>
-                    </Pressable>
-                  ))}
-                </View>
-                {walutaCurrency !== "" && (
-                  <>
-                    <Text style={[s.fieldLabel2, { color: colors.mutedForeground, marginTop: 14, marginBottom: 8 }]}>
-                      Töleg mukdary ({walutaCurrency})
-                    </Text>
-                    <TextInput
-                      value={walutaAmount}
-                      onChangeText={setWalutaAmount}
-                      placeholder={`Mukdar (${INTL_CURRENCIES.find(c => c.code === walutaCurrency)?.symbol})`}
-                      placeholderTextColor={colors.mutedForeground}
-                      keyboardType="numeric"
-                      style={[s.cardLast4Input, { backgroundColor: colors.muted, borderColor: walutaAmount ? "#10b981" : colors.border, color: colors.foreground, fontSize: 18, letterSpacing: 2 }]}
-                    />
-                    <View style={[s.noticeBox, { backgroundColor: "#10b98110", borderColor: "#10b98140", marginTop: 12 }]}>
-                      <Ionicons name="information-circle-outline" size={14} color="#10b981" />
-                      <Text style={[s.noticeText, { color: "#10b981", fontSize: 11 }]}>
-                        Töleg ammarlary: admin bilen habarlaşylanda görkeziler.
-                      </Text>
-                    </View>
-                  </>
+                {balance < 50 && (
+                  <Text style={{ fontSize: 12, color: "#d97706", marginTop: 2 }}>
+                    Ýetmezçilik: {(50 - balance).toFixed(2)} BP • Düwme balansy doldurýar
+                  </Text>
                 )}
               </View>
-            )}
-
-            {/* International card details */}
-            {payMethod === "intcard" && (
-              <View style={[s.detailCard, { backgroundColor: colors.card, borderColor: "#ec489940" }]}>
-                <Text style={[s.detailCardTitle, { color: colors.foreground }]}>Halkara kart bilen töleg</Text>
-                <Text style={[s.detailCardSub, { color: colors.mutedForeground }]}>
-                  Daşary ýurt Visa ýa MasterCard kart bilen töläp bilersiňiz. Admin töleg salgysy iberer.
-                </Text>
-
-                <Text style={[s.fieldLabel2, { color: colors.mutedForeground, marginTop: 8, marginBottom: 8 }]}>Kart görnüşi</Text>
-                <View style={s.bankGrid}>
-                  {["Visa (halkara)", "MasterCard (halkara)"].map((ct) => (
-                    <Pressable
-                      key={ct}
-                      onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setIntCardType(ct); }}
-                      style={[s.bankPill, {
-                        backgroundColor: intCardType === ct ? "#ec4899" : colors.muted,
-                        borderColor: intCardType === ct ? "#ec4899" : colors.border,
-                      }]}
-                    >
-                      <Text style={[s.bankPillText, { color: intCardType === ct ? "#fff" : colors.foreground }]}>{ct}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-
-                <Text style={[s.fieldLabel2, { color: colors.mutedForeground, marginTop: 14, marginBottom: 8 }]}>
-                  Kartyňyzyň soňky 4 sany
-                </Text>
-                <TextInput
-                  value={intCardLast4}
-                  onChangeText={(t) => setIntCardLast4(t.replace(/\D/g, "").slice(0, 4))}
-                  placeholder="XXXX"
-                  placeholderTextColor={colors.mutedForeground}
-                  keyboardType="number-pad"
-                  maxLength={4}
-                  style={[s.cardLast4Input, { backgroundColor: colors.muted, borderColor: intCardLast4.length === 4 ? "#ec4899" : colors.border, color: colors.foreground }]}
-                />
-                <View style={[s.noticeBox, { backgroundColor: "#ec489910", borderColor: "#ec489940", marginTop: 12 }]}>
-                  <Ionicons name="shield-checkmark-outline" size={14} color="#ec4899" />
-                  <Text style={[s.noticeText, { color: "#ec4899", fontSize: 11 }]}>
-                    Howpsuzlyk üçin diňe soňky 4 san sorulýar. Doly kart belgisi hiç wagt soralmaýar.
-                  </Text>
-                </View>
-              </View>
-            )}
+              {balance >= 50
+                ? <Ionicons name="checkmark-circle" size={20} color="#059669" />
+                : <Ionicons name="alert-circle" size={20} color="#d97706" />
+              }
+            </View>
 
             {loading
-              ? <ActivityIndicator color="#0ea5e9" style={{ marginTop: 24 }} />
-              : payMethod !== "" && (
-                <Pressable
-                  onPress={handleBooking}
-                  style={({ pressed }) => [s.primaryBtn, {
-                    backgroundColor: payMethod === "waluta" ? "#10b981" : payMethod === "intcard" ? "#ec4899" : "#0ea5e9",
-                    opacity: pressed ? 0.85 : 1, marginTop: 8,
-                  }]}
-                >
-                  <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />
+              ? <ActivityIndicator color="#0ea5e9" style={{ marginTop: 20 }} />
+              : (
+                <Pressable onPress={handleBooking} disabled={loading}
+                  style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#0ea5e9", opacity: pressed ? 0.85 : 1 }]}>
+                  <Ionicons name="wallet-outline" size={18} color="#fff" />
                   <Text style={s.primaryBtnText}>
-                    {payMethod === "card" ? "Töleg geçirdim, Tassykla" :
-                     payMethod === "terminal" ? "Töleg geçirdim" :
-                     payMethod === "bonus" ? "Balansdan töle" :
-                     payMethod === "waluta" ? "Walýuta tölegini tassykla" :
-                     "Halkara kart bilen tassykla"}
+                    {balance >= 50 ? "50 BP bilen sargyt et" : "Balans doldur we sargyt et"}
                   </Text>
                 </Pressable>
-              )}
+              )
+            }
+
+            <BPCheckoutModal
+              visible={showHowaTopUp}
+              onClose={() => setShowHowaTopUp(false)}
+              serviceName={`Howa biledi · ${from?.city ?? ""} → ${to?.city ?? ""}`}
+              serviceAmount={50}
+              currentBalance={balance}
+              deviceId={deviceId}
+              onPaymentComplete={() => {
+                setShowHowaTopUp(false);
+                const id = `HW-${Date.now().toString(36).toUpperCase()}`;
+                setBookingId(id);
+                Promise.all([
+                  saveOrder("howa-bilet-orders", {
+                    deviceId, bookingId: id, orderMode, flightType, tripType,
+                    from: from?.code, fromCity: from?.city,
+                    to: to?.code, toCity: to?.city, depDate,
+                    retDate: tripType === "baryş-gelişli" ? retDate : null,
+                    passengers,
+                    passenger: { name: pasName, passport: pasPassport, birth: pasBirth, phone: pasPhone },
+                    payMethod: "bonus", status: "pending",
+                  }),
+                  addToHistory({
+                    type: "howa-bilet", title: "Howa biledi",
+                    details: `${from?.city} → ${to?.city} · ${depDate}`,
+                    amount: 50, amountLabel: "-50 BP", phone: pasPhone,
+                  }),
+                ]).then(() => {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  setStep("success");
+                }).catch(() => Alert.alert("Ýalňyşlyk", "Sargyt saklanyp bilinmedi."));
+              }}
+            />
 
             <Pressable onPress={() => setStep("passenger")} style={s.backRow}>
               <Ionicons name="chevron-back" size={16} color={colors.mutedForeground} />
@@ -990,9 +796,7 @@ export default function HowaScreen() {
               <View style={s.bookingMeta}>
                 <Text style={s.bookingMetaText}>📅 {depDate}</Text>
                 <Text style={s.bookingMetaText}>👤 {passengers} ýolagçy</Text>
-                <Text style={s.bookingMetaText}>
-                  {payMethod === "card" ? "💳 Kart" : payMethod === "terminal" ? "📱 Terminal" : "⭐ BP"}
-                </Text>
+                <Text style={s.bookingMetaText}>⭐ BP</Text>
               </View>
             </View>
 
