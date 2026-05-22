@@ -148,9 +148,9 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
       {/* iOS-style segmented control */}
       <View style={[s.segment, { backgroundColor: colors.muted }]}>
         {([
-          { id: "buy" as const, icon: "arrow-down-circle-outline" as const, label: "BP Almak" },
-          { id: "sell" as const, icon: "arrow-up-circle-outline" as const, label: "TMCell Çykaryş" },
-          { id: "transfer" as const, icon: "paper-plane-outline" as const, label: "BP Geçir" },
+          { id: "buy" as const, icon: "arrow-down-circle-outline" as const, label: "Almak" },
+          { id: "sell" as const, icon: "arrow-up-circle-outline" as const, label: "Çykaryş" },
+          { id: "transfer" as const, icon: "paper-plane-outline" as const, label: "Geçirmek" },
         ]).map(t => (
           <Pressable
             key={t.id}
@@ -785,14 +785,14 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
 
           {/* Amount input */}
           <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Iberjek USDT mukdaryňyz</Text>
-          <View style={[cs.depInputWrap, { backgroundColor: colors.card, borderColor: depUsdtNum > 0 ? colors.primary : colors.border }]}>
-            <View style={[cs.depInputIcon, { backgroundColor: "#2563eb15" }]}>
-              <Text style={{ color: "#2563eb", fontSize: 13, fontWeight: "800" }}>$</Text>
+          <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: depUsdtNum > 0 ? colors.primary : colors.border, borderWidth: 1.5 }]}>
+            <View style={[cs.depPfxBadge, { backgroundColor: "#2563eb18" }]}>
+              <Text style={{ color: "#2563eb", fontSize: 14, fontWeight: "800" }}>$</Text>
             </View>
             <TextInput value={depUsdt} onChangeText={setDepUsdt} placeholder="0.00"
               placeholderTextColor={colors.mutedForeground} keyboardType="decimal-pad"
-              style={[cs.depInputField, { color: colors.foreground }]} />
-            <View style={[cs.depInputSuffix, { backgroundColor: colors.muted }]}>
+              style={[cs.inputField, { color: colors.foreground }]} />
+            <View style={[cs.depSfxBadge, { backgroundColor: colors.muted }]}>
               <Text style={{ color: colors.mutedForeground, fontSize: 12, fontWeight: "700" }}>USDT</Text>
             </View>
           </View>
@@ -822,23 +822,24 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
           </Text>
           <Pressable
             onPress={() => Alert.alert("Manzil", USDT_WALLETS[depNet], [{ text: "Ýap" }])}
-            style={[cs.depAddrCard, { backgroundColor: colors.card, borderColor: USDT_NETWORKS.find(n=>n.id===depNet)!.color + "50" }]}
+            style={[cs.addrCard, { backgroundColor: colors.card, borderColor: USDT_NETWORKS.find(n=>n.id===depNet)!.color }]}
           >
-            <View style={[cs.depAddrNet, { backgroundColor: USDT_NETWORKS.find(n=>n.id===depNet)!.color + "18" }]}>
-              <View style={[cs.netDot, { backgroundColor: USDT_NETWORKS.find(n=>n.id===depNet)!.color, width: 10, height: 10, borderRadius: 5 }]} />
-              <Text style={[{ fontSize: 10, fontWeight: "800", color: USDT_NETWORKS.find(n=>n.id===depNet)!.color }]}>
-                {USDT_NETWORKS.find(n=>n.id===depNet)?.name}
+            <View style={{ flex: 1, gap: 4 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                <View style={[cs.netDot, { backgroundColor: USDT_NETWORKS.find(n=>n.id===depNet)!.color }]} />
+                <Text style={{ fontSize: 10, fontWeight: "800", color: USDT_NETWORKS.find(n=>n.id===depNet)!.color }}>
+                  {USDT_NETWORKS.find(n=>n.id===depNet)?.full} · USDT
+                </Text>
+              </View>
+              <Text style={[cs.addrText, { color: colors.foreground }]} selectable numberOfLines={2}>
+                {USDT_WALLETS[depNet]}
               </Text>
             </View>
-            <Text style={[cs.addrText, { color: colors.foreground, marginTop: 6, fontSize: 12, lineHeight: 18 }]} selectable numberOfLines={2}>
-              {USDT_WALLETS[depNet]}
-            </Text>
-            <View style={[cs.depCopyRow, { borderTopColor: colors.border }]}>
-              <Ionicons name="copy-outline" size={13} color={USDT_NETWORKS.find(n=>n.id===depNet)!.color} />
-              <Text style={[{ fontSize: 11, fontWeight: "700", color: USDT_NETWORKS.find(n=>n.id===depNet)!.color }]}>Göçür</Text>
+            <View style={[cs.copyBtn, { backgroundColor: USDT_NETWORKS.find(n=>n.id===depNet)!.color }]}>
+              <Ionicons name="copy-outline" size={15} color="#fff" />
             </View>
           </Pressable>
-          <View style={[cs.depWarningRow, { backgroundColor: "#fef9c3", borderColor: "#fde047" }]}>
+          <View style={[cs.depWarningRow, { backgroundColor: "#fef9c3", borderColor: "#fde047", marginTop: 6 }]}>
             <Ionicons name="warning-outline" size={14} color="#ca8a04" />
             <Text style={[cs.depWarningText, { color: "#92400e" }]}>
               Diňe {USDT_NETWORKS.find(n=>n.id===depNet)?.name} USDT iberiň. Başga token ýitgä sebäp bolar.
@@ -847,13 +848,11 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
 
           {/* TX Hash */}
           <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Tranzaksiýa haşy (TX ID)</Text>
-          <View style={[cs.depInputWrap, { backgroundColor: colors.card, borderColor: depTx.length > 10 ? "#059669" : colors.border }]}>
-            <View style={[cs.depInputIcon, { backgroundColor: "#05966915" }]}>
-              <Ionicons name="receipt-outline" size={15} color="#059669" />
-            </View>
+          <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: depTx.length > 10 ? "#059669" : colors.border, borderWidth: 1.5 }]}>
+            <Ionicons name="receipt-outline" size={15} color={depTx.length > 10 ? "#059669" : colors.mutedForeground} />
             <TextInput value={depTx} onChangeText={setDepTx} placeholder="0x... ýa-da TX ID"
               placeholderTextColor={colors.mutedForeground} autoCapitalize="none"
-              style={[cs.depInputField, { color: colors.foreground }]} />
+              style={[cs.inputField, { color: colors.foreground }]} />
           </View>
 
           {depErr ? (
@@ -939,14 +938,12 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
 
           {/* BP amount input */}
           <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Näçe BP çykarmak isleýärsiňiz?</Text>
-          <View style={[cs.depInputWrap, { backgroundColor: colors.card, borderColor: wdBPNum > 0 ? colors.primary : colors.border }]}>
-            <View style={[cs.depInputIcon, { backgroundColor: colors.primary + "15" }]}>
-              <Ionicons name="logo-bitcoin" size={15} color={colors.primary} />
-            </View>
+          <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: wdBPNum > 0 ? colors.primary : colors.border, borderWidth: 1.5 }]}>
+            <Ionicons name="logo-bitcoin" size={15} color={wdBPNum > 0 ? colors.primary : colors.mutedForeground} />
             <TextInput value={wdBP} onChangeText={setWdBP} placeholder="0"
               placeholderTextColor={colors.mutedForeground} keyboardType="decimal-pad"
-              style={[cs.depInputField, { color: colors.foreground }]} />
-            <View style={[cs.depInputSuffix, { backgroundColor: colors.muted }]}>
+              style={[cs.inputField, { color: colors.foreground }]} />
+            <View style={[cs.depSfxBadge, { backgroundColor: colors.muted }]}>
               <Text style={{ color: colors.mutedForeground, fontSize: 12, fontWeight: "700" }}>BP</Text>
             </View>
           </View>
@@ -995,16 +992,14 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
           <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>
             {wdNetData.name} Kripto Manziliniz
           </Text>
-          <View style={[cs.depInputWrap, { backgroundColor: colors.card, borderColor: wdAddr.length > 5 ? wdNetData.color : colors.border }]}>
-            <View style={[cs.depInputIcon, { backgroundColor: wdNetData.color + "15" }]}>
-              <Ionicons name="wallet-outline" size={15} color={wdNetData.color} />
-            </View>
+          <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: wdAddr.length > 5 ? wdNetData.color : colors.border, borderWidth: 1.5 }]}>
+            <Ionicons name="wallet-outline" size={15} color={wdAddr.length > 5 ? wdNetData.color : colors.mutedForeground} />
             <TextInput value={wdAddr} onChangeText={setWdAddr}
               placeholder={wdNet === "bep20" ? "0x..." : wdNet === "ton" ? "UQ..." : "T..."}
               placeholderTextColor={colors.mutedForeground} autoCapitalize="none"
-              style={[cs.depInputField, { color: colors.foreground }]} />
+              style={[cs.inputField, { color: colors.foreground }]} />
           </View>
-          <View style={[cs.depWarningRow, { backgroundColor: "#fef9c3", borderColor: "#fde047" }]}>
+          <View style={[cs.depWarningRow, { backgroundColor: "#fef9c3", borderColor: "#fde047", marginTop: 6 }]}>
             <Ionicons name="warning-outline" size={14} color="#ca8a04" />
             <Text style={[cs.depWarningText, { color: "#92400e" }]}>
               Manzil ýalňyş girizilse pul yzyna gaýtarylmaýar. Üns bilen barlaň.
@@ -1186,20 +1181,15 @@ const cs = StyleSheet.create({
   depSummaryVal: { fontSize: 15, fontWeight: "700" },
   depRateBadge: { borderRadius: 8, borderWidth: 1, paddingHorizontal: 9, paddingVertical: 5 },
   depSectionLabel: { fontSize: 12, fontWeight: "700", marginBottom: 8 },
-  depInputWrap: { flexDirection: "row", alignItems: "center", borderWidth: 1.5, borderRadius: 14, overflow: "hidden" },
-  depInputIcon: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
-  depInputField: { flex: 1, fontSize: 15, paddingHorizontal: 10, paddingVertical: 12 },
-  depInputSuffix: { paddingHorizontal: 12, paddingVertical: 13, alignItems: "center", justifyContent: "center" },
+  depPfxBadge: { width: 32, height: 32, borderRadius: 9, alignItems: "center", justifyContent: "center" },
+  depSfxBadge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, alignItems: "center", justifyContent: "center" },
   depConvCard: { borderRadius: 12, borderWidth: 1, padding: 14, marginTop: 8 },
   depConvRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
   depConvItem: { flex: 1 },
   depConvArrow: { width: 28, height: 28, borderRadius: 8, alignItems: "center", justifyContent: "center" },
   depConvLbl: { fontSize: 10, fontWeight: "600", marginBottom: 3 },
   depConvVal: { fontSize: 14, fontWeight: "700" },
-  depAddrCard: { borderRadius: 14, borderWidth: 1.5, padding: 14, marginBottom: 8 },
-  depAddrNet: { flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 },
-  depCopyRow: { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 10, paddingTop: 10, borderTopWidth: 1 },
-  depWarningRow: { flexDirection: "row", alignItems: "flex-start", gap: 7, borderRadius: 10, borderWidth: 1, padding: 10, marginBottom: 4 },
+  depWarningRow: { flexDirection: "row", alignItems: "flex-start", gap: 7, borderRadius: 10, borderWidth: 1, padding: 10 },
   depWarningText: { fontSize: 11, flex: 1, lineHeight: 16 },
   depLoadingWrap: { alignItems: "center", paddingVertical: 24 },
   stepsTitleRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 },
