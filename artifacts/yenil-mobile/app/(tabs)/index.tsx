@@ -745,88 +745,19 @@ export default function HomeScreen() {
 
         <Pressable
           onPress={() => nav("/e-bilim")}
-          style={({ pressed }) => [eb.outer, { opacity: pressed ? 0.93 : 1 }]}
+          style={({ pressed }) => [
+            styles.banner,
+            { opacity: pressed ? 0.9 : 1, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+          ]}
         >
-          <LinearGradient
-            colors={["#0f0c29", "#302b63", "#6366f1"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={eb.card}
-          >
-            {/* Decorative circles */}
-            <View style={eb.circleA} />
-            <View style={eb.circleB} />
-            <View style={eb.circleC} />
-
-            {/* Title row */}
-            <View style={eb.titleRow}>
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 9, marginBottom: 7 }}>
-                  <Text style={eb.title}>E-Bilim 📚</Text>
-                  <View style={eb.earnBadge}>
-                    <Ionicons name="trophy-outline" size={9} color="#fbbf24" />
-                    <Text style={eb.earnBadgeText}>LEARN & EARN</Text>
-                  </View>
-                </View>
-                <Text style={eb.desc}>
-                  Har bir sabaq o'qib, testdan o'tib BP mukofot ol — 7 ugur, {LESSONS.length} + sapak
-                </Text>
-              </View>
-              <View style={eb.arrowBtn}>
-                <Ionicons name="arrow-forward" size={18} color="#fff" />
-              </View>
-            </View>
-
-            {/* Stats row */}
-            <View style={eb.statsRow}>
-              {([
-                { icon: "grid-outline", value: "7", label: "Ugur" },
-                { icon: "book-outline", value: `${LESSONS.length}+`, label: "Sapak" },
-                { icon: "wallet-outline", value: "0.3", label: "BP/sapak" },
-              ] as const).map((st, i) => (
-                <View key={i} style={eb.statItem}>
-                  <Ionicons name={st.icon as any} size={13} color="rgba(255,255,255,0.65)" />
-                  <Text style={eb.statValue}>{st.value}</Text>
-                  <Text style={eb.statLabel}>{st.label}</Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Progress bar (shows when user has completed ≥1 lesson) */}
-            {eBilimCompleted > 0 && (
-              <View style={eb.progressBlock}>
-                <View style={eb.progressTopRow}>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-                    <Ionicons name="checkmark-circle" size={11} color="#4ade80" />
-                    <Text style={eb.progressText}>{eBilimCompleted} tamam</Text>
-                  </View>
-                  <Text style={eb.progressText}>
-                    {Math.round((eBilimCompleted / LESSONS.length) * 100)}%
-                  </Text>
-                </View>
-                <View style={eb.progressTrack}>
-                  <View
-                    style={[
-                      eb.progressFill,
-                      { width: `${Math.min((eBilimCompleted / LESSONS.length) * 100, 100)}%` as any },
-                    ]}
-                  />
-                </View>
-              </View>
-            )}
-
-            {/* Category emoji bubbles */}
-            <View style={eb.catRow}>
-              {CATEGORIES.map(c => (
-                <View key={c.id} style={[eb.catBubble, { backgroundColor: c.color + "25", borderColor: c.color + "40" }]}>
-                  <Text style={{ fontSize: 15 }}>{c.emoji}</Text>
-                </View>
-              ))}
-              <View style={[eb.catBubble, { backgroundColor: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.2)" }]}>
-                <Ionicons name="arrow-forward" size={13} color="rgba(255,255,255,0.7)" />
-              </View>
-            </View>
-          </LinearGradient>
+          <View style={[styles.bannerIcon, { backgroundColor: "#6366f1" + "20" }]}>
+            <Ionicons name="school-outline" size={26} color="#6366f1" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.bannerTitle, { color: colors.foreground }]}>E-Bilim 📚</Text>
+            <Text style={[styles.bannerDesc, { color: colors.mutedForeground }]}>O'qi, test ber, BP gazan</Text>
+          </View>
+          <Feather name="arrow-right" size={20} color="#6366f1" />
         </Pressable>
 
         {/* SANLY BAZAR BANNER */}
