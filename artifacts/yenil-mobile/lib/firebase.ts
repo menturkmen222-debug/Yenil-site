@@ -1,7 +1,7 @@
 import { initializeApp, getApps } from "firebase/app";
 import {
   getDatabase, ref, set, get, push, onValue, update, remove,
-  query, orderByChild, limitToLast, equalTo,
+  query, orderByChild, limitToLast, equalTo, runTransaction,
 } from "firebase/database";
 
 const firebaseConfig = {
@@ -990,4 +990,89 @@ export async function cancelDigitalListing(listingId: string, sellerDeviceId: st
   } catch {
     return { success: false, message: "Ýalňyşlyk" };
   }
+}
+
+// ─── Atomic Balance Deduction (anti-double-spend) ────────────────────────────
+
+export async function deductBalanceAtomic(
+  deviceId: string,
+  amount: number
+): Promise<{ success: boolean; newBalance: number }> {
+  try {
+    const balRef = ref(db, `user-balances/${deviceId}`);
+    const result = await runTransaction(balRef, (current) => {
+      if (!current) return undefined;
+      const bal = typeof current.balance === "number" ? current.balance : 0;
+      if (bal < amount) return undefined;
+      return { ...current, balance: parseFloat((bal - amount).toFixed(2)), updatedAt: new Date().toISOString() };
+    });
+    if (result.committed && result.snapshot.exists()) {
+      return { success: true, newBalance: result.snapshot.val().balance };
+    }
+    return { success: false, newBalance: 0 };
+  } catch {
+    return { success: false, newBalance: 0 };
+  }
+}
+
+// ─── Inline Top-up (credits missing BP + saves pending order) ────────────────
+
+export async function createInlineTopUpOrder(
+  deviceId: string,
+  missingBP: number,
+  method: "card" | "tmcell",
+  serviceAmount: number,
+  serviceName: string
+): Promise<{ success: boolean }> {
+  try {
+    const commissionRate = method === "card" ? 0.15 : 0.30;
+    const tmtAmount = parseFloat((missingBP * (1 + commissionRate)).toFixed(2));
+    await addBalance(deviceId, missingBP);
+    await saveOrder("inline-topup-orders", {
+      deviceId, missingBP, method, tmtAmount, commissionRate,
+      serviceName, serviceCost: serviceAmount, status: "pending",
+    });
+    return { success: true };
+  } catch {
+    return { success: false };
+  }
+}
+
+// ─── TMCell Cashout (BP → TMCell balance, 0.5% commission) ───────────────────
+
+export async function createTMCellCashout(
+  deviceId: string,
+  bpAmount: number,
+  phone: string
+): Promise<{ success: boolean; message: string; commission?: number; receiveAmount?: number }> {
+  try {
+    if (bpAmount < 10) return { success: false, message: "Minimum 10 BP çykaryp bolýar" };
+    const result = await deductBalanceAtomic(deviceId, bpAmount);
+    if (!result.success) return { success: false, message: `Ýeterlik BP ýok (${bpAmount} BP gerek)` };
+    const commission = parseFloat((bpAmount * 0.005).toFixed(2));
+    const receiveAmount = parseFloat((bpAmount - commission).toFixed(2));
+    await saveOrder("tmcell-cashout-orders", {
+      deviceId, bpAmount, commission, receiveAmount, phone, status: "pending",
+    });
+    return { success: true, message: "Çykaryş haýyşnamasy kabul edildi!", commission, receiveAmount };
+  } catch {
+    return { success: false, message: "Ýalňyşlyk ýüz berdi" };
+  }
+}
+
+// ─── Seed Test Account (1000 BP + reputation 80) ────────────────────────────
+
+export async function seedTestAccount(deviceId: string): Promise<void> {
+  await set(ref(db, `user-balances/${deviceId}`), {
+    balance: 1000,
+    updatedAt: new Date().toISOString(),
+  });
+  const repRef = ref(db, `reputation/${deviceId}`);
+  const repSnap = await get(repRef);
+  const existing = repSnap.exists() ? repSnap.val() : {};
+  await set(repRef, {
+    ...existing,
+    score: 80,
+    updatedAt: new Date().toISOString(),
+  });
 }

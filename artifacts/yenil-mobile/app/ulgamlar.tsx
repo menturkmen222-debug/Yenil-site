@@ -1,17 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
-  Alert, ActivityIndicator, Platform,
+  ActivityIndicator, Platform,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
-import { saveOrder } from "@/lib/firebase";
+import { saveOrder, deductBalanceAtomic } from "@/lib/firebase";
 import { useBonusPul } from "@/contexts/BonusPulContext";
-
-const PAYMENT_PHONES = ["+993 71 789091", "+993 64 629487", "+993 71 788546"];
+import BPCheckoutModal from "@/components/BPCheckoutModal";
 
 interface AppService {
   id: string;
@@ -68,50 +67,73 @@ const APPS: AppService[] = [
 ];
 
 function AppPaymentFlow({ app, onBack, colors }: { app: AppService; onBack: () => void; colors: ReturnType<typeof useColors> }) {
-  const { balance, deviceId, deduct } = useBonusPul();
+  const { balance, deviceId } = useBonusPul();
   const [plan, setPlan] = useState<AppService["plans"][0] | null>(null);
   const [userPhone, setUserPhone] = useState("");
-  const [payPhone, setPayPhone] = useState("");
-  const [payMethod, setPayMethod] = useState<"terminal" | "bonus" | null>(null);
-  const [showPayment, setShowPayment] = useState(false);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const idempotencyKeyRef = useRef<string>("");
 
-  async function handleSubmit() {
-    if (!plan || !userPhone.trim()) { Alert.alert("Ýalňyşlyk", "Ähli meýdançalary dolduryň!"); return; }
-    if (!payMethod) { Alert.alert("Ýalňyşlyk", "Töleg usulyny saýlaň!"); return; }
-    if (payMethod === "terminal" && !payPhone.trim()) { Alert.alert("Ýalňyşlyk", "Töleg nomeriňizi giriziň!"); return; }
-    setLoading(true);
-    try {
-      if (payMethod === "bonus") {
-        if (balance < plan.amount) {
-          Alert.alert("Ýalňyşlyk", `Ýeterlik bonus pul ýok. Balansyňyz: ${balance} BP. Gerekli: ${plan.amount} BP`);
-          setLoading(false); return;
+  function generateIdempotencyKey() {
+    idempotencyKeyRef.current = `pay-${deviceId}-${app.firebaseKey}-${Date.now()}`;
+  }
+
+  async function handlePay() {
+    if (!plan || !userPhone.trim()) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      return;
+    }
+    generateIdempotencyKey();
+    if (balance >= plan.amount) {
+      setLoading(true);
+      try {
+        const result = await deductBalanceAtomic(deviceId, plan.amount);
+        if (!result.success) {
+          setShowModal(true);
+          setLoading(false);
+          return;
         }
-        const ok = await deduct(plan.amount);
-        if (!ok) { Alert.alert("Ýalňyşlyk", "Bonus pul aýyrmak başartmady!"); setLoading(false); return; }
+        await saveOrder("app-payments", {
+          app: app.firebaseKey, plan: plan.label, amount: plan.amount,
+          userPhone, paymentMethod: "bonus", deviceId, status: "pending",
+        });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setDone(true);
+      } catch {
+        setShowModal(true);
+      } finally {
+        setLoading(false);
       }
-      await saveOrder("app-payments", {
-        app: app.firebaseKey, plan: plan.label, amount: plan.amount,
-        userPhone, paymentPhone: payMethod === "terminal" ? payPhone : undefined,
-        paymentMethod: payMethod, deviceId, status: "pending",
-      });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setDone(true);
-    } catch { Alert.alert("Ýalňyşlyk", "Bilinmeýän ýalňyşlyk"); }
-    finally { setLoading(false); }
+    } else {
+      setShowModal(true);
+    }
+  }
+
+  async function handleModalComplete() {
+    setShowModal(false);
+    await saveOrder("app-payments", {
+      app: app.firebaseKey, plan: plan?.label, amount: plan?.amount,
+      userPhone, paymentMethod: "inline-topup", deviceId, status: "pending",
+    });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setDone(true);
   }
 
   if (done) {
     return (
       <View style={{ alignItems: "center", gap: 14, paddingTop: 40 }}>
-        <Ionicons name="checkmark-circle" size={64} color="#059669" />
+        <View style={[styles.successIcon, { backgroundColor: "#d1fae5" }]}>
+          <Ionicons name="checkmark-circle" size={48} color="#059669" />
+        </View>
         <Text style={[{ fontSize: 22, fontWeight: "800", color: colors.foreground }]}>Üstünlikli!</Text>
         <Text style={[{ color: colors.mutedForeground, fontSize: 14, textAlign: "center", lineHeight: 20 }]}>
           Iň tiz wagtda barlanar we size habar berler.
         </Text>
-        <Pressable onPress={() => { setDone(false); setPlan(null); setShowPayment(false); setUserPhone(""); setPayPhone(""); }}
-          style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}>
+        <Pressable
+          onPress={() => { setDone(false); setPlan(null); setUserPhone(""); }}
+          style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}
+        >
           <Text style={styles.primaryBtnText}>Täzeden</Text>
         </Pressable>
         <Pressable onPress={onBack} style={({ pressed }) => [styles.secondaryBtn, { opacity: pressed ? 0.85 : 1 }]}>
@@ -134,93 +156,86 @@ function AppPaymentFlow({ app, onBack, colors }: { app: AppService; onBack: () =
         </View>
       </View>
 
-      {!showPayment ? (
-        <>
-          <Text style={[styles.sectionHead, { color: colors.foreground }]}>Möçberi saýlaň</Text>
-          <View style={styles.planGrid}>
-            {app.plans.map(p => (
-              <Pressable key={p.label} onPress={() => setPlan(p)}
-                style={[styles.planCard, {
-                  backgroundColor: plan?.label === p.label ? colors.primary + "15" : colors.card,
-                  borderColor: plan?.label === p.label ? colors.primary : colors.border,
-                  borderWidth: plan?.label === p.label ? 2 : 1,
-                }]}>
-                <Text style={[styles.planAmount, { color: plan?.label === p.label ? colors.primary : colors.foreground }]}>{p.amount}</Text>
-                <Text style={[styles.planUnit, { color: colors.mutedForeground }]}>TMT</Text>
-                <Text style={[styles.planLabel, { color: plan?.label === p.label ? colors.primary : colors.mutedForeground }]}>{p.label}</Text>
-              </Pressable>
-            ))}
-          </View>
-
-          <View style={{ marginTop: 16 }}>
-            <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>{app.inputLabel}</Text>
-            <TextInput value={userPhone} onChangeText={setUserPhone}
-              placeholder="+993 XX XXXXXX" placeholderTextColor={colors.mutedForeground}
-              keyboardType="phone-pad"
-              style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
-            />
-          </View>
-
-          <Pressable onPress={() => { if (!plan || !userPhone) { Alert.alert("Ýalňyşlyk", "Sanawy saýlaň we nomeri giriziň!"); return; } setShowPayment(true); }}
-            style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1, marginTop: 20 }]}>
-            <Text style={styles.primaryBtnText}>Töleg usulyna geçmek</Text>
+      <Text style={[styles.sectionHead, { color: colors.foreground }]}>Möçberi saýlaň</Text>
+      <View style={styles.planGrid}>
+        {app.plans.map(p => (
+          <Pressable
+            key={p.label}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setPlan(p); }}
+            style={[styles.planCard, {
+              backgroundColor: plan?.label === p.label ? colors.primary + "15" : colors.card,
+              borderColor: plan?.label === p.label ? colors.primary : colors.border,
+              borderWidth: plan?.label === p.label ? 2 : 1,
+            }]}
+          >
+            <Text style={[styles.planAmount, { color: plan?.label === p.label ? colors.primary : colors.foreground }]}>{p.amount}</Text>
+            <Text style={[styles.planUnit, { color: colors.mutedForeground }]}>BP</Text>
+            <Text style={[styles.planLabel, { color: plan?.label === p.label ? colors.primary : colors.mutedForeground }]}>{p.label}</Text>
           </Pressable>
-        </>
-      ) : (
-        <>
-          <View style={[styles.summaryCard, { backgroundColor: colors.primary + "10", borderColor: colors.primary }]}>
-            <Text style={[{ color: colors.foreground, fontWeight: "700" }]}>{plan?.label} — <Text style={{ color: colors.primary }}>{plan?.amount} TMT</Text></Text>
-            <Text style={[{ color: colors.mutedForeground, fontSize: 12, marginTop: 2 }]}>Nomer: {userPhone}</Text>
-          </View>
+        ))}
+      </View>
 
-          <Text style={[styles.sectionHead, { color: colors.foreground }]}>Töleg usulyny saýlaň</Text>
-          <View style={{ flexDirection: "row", gap: 12 }}>
-            {([{ id: "terminal" as const, icon: "phone-portrait-outline" as const, label: "TMCELL terminal" },
-              { id: "bonus" as const, icon: "wallet-outline" as const, label: `Bonus pul (${balance} BP)` }]).map(m => (
-              <Pressable key={m.id} onPress={() => setPayMethod(m.id)}
-                style={[styles.payMethodCard, {
-                  backgroundColor: payMethod === m.id ? colors.primary + "15" : colors.card,
-                  borderColor: payMethod === m.id ? colors.primary : colors.border,
-                }]}>
-                <Ionicons name={m.icon} size={26} color={payMethod === m.id ? colors.primary : colors.mutedForeground} />
-                <Text style={[{ fontWeight: "600", fontSize: 12, textAlign: "center", color: payMethod === m.id ? colors.primary : colors.foreground }]}>{m.label}</Text>
-              </Pressable>
-            ))}
-          </View>
+      <View style={{ marginTop: 16 }}>
+        <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>{app.inputLabel}</Text>
+        <TextInput
+          value={userPhone}
+          onChangeText={setUserPhone}
+          placeholder="+993 XX XXXXXX"
+          placeholderTextColor={colors.mutedForeground}
+          keyboardType="phone-pad"
+          style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
+        />
+      </View>
 
-          {payMethod === "terminal" && (
-            <>
-              <View style={[{ backgroundColor: colors.primary + "10", borderRadius: 12, padding: 14, marginTop: 14 }]}>
-                <Text style={[{ fontWeight: "700", color: colors.foreground, marginBottom: 8 }]}>Şu nomerleriň birine {plan?.amount} TMT geçirmeli:</Text>
-                {PAYMENT_PHONES.map((p, i) => <Text key={i} style={{ color: colors.primary, fontWeight: "700", fontSize: 15, marginBottom: 4 }}>{p}</Text>)}
-              </View>
-              <View style={{ marginTop: 14 }}>
-                <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>Bize töleg geçirjek nomeriňiz</Text>
-                <TextInput value={payPhone} onChangeText={setPayPhone}
-                  placeholder="+993 XX XXXXXX" placeholderTextColor={colors.mutedForeground}
-                  keyboardType="phone-pad"
-                  style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
-                />
-              </View>
-            </>
+      <View style={[styles.bpInfoCard, { backgroundColor: colors.primary + "10", borderColor: colors.primary + "30" }]}>
+        <Ionicons name="wallet-outline" size={16} color={colors.primary} />
+        <View style={{ flex: 1 }}>
+          <Text style={[{ color: colors.primary, fontWeight: "700", fontSize: 13 }]}>
+            Balans: {balance.toFixed(2)} BP
+          </Text>
+          {plan && (
+            <Text style={[{ color: colors.mutedForeground, fontSize: 12, marginTop: 2 }]}>
+              {balance >= plan.amount
+                ? `✓ ${plan.amount} BP aýrylar`
+                : `⚡ ${(plan.amount - balance).toFixed(2)} BP ýetmez — doldurma mümkin`}
+            </Text>
           )}
+        </View>
+      </View>
 
-          {payMethod === "bonus" && balance < (plan?.amount || 0) && (
-            <View style={[{ backgroundColor: "#fee2e2", borderRadius: 10, padding: 12, marginTop: 12 }]}>
-              <Text style={{ color: "#dc2626" }}>Ýeterlik bonus pul ýok. Balansyňyz: {balance} BP. Gerekli: {plan?.amount} BP</Text>
-            </View>
-          )}
+      <Pressable
+        onPress={handlePay}
+        disabled={loading || !plan || !userPhone.trim()}
+        style={({ pressed }) => [
+          styles.primaryBtn,
+          {
+            backgroundColor: colors.primary,
+            opacity: loading || !plan || !userPhone.trim() || pressed ? 0.65 : 1,
+            marginTop: 20,
+          },
+        ]}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" size="small" />
+        ) : (
+          <>
+            <Ionicons name="wallet-outline" size={18} color="#fff" />
+            <Text style={styles.primaryBtnText}>
+              {plan ? `${plan.amount} BP bilen tölemek` : "Tölemek"}
+            </Text>
+          </>
+        )}
+      </Pressable>
 
-          <Pressable onPress={handleSubmit} disabled={loading}
-            style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: pressed || loading ? 0.7 : 1, marginTop: 20 }]}>
-            {loading ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.primaryBtnText}>Töleg geçirdim — Tassyklamak</Text>}
-          </Pressable>
-          <Pressable onPress={() => setShowPayment(false)} style={({ pressed }) => [styles.secondaryBtn, { opacity: pressed ? 0.85 : 1, marginTop: 8 }]}>
-            <Feather name="arrow-left" size={16} color={colors.mutedForeground} />
-            <Text style={[styles.secondaryBtnText, { color: colors.mutedForeground }]}>Yza</Text>
-          </Pressable>
-        </>
-      )}
+      <BPCheckoutModal
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+        serviceName={`${app.name} — ${plan?.label ?? ""}`}
+        serviceAmount={plan?.amount ?? 0}
+        currentBalance={balance}
+        deviceId={deviceId}
+        onPaymentComplete={handleModalComplete}
+      />
     </>
   );
 }
@@ -240,20 +255,26 @@ export default function UlgamlarScreen() {
         <Text style={styles.headerTitle}>{activeApp ? activeApp.name : "Içerki ulgamlar"}</Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 110 }}
-        keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 110 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {!activeApp ? (
           <>
-            <View style={[{ backgroundColor: colors.primary + "10", borderRadius: 12, padding: 14, marginBottom: 16, flexDirection: "row", gap: 10 }]}>
-              <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
+            <View style={[styles.infoBar, { backgroundColor: colors.primary + "10", borderColor: colors.primary + "25" }]}>
+              <Ionicons name="wallet-outline" size={18} color={colors.primary} />
               <Text style={[{ color: colors.mutedForeground, fontSize: 13, flex: 1, lineHeight: 20 }]}>
-                Türkmenistanyň sosial ulgamlaryna TMCELL üsti bilen töleg ediň.
+                Ähli tölegler Bonus Pul (BP) bilen amala aşyrylýar. Balans ýetmese, amatly usul bilen doldursa bolýar.
               </Text>
             </View>
             <View style={styles.appsGrid}>
               {APPS.map(app => (
-                <Pressable key={app.id} onPress={() => setActiveApp(app)}
-                  style={({ pressed }) => [styles.appCard, { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.85 : 1 }]}>
+                <Pressable
+                  key={app.id}
+                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setActiveApp(app); }}
+                  style={({ pressed }) => [styles.appCard, { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.85 : 1 }]}
+                >
                   <View style={[styles.appCardIcon, { backgroundColor: app.color }]}>
                     <Ionicons name="star-outline" size={24} color="#fff" />
                   </View>
@@ -261,10 +282,14 @@ export default function UlgamlarScreen() {
                   <Text style={[styles.appCardType, { color: colors.mutedForeground }]}>
                     {app.planType === "subscription" ? "Premium abonement" : "Hasaby doldurmak"}
                   </Text>
-                  <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 8, justifyContent: "center" }}>
+                  <View style={[styles.bpOnlyBadge, { backgroundColor: colors.primary + "15" }]}>
+                    <Ionicons name="wallet-outline" size={11} color={colors.primary} />
+                    <Text style={[{ color: colors.primary, fontSize: 10, fontWeight: "700" }]}>BP bilen töle</Text>
+                  </View>
+                  <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 6, justifyContent: "center" }}>
                     {app.plans.slice(0, 3).map(p => (
-                      <View key={p.label} style={[styles.planBadge, { backgroundColor: colors.primary + "15" }]}>
-                        <Text style={[{ color: colors.primary, fontSize: 11, fontWeight: "600" }]}>{p.amount} TMT</Text>
+                      <View key={p.label} style={[styles.planBadge, { backgroundColor: colors.muted }]}>
+                        <Text style={[{ color: colors.mutedForeground, fontSize: 11, fontWeight: "600" }]}>{p.amount} BP</Text>
                       </View>
                     ))}
                   </View>
@@ -283,11 +308,13 @@ export default function UlgamlarScreen() {
 const styles = StyleSheet.create({
   header: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingBottom: 16 },
   headerTitle: { color: "#fff", fontSize: 20, fontWeight: "800" },
+  infoBar: { flexDirection: "row", gap: 10, padding: 14, borderRadius: 12, borderWidth: 1, marginBottom: 16, alignItems: "flex-start" },
   appsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 14 },
   appCard: { width: "47%", borderRadius: 16, borderWidth: 1, padding: 16, alignItems: "center", gap: 8 },
   appCardIcon: { width: 52, height: 52, borderRadius: 16, alignItems: "center", justifyContent: "center" },
   appCardName: { fontSize: 15, fontWeight: "700", textAlign: "center" },
   appCardType: { fontSize: 11, textAlign: "center" },
+  bpOnlyBadge: { flexDirection: "row", alignItems: "center", gap: 4, borderRadius: 50, paddingHorizontal: 10, paddingVertical: 4 },
   planBadge: { borderRadius: 50, paddingHorizontal: 8, paddingVertical: 2 },
   appInfoCard: { flexDirection: "row", gap: 14, padding: 14, borderRadius: 14, borderWidth: 1, marginBottom: 16, alignItems: "flex-start" },
   appIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center", flexShrink: 0 },
@@ -299,10 +326,10 @@ const styles = StyleSheet.create({
   planLabel: { fontSize: 11, fontWeight: "600", textAlign: "center" },
   fieldLabel: { fontSize: 12, fontWeight: "600", marginBottom: 6 },
   input: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15 },
-  summaryCard: { borderWidth: 1, borderRadius: 12, padding: 14, marginBottom: 8 },
-  payMethodCard: { flex: 1, borderRadius: 12, borderWidth: 2, padding: 14, alignItems: "center", gap: 8 },
+  bpInfoCard: { flexDirection: "row", gap: 10, borderWidth: 1, borderRadius: 12, padding: 12, marginTop: 14, alignItems: "flex-start" },
   primaryBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 14, paddingVertical: 16 },
   primaryBtnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
   secondaryBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 12 },
   secondaryBtnText: { fontWeight: "600", fontSize: 15 },
+  successIcon: { width: 80, height: 80, borderRadius: 24, alignItems: "center", justifyContent: "center" },
 });

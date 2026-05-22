@@ -9,7 +9,7 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
-import { saveOrder, transferBP, getBPTransferHistory, type BPTransfer } from "@/lib/firebase";
+import { saveOrder, transferBP, getBPTransferHistory, createTMCellCashout, type BPTransfer } from "@/lib/firebase";
 import { uploadImage } from "@/lib/upload";
 import { addToHistory } from "@/lib/orderHistory";
 
@@ -69,15 +69,27 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
     finally { setBuyLoading(false); }
   }
 
+  const CASHOUT_FEE_RATE = 0.005;
+  const sellAmtNum = parseFloat(sellAmount) || 0;
+  const cashoutCommission = parseFloat((sellAmtNum * CASHOUT_FEE_RATE).toFixed(2));
+  const cashoutReceive = parseFloat((sellAmtNum - cashoutCommission).toFixed(2));
+
   async function handleSell() {
     const amt = parseFloat(sellAmount);
     if (!amt || amt <= 0) { Alert.alert("Ýalňyşlyk", "Mukdary giriziň!"); return; }
-    if (amt > balance) { Alert.alert("Ýalňyşlyk", `Ýeterlik bonus pul ýok. Balansyňyz: ${balance} BP`); return; }
-    if (!sellPhone.trim()) { Alert.alert("Ýalňyşlyk", "Nomeriňizi giriziň!"); return; }
+    if (!sellPhone.trim()) { Alert.alert("Ýalňyşlyk", "TMCell nomeriňizi giriziň!"); return; }
     setSellLoading(true);
     try {
-      await saveOrder("bonus-sell-orders", { deviceId, amount: amt, userPhone: sellPhone, status: "pending" });
-      await addToHistory({ type: "bonus-sell", title: "BP Satmak", details: `${amt} BP · ${sellPhone}`, amount: amt, amountLabel: `${amt} BP`, phone: sellPhone });
+      const result = await createTMCellCashout(deviceId, amt, sellPhone.trim());
+      if (!result.success) {
+        Alert.alert("Ýalňyşlyk", result.message);
+        setSellLoading(false); return;
+      }
+      await addToHistory({
+        type: "bonus-sell", title: "TMCell Çykaryş",
+        details: `${amt} BP → ${result.receiveAmount} TMT · ${sellPhone}`,
+        amount: amt, amountLabel: `-${amt} BP`, phone: sellPhone,
+      });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setSellDone(true);
     } catch { Alert.alert("Ýalňyşlyk", "Bilinmeýän ýalňyşlyk"); }
@@ -137,7 +149,7 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
       <View style={[s.segment, { backgroundColor: colors.muted }]}>
         {([
           { id: "buy" as const, icon: "arrow-down-circle-outline" as const, label: "BP Almak" },
-          { id: "sell" as const, icon: "arrow-up-circle-outline" as const, label: "BP Satmak" },
+          { id: "sell" as const, icon: "arrow-up-circle-outline" as const, label: "TMCell Çykaryş" },
           { id: "transfer" as const, icon: "paper-plane-outline" as const, label: "BP Geçir" },
         ]).map(t => (
           <Pressable
@@ -341,17 +353,25 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
       ) : mode === "sell" ? (
         sellDone ? (
           <View style={s.successBox}>
-            <View style={[s.successIcon, { backgroundColor: "#dbeafe" }]}>
-              <Ionicons name="checkmark-circle" size={40} color="#2563eb" />
+            <View style={[s.successIcon, { backgroundColor: "#d1fae5" }]}>
+              <Ionicons name="phone-portrait" size={40} color="#059669" />
             </View>
-            <Text style={[s.successTitle, { color: colors.foreground }]}>Haýyşnama kabul edildi!</Text>
-            <Text style={[s.successDesc, { color: colors.mutedForeground }]}>Bonus pul satmak haýyşnamaňyz iň gysga wagtda işleniler.</Text>
+            <Text style={[s.successTitle, { color: colors.foreground }]}>Çykaryş iberildi!</Text>
+            <Text style={[s.successDesc, { color: colors.mutedForeground }]}>
+              TMCell çykaryş haýyşnamaňyz kabul edildi.{"\n"}Iň gysga wagtda TMCell balansynyza geçer.
+            </Text>
             <Pressable onPress={resetSell} style={[s.primaryBtn, { backgroundColor: colors.primary }]}>
               <Text style={s.primaryBtnText}>Täzeden</Text>
             </Pressable>
           </View>
         ) : (
           <>
+            {/* Rate pill */}
+            <View style={[s.ratePill, { backgroundColor: "#05966912", borderColor: "#05966930" }]}>
+              <Ionicons name="phone-portrait-outline" size={15} color="#059669" />
+              <Text style={[s.rateText, { color: "#059669" }]}>TMCell çykaryş · 0.5% komissiya</Text>
+            </View>
+
             {/* Balance card */}
             <View style={[s.balanceCard, { backgroundColor: colors.primary }]}>
               <View style={s.balanceCardRow}>
@@ -360,29 +380,64 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
                 </View>
                 <View>
                   <Text style={s.balanceCardLabel}>Häzirki balans</Text>
-                  <Text style={s.balanceCardVal}>{balance} BP</Text>
+                  <Text style={s.balanceCardVal}>{balance.toFixed(2)} BP</Text>
                 </View>
               </View>
             </View>
+
             <View style={{ marginTop: 16 }}>
-              <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Satmak üçin mukdar (BP)</Text>
+              <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Çykarmak üçin mukdar (BP)</Text>
               <TextInput value={sellAmount} onChangeText={setSellAmount} placeholder="Meseläň: 100"
                 placeholderTextColor={colors.mutedForeground} keyboardType="decimal-pad"
                 style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
               />
             </View>
+
+            {sellAmtNum > 0 && (
+              <View style={[{ borderRadius: 14, borderWidth: 1, padding: 14, marginTop: 10, gap: 7, backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Text style={[{ fontSize: 12, fontWeight: "700", color: colors.foreground, marginBottom: 2 }]}>Töleg hasaplamasy</Text>
+                {[
+                  { label: "Çykarylýan BP",  val: `${sellAmtNum} BP`,           red: false },
+                  { label: "Komissiya (0.5%)", val: `-${cashoutCommission} BP`,   red: true  },
+                ].map((row, i) => (
+                  <View key={i} style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <Text style={{ color: colors.mutedForeground, fontSize: 12 }}>{row.label}</Text>
+                    <Text style={{ color: row.red ? "#ef4444" : colors.foreground, fontWeight: "700", fontSize: 12 }}>{row.val}</Text>
+                  </View>
+                ))}
+                <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 3 }} />
+                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                  <Text style={{ color: colors.foreground, fontWeight: "700", fontSize: 12 }}>TMCell-de alarsyňyz</Text>
+                  <Text style={{ color: "#059669", fontWeight: "800", fontSize: 17 }}>{cashoutReceive} TMT</Text>
+                </View>
+              </View>
+            )}
+
             <View style={{ marginTop: 14 }}>
-              <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>TMT alynjak nomer</Text>
-              <TextInput value={sellPhone} onChangeText={setSellPhone} placeholder="+993 XX XXXXXX"
+              <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Siziň TMCell nomeriňiz</Text>
+              <TextInput value={sellPhone} onChangeText={setSellPhone} placeholder="+993 6X XXXXXX"
                 placeholderTextColor={colors.mutedForeground} keyboardType="phone-pad"
                 style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
               />
             </View>
-            {sellLoading ? <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} /> : (
-              <Pressable onPress={handleSell}
-                style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1, marginTop: 20 }]}>
-                <Ionicons name="paper-plane-outline" size={18} color="#fff" />
-                <Text style={s.primaryBtnText}>Haýyşnama ibermek</Text>
+
+            <View style={[{ flexDirection: "row", gap: 8, alignItems: "flex-start", padding: 11, borderRadius: 12, borderWidth: 1, marginTop: 12, backgroundColor: "#fef3c710", borderColor: "#d9770640" }]}>
+              <Ionicons name="information-circle-outline" size={15} color="#d97706" />
+              <Text style={{ color: "#d97706", fontSize: 12, flex: 1, lineHeight: 17 }}>
+                Diňe öz TMCell belgiňize çykaryp bolýar. Karta çykaryş elýeterli däl.
+              </Text>
+            </View>
+
+            {sellLoading ? (
+              <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} />
+            ) : (
+              <Pressable
+                onPress={handleSell}
+                disabled={!sellAmount || !sellPhone}
+                style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#059669", opacity: pressed || !sellAmount || !sellPhone ? 0.7 : 1, marginTop: 20 }]}
+              >
+                <Ionicons name="phone-portrait-outline" size={18} color="#fff" />
+                <Text style={s.primaryBtnText}>TMCell-e çykar</Text>
               </Pressable>
             )}
           </>

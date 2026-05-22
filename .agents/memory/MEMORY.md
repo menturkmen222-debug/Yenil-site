@@ -1,0 +1,3 @@
+- [BP Payment Architecture](bp-payment-arch.md) — BP-centric payments: deductBalanceAtomic (runTransaction) for all service purchases; inline BPCheckoutModal when balance insufficient (card +15%, TMCell +30%)
+- [TMCell Cashout Rules](tmcell-cashout.md) — Cash-out to bank card BLOCKED; only TMCell (0.5% fee via createTMCellCashout), P2P arbitrage (nagt-cashout), and crypto allowed
+- [Test Account Seeding](test-seed.md) — seedTestAccount(deviceId) in firebase.ts sets balance=1000 BP and reputation.score=80; accessible via Settings → SYNAG REJIMI

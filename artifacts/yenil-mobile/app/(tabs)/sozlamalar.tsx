@@ -17,7 +17,7 @@ import { type ThemeKey } from "@/constants/colors";
 import {
   getReputation, watchReputation, watchFriends, addFriend, removeFriend,
   getBPTransferHistory, saveDispute, setUserNickname, getUserNickname,
-  getReputation as fetchReputation,
+  getReputation as fetchReputation, seedTestAccount,
   type ReputationData, type FriendEntry, type BPTransfer,
 } from "@/lib/firebase";
 import {
@@ -1323,6 +1323,40 @@ export default function SozlamalarScreen() {
             </View>
           )}
         </Pressable>
+
+        {/* ══════════ SYNAG REJIMI ══════════ */}
+        <SectionTitle title="SYNAG REJIMI" colors={colors} />
+        <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <SettingRow
+            icon="flask-outline"
+            iconColor="#7c3aed"
+            label="1000 BP + Abraý 80 ber"
+            desc="Test hasaby üçin balans we abraý nokat goş"
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              Alert.alert(
+                "Synag maglumaty",
+                "Hasabyňyza 1000 BP we 80 abraý baly goşuljakmy?",
+                [
+                  { text: "Ýatyr", style: "cancel" },
+                  {
+                    text: "Hawa, goş",
+                    onPress: async () => {
+                      try {
+                        await seedTestAccount(deviceId);
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        Alert.alert("✅ Üstünlikli", "1000 BP we 80 abraý baly goşuldy!");
+                      } catch {
+                        Alert.alert("Ýalňyşlyk", "Synag maglumaty goşup bolmady.");
+                      }
+                    },
+                  },
+                ]
+              );
+            }}
+            colors={colors}
+          />
+        </View>
 
         {/* Logout */}
         <Pressable

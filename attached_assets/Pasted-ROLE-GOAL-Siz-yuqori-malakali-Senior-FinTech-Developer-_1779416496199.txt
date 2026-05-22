@@ -1,0 +1,30 @@
+ROLE & GOAL:
+Siz yuqori malakali (Senior FinTech Developer) AIsiz. Bizning Mobil ilovamiz (Web App emas) loyihamizdagi barcha to'lov arxitekturasini fundamental ravishda o'zgartirishingiz shart. Hech qanday chala kod yoki "// TODO" sharhlari qoldirilmasligi, barcha mantiq (logic) backend va frontendda 100% to'liq yozilishi qonundir.
+
+### 1. "BP-CENTRIC" IN-LINE TO'LOV TIZIMI (YOPIQ IQTISODIYOT)
+- **Eski tizimlarni butunlay o'chirish:** Mobil ilovadagi barcha xizmatlar (Taksi, Bilet, E-bilim, Kuryer va h.g.) ichidan to'g'ridan-to'g'ri "Bank kartasi orqali to'lash" yoki "Telefon raqami orqali o'tkazish" tizimlari va tugmalari butunlay olib tashlansin. Xizmat checkout sahifalarida FAQAT bitta tugma qoladi: O'ziga hos "Tölemek" yani "BP (Bonus Pul) bilan to'lash" hisoblangan miqdor shu BP bilan to'lanadi. 
+- **Nominal qiymat:** 1 BP har doim 1 TMT ga teng deb hisoblanadi (1 BP = 1 TMT).
+- **In-Line To'lov Modali (Seamless Checkout Logic):** Foydalanuvchi biror xizmatni sotib olmoqchi bo'lganda (Masalan, narxi 50 BP):
+  * Tizim foydalanuvchining `balanceBP` maydonini tekshiradi.
+  * Agar balans yetarli bo'lsa (balanceBP >= 50), mablag' darhol yechiladi va xizmat ochiladi.
+  * Agar balans yetishmasa (Masalan, balansda 20 BP bor, ya'ni 30 BP yetishmayapti), tizim foydalanuvchini boshqa sahifaga o'tkazmasdan, o'sha joyning o'zida "Yashirin Integratsiya" modal oynasini ochadi.
+- **Faqat yetishmayotgan summani dinamik hisoblash:** Modal oyna foydalanuvchiga ortiqcha paketlarni majburlamasdan, FAQAT yetishmayotgan summani (bizning misolda 30 BP) sotib olishni taklif qiladi. Foydalanuvchiga faqat 2 ta tezkor to'ldirish tugmasi ko'rsatiladi (Dinamik foizlar bilan):
+  * 💳 Bank kartasi orqali darhol to'ldirish: (Yetishmayotgan BP + 15% komissiya). Foydalanuvchi kartadan to'lov qilgan soniyada, fon rejimida (background) uning balansiga yetishmagan 30 BP uriladi va o'sha zahoti xizmat sotib olinadi. Foydalanuvchi ortiqcha klik qilmaydi.
+  * 📱 TMCell balansi orqali darhol to'ldirish: (Yetishmayotgan BP + 30% komissiya).
+
+### 2. REAL PULGA CHIQARISH (CASH-OUT) CHEKLOVLARI
+- **Karta Blokirovkasi:** User modelida va hamyon sahifasida BP balansini to'g'ridan-to'g'ri bank kartasiga qaytarib yechib olish (cash-out) funksiyasi qat'iyan BLOCKLANADI yani olib tashlanadi. Kod darajasida buni cheklang.
+- **Ruxsat etilgan yo'llar:** BP hamyonidagi mablag'larni foydalanuvchi faqat:
+  1. Ilova ichidagi barcha ichki xizmatlarga (0% komissiya bilan).
+  2. P2P Arbitraj bo'limida boshqa foydalanuvchilarga naqd pulga sotish orqali.
+  3. TMCell balansiga yoki Kripto hamyonga chiqarish orqali sarflashi mumkin.
+- **Chiqarish komissiyalari:** * TMCell balansiga pul chiqarish komissiyasi: 0.5% qilib belgilansin.
+  * Kripto (USDT) chiqarish komissiyasi umuman boshqa tarmoq tariflariga tayanadi.
+
+### 3. UI/UX VA XAVFSIZLIK (ANTI-DOUBLE-SPEND)
+- **iOS (Cupertino) Style PWA:** Interfeys to'liq iOS uslubida, toza, minimalistik va shaffof oyna (glassmorphism) effektlari bilan dizaýn qilinsin.
+- **Ikki marta yechilishga qarshi blok:** Internet sekin bo'lganda foydalanuvchi tugmani ko'p bosib yubormasligi uchun, to'lov tugmasi bosilgan soniyadan boshlab API'dan javob kelguncha tugma to'liq "Disabled" holatiga o'tsin va "Loading..." spinneri ko'rinsin. Pul  takroran yechilishi server va klient darajasida bloklansin.
+
+Va BP hisobimga ilovani test, sinov qilish uchun 1000BP va abraý/Ynam ballari berilsin
+
+Bularni barchasi shu bir so'rovda to'liq barjar
