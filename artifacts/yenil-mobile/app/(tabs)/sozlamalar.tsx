@@ -1359,14 +1359,6 @@ export default function SozlamalarScreen() {
           />
         </View>
 
-        {/* Logout */}
-        <Pressable
-          onPress={() => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning); Alert.alert("Çykmak", "Akkauntdan çykmagy isleýärsiňizmi?", [{ text: "Ýok" }, { text: "Hawa, çyk", style: "destructive", onPress: () => Alert.alert("Çykyldy", "Üstünlikli çykyldy!") }]); }}
-          style={({ pressed }) => [s.logoutBtn, { opacity: pressed ? 0.8 : 1, borderColor: colors.destructive }]}
-        >
-          <Ionicons name="log-out-outline" size={18} color={colors.destructive} />
-          <Text style={[s.logoutText, { color: colors.destructive }]}>Akkauntdan çyk</Text>
-        </Pressable>
       </ScrollView>
 
       {/* ─── MODALS ─── */}

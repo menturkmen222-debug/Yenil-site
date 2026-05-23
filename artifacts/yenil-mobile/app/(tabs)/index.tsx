@@ -546,7 +546,7 @@ export default function HomeScreen() {
           <View style={styles.heroTopRow}>
             {/* Left: Profile avatar → settings */}
             <Pressable
-              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/(tabs)/sozlamalar" as Href); }}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/(tabs)/profile" as Href); }}
               style={styles.profileBtn}
             >
               <LinearGradient

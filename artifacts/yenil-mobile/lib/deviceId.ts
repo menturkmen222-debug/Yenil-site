@@ -9,6 +9,17 @@ function makeId(): string {
 
 let cachedId: string | null = null;
 
+export async function clearDeviceId(): Promise<void> {
+  cachedId = null;
+  try {
+    if (Platform.OS === "web") {
+      if (typeof localStorage !== "undefined") localStorage.removeItem(KEY);
+    } else {
+      await SecureStore.deleteItemAsync(KEY);
+    }
+  } catch {}
+}
+
 export async function getDeviceIdAsync(): Promise<string> {
   if (cachedId) return cachedId;
   try {

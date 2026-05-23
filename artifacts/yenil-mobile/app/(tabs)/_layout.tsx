@@ -119,6 +119,7 @@ export default function TabLayout() {
       {/* Hidden tabs */}
       <Tabs.Screen name="pay" options={{ href: null }} />
       <Tabs.Screen name="statistika" options={{ href: null }} />
+      <Tabs.Screen name="profile" options={{ href: null }} />
     </Tabs>
   );
 }
