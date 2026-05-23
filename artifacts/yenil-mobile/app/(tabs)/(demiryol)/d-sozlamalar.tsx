@@ -4,6 +4,7 @@ import {
   Alert, Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
@@ -22,13 +23,16 @@ export default function DemiryolSozlamalarScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12, backgroundColor: colors.primary }]}>
+      <LinearGradient
+        colors={[colors.headerGradientStart, colors.headerGradientEnd]}
+        style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12 }]}
+      >
         <View style={styles.headerRow}>
           <Ionicons name="settings-outline" size={22} color="#fff" />
           <Text style={styles.headerTitle}>Demirýol sozlamalary</Text>
         </View>
         <Text style={styles.headerSub}>Bilet hyzmatyna degişli sazlamalar</Text>
-      </View>
+      </LinearGradient>
 
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 120 }}

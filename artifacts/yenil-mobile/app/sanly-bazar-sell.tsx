@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable,
-  Platform, Modal, TextInput, ActivityIndicator, Alert,
+  Platform, Modal, TextInput, Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,6 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import {
   watchDigitalListings, createDigitalListing, buyDigitalListing, cancelDigitalListing,
@@ -166,17 +167,16 @@ export default function SanlyBazarSellScreen() {
             <Text style={lc.cancelText}>Ýatyr</Text>
           </Pressable>
         ) : (
-          <Pressable
-            onPress={() => handleBuy(listing.id, listing.price, listing.title)}
+          <PessimisticButton
+            label={`${listing.price} BP — Satyn al`}
+            loadingLabel="Satyn alynýar..."
+            loading={buyingId === listing.id}
             disabled={buyingId === listing.id}
-            style={[lc.buyBtn, { backgroundColor: cat.color }]}
-          >
-            {buyingId === listing.id
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <Ionicons name="cart-outline" size={16} color="#fff" />
-            }
-            <Text style={lc.buyBtnText}>{buyingId === listing.id ? "Satyn alynýar..." : `${listing.price} BP — Satyn al`}</Text>
-          </Pressable>
+            onPress={() => handleBuy(listing.id, listing.price, listing.title)}
+            color={cat.color}
+            size="sm"
+            icon={<Ionicons name="cart-outline" size={16} color="#fff" />}
+          />
         )}
       </View>
     );
@@ -383,17 +383,16 @@ export default function SanlyBazarSellScreen() {
               </Text>
             </View>
 
-            <Pressable
-              onPress={handleCreate}
+            <PessimisticButton
+              label="Haryt ýerleşdir"
+              loadingLabel="Ýerleşdirilýär..."
+              loading={submitting}
               disabled={submitting || !title.trim() || !description.trim() || priceNum < 1 || !delivery.trim()}
-              style={[s.btnPrimary, { backgroundColor: "#db2777", opacity: (!title.trim() || !description.trim() || priceNum < 1 || !delivery.trim()) ? 0.5 : 1 }]}
-            >
-              {submitting
-                ? <ActivityIndicator size="small" color="#fff" />
-                : <Ionicons name="storefront-outline" size={18} color="#fff" />
-              }
-              <Text style={s.btnPrimaryText}>{submitting ? "Ýerleşdirilýär..." : "Haryt ýerleşdir"}</Text>
-            </Pressable>
+              onPress={handleCreate}
+              color="#db2777"
+              size="lg"
+              icon={<Ionicons name="storefront-outline" size={18} color="#fff" />}
+            />
           </ScrollView>
         </View>
       </Modal>

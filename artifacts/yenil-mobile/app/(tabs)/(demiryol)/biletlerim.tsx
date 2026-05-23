@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable,
-  TextInput, Alert, ActivityIndicator, Platform,
+  TextInput, Alert, Platform,
 } from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
+import { PessimisticButton } from "@/components/PessimisticButton";
 
 const DEMIRYOL_API = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api/demiryol`
@@ -78,13 +80,16 @@ export default function BiletlerimScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12, backgroundColor: colors.primary }]}>
+      <LinearGradient
+        colors={[colors.headerGradientStart, colors.headerGradientEnd]}
+        style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12 }]}
+      >
         <View style={styles.headerRow}>
           <Ionicons name="ticket-outline" size={22} color="#fff" />
           <Text style={styles.headerTitle}>Biletlerim</Text>
         </View>
         <Text style={styles.headerSub}>Biletleriňizi dolandyryň</Text>
-      </View>
+      </LinearGradient>
 
       <View style={[styles.tabSelector, { backgroundColor: colors.card, borderColor: colors.border }]}>
         {(["saved", "search"] as const).map((t) => (
@@ -192,19 +197,16 @@ export default function BiletlerimScreen() {
                 </Pressable>
               )}
             </View>
-            <Pressable
+            <PessimisticButton
+              label="Gözlemek"
+              loadingLabel="Gözlenýär..."
+              loading={loading}
+              disabled={loading}
               onPress={searchTicket}
-              style={({ pressed }) => [styles.searchBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <>
-                  <Ionicons name="search" size={18} color="#fff" />
-                  <Text style={styles.searchBtnText}>Gözlemek</Text>
-                </>
-              )}
-            </Pressable>
+              color={colors.primary}
+              size="lg"
+              icon={<Ionicons name="search" size={18} color="#fff" />}
+            />
 
             {error ? (
               <View style={[styles.errorBox, { backgroundColor: "#fee2e2", borderColor: "#ef4444" }]}>

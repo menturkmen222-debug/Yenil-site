@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable,
-  Platform, Modal, TextInput, ActivityIndicator, Alert,
+  Platform, Modal, TextInput, Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,6 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import {
   watchMicroTasks, createMicroTask, acceptMicroTask, completeMicroTask,
@@ -177,31 +178,29 @@ export default function KurYerScreen() {
 
         {/* Action buttons */}
         {!isMyTask && task.status === "open" && (
-          <Pressable
-            onPress={() => handleAccept(task.id)}
+          <PessimisticButton
+            label={`Kabul et — ${task.reward} BP gazanyň`}
+            loadingLabel="Işlenýär..."
+            loading={actingId === task.id}
             disabled={actingId === task.id}
-            style={[tc.actionBtn, { backgroundColor: "#d97706" }]}
-          >
-            {actingId === task.id
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <Ionicons name="bicycle-outline" size={15} color="#fff" />
-            }
-            <Text style={tc.actionBtnText}>Kabul et — {task.reward} BP gazanyň</Text>
-          </Pressable>
+            onPress={() => handleAccept(task.id)}
+            color="#d97706"
+            size="sm"
+            icon={<Ionicons name="bicycle-outline" size={15} color="#fff" />}
+          />
         )}
 
         {isMyCourier && task.status === "taken" && (
-          <Pressable
-            onPress={() => handleComplete(task.id)}
+          <PessimisticButton
+            label={`Eltip berdim — ${task.reward} BP al`}
+            loadingLabel="Işlenýär..."
+            loading={actingId === task.id}
             disabled={actingId === task.id}
-            style={[tc.actionBtn, { backgroundColor: "#059669" }]}
-          >
-            {actingId === task.id
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <Ionicons name="checkmark-done-outline" size={15} color="#fff" />
-            }
-            <Text style={tc.actionBtnText}>Eltip berdim — {task.reward} BP al</Text>
-          </Pressable>
+            onPress={() => handleComplete(task.id)}
+            color="#059669"
+            size="sm"
+            icon={<Ionicons name="checkmark-done-outline" size={15} color="#fff" />}
+          />
         )}
       </View>
     );
@@ -387,17 +386,16 @@ export default function KurYerScreen() {
               </Text>
             </View>
 
-            <Pressable
-              onPress={handleCreate}
+            <PessimisticButton
+              label="Tapşyrygy ýerleşdir"
+              loadingLabel="Iberilýär..."
+              loading={submitting}
               disabled={submitting || rewardNum < MIN_REWARD || !description.trim() || rewardNum > balance}
-              style={[s.btnPrimary, { backgroundColor: "#d97706", opacity: (rewardNum < MIN_REWARD || !description.trim() || rewardNum > balance) ? 0.5 : 1 }]}
-            >
-              {submitting
-                ? <ActivityIndicator size="small" color="#fff" />
-                : <Ionicons name="send-outline" size={18} color="#fff" />
-              }
-              <Text style={s.btnPrimaryText}>{submitting ? "Iberilýär..." : "Tapşyrygy ýerleşdir"}</Text>
-            </Pressable>
+              onPress={handleCreate}
+              color="#d97706"
+              size="lg"
+              icon={<Ionicons name="send-outline" size={18} color="#fff" />}
+            />
           </ScrollView>
         </View>
       </Modal>

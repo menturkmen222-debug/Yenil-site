@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
-  Platform, Alert, ActivityIndicator,
+  Platform, Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +17,7 @@ import {
   type AgentDeposit,
 } from "@/lib/firebase";
 import { formatRelativeTime } from "@/lib/reputation";
+import { PessimisticButton } from "@/components/PessimisticButton";
 
 const MIN_TMT = 50;
 const STATUS_MAP: Record<AgentDeposit["status"], { label: string; color: string; icon: string }> = {
@@ -201,20 +202,18 @@ export default function AgentTopupScreen() {
                 Pul geçireniňizden SOŇRA sargyt iberiň. Tassyklanmaz öň BP berilmez.
               </Text>
 
-              <Pressable
-                onPress={handleSubmit}
-                disabled={loading || tmt < MIN_TMT}
-                style={[s.btnPrimary, { backgroundColor: "#059669", opacity: tmt < MIN_TMT ? 0.5 : 1, marginTop: 6 }]}
-              >
-                {loading ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Ionicons name="send-outline" size={18} color="#fff" />
-                )}
-                <Text style={s.btnPrimaryText}>
-                  {loading ? "Iberilýär..." : "Sargyt iber"}
-                </Text>
-              </Pressable>
+              <View style={{ marginTop: 6 }}>
+                <PessimisticButton
+                  label="Sargyt iber"
+                  loadingLabel="Iberilýär..."
+                  loading={loading}
+                  disabled={loading || tmt < MIN_TMT}
+                  onPress={handleSubmit}
+                  color="#059669"
+                  size="lg"
+                  icon={<Ionicons name="send-outline" size={18} color="#fff" />}
+                />
+              </View>
             </View>
           </>
         )}

@@ -4,9 +4,11 @@ import {
   ActivityIndicator, Modal, Platform, Alert,
 } from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import {
   getHistory, clearHistory, addToHistory,
@@ -167,7 +169,10 @@ export default function StatistikaScreen() {
     <View style={[s.container, { backgroundColor: colors.background }]}>
 
       {/* Header */}
-      <View style={[s.header, { paddingTop: topPad, backgroundColor: colors.primary }]}>
+      <LinearGradient
+        colors={[colors.headerGradientStart, colors.headerGradientEnd]}
+        style={[s.header, { paddingTop: topPad }]}
+      >
         <View>
           <Text style={s.headerTitle}>Statistika</Text>
           <Text style={s.headerSub}>Siziň amallar taryhyňyz</Text>
@@ -177,7 +182,7 @@ export default function StatistikaScreen() {
             <Feather name="trash-2" size={16} color="rgba(255,255,255,0.8)" />
           </Pressable>
         )}
-      </View>
+      </LinearGradient>
 
       {/* Summary Cards */}
       {history.length > 0 && (
@@ -339,17 +344,17 @@ export default function StatistikaScreen() {
                 </View>
               </View>
 
-              {repeatLoading ? (
-                <ActivityIndicator color={colors.primary} style={{ marginTop: 24, marginBottom: 8 }} />
-              ) : (
-                <View style={{ gap: 10, marginTop: 16 }}>
-                  <Pressable
+              <View style={{ gap: 10, marginTop: 16 }}>
+                  <PessimisticButton
+                    label="Hawa, gaýtala"
+                    loadingLabel="Ugradylýar..."
+                    loading={repeatLoading}
+                    disabled={repeatLoading}
                     onPress={handleRepeat}
-                    style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}
-                  >
-                    <Feather name="refresh-cw" size={16} color="#fff" />
-                    <Text style={s.primaryBtnText}>Hawa, gaýtala</Text>
-                  </Pressable>
+                    color={colors.primary}
+                    size="lg"
+                    icon={<Feather name="refresh-cw" size={16} color="#fff" />}
+                  />
                   <Pressable
                     onPress={() => { setRepeatItem(null); setRepeatDone(false); }}
                     style={({ pressed }) => [s.secondaryBtn, { backgroundColor: colors.muted, opacity: pressed ? 0.85 : 1 }]}
@@ -357,7 +362,6 @@ export default function StatistikaScreen() {
                     <Text style={[s.secondaryBtnText, { color: colors.foreground }]}>Ýatyr</Text>
                   </Pressable>
                 </View>
-              )}
             </>
           ) : null}
         </View>

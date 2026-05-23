@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import * as Location from "expo-location";
 import { useColors } from "@/hooks/useColors";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import { getDeviceIdAsync } from "@/lib/deviceId";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
@@ -264,25 +265,16 @@ export default function KonumScreen() {
             </Text>
           </View>
 
-          <Pressable
-            onPress={limitReached ? () => setShowPaywall(true) : createLink}
+          <PessimisticButton
+            label={limitReached ? "Premium al — Çäksiz link" : "Täze paýlaşma linki döret"}
+            loadingLabel="Döredilýär..."
+            loading={creating}
             disabled={creating}
-            style={({ pressed }) => [s.createBtn, { opacity: pressed || creating ? 0.75 : 1 }]}
-          >
-            <LinearGradient
-              colors={limitReached ? ["#7c3aed", "#a855f7"] : ["#166534", "#16a34a"]}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-              style={s.createBtnInner}
-            >
-              {creating
-                ? <ActivityIndicator color="#fff" size="small" />
-                : <Ionicons name={limitReached ? "arrow-up-circle-outline" : "add-circle-outline"} size={22} color="#fff" />
-              }
-              <Text style={s.createBtnText}>
-                {creating ? "Döredilýär..." : limitReached ? "Premium al — Çäksiz link" : "Täze paýlaşma linki döret"}
-              </Text>
-            </LinearGradient>
-          </Pressable>
+            onPress={limitReached ? () => setShowPaywall(true) : createLink}
+            color={limitReached ? "#7c3aed" : "#166534"}
+            size="lg"
+            icon={<Ionicons name={limitReached ? "arrow-up-circle-outline" : "add-circle-outline"} size={22} color="#fff" />}
+          />
 
           {loadingShares ? (
             <ActivityIndicator color={colors.primary} style={{ marginTop: 40 }} />
@@ -365,21 +357,16 @@ export default function KonumScreen() {
                   </View>
                 ))}
               </View>
-              <Pressable
-                onPress={startLiveTracking}
+              <PessimisticButton
+                label="Canlý yzarlamany başlat"
+                loadingLabel="Başlanýar..."
+                loading={liveStatus === "requesting"}
                 disabled={liveStatus === "requesting"}
-                style={({ pressed }) => [s.liveStartBtn, { opacity: pressed || liveStatus === "requesting" ? 0.75 : 1 }]}
-              >
-                <LinearGradient colors={["#166534", "#16a34a"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={s.liveStartBtnInner}>
-                  {liveStatus === "requesting"
-                    ? <ActivityIndicator color="#fff" size="small" />
-                    : <Ionicons name="radio" size={22} color="#fff" />
-                  }
-                  <Text style={s.liveStartBtnText}>
-                    {liveStatus === "requesting" ? "Başlanýar..." : "Canlý yzarlamany başlat"}
-                  </Text>
-                </LinearGradient>
-              </Pressable>
+                onPress={startLiveTracking}
+                color="#166534"
+                size="lg"
+                icon={<Ionicons name="radio" size={22} color="#fff" />}
+              />
             </View>
           ) : (
             <View style={s.liveActiveBox}>

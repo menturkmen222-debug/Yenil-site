@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import { useColors } from "@/hooks/useColors";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import {
   getOrCreateReferralCode, getReferralStats, applyReferralCode,
@@ -189,16 +190,16 @@ export default function ReferalScreen() {
                   autoCapitalize="characters"
                   maxLength={8}
                 />
-                <Pressable
-                  onPress={handleApplyCode}
+                <PessimisticButton
+                  label=""
+                  loadingLabel=""
+                  loading={applying}
                   disabled={applying || !applyCode.trim()}
-                  style={[s.applyBtn, { backgroundColor: "#6366f1", opacity: !applyCode.trim() ? 0.5 : 1 }]}
-                >
-                  {applying
-                    ? <ActivityIndicator size="small" color="#fff" />
-                    : <Ionicons name="checkmark" size={20} color="#fff" />
-                  }
-                </Pressable>
+                  onPress={handleApplyCode}
+                  color="#6366f1"
+                  size="sm"
+                  icon={<Ionicons name="checkmark" size={20} color="#fff" />}
+                />
               </View>
               {applyMsg && (
                 <View style={[s.applyMsg, {

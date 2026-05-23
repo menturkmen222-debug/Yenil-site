@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable,
-  Platform, Modal, TextInput, ActivityIndicator, Alert,
+  Platform, Modal, TextInput, Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,6 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import {
   watchNagtOrders, createNagtOrder, acceptNagtOrder, completeNagtOrder, getReputation,
@@ -147,31 +148,29 @@ export default function NagtCashoutScreen() {
 
         {/* Buttons */}
         {!isMyOrder && canBeAgent && order.status === "open" && (
-          <Pressable
-            onPress={() => handleAccept(order.id)}
+          <PessimisticButton
+            label="Agent hökmünde kabul et"
+            loadingLabel="Işlenýär..."
+            loading={actingId === order.id}
             disabled={actingId === order.id}
-            style={[oc.actionBtn, { backgroundColor: "#0284c7" }]}
-          >
-            {actingId === order.id
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <Ionicons name="people-outline" size={15} color="#fff" />
-            }
-            <Text style={oc.actionBtnText}>Agent hökmünde kabul et</Text>
-          </Pressable>
+            onPress={() => handleAccept(order.id)}
+            color="#0284c7"
+            size="sm"
+            icon={<Ionicons name="people-outline" size={15} color="#fff" />}
+          />
         )}
 
         {isMyAgentOrder && order.status === "matched" && (
-          <Pressable
-            onPress={() => handleComplete(order.id)}
+          <PessimisticButton
+            label="Tamamlandy diýip belirt"
+            loadingLabel="Işlenýär..."
+            loading={actingId === order.id}
             disabled={actingId === order.id}
-            style={[oc.actionBtn, { backgroundColor: "#059669" }]}
-          >
-            {actingId === order.id
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <Ionicons name="checkmark-circle-outline" size={15} color="#fff" />
-            }
-            <Text style={oc.actionBtnText}>Tamamlandy diýip belirt</Text>
-          </Pressable>
+            onPress={() => handleComplete(order.id)}
+            color="#059669"
+            size="sm"
+            icon={<Ionicons name="checkmark-circle-outline" size={15} color="#fff" />}
+          />
         )}
 
         {isMyOrder && (
@@ -342,17 +341,16 @@ export default function NagtCashoutScreen() {
               </Text>
             </View>
 
-            <Pressable
-              onPress={handleCreate}
+            <PessimisticButton
+              label="Sargyt iber"
+              loadingLabel="Iberilýär..."
+              loading={submitting}
               disabled={submitting || bp < MIN_CASHOUT_BP || bp > balance}
-              style={[s.btnPrimary, { backgroundColor: "#0284c7", opacity: (bp < MIN_CASHOUT_BP || bp > balance) ? 0.5 : 1 }]}
-            >
-              {submitting
-                ? <ActivityIndicator size="small" color="#fff" />
-                : <Ionicons name="cash-outline" size={18} color="#fff" />
-              }
-              <Text style={s.btnPrimaryText}>{submitting ? "Iberilýär..." : "Sargyt iber"}</Text>
-            </Pressable>
+              onPress={handleCreate}
+              color="#0284c7"
+              size="lg"
+              icon={<Ionicons name="cash-outline" size={18} color="#fff" />}
+            />
           </ScrollView>
         </View>
       </Modal>

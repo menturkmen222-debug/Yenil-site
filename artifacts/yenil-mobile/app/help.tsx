@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, StyleSheet, Pressable, TextInput, Alert, ActivityIndicator, Platform } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Pressable, TextInput, Alert, Platform } from "react-native";
 import { router } from "expo-router";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import { saveOrder } from "@/lib/firebase";
 
 const faqs = [
@@ -101,15 +102,18 @@ export default function HelpScreen() {
           </View>
         </View>
 
-        <Pressable onPress={submitQuestion} disabled={loading}
-          style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: pressed || loading ? 0.7 : 1, marginTop: 20 }]}>
-          {loading ? <ActivityIndicator color="#fff" size="small" /> : (
-            <>
-              <Ionicons name="send-outline" size={18} color="#fff" />
-              <Text style={styles.primaryBtnText}>Sorag ibermek</Text>
-            </>
-          )}
-        </Pressable>
+        <View style={{ marginTop: 20 }}>
+          <PessimisticButton
+            label="Sorag ibermek"
+            loadingLabel="Iberilýär..."
+            loading={loading}
+            disabled={loading}
+            onPress={submitQuestion}
+            color={colors.primary}
+            size="lg"
+            icon={<Ionicons name="send-outline" size={18} color="#fff" />}
+          />
+        </View>
       </ScrollView>
     </View>
   );

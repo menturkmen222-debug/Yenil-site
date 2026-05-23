@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable,
-  Platform, Modal, TextInput, ActivityIndicator, Alert,
+  Platform, Modal, TextInput, Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,6 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import {
   createRoadReport, upvoteRoadReport, watchRoadReports,
@@ -98,35 +99,16 @@ function ReportCard({
           <Text style={[rc.time, { color: colors.mutedForeground }]}>· {formatRelativeTime(report.createdAt)}</Text>
         </View>
 
-        <Pressable
-          onPress={handleUpvote}
+        <PessimisticButton
+          label={hasVoted ? "Tassykladyňyz" : report.upvoteCount >= 3 ? "Tassyklandy" : "Tassykla"}
+          loadingLabel="Barlanýar..."
+          loading={voting}
           disabled={hasVoted || isOwn || voting || report.upvoteCount >= 3}
-          style={[
-            rc.upvoteBtn,
-            {
-              backgroundColor: hasVoted || report.upvoteCount >= 3
-                ? "#05966918" : rType.color + "15",
-              borderColor: hasVoted || report.upvoteCount >= 3
-                ? "#05966930" : rType.color + "40",
-              opacity: isOwn ? 0.4 : 1,
-            },
-          ]}
-        >
-          {voting ? (
-            <ActivityIndicator size="small" color={rType.color} />
-          ) : (
-            <>
-              <Ionicons
-                name={hasVoted || report.upvoteCount >= 3 ? "checkmark-circle" : "thumbs-up-outline"}
-                size={14}
-                color={hasVoted || report.upvoteCount >= 3 ? "#059669" : rType.color}
-              />
-              <Text style={[rc.upvoteText, { color: hasVoted || report.upvoteCount >= 3 ? "#059669" : rType.color }]}>
-                {hasVoted ? "Tassykladyňyz" : report.upvoteCount >= 3 ? "Tassyklandy" : "Tassykla"}
-              </Text>
-            </>
-          )}
-        </Pressable>
+          onPress={handleUpvote}
+          color={hasVoted || report.upvoteCount >= 3 ? "#059669" : rType.color}
+          size="sm"
+          icon={<Ionicons name={hasVoted || report.upvoteCount >= 3 ? "checkmark-circle" : "thumbs-up-outline"} size={14} color="#fff" />}
+        />
       </View>
     </View>
   );
@@ -319,17 +301,16 @@ export default function InformatorScreen() {
               />
             </View>
 
-            <Pressable
-              onPress={handleSubmit}
+            <PessimisticButton
+              label="Habar iber"
+              loadingLabel="Iberilýär..."
+              loading={submitting}
               disabled={submitting || !location.trim()}
-              style={[s.btnPrimary, { backgroundColor: "#f59e0b", opacity: !location.trim() ? 0.5 : 1 }]}
-            >
-              {submitting
-                ? <ActivityIndicator size="small" color="#fff" />
-                : <Ionicons name="paper-plane-outline" size={18} color="#fff" />
-              }
-              <Text style={s.btnPrimaryText}>{submitting ? "Iberilýär..." : "Habar iber"}</Text>
-            </Pressable>
+              onPress={handleSubmit}
+              color="#f59e0b"
+              size="lg"
+              icon={<Ionicons name="paper-plane-outline" size={18} color="#fff" />}
+            />
           </ScrollView>
         </View>
       </Modal>

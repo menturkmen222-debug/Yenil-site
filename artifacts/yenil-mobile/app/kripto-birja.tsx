@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable,
-  Platform, Modal, TextInput, ActivityIndicator, Alert,
+  Platform, Modal, TextInput, Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,6 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import {
   watchCryptoAds, createCryptoAd, initiateCryptoTrade, cancelCryptoAd, getReputation,
@@ -153,19 +154,16 @@ export default function KriptoBirjaScreen() {
 
         {/* Trade button */}
         {!isOwn && !isLocked && (
-          <Pressable
-            onPress={() => handleTrade(ad.id)}
+          <PessimisticButton
+            label={isSellUsdt ? "USDT Al" : "USDT Sat"}
+            loadingLabel="Başlanýar..."
+            loading={tradingId === ad.id}
             disabled={tradingId === ad.id}
-            style={[cc.tradeBtn, { backgroundColor: isSellUsdt ? "#059669" : "#6366f1" }]}
-          >
-            {tradingId === ad.id
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <Ionicons name="swap-horizontal" size={16} color="#fff" />
-            }
-            <Text style={cc.tradeBtnText}>
-              {tradingId === ad.id ? "Başlanýar..." : isSellUsdt ? "USDT Al" : "USDT Sat"}
-            </Text>
-          </Pressable>
+            onPress={() => handleTrade(ad.id)}
+            color={isSellUsdt ? "#059669" : "#6366f1"}
+            size="sm"
+            icon={<Ionicons name="swap-horizontal" size={16} color="#fff" />}
+          />
         )}
       </View>
     );
@@ -341,17 +339,16 @@ export default function KriptoBirjaScreen() {
               </View>
             )}
 
-            <Pressable
-              onPress={handleCreate}
+            <PessimisticButton
+              label="E'lon ýerleşdir"
+              loadingLabel="Ýerleşdirilýär..."
+              loading={creating}
               disabled={creating || !usdtAmt || !bpRate}
-              style={[s.btnPrimary, { backgroundColor: "#7c3aed", opacity: !usdtAmt || !bpRate ? 0.5 : 1 }]}
-            >
-              {creating
-                ? <ActivityIndicator size="small" color="#fff" />
-                : <Ionicons name="add-circle-outline" size={18} color="#fff" />
-              }
-              <Text style={s.btnPrimaryText}>{creating ? "Ýerleşdirilýär..." : "E'lon ýerleşdir"}</Text>
-            </Pressable>
+              onPress={handleCreate}
+              color="#7c3aed"
+              size="lg"
+              icon={<Ionicons name="add-circle-outline" size={18} color="#fff" />}
+            />
           </ScrollView>
         </View>
       </Modal>

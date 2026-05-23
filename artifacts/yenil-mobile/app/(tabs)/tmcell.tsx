@@ -71,9 +71,8 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
     finally { setBuyLoading(false); }
   }
 
-  const CASHOUT_FEE_RATE = 0.005;
   const sellAmtNum = parseFloat(sellAmount) || 0;
-  const cashoutCommission = parseFloat((sellAmtNum * CASHOUT_FEE_RATE).toFixed(2));
+  const cashoutCommission = parseFloat((sellAmtNum * COMMISSION_RATES.tmcell_cashout).toFixed(2));
   const cashoutReceive = parseFloat((sellAmtNum - cashoutCommission).toFixed(2));
 
   async function handleSell() {

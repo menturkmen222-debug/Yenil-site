@@ -4,6 +4,7 @@ import {
   Platform, Alert, Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
@@ -66,7 +67,10 @@ export default function SmsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 50, backgroundColor: colors.primary }]}>
+      <LinearGradient
+        colors={[colors.headerGradientStart, colors.headerGradientEnd]}
+        style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 50 }]}
+      >
         <Text style={styles.headerTitle}>SMS arkaly sargyt</Text>
         <Text style={styles.headerSub}>Internetsiz bilet sargyt ediň</Text>
         {/* Step indicator */}
@@ -86,7 +90,7 @@ export default function SmsScreen() {
             </View>
           ))}
         </View>
-      </View>
+      </LinearGradient>
 
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 120 }}

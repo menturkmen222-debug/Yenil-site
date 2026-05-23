@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { router, type Href } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
@@ -281,10 +282,13 @@ export default function MoreScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* ── Large title header ── */}
-        <View style={[s.header, { paddingTop: topPad + 16, backgroundColor: colors.background }]}>
-          <Text style={[s.largeTitle, { color: colors.foreground }]}>Has köp</Text>
-          <Text style={[s.largeSub, { color: colors.mutedForeground }]}>Ähli hyzmatlar & sazlamalar</Text>
-        </View>
+        <LinearGradient
+          colors={[colors.headerGradientStart, colors.headerGradientEnd]}
+          style={[s.header, { paddingTop: topPad + 16 }]}
+        >
+          <Text style={[s.largeTitle, { color: "#fff" }]}>Has köp</Text>
+          <Text style={[s.largeSub, { color: "rgba(255,255,255,0.75)" }]}>Ähli hyzmatlar & sazlamalar</Text>
+        </LinearGradient>
 
         {/* ── AI HERO CARD ── */}
         <Pressable
