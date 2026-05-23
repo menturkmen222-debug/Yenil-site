@@ -13,7 +13,7 @@ import {
   ScrollView,
 } from "react-native";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
@@ -37,7 +37,7 @@ const TOTAL_STEPS = 4;
 const { width: SCREEN_W } = Dimensions.get("window");
 
 const STEP_SUBTITLES = [
-  "Telefon belgiňizi tassyklap başlaň",
+  "Hasaby açmak üçin usuly saýlaň",
   "Şahsy maglumatlaryňyz",
   "Hünär maglumatlaryňyz",
   "Ynamdar adamlar toruňyz",
@@ -247,6 +247,28 @@ export default function RegisterScreen() {
     [progressAnim]
   );
 
+  // ── 1-ädim: Giriş usuly ──
+  const [loginMethod, setLoginMethod] = useState<"phone" | "google" | "mailru">("phone");
+  const [email, setEmail] = useState("");
+  const emailRef = useRef<TextInput>(null);
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
+  const handleSelectMethod = useCallback((method: "phone" | "google" | "mailru") => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setLoginMethod(method);
+    setEmail("");
+    setPhone("");
+    setOtp("");
+    setOtpSent(false);
+    setTimeout(() => emailRef.current?.focus(), 200);
+  }, []);
+
+  const handleEmailContinue = useCallback(() => {
+    if (!emailValid) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    goToStep(1);
+  }, [emailValid, goToStep]);
+
   // ── 1-ädim: Telefon + OTP ──
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -310,10 +332,13 @@ export default function RegisterScreen() {
     if (!deviceId || saving) return;
     setSaving(true);
     try {
+      const contact = loginMethod === "phone"
+        ? phone.replace(/\s/g, "")
+        : email.trim();
       await saveUserProfile(deviceId, {
         name: name.trim(),
         surname: surname.trim(),
-        phone: phone.replace(/\s/g, ""),
+        phone: contact,
         region: welaýatLabel,
         district: tumanLabel,
         profession,
@@ -326,9 +351,11 @@ export default function RegisterScreen() {
   }, [
     deviceId,
     saving,
+    loginMethod,
     name,
     surname,
     phone,
+    email,
     welaýatLabel,
     tumanLabel,
     profession,
@@ -359,115 +386,246 @@ export default function RegisterScreen() {
         entering={FadeInDown.duration(320).easing(Easing.out(Easing.quad))}
         exiting={FadeOutUp.duration(180).easing(Easing.in(Easing.quad))}
       >
+        {/* Header card */}
         <View style={s.stepCard}>
-          <View
-            style={[
-              s.stepIconWrap,
-              { backgroundColor: colors.primary + "15" },
-            ]}
-          >
-            <Ionicons name="phone-portrait-outline" size={32} color={colors.primary} />
+          <View style={[s.stepIconWrap, { backgroundColor: colors.primary + "15" }]}>
+            <Ionicons name="shield-checkmark-outline" size={32} color={colors.primary} />
           </View>
           <Text style={[s.stepCardTitle, { color: colors.foreground }]}>
-            Telefon belgiňiz
+            Hasaby açmak
           </Text>
           <Text style={[s.stepCardDesc, { color: colors.mutedForeground }]}>
-            Turkmenistan ulgamyndaky mobil belgiňizi giriziň
+            Aşakdaky usullaryň birini saýlaň
           </Text>
         </View>
 
-        {sectionTitle("Telefon belgisi")}
-        <View
-          style={[
-            s.phoneRow,
-            { backgroundColor: colors.input, borderColor: colors.border },
+        {/* ── Social buttons ── */}
+        <Pressable
+          onPress={() => handleSelectMethod("google")}
+          style={({ pressed }) => [
+            s.socialBtn,
+            {
+              backgroundColor: loginMethod === "google"
+                ? "#EA4335" + "15"
+                : colors.card,
+              borderColor: loginMethod === "google" ? "#EA4335" : colors.border,
+              opacity: pressed ? 0.8 : 1,
+            },
           ]}
         >
-          <View
-            style={[
-              s.phonePrefix,
-              { borderRightColor: colors.border },
-            ]}
-          >
-            <Text style={[s.phonePrefixText, { color: colors.mutedForeground }]}>
-              +993
+          <View style={[s.socialIconBox, { backgroundColor: "#EA4335" + "18" }]}>
+            <AntDesign name="google" size={20} color="#EA4335" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.socialBtnTitle, { color: colors.foreground }]}>
+              Google bilen dowam et
+            </Text>
+            <Text style={[s.socialBtnSub, { color: colors.mutedForeground }]}>
+              Gmail salgyňyz bilen
             </Text>
           </View>
-          <TextInput
-            style={[s.phoneInput, { color: colors.foreground }]}
-            value={phone}
-            onChangeText={(t) => setPhone(t.replace(/[^0-9\s]/g, "").slice(0, 10))}
-            placeholder="6X XXX XX XX"
-            placeholderTextColor={colors.mutedForeground}
-            keyboardType="phone-pad"
-            maxLength={10}
-            editable={!otpSent}
-            returnKeyType="done"
-            onSubmitEditing={handleSendOtp}
-          />
-        </View>
+          {loginMethod === "google" && (
+            <Ionicons name="checkmark-circle" size={20} color="#EA4335" />
+          )}
+        </Pressable>
 
-        {!otpSent ? (
-          <View style={s.btnWrap}>
-            <PessimisticButton
-              label={sendingOtp ? "Iberilýär..." : "SMS Iber"}
-              loading={sendingOtp}
-              disabled={phone.replace(/\s/g, "").length < 8}
-              onPress={handleSendOtp}
-              icon="send-outline"
-            />
+        <Pressable
+          onPress={() => handleSelectMethod("mailru")}
+          style={({ pressed }) => [
+            s.socialBtn,
+            {
+              backgroundColor: loginMethod === "mailru"
+                ? "#005FF9" + "15"
+                : colors.card,
+              borderColor: loginMethod === "mailru" ? "#005FF9" : colors.border,
+              opacity: pressed ? 0.8 : 1,
+            },
+          ]}
+        >
+          <View style={[s.socialIconBox, { backgroundColor: "#005FF9" + "18" }]}>
+            <Ionicons name="mail" size={20} color="#005FF9" />
           </View>
-        ) : (
-          <Animated.View
-            entering={FadeInDown.duration(280)}
-            style={s.otpSection}
-          >
-            <View
-              style={[
-                s.otpInfoRow,
-                { backgroundColor: colors.primary + "12", borderColor: colors.primary + "30" },
-              ]}
-            >
-              <Ionicons name="checkmark-circle" size={16} color={colors.primary} />
-              <Text style={[s.otpInfoText, { color: colors.primary }]}>
-                +993 {phone} belgisine SMS iberildi
-              </Text>
-            </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.socialBtnTitle, { color: colors.foreground }]}>
+              Mail.ru bilen dowam et
+            </Text>
+            <Text style={[s.socialBtnSub, { color: colors.mutedForeground }]}>
+              Mail.ru ýa-da @mail.ru
+            </Text>
+          </View>
+          {loginMethod === "mailru" && (
+            <Ionicons name="checkmark-circle" size={20} color="#005FF9" />
+          )}
+        </Pressable>
 
-            {sectionTitle("SMS kody")}
+        {/* Email input (shown for google/mailru) */}
+        {loginMethod !== "phone" && (
+          <Animated.View entering={FadeInDown.duration(260)} style={{ marginTop: 4 }}>
+            {sectionTitle(
+              loginMethod === "google"
+                ? "Gmail salgyňyz"
+                : "Mail.ru salgyňyz"
+            )}
             <TextInput
-              ref={otpRef}
-              style={[...inputStyle, s.otpInput]}
-              value={otp}
-              onChangeText={(t) => setOtp(t.replace(/\D/g, "").slice(0, 6))}
-              placeholder="XXXXXX"
+              ref={emailRef}
+              style={[
+                ...inputStyle,
+                { borderColor: emailValid ? colors.primary : colors.border },
+              ]}
+              value={email}
+              onChangeText={setEmail}
+              placeholder={
+                loginMethod === "google"
+                  ? "mysal@gmail.com"
+                  : "mysal@mail.ru"
+              }
               placeholderTextColor={colors.mutedForeground}
-              keyboardType="number-pad"
-              maxLength={6}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
               returnKeyType="done"
-              onSubmitEditing={handleVerifyOtp}
+              onSubmitEditing={handleEmailContinue}
             />
-
             <View style={s.btnWrap}>
               <PessimisticButton
-                label="Tassykla"
-                disabled={otp.length < 4}
-                onPress={handleVerifyOtp}
-                icon="checkmark-circle-outline"
+                label="Dowam et"
+                disabled={!emailValid}
+                onPress={handleEmailContinue}
+                icon="arrow-forward-outline"
+              />
+            </View>
+          </Animated.View>
+        )}
+
+        {/* Divider */}
+        <View style={s.divider}>
+          <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
+          <Text style={[s.dividerText, { color: colors.mutedForeground }]}>
+            ýa-da telefon bilen
+          </Text>
+          <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
+        </View>
+
+        {/* Phone button (tap to switch) */}
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setLoginMethod("phone");
+            setEmail("");
+          }}
+          style={({ pressed }) => [
+            s.socialBtn,
+            {
+              backgroundColor: loginMethod === "phone"
+                ? colors.primary + "12"
+                : colors.card,
+              borderColor: loginMethod === "phone" ? colors.primary : colors.border,
+              opacity: pressed ? 0.8 : 1,
+            },
+          ]}
+        >
+          <View style={[s.socialIconBox, { backgroundColor: colors.primary + "18" }]}>
+            <Ionicons name="phone-portrait-outline" size={20} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.socialBtnTitle, { color: colors.foreground }]}>
+              Telefon belgisi bilen
+            </Text>
+            <Text style={[s.socialBtnSub, { color: colors.mutedForeground }]}>
+              +993 TM nomer
+            </Text>
+          </View>
+          {loginMethod === "phone" && (
+            <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+          )}
+        </Pressable>
+
+        {/* Phone + OTP section (shown only when phone method selected) */}
+        {loginMethod === "phone" && (
+          <Animated.View entering={FadeInDown.duration(260)} style={{ marginTop: 4 }}>
+            {sectionTitle("Telefon belgisi")}
+            <View
+              style={[
+                s.phoneRow,
+                { backgroundColor: colors.input, borderColor: colors.border },
+              ]}
+            >
+              <View style={[s.phonePrefix, { borderRightColor: colors.border }]}>
+                <Text style={[s.phonePrefixText, { color: colors.mutedForeground }]}>
+                  +993
+                </Text>
+              </View>
+              <TextInput
+                style={[s.phoneInput, { color: colors.foreground }]}
+                value={phone}
+                onChangeText={(t) => setPhone(t.replace(/[^0-9\s]/g, "").slice(0, 10))}
+                placeholder="6X XXX XX XX"
+                placeholderTextColor={colors.mutedForeground}
+                keyboardType="phone-pad"
+                maxLength={10}
+                editable={!otpSent}
+                returnKeyType="done"
+                onSubmitEditing={handleSendOtp}
               />
             </View>
 
-            <Pressable
-              onPress={() => {
-                setOtpSent(false);
-                setOtp("");
-              }}
-              style={s.retryBtn}
-            >
-              <Text style={[s.retryText, { color: colors.mutedForeground }]}>
-                Belgimi üýtget
-              </Text>
-            </Pressable>
+            {!otpSent ? (
+              <View style={s.btnWrap}>
+                <PessimisticButton
+                  label={sendingOtp ? "Iberilýär..." : "SMS Iber"}
+                  loading={sendingOtp}
+                  disabled={phone.replace(/\s/g, "").length < 8}
+                  onPress={handleSendOtp}
+                  icon="send-outline"
+                />
+              </View>
+            ) : (
+              <Animated.View entering={FadeInDown.duration(280)} style={s.otpSection}>
+                <View
+                  style={[
+                    s.otpInfoRow,
+                    { backgroundColor: colors.primary + "12", borderColor: colors.primary + "30" },
+                  ]}
+                >
+                  <Ionicons name="checkmark-circle" size={16} color={colors.primary} />
+                  <Text style={[s.otpInfoText, { color: colors.primary }]}>
+                    +993 {phone} belgisine SMS iberildi
+                  </Text>
+                </View>
+
+                {sectionTitle("SMS kody")}
+                <TextInput
+                  ref={otpRef}
+                  style={[...inputStyle, s.otpInput]}
+                  value={otp}
+                  onChangeText={(t) => setOtp(t.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="XXXXXX"
+                  placeholderTextColor={colors.mutedForeground}
+                  keyboardType="number-pad"
+                  maxLength={6}
+                  returnKeyType="done"
+                  onSubmitEditing={handleVerifyOtp}
+                />
+
+                <View style={s.btnWrap}>
+                  <PessimisticButton
+                    label="Tassykla"
+                    disabled={otp.length < 4}
+                    onPress={handleVerifyOtp}
+                    icon="checkmark-circle-outline"
+                  />
+                </View>
+
+                <Pressable
+                  onPress={() => { setOtpSent(false); setOtp(""); }}
+                  style={s.retryBtn}
+                >
+                  <Text style={[s.retryText, { color: colors.mutedForeground }]}>
+                    Belgimi üýtget
+                  </Text>
+                </Pressable>
+              </Animated.View>
+            )}
           </Animated.View>
         )}
       </Animated.View>
@@ -1104,6 +1262,51 @@ const s = StyleSheet.create({
     paddingVertical: 12,
   },
   skipText: { fontSize: 14 },
+
+  socialBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    padding: 14,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
+  socialIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  socialBtnTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  socialBtnSub: {
+    fontSize: 12,
+  },
+
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginVertical: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+  },
+  dividerText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
 });
 
 // ─── SelectModal stilleri ─────────────────────────────────────────────────────

@@ -5,8 +5,9 @@ import {
   Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -22,9 +23,18 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
+  useEffect(() => {
+    AsyncStorage.getItem("onboarding_seen").then((val) => {
+      if (!val) {
+        setTimeout(() => router.replace("/welcome"), 80);
+      }
+    });
+  }, []);
+
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="welcome" options={{ headerShown: false, animation: "fade" }} />
       <Stack.Screen name="ulgamlar" options={{ headerShown: false }} />
       <Stack.Screen name="teklip" options={{ headerShown: false }} />
       <Stack.Screen name="bazar" options={{ headerShown: false }} />
