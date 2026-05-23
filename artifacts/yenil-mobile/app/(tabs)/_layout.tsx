@@ -1,33 +1,41 @@
 import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Platform, StyleSheet, View, Text } from "react-native";
-import { SymbolView } from "expo-symbols";
+import { Platform, StyleSheet, View } from "react-native";
 
 import { useColors } from "@/hooks/useColors";
 
 type TabIconProps = { focused: boolean; color: string };
 
 function HomeIcon({ focused, color }: TabIconProps) {
-  const isIOS = Platform.OS === "ios";
-  if (isIOS) return <SymbolView name={focused ? "house.fill" : "house"} tintColor={color} size={24} />;
-  return <Ionicons name={focused ? "home" : "home-outline"} size={23} color={color} />;
+  return (
+    <Ionicons
+      name={focused ? "home" : "home-outline"}
+      size={23}
+      color={color}
+    />
+  );
 }
-function AmallarIcon({ focused, color }: TabIconProps) {
-  const isIOS = Platform.OS === "ios";
-  if (isIOS) return <SymbolView name={focused ? "clock.fill" : "clock"} tintColor={color} size={24} />;
-  return <Ionicons name={focused ? "receipt" : "receipt-outline"} size={23} color={color} />;
+
+function HyzmatlarIcon({ focused, color }: TabIconProps) {
+  return (
+    <Ionicons
+      name={focused ? "grid" : "grid-outline"}
+      size={23}
+      color={color}
+    />
+  );
 }
-function MoreIcon({ focused, color }: TabIconProps) {
-  const isIOS = Platform.OS === "ios";
-  if (isIOS) return <SymbolView name={focused ? "square.grid.2x2.fill" : "square.grid.2x2"} tintColor={color} size={24} />;
-  return <Ionicons name={focused ? "apps" : "apps-outline"} size={23} color={color} />;
-}
-function SozlamalarIcon({ focused, color }: TabIconProps) {
-  const isIOS = Platform.OS === "ios";
-  if (isIOS) return <SymbolView name={focused ? "gearshape.fill" : "gearshape"} tintColor={color} size={24} />;
-  return <Ionicons name={focused ? "settings" : "settings-outline"} size={23} color={color} />;
+
+function ProfilIcon({ focused, color }: TabIconProps) {
+  return (
+    <Ionicons
+      name={focused ? "person-circle" : "person-circle-outline"}
+      size={24}
+      color={color}
+    />
+  );
 }
 
 export default function TabLayout() {
@@ -44,8 +52,8 @@ export default function TabLayout() {
         tabBarInactiveTintColor: colors.mutedForeground,
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : colors.background,
-          borderTopWidth: isWeb ? 1 : isIOS ? 0 : 0.5,
+          backgroundColor: isIOS ? "transparent" : colors.tabBarBg,
+          borderTopWidth: isIOS ? 0 : StyleSheet.hairlineWidth,
           borderTopColor: colors.border,
           elevation: 0,
           height: isWeb ? 84 : isIOS ? 82 : 72,
@@ -69,11 +77,15 @@ export default function TabLayout() {
               style={StyleSheet.absoluteFill}
             />
           ) : isWeb ? (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.background }]} />
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                { backgroundColor: colors.tabBarBg },
+              ]}
+            />
           ) : null,
       }}
     >
-      {/* 1 — Baş sahypa */}
       <Tabs.Screen
         name="index"
         options={{
@@ -82,42 +94,28 @@ export default function TabLayout() {
         }}
       />
 
-      {/* 2 — Amallar */}
       <Tabs.Screen
-        name="amallar"
+        name="hyzmatlar"
         options={{
-          title: "Amallar",
-          tabBarIcon: (p) => <AmallarIcon {...p} />,
+          title: "Hyzmatlar",
+          tabBarIcon: (p) => <HyzmatlarIcon {...p} />,
         }}
       />
 
-      {/* Hidden tabs */}
       <Tabs.Screen
-        name="(demiryol)"
-        options={{ href: null, tabBarStyle: { display: "none" } }}
-      />
-      <Tabs.Screen name="tmcell" options={{ href: null }} />
-
-      {/* 3 — Has köp */}
-      <Tabs.Screen
-        name="more"
+        name="profil"
         options={{
-          title: "Has köp",
-          tabBarIcon: (p) => <MoreIcon {...p} />,
+          title: "Profil",
+          tabBarIcon: (p) => <ProfilIcon {...p} />,
         }}
       />
 
-      {/* 4 — Sozlamalar */}
-      <Tabs.Screen
-        name="sozlamalar"
-        options={{
-          title: "Sozlamalar",
-          tabBarIcon: (p) => <SozlamalarIcon {...p} />,
-        }}
-      />
-
-      {/* Hidden tabs */}
-      <Tabs.Screen name="pay" options={{ href: null }} />
+      <Tabs.Screen name="amallar"    options={{ href: null }} />
+      <Tabs.Screen name="more"       options={{ href: null }} />
+      <Tabs.Screen name="sozlamalar" options={{ href: null }} />
+      <Tabs.Screen name="(demiryol)" options={{ href: null, tabBarStyle: { display: "none" } }} />
+      <Tabs.Screen name="tmcell"     options={{ href: null }} />
+      <Tabs.Screen name="pay"        options={{ href: null }} />
       <Tabs.Screen name="statistika" options={{ href: null }} />
     </Tabs>
   );
