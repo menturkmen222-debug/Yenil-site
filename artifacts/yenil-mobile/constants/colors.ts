@@ -25,34 +25,36 @@ export interface ColorPalette {
   headerGradientStart: string;
   headerGradientEnd: string;
   isDark: boolean;
+  radius: number;
 }
 
 export const themes: Record<ThemeKey, ColorPalette> = {
   green: {
-    text: "#14532d",
-    tint: "#166534",
+    text: "#0f3d22",
+    tint: "#1B6B3A",
     background: "#f0fdf4",
-    foreground: "#14532d",
+    foreground: "#0f3d22",
     card: "#ffffff",
-    cardForeground: "#14532d",
-    primary: "#16a34a",
+    cardForeground: "#0f3d22",
+    primary: "#1B6B3A",
     primaryForeground: "#ffffff",
     secondary: "#dcfce7",
-    secondaryForeground: "#14532d",
+    secondaryForeground: "#0f3d22",
     muted: "#f0fdf4",
     mutedForeground: "#4b7c5e",
-    accent: "#15803d",
+    accent: "#155230",
     accentForeground: "#ffffff",
     destructive: "#ef4444",
     destructiveForeground: "#ffffff",
     border: "#bbf7d0",
     input: "#d1fae5",
-    success: "#16a34a",
+    success: "#22c55e",
     warning: "#d97706",
     tabBarBg: "#ffffff",
-    headerGradientStart: "#166534",
-    headerGradientEnd: "#15803d",
+    headerGradientStart: "#0d4222",
+    headerGradientEnd: "#1B6B3A",
     isDark: false,
+    radius: 16,
   },
   dark: {
     text: "#f1f5f9",
@@ -79,6 +81,7 @@ export const themes: Record<ThemeKey, ColorPalette> = {
     headerGradientStart: "#111111",
     headerGradientEnd: "#1a1a1a",
     isDark: true,
+    radius: 16,
   },
   white: {
     text: "#0f172a",
@@ -105,6 +108,7 @@ export const themes: Record<ThemeKey, ColorPalette> = {
     headerGradientStart: "#1d4ed8",
     headerGradientEnd: "#3b82f6",
     isDark: false,
+    radius: 16,
   },
   girls: {
     text: "#831843",
@@ -131,6 +135,7 @@ export const themes: Record<ThemeKey, ColorPalette> = {
     headerGradientStart: "#9d174d",
     headerGradientEnd: "#ec4899",
     isDark: false,
+    radius: 16,
   },
 };
 
