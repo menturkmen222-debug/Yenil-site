@@ -1031,42 +1031,37 @@ export default function SozlamalarScreen() {
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 130 }} showsVerticalScrollIndicator={false}>
 
         {/* ══════════ ACCOUNT CARD ══════════ */}
-        <LinearGradient
-          colors={[colors.headerGradientStart, colors.headerGradientEnd] as [string, string]}
-          style={s.accountCard}
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            router.push("/(tabs)/profile" as Href);
+          }}
+          style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1 })}
         >
-          <View style={[s.accountAvatar, { borderColor: "rgba(255,255,255,0.35)" }]}>
-            <Text style={{ fontSize: 24, color: "white" }}>
-              {(nickname || "Y").slice(0, 1).toUpperCase()}
-            </Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={s.accountName}>{displayName}</Text>
-            <Pressable
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                Alert.alert("ID", deviceId, [{ text: "Ýap" }]);
-              }}
-            >
+          <LinearGradient
+            colors={[colors.headerGradientStart, colors.headerGradientEnd] as [string, string]}
+            style={s.accountCard}
+          >
+            <View style={[s.accountAvatar, { borderColor: "rgba(255,255,255,0.35)" }]}>
+              <Text style={{ fontSize: 24, color: "white" }}>
+                {(nickname || "Y").slice(0, 1).toUpperCase()}
+              </Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={s.accountName}>{displayName}</Text>
               <Text style={s.accountId}>
                 ID: {deviceId ? deviceId.slice(0, 14) + "..." : "..."}
               </Text>
-            </Pressable>
-            <View style={s.accountBalance}>
-              <Ionicons name="wallet-outline" size={13} color="rgba(255,255,255,0.9)" />
-              <Text style={s.accountBalanceText}>{balance.toFixed(2)} BP</Text>
+              <View style={s.accountBalance}>
+                <Ionicons name="wallet-outline" size={13} color="rgba(255,255,255,0.9)" />
+                <Text style={s.accountBalanceText}>{balance.toFixed(2)} BP</Text>
+              </View>
             </View>
-          </View>
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setShowNickModal(true);
-            }}
-            style={s.editBtn}
-          >
-            <Feather name="edit-3" size={15} color="#fff" />
-          </Pressable>
-        </LinearGradient>
+            <View style={[s.editBtn, { backgroundColor: "rgba(255,255,255,0.18)" }]}>
+              <Ionicons name="chevron-forward" size={16} color="#fff" />
+            </View>
+          </LinearGradient>
+        </Pressable>
 
         {/* ══════════ 1. REPUTATION ══════════ */}
         <SectionTitle title="ABRAÝ / YNAM ULGAMY" colors={colors} />

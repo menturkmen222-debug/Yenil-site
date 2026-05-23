@@ -68,27 +68,33 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const loadProfile = useCallback(async () => {
-    if (!deviceId) return;
-    setLoading(true);
-    try {
-      const [prof, nick, rep] = await Promise.all([
-        getUserProfile(deviceId),
-        getUserNickname(deviceId),
-        getReputation(deviceId),
-      ]);
-      setProfile(prof);
-      setNickname(nick);
-      setRepData(rep);
-    } catch {
-    } finally {
-      setLoading(false);
-    }
-  }, [deviceId]);
-
   useEffect(() => {
-    loadProfile();
-  }, [loadProfile]);
+    if (!deviceId) return;
+    let cancelled = false;
+    setLoading(true);
+
+    Promise.all([
+      getUserProfile(deviceId),
+      getUserNickname(deviceId),
+      getReputation(deviceId),
+    ])
+      .then(([prof, nick, rep]) => {
+        if (cancelled) return;
+        if (!prof) {
+          router.replace("/auth/register");
+          return;
+        }
+        setProfile(prof);
+        setNickname(nick);
+        setRepData(rep);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [deviceId]);
 
   const level = getLevel(repData.score);
   const pct = getProgressPercent(repData.score);
