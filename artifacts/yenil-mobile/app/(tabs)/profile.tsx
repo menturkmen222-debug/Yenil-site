@@ -3,7 +3,7 @@ import {
   View, Text, ScrollView, StyleSheet, Pressable,
   Alert, Platform, ActivityIndicator,
 } from "react-native";
-import { router } from "expo-router";
+import { router, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -67,11 +67,16 @@ export default function ProfileScreen() {
   const [repData, setRepData] = useState<ReputationData>({ score: 20, entries: [] });
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [goRegister, setGoRegister] = useState(false);
 
   useEffect(() => {
     if (!deviceId) return;
     let cancelled = false;
     setLoading(true);
+
+    const timeout = setTimeout(() => {
+      if (!cancelled) setGoRegister(true);
+    }, 8000);
 
     Promise.all([
       getUserProfile(deviceId),
@@ -79,9 +84,10 @@ export default function ProfileScreen() {
       getReputation(deviceId),
     ])
       .then(([prof, nick, rep]) => {
+        clearTimeout(timeout);
         if (cancelled) return;
         if (!prof) {
-          router.replace("/auth/register");
+          setGoRegister(true);
           return;
         }
         setProfile(prof);
@@ -90,11 +96,17 @@ export default function ProfileScreen() {
         setLoading(false);
       })
       .catch(() => {
-        if (!cancelled) setLoading(false);
+        clearTimeout(timeout);
+        if (!cancelled) setGoRegister(true);
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
   }, [deviceId]);
+
+  if (goRegister) return <Redirect href="/auth/register" />;
 
   const level = getLevel(repData.score);
   const pct = getProgressPercent(repData.score);
