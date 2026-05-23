@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
-  Alert, ActivityIndicator, Platform, Clipboard,
+  Alert, Platform, Clipboard,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
-
+import { PessimisticButton } from "@/components/PessimisticButton";
 import { COMMISSION_RATES, calcCryptoDepositBP, calcCryptoWithdrawUSDT, getCryptoDepositRatePct } from "@/lib/payments";
 
 const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AEDA785F26CB/9A8CACA4-5889-4D47-903E-BF12F059E175`;
@@ -284,18 +284,16 @@ export default function PayScreen() {
           </View>
         ) : null}
 
-        <Pressable
-          onPress={submitDeposit}
+        <PessimisticButton
+          label="Tassyklamak we Ibermek"
+          loadingLabel="Iberilýär..."
+          loading={loading}
           disabled={loading}
-          style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#059669", opacity: pressed || loading ? 0.75 : 1 }]}
-        >
-          {loading ? <ActivityIndicator color="#fff" size="small" /> : (
-            <>
-              <Ionicons name="cloud-upload-outline" size={19} color="#fff" />
-              <Text style={s.primaryBtnText}>Tassyklamak we Ibermek</Text>
-            </>
-          )}
-        </Pressable>
+          onPress={submitDeposit}
+          color="#059669"
+          size="lg"
+          icon={<Ionicons name="cloud-upload-outline" size={19} color="#fff" />}
+        />
 
         {/* Step guide */}
         <View style={[s.stepsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -411,18 +409,16 @@ export default function PayScreen() {
           </View>
         ) : null}
 
-        <Pressable
-          onPress={submitWithdraw}
+        <PessimisticButton
+          label="Çykaryşy Tassyklamak"
+          loadingLabel="Iberilýär..."
+          loading={loading}
           disabled={loading}
-          style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed || loading ? 0.75 : 1 }]}
-        >
-          {loading ? <ActivityIndicator color="#fff" size="small" /> : (
-            <>
-              <Ionicons name="send-outline" size={19} color="#fff" />
-              <Text style={s.primaryBtnText}>Çykaryşy Tassyklamak</Text>
-            </>
-          )}
-        </Pressable>
+          onPress={submitWithdraw}
+          color={colors.primary}
+          size="lg"
+          icon={<Ionicons name="send-outline" size={19} color="#fff" />}
+        />
       </ScrollView>
     );
   }

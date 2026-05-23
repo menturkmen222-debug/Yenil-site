@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, Platform, Modal,
-  TextInput, KeyboardAvoidingView, FlatList, Alert, ActivityIndicator,
+  TextInput, KeyboardAvoidingView, FlatList, Alert,
   Animated, Linking,
 } from "react-native";
 import { router, type Href } from "expo-router";
@@ -11,6 +11,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import {
   listenHyzmatlar, addHyzmat, HYZMAT_CATEGORIES,
   type HyzmatItem, type HyzmatCategory,
@@ -309,23 +310,16 @@ function AddHyzmatModal({
           />
 
           {/* Submit */}
-          <Pressable
-            onPress={handleAdd}
+          <PessimisticButton
+            label="Hyzmat goş"
+            loadingLabel="Goşulýar..."
+            loading={saving}
             disabled={saving}
-            style={({ pressed }) => [
-              addStyles.submitBtn,
-              { backgroundColor: colors.primary, opacity: pressed || saving ? 0.85 : 1 },
-            ]}
-          >
-            {saving ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <>
-                <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
-                <Text style={addStyles.submitText}>Hyzmat goş</Text>
-              </>
-            )}
-          </Pressable>
+            onPress={handleAdd}
+            color={colors.primary}
+            size="lg"
+            icon={<Ionicons name="checkmark-circle-outline" size={20} color="#fff" />}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </Modal>

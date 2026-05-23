@@ -11,6 +11,7 @@ import * as Haptics from "expo-haptics";
 import { router, type Href } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { type ThemeKey } from "@/constants/colors";
@@ -321,16 +322,16 @@ function ReputationModal({
                   onSubmitEditing={doSearch}
                   autoCapitalize="none"
                 />
-                <Pressable
-                  onPress={doSearch}
+                <PessimisticButton
+                  label=""
+                  loadingLabel=""
+                  loading={searching}
                   disabled={searching || !searchId.trim()}
-                  style={[s.searchBtn, { backgroundColor: colors.primary, opacity: !searchId.trim() ? 0.5 : 1 }]}
-                >
-                  {searching
-                    ? <ActivityIndicator size="small" color="#fff" />
-                    : <Ionicons name="search-outline" size={18} color="#fff" />
-                  }
-                </Pressable>
+                  onPress={doSearch}
+                  color={colors.primary}
+                  size="sm"
+                  icon={<Ionicons name="search-outline" size={18} color="#fff" />}
+                />
               </View>
 
               {searchErr ? (
@@ -438,17 +439,16 @@ function ReputationModal({
                     />
                   </View>
 
-                  <Pressable
-                    onPress={doDispute}
+                  <PessimisticButton
+                    label="Iberiň"
+                    loadingLabel="Iberilýär..."
+                    loading={dispSending}
                     disabled={dispSending || !dispDesc.trim()}
-                    style={[s.btnPrimary, { backgroundColor: colors.primary, opacity: !dispDesc.trim() ? 0.5 : 1 }]}
-                  >
-                    {dispSending
-                      ? <ActivityIndicator size="small" color="#fff" />
-                      : <Ionicons name="paper-plane-outline" size={16} color="#fff" />
-                    }
-                    <Text style={s.btnPrimaryText}>Iberiň</Text>
-                  </Pressable>
+                    onPress={doDispute}
+                    color={colors.primary}
+                    size="md"
+                    icon={<Ionicons name="paper-plane-outline" size={16} color="#fff" />}
+                  />
                 </>
               )}
             </View>
@@ -572,17 +572,18 @@ function FriendsModal({
                   onChangeText={setAddNick}
                 />
               </View>
-              <Pressable
-                onPress={handleAdd}
-                disabled={adding || !addId.trim()}
-                style={[s.btnPrimary, { backgroundColor: colors.primary, marginTop: 12, opacity: !addId.trim() ? 0.5 : 1 }]}
-              >
-                {adding
-                  ? <ActivityIndicator size="small" color="#fff" />
-                  : <Ionicons name="person-add-outline" size={16} color="#fff" />
-                }
-                <Text style={s.btnPrimaryText}>Tanyş goş</Text>
-              </Pressable>
+              <View style={{ marginTop: 12 }}>
+                <PessimisticButton
+                  label="Tanyş goş"
+                  loadingLabel="Goşulýar..."
+                  loading={adding}
+                  disabled={adding || !addId.trim()}
+                  onPress={handleAdd}
+                  color={colors.primary}
+                  size="md"
+                  icon={<Ionicons name="person-add-outline" size={16} color="#fff" />}
+                />
+              </View>
             </View>
           )}
 
@@ -788,19 +789,16 @@ function BPTransferModal({
                 />
               </View>
 
-              <Pressable
-                onPress={handleSend}
+              <PessimisticButton
+                label={amount && parseFloat(amount) > 0 ? `${amount} BP Geçir` : "Geçir"}
+                loadingLabel="Geçirilýär..."
+                loading={sending}
                 disabled={sending || !toId.trim() || !amount || parseFloat(amount) <= 0}
-                style={[s.btnPrimary, { backgroundColor: colors.primary, opacity: (!toId.trim() || !amount) ? 0.5 : 1 }]}
-              >
-                {sending
-                  ? <ActivityIndicator size="small" color="#fff" />
-                  : <Ionicons name="paper-plane-outline" size={16} color="#fff" />
-                }
-                <Text style={s.btnPrimaryText}>
-                  {amount && parseFloat(amount) > 0 ? `${amount} BP Geçir` : "Geçir"}
-                </Text>
-              </Pressable>
+                onPress={handleSend}
+                color={colors.primary}
+                size="md"
+                icon={<Ionicons name="paper-plane-outline" size={16} color="#fff" />}
+              />
             </View>
           )}
 
@@ -898,14 +896,17 @@ function NicknameModal({
             <Pressable onPress={onClose} style={[s.btnSecondary, { flex: 1, borderColor: colors.border }]}>
               <Text style={[s.btnSecText, { color: colors.foreground }]}>Ýap</Text>
             </Pressable>
-            <Pressable
-              onPress={save}
-              disabled={saving}
-              style={[s.btnPrimary, { flex: 1, backgroundColor: colors.primary }]}
-            >
-              {saving ? <ActivityIndicator size="small" color="#fff" /> : null}
-              <Text style={s.btnPrimaryText}>Saklat</Text>
-            </Pressable>
+            <View style={{ flex: 1 }}>
+              <PessimisticButton
+                label="Saklat"
+                loadingLabel="Saklanýar..."
+                loading={saving}
+                disabled={saving}
+                onPress={save}
+                color={colors.primary}
+                size="md"
+              />
+            </View>
           </View>
         </View>
       </View>
