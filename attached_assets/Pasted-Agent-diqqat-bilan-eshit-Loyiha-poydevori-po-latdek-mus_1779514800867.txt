@@ -1,0 +1,27 @@
+Agent, diqqat bilan eshit!
+Loyiha poydevori po'latdek mustahkam. Endi loyihaning "Yuzi"ni — "Hyzmatlar" (app/(tabs)/hyzmatlar.tsx) bo'limini premium dizaýnda qayta quramiz. Bu bo'lim hozirgacha zaif va eskirgan arxitekturada "o'tirib qolgan" edi, endi uni foydalanuvchilarimiz sevadigan, "Ýeňil Mobile"ning eng yuqori sifatdagi "Premium Yuzi"ga aylantirishimiz shart.
+
+🎯 VAZIFALAR (Hyzmatlar Bo'limini Premium Dizaýnda Qayta Qurish):
+
+1. HEADER VA DIZAÝN TIZIMI (9-bo'limga muvofiq):
+   - Gradient Header ("Hyzmatlar" sarlavhasi bilan) ishlatilsin.
+   - Header ostida zumrad yashil (#1B6B3A) rangdagi real vaqtda yangilanadigan joriy BP balansi (wallets-outline piktogrammasi bilan) chiroyli pill ko'rinishida chiqarilsin.
+
+2. XIZMATLAR KATALOGI (Karta dizaýni):
+   - Hozirgi "Tez orada xizmatlar qo'shiladi" placeholder matni o'rniga, premium dizaýndagi xizmat kartalarini ro'yxati (kuryer, usta va h.k.) ko'rinishida qo'shilsin.
+
+3. VIP STATUS KARTOSI (To'lov oqimi sinovi):
+   - Bitta yirik, ajralib turadigan, premium vizual effektlarga ega karta bo'lsin: "VIP Status Satyn Almak" (VIP Status sotib olish). Narxi: 50 BP (bu narx badgeda ko'rinishi shart).
+   - Kartochka ichida sariq 'star' yoki 'shield-checkmark' ikonasi va "10 ball Abraý bali qo'shiladi" kabi xususiyatlar ko'rinsin. Radius 16, chiroyli iOS shadow bilan.
+
+4. MOCK TO'LOV MANTIG'I (API siz real oqim sinovi):
+   - Xizmat kartasi tagida "Satyn Almak" (Sotib olish) tugmasi bosilganda "AI_INSTRUCTIONS.md" 6-bo'limdagi `SeamlessCheckout` (BPCheckoutModal) ochilsin.
+   - Real bank API-lari bo'lmagani sababli, modal ichidagi to'lov usullari tugmalariga real bank API'sini simulatsiya qiladigan "Mock" (simulyatsiya) funksiyalarini ula.
+   - To'lov usuli tanlanganda (masalan TMCell yoki Bank kartasi), tizim real bankka ulanmaydi, shunchaki testing uchun *go'yoki pul to'langanini* simulatsiya qilib, senga chiroyli Turkman tilida `Alert.alert("Üstünlikli!", "Töleg kabul edildi")` muvaffaqiyat xabarini ko'rsatadi.
+   - Pul yechilganda telefon Haptics Impact darajasida chiroyli tebranishi shart.
+   - Balans yetarli bo'lsa real Firebase tranzaksiyasi o'tsin (Pessimistic lock bilan), agar pul yetmasa `SeamlessCheckout` dagi balans kamligi xabari chiqsin.
+
+5. TAQIQLAR VE QOIDALAR:
+   - Zarracha emoji ishlatmaslik qoidasi qat'iy saqlansin! Faqat toza turkman tili.
+
+Kod eng yuqori Senior darajasida, xatosiz va toza yozilsin. Ishni boshla!
