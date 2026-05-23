@@ -631,9 +631,9 @@ export default function EBilimScreen() {
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={[mo.reviewQ, { color: colors.foreground }]}>{q.q}</Text>
-                        <Text style={[mo.reviewCorrect, { color: "#10b981" }]}>✓ {q.options[q.correct]}</Text>
+                        <Text style={[mo.reviewCorrect, { color: "#10b981" }]}>{q.options[q.correct]}</Text>
                         {!ok && ua !== null && (
-                          <Text style={[mo.reviewUser, { color: "#ef4444" }]}>✗ {q.options[ua]}</Text>
+                          <Text style={[mo.reviewUser, { color: "#ef4444" }]}>{q.options[ua]}</Text>
                         )}
                       </View>
                     </View>

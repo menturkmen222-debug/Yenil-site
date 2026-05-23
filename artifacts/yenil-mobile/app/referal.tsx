@@ -50,7 +50,7 @@ export default function ReferalScreen() {
     if (!stats?.code) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await Share.share({
-      message: `Ýeňil programmasy — Türkmenistanyň iň ynamly onlayn hyzmat platformasy!\n\nMeniň referal kodum: ${stats.code}\n\nYükle we ilkinji sargytyňda bonus BP al! 🎁`,
+      message: `Ýeňil programmasy — Türkmenistanyň iň ynamly onlayn hyzmat platformasy!\n\nMeniň referal kodum: ${stats.code}\n\nYükle we ilkinji sargytyňda bonus BP al!`,
       title: "Ýeňil — Referal",
     });
   }

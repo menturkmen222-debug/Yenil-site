@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
-  Alert, ActivityIndicator, Platform, Linking,
+  Alert, Platform, Linking,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { deductBalanceAtomic } from "@/lib/firebase";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import BPCheckoutModal from "@/components/BPCheckoutModal";
 
 const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AEDA785F26CB/9A8CACA4-5889-4D47-903E-BF12F059E175`;
@@ -224,7 +226,9 @@ export default function DemiryolScreen() {
   return (
     <View style={[s.container, { backgroundColor: colors.background }]}>
       {/* ── HEADER ── */}
-      <View style={[s.header, { paddingTop: topPad, backgroundColor: colors.primary }]}>
+      <LinearGradient
+        colors={[colors.headerGradientStart, colors.headerGradientEnd]}
+        style={[s.header, { paddingTop: topPad }]}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
           {main === "choose" ? (
             <Pressable onPress={() => {
@@ -250,7 +254,7 @@ export default function DemiryolScreen() {
              "SMS zaýawka"}
           </Text>
         </View>
-      </View>
+      </LinearGradient>
 
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 120 }}
@@ -556,15 +560,18 @@ export default function DemiryolScreen() {
               }
             </View>
 
-            {loading ? <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} /> : (
-              <Pressable onPress={handlePayWithBP} disabled={loading}
-                style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1, marginTop: 6 }]}>
-                <Ionicons name="wallet-outline" size={18} color="#fff" />
-                <Text style={s.primaryBtnText}>
-                  {balance >= price ? `${price} BP bilen tölenmek` : "Balans doldur we tölenmek"}
-                </Text>
-              </Pressable>
-            )}
+            <View style={{ marginTop: 6 }}>
+              <PessimisticButton
+                label={balance >= price ? `${price} BP bilen tölenmek` : "Balans doldur we tölenmek"}
+                loadingLabel="Işlenýär..."
+                loading={loading}
+                disabled={loading}
+                onPress={handlePayWithBP}
+                color={colors.primary}
+                size="lg"
+                icon={<Ionicons name="wallet-outline" size={18} color="#fff" />}
+              />
+            </View>
 
             <BPCheckoutModal
               visible={showTopUp}
@@ -605,15 +612,16 @@ export default function DemiryolScreen() {
                 <Text style={{ color: "#dc2626" }}>{error}</Text>
               </View>
             ) : null}
-            <Pressable onPress={handleDirectSubmit} disabled={loading}
-              style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed || loading ? 0.7 : 1 }]}>
-              {loading ? <ActivityIndicator color="#fff" size="small" /> : (
-                <>
-                  <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />
-                  <Text style={s.primaryBtnText}>Hawa, tassyklaýyn</Text>
-                </>
-              )}
-            </Pressable>
+            <PessimisticButton
+              label="Hawa, tassyklaýyn"
+              loadingLabel="Ugradylýar..."
+              loading={loading}
+              disabled={loading}
+              onPress={handleDirectSubmit}
+              color={colors.primary}
+              size="lg"
+              icon={<Ionicons name="checkmark-circle-outline" size={18} color="#fff" />}
+            />
             <Pressable onPress={() => setDirectStep("payment")} style={s.secondaryBtn}>
               <Feather name="arrow-left" size={16} color={colors.mutedForeground} />
               <Text style={[s.secondaryBtnText, { color: colors.mutedForeground }]}>Yza</Text>
@@ -688,15 +696,16 @@ export default function DemiryolScreen() {
               </Text>
             </View>
 
-            <Pressable onPress={handleAgentSubmit} disabled={agentLoading}
-              style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#8b5cf6", opacity: pressed || agentLoading ? 0.75 : 1 }]}>
-              {agentLoading ? <ActivityIndicator color="#fff" size="small" /> : (
-                <>
-                  <MaterialCommunityIcons name="robot-outline" size={18} color="#fff" />
-                  <Text style={s.primaryBtnText}>Tabşyrmak</Text>
-                </>
-              )}
-            </Pressable>
+            <PessimisticButton
+              label="Tabşyrmak"
+              loadingLabel="Ugradylýar..."
+              loading={agentLoading}
+              disabled={agentLoading}
+              onPress={handleAgentSubmit}
+              color="#8b5cf6"
+              size="lg"
+              icon={<MaterialCommunityIcons name="robot-outline" size={18} color="#fff" />}
+            />
           </View>
         )}
 

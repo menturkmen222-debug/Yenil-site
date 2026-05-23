@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
@@ -689,7 +690,9 @@ export default function SmmScreen() {
   return (
     <View style={[{ flex: 1 }, { backgroundColor: colors.background }]}>
       {/* ── Header ── */}
-      <View style={[sf.header, { paddingTop: topPad, backgroundColor: activeColor }]}>
+      <LinearGradient
+        colors={[colors.headerGradientStart, colors.headerGradientEnd]}
+        style={[sf.header, { paddingTop: topPad }]}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12, flex: 1 }}>
           {step !== "service" && step !== "success" ? (
             <Pressable onPress={goBack} style={sf.backBtn}>
@@ -722,7 +725,7 @@ export default function SmmScreen() {
             color="#fff"
           />
         )}
-      </View>
+      </LinearGradient>
 
       {/* ── Content ── */}
       {step === "service" && (

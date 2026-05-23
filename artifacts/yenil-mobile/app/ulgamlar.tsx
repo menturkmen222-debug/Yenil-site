@@ -1,15 +1,17 @@
 import React, { useState, useRef } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
-  ActivityIndicator, Platform,
+  Platform,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons, Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { saveOrder, deductBalanceAtomic } from "@/lib/firebase";
 import { useBonusPul } from "@/contexts/BonusPulContext";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import BPCheckoutModal from "@/components/BPCheckoutModal";
 
 interface AppService {
@@ -203,29 +205,18 @@ function AppPaymentFlow({ app, onBack, colors }: { app: AppService; onBack: () =
         </View>
       </View>
 
-      <Pressable
-        onPress={handlePay}
-        disabled={loading || !plan || !userPhone.trim()}
-        style={({ pressed }) => [
-          styles.primaryBtn,
-          {
-            backgroundColor: colors.primary,
-            opacity: loading || !plan || !userPhone.trim() || pressed ? 0.65 : 1,
-            marginTop: 20,
-          },
-        ]}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" size="small" />
-        ) : (
-          <>
-            <Ionicons name="wallet-outline" size={18} color="#fff" />
-            <Text style={styles.primaryBtnText}>
-              {plan ? `${plan.amount} BP bilen tölemek` : "Tölemek"}
-            </Text>
-          </>
-        )}
-      </Pressable>
+      <View style={{ marginTop: 20 }}>
+        <PessimisticButton
+          label={plan ? `${plan.amount} BP bilen tölemek` : "Tölemek"}
+          loadingLabel="Işlenýär..."
+          loading={loading}
+          disabled={loading || !plan || !userPhone.trim()}
+          onPress={handlePay}
+          color={colors.primary}
+          size="lg"
+          icon={<Ionicons name="wallet-outline" size={18} color="#fff" />}
+        />
+      </View>
 
       <BPCheckoutModal
         visible={showModal}
@@ -248,12 +239,14 @@ export default function UlgamlarScreen() {
 
   return (
     <View style={[{ flex: 1 }, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12, backgroundColor: colors.primary }]}>
+      <LinearGradient
+        colors={[colors.headerGradientStart, colors.headerGradientEnd]}
+        style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12 }]}>
         <Pressable onPress={activeApp ? () => setActiveApp(null) : () => router.back()} style={{ padding: 4 }}>
           <Feather name="arrow-left" size={20} color="#fff" />
         </Pressable>
         <Text style={styles.headerTitle}>{activeApp ? activeApp.name : "Içerki ulgamlar"}</Text>
-      </View>
+      </LinearGradient>
 
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 110 }}

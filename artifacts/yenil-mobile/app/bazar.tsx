@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
@@ -308,7 +309,9 @@ export default function BazarScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* HEADER */}
-      <View style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12, backgroundColor: colors.primary }]}>
+      <LinearGradient
+        colors={[colors.headerGradientStart, colors.headerGradientEnd]}
+        style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12 }]}>
         <View style={styles.headerTop}>
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={22} color="#fff" />
@@ -343,7 +346,7 @@ export default function BazarScreen() {
             <Ionicons name="arrow-forward" size={16} color="#fff" />
           </View>
         </Pressable>
-      </View>
+      </LinearGradient>
 
       {/* SORT DROPDOWN */}
       {showSort && (

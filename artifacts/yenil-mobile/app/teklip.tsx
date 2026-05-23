@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
-  Alert, ActivityIndicator, Platform, Image,
+  Alert, Platform, Image,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons, Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import { saveOrder } from "@/lib/firebase";
 import { uploadImage } from "@/lib/upload";
 
@@ -49,12 +51,14 @@ export default function TeklipScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12, backgroundColor: colors.primary }]}>
+      <LinearGradient
+        colors={[colors.headerGradientStart, colors.headerGradientEnd]}
+        style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12 }]}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Feather name="arrow-left" size={20} color="#fff" />
         </Pressable>
         <Text style={styles.headerTitle}>Teklip ibermek</Text>
-      </View>
+      </LinearGradient>
 
       {success ? (
         <View style={styles.successContainer}>
@@ -122,7 +126,7 @@ export default function TeklipScreen() {
                 style={[styles.filePicker, { borderColor: colors.primary, backgroundColor: colors.card }]}>
                 <Ionicons name="image-outline" size={24} color={colors.primary} />
                 <Text style={[{ color: colors.primary, fontWeight: "600", fontSize: 14 }]}>
-                  {fileUri ? "Surat saýlandy ✓" : "Surat ýüklemek üçin basyň"}
+                  {fileUri ? "Surat saýlandy" : "Surat ýüklemek üçin basyň"}
                 </Text>
               </Pressable>
               {fileUri && (
@@ -131,15 +135,18 @@ export default function TeklipScreen() {
             </View>
           </View>
 
-          <Pressable onPress={handleSubmit} disabled={loading}
-            style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: pressed || loading ? 0.7 : 1, marginTop: 24 }]}>
-            {loading ? <ActivityIndicator color="#fff" size="small" /> : (
-              <>
-                <Ionicons name="send-outline" size={18} color="#fff" />
-                <Text style={styles.primaryBtnText}>Teklip ibermek</Text>
-              </>
-            )}
-          </Pressable>
+          <View style={{ marginTop: 24 }}>
+            <PessimisticButton
+              label="Teklip ibermek"
+              loadingLabel="Ugradylýar..."
+              loading={loading}
+              disabled={loading}
+              onPress={handleSubmit}
+              color={colors.primary}
+              size="lg"
+              icon={<Ionicons name="send-outline" size={18} color="#fff" />}
+            />
+          </View>
         </ScrollView>
       )}
     </View>

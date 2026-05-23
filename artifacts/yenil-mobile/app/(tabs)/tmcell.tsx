@@ -11,6 +11,7 @@ import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { saveOrder, transferBP, getBPTransferHistory, createTMCellCashout, deductBalanceAtomic, type BPTransfer } from "@/lib/firebase";
 import { COMMISSION_RATES } from "@/lib/payments";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import BPCheckoutModal from "@/components/BPCheckoutModal";
 import { addToHistory } from "@/lib/orderHistory";
 
@@ -262,13 +263,18 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
                     style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
                   />
                 </View>
-                {buyLoading ? <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} /> : (
-                  <Pressable onPress={handleBuy}
-                    style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1, marginTop: 16 }]}>
-                    <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />
-                    <Text style={s.primaryBtnText}>Töleg geçirdim</Text>
-                  </Pressable>
-                )}
+                <View style={{ marginTop: 16 }}>
+                  <PessimisticButton
+                    label="Töleg geçirdim"
+                    loadingLabel="Barlanýar..."
+                    loading={buyLoading}
+                    disabled={buyLoading}
+                    onPress={handleBuy}
+                    color={colors.primary}
+                    size="lg"
+                    icon={<Ionicons name="checkmark-circle-outline" size={18} color="#fff" />}
+                  />
+                </View>
                 <Pressable onPress={() => setBuyPayMethod("")} style={s.backRow}>
                   <Feather name="arrow-left" size={16} color={colors.mutedForeground} />
                   <Text style={[{ color: colors.mutedForeground, fontWeight: "600" }]}>Yza</Text>
@@ -336,13 +342,18 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
                   style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
                 />
 
-                {buyLoading ? <ActivityIndicator color="#6366f1" style={{ marginTop: 20 }} /> : (
-                  <Pressable onPress={handleBuy}
-                    style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#6366f1", opacity: pressed ? 0.85 : 1, marginTop: 16 }]}>
-                    <Ionicons name="card-outline" size={18} color="#fff" />
-                    <Text style={s.primaryBtnText}>Töleg geçirdim</Text>
-                  </Pressable>
-                )}
+                <View style={{ marginTop: 16 }}>
+                  <PessimisticButton
+                    label="Töleg geçirdim"
+                    loadingLabel="Barlanýar..."
+                    loading={buyLoading}
+                    disabled={buyLoading}
+                    onPress={handleBuy}
+                    color="#6366f1"
+                    size="lg"
+                    icon={<Ionicons name="card-outline" size={18} color="#fff" />}
+                  />
+                </View>
                 <Pressable onPress={() => setBuyPayMethod("")} style={s.backRow}>
                   <Feather name="arrow-left" size={16} color={colors.mutedForeground} />
                   <Text style={[{ color: colors.mutedForeground, fontWeight: "600" }]}>Yza</Text>
@@ -370,7 +381,7 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
             {/* Rate pill */}
             <View style={[s.ratePill, { backgroundColor: "#05966912", borderColor: "#05966930" }]}>
               <Ionicons name="phone-portrait-outline" size={15} color="#059669" />
-              <Text style={[s.rateText, { color: "#059669" }]}>TMCell çykaryş · 0.5% komissiya</Text>
+              <Text style={[s.rateText, { color: "#059669" }]}>TMCell çykaryş · {(COMMISSION_RATES.tmcell_cashout * 100).toFixed(1)}% komissiya</Text>
             </View>
 
             {/* Balance card */}
@@ -399,7 +410,7 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
                 <Text style={[{ fontSize: 12, fontWeight: "700", color: colors.foreground, marginBottom: 2 }]}>Töleg hasaplamasy</Text>
                 {[
                   { label: "Çykarylýan BP",  val: `${sellAmtNum} BP`,           red: false },
-                  { label: "Komissiya (0.5%)", val: `-${cashoutCommission} BP`,   red: true  },
+                  { label: `Komissiya (${(COMMISSION_RATES.tmcell_cashout * 100).toFixed(1)}%)`, val: `-${cashoutCommission} BP`,   red: true  },
                 ].map((row, i) => (
                   <View key={i} style={{ flexDirection: "row", justifyContent: "space-between" }}>
                     <Text style={{ color: colors.mutedForeground, fontSize: 12 }}>{row.label}</Text>
@@ -1396,15 +1407,18 @@ function SimSection({ colors }: { colors: ReturnType<typeof useColors> }) {
         }
       </View>
 
-      {loading ? <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} /> : (
-        <Pressable onPress={handlePay}
-          style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1, marginTop: 4 }]}>
-          <Ionicons name="wallet-outline" size={18} color="#fff" />
-          <Text style={s.primaryBtnText}>
-            {balance >= tmt ? `${tmt} BP bilen tölenmek` : "Balans doldur we tölenmek"}
-          </Text>
-        </Pressable>
-      )}
+      <View style={{ marginTop: 4 }}>
+        <PessimisticButton
+          label={balance >= tmt ? `${tmt} BP bilen tölenmek` : "Balans doldur we tölenmek"}
+          loadingLabel="Işlenýär..."
+          loading={loading}
+          disabled={loading}
+          onPress={handlePay}
+          color={colors.primary}
+          size="lg"
+          icon={<Ionicons name="wallet-outline" size={18} color="#fff" />}
+        />
+      </View>
 
       <BPCheckoutModal
         visible={showSimTopUp}

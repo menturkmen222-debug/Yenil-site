@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
-  Alert, ActivityIndicator, Platform, Modal, FlatList,
+  Alert, Platform, Modal, FlatList,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
+import { PessimisticButton } from "@/components/PessimisticButton";
 import { saveOrder, deductBalanceAtomic } from "@/lib/firebase";
 import BPCheckoutModal from "@/components/BPCheckoutModal";
 import { addToHistory, getHistory, type OrderHistoryItem } from "@/lib/orderHistory";
@@ -230,7 +232,9 @@ export default function HowaScreen() {
   return (
     <View style={[s.root, { backgroundColor: colors.background }]}>
       {/* Hero Header */}
-      <View style={[s.hero, { paddingTop: ptop }]}>
+      <LinearGradient
+        colors={[colors.headerGradientStart, colors.headerGradientEnd]}
+        style={[s.hero, { paddingTop: ptop }]}>
         <View style={s.heroTop}>
           <Pressable onPress={() => router.back()} style={s.backBtn}>
             <Ionicons name="chevron-back" size={22} color="#fff" />
@@ -269,7 +273,7 @@ export default function HowaScreen() {
             })}
           </View>
         )}
-      </View>
+      </LinearGradient>
 
       {howaTab === "book" && (
       <ScrollView
@@ -711,18 +715,16 @@ export default function HowaScreen() {
               }
             </View>
 
-            {loading
-              ? <ActivityIndicator color="#0ea5e9" style={{ marginTop: 20 }} />
-              : (
-                <Pressable onPress={handleBooking} disabled={loading}
-                  style={({ pressed }) => [s.primaryBtn, { backgroundColor: "#0ea5e9", opacity: pressed ? 0.85 : 1 }]}>
-                  <Ionicons name="wallet-outline" size={18} color="#fff" />
-                  <Text style={s.primaryBtnText}>
-                    {balance >= 50 ? "50 BP bilen sargyt et" : "Balans doldur we sargyt et"}
-                  </Text>
-                </Pressable>
-              )
-            }
+            <PessimisticButton
+              label={balance >= 50 ? "50 BP bilen sargyt et" : "Balans doldur we sargyt et"}
+              loadingLabel="Işlenýär..."
+              loading={loading}
+              disabled={loading}
+              onPress={handleBooking}
+              color="#0ea5e9"
+              size="lg"
+              icon={<Ionicons name="wallet-outline" size={18} color="#fff" />}
+            />
 
             <BPCheckoutModal
               visible={showHowaTopUp}
@@ -1006,7 +1008,6 @@ const s = StyleSheet.create({
   hero: {
     paddingHorizontal: 16,
     paddingBottom: 20,
-    backgroundColor: "#0ea5e9",
   },
   heroTop: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 20 },
   backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center" },
