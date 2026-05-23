@@ -1268,3 +1268,38 @@ export async function verifySmsAndConfirmDeposit(
     return { verified: false, message: "Tassyklama ýerine ýetirilmedi. Täzeden synanyşyň." };
   }
 }
+
+// ─── Ulanyjy profili ──────────────────────────────────────────────────────────
+
+export interface UserProfile {
+  name: string;
+  surname: string;
+  phone: string;
+  region: string;
+  district: string;
+  profession: string;
+  bio: string;
+  updatedAt: string;
+  createdAt: number;
+}
+
+export async function saveUserProfile(
+  deviceId: string,
+  data: Omit<UserProfile, "updatedAt" | "createdAt">
+): Promise<void> {
+  await set(ref(db, `users/${deviceId}/profile`), {
+    ...data,
+    updatedAt: new Date().toISOString(),
+    createdAt: Date.now(),
+  });
+}
+
+export async function getUserProfile(deviceId: string): Promise<UserProfile | null> {
+  try {
+    const snap = await get(ref(db, `users/${deviceId}/profile`));
+    if (!snap.exists()) return null;
+    return snap.val() as UserProfile;
+  } catch {
+    return null;
+  }
+}
