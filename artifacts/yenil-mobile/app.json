@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.replit.yenilmobile"
     },
     "android": {
-      "package": "com.replit.yenilmobile"
+      "package": "com.replit.yenilmobile",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/images/favicon.png"

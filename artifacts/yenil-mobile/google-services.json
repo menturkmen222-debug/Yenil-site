@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "405972999183",
+    "project_id": "yenil-f8c12",
+    "storage_bucket": "yenil-f8c12.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405972999183:android:0563331ffb77d7373ed77a",
+        "android_client_info": {
+          "package_name": "com.replit.yenilmobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGu5beomNMKW12amssM8GLiEK-8M0Y-iU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

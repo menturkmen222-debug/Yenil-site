@@ -6,11 +6,13 @@ import {
 import { COMMISSION_RATES, MIN_CASHOUT_BP } from "@/lib/payments";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCc3EdDkk_Bhvw8TphLj60aJSXtyWwWpZw",
-  authDomain: "yenil-app.firebaseapp.com",
-  databaseURL: "https://yenil-app-default-rtdb.firebaseio.com",
-  projectId: "yenil-app",
-  storageBucket: "yenil-app.appspot.com",
+  apiKey: "AIzaSyBGu5beomNMKW12amssM8GLiEK-8M0Y-iU",
+  authDomain: "yenil-f8c12.firebaseapp.com",
+  databaseURL: "https://yenil-f8c12-default-rtdb.firebaseio.com",
+  projectId: "yenil-f8c12",
+  storageBucket: "yenil-f8c12.firebasestorage.app",
+  messagingSenderId: "405972999183",
+  appId: "1:405972999183:android:0563331ffb77d7373ed77a",
 };
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
