@@ -1,22 +1,31 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable,
-  Alert, Platform, ActivityIndicator,
+  Alert, Platform, ActivityIndicator, Animated,
 } from "react-native";
 import { router, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import * as ImagePicker from "expo-image-picker";
+import { Image } from "expo-image";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useColors } from "@/hooks/useColors";
+import { RipplePress } from "@/components/RipplePress";
 import { useBonusPul } from "@/contexts/BonusPulContext";
-import { getUserProfile, getUserNickname, getReputation, type UserProfile, type ReputationData } from "@/lib/firebase";
+import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  getUserProfile, getUserNickname, getReputation,
+  setUserAvatar, getUserAvatar, watchUserAvatar,
+  type UserProfile, type ReputationData,
+} from "@/lib/firebase";
 import { getLevel, getProgressPercent, getNextLevel } from "@/lib/reputation";
 import { clearDeviceId } from "@/lib/deviceId";
 
 const isWeb = Platform.OS === "web";
+const AVATAR_CACHE_KEY = "@yenil_avatar";
 
 function InfoRow({
   icon, label, value, colors,
@@ -61,6 +70,7 @@ export default function ProfileScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { balance, deviceId } = useBonusPul();
+  const { t } = useLanguage();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [nickname, setNickname] = useState("");
@@ -68,6 +78,14 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
   const [goRegister, setGoRegister] = useState(false);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const cameraAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    // Load cached avatar immediately
+    AsyncStorage.getItem(AVATAR_CACHE_KEY).then((v) => { if (v) setAvatarUri(v); });
+  }, []);
 
   useEffect(() => {
     if (!deviceId) return;
@@ -77,6 +95,14 @@ export default function ProfileScreen() {
     const timeout = setTimeout(() => {
       if (!cancelled) setGoRegister(true);
     }, 8000);
+
+    // Watch avatar in real-time
+    const unsubAvatar = watchUserAvatar(deviceId, (uri) => {
+      if (uri) {
+        setAvatarUri(uri);
+        AsyncStorage.setItem(AVATAR_CACHE_KEY, uri);
+      }
+    });
 
     Promise.all([
       getUserProfile(deviceId),
@@ -103,8 +129,52 @@ export default function ProfileScreen() {
     return () => {
       cancelled = true;
       clearTimeout(timeout);
+      unsubAvatar();
     };
   }, [deviceId]);
+
+  const pickAvatar = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    // Animate camera button
+    Animated.sequence([
+      Animated.timing(cameraAnim, { toValue: 0.85, duration: 100, useNativeDriver: true }),
+      Animated.timing(cameraAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
+    ]).start();
+
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(t("error"), "Surat galeresine girişe rugsat edilmedi.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.45,
+      base64: true,
+    });
+
+    if (result.canceled || !result.assets[0]) return;
+
+    const asset = result.assets[0];
+    const dataUri = asset.base64
+      ? `data:image/jpeg;base64,${asset.base64}`
+      : asset.uri;
+
+    setUploadingAvatar(true);
+    try {
+      setAvatarUri(dataUri);
+      await AsyncStorage.setItem(AVATAR_CACHE_KEY, dataUri);
+      if (deviceId) await setUserAvatar(deviceId, dataUri);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch {
+      Alert.alert(t("error"), "Surat ýüklenip bilmedi.");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }, [deviceId, t, cameraAnim]);
 
   if (goRegister) return <Redirect href="/auth/register" />;
 
@@ -120,12 +190,12 @@ export default function ProfileScreen() {
   async function handleLogout() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert(
-      "Ulgamdan çykmak",
-      "Çykanyňyzdan soň täzeden hasaba alynmaly bolarsyňyz. Dowam etmekmi?",
+      t("logout"),
+      t("logout_confirm"),
       [
-        { text: "Ýok", style: "cancel" },
+        { text: t("no"), style: "cancel" },
         {
-          text: "Hawa, çyk",
+          text: t("logout_btn"),
           style: "destructive",
           onPress: async () => {
             setLoggingOut(true);
@@ -136,7 +206,7 @@ export default function ProfileScreen() {
               router.replace("/auth/register");
             } catch {
               setLoggingOut(false);
-              Alert.alert("Ýalňyşlyk", "Çykyp bolmady. Gaýtadan synanyşyň.");
+              Alert.alert(t("error"), "Çykyp bolmady. Gaýtadan synanyşyň.");
             }
           },
         },
@@ -153,14 +223,14 @@ export default function ProfileScreen() {
         colors={[colors.headerGradientStart, colors.headerGradientEnd] as [string, string]}
         style={[s.header, { paddingTop: topPad }]}
       >
-        <Text style={s.headerTitle}>Profilim</Text>
-        <Text style={s.headerSub}>Şahsy maglumatlar</Text>
+        <Text style={s.headerTitle}>{t("profile")}</Text>
+        <Text style={s.headerSub}>{t("personal_info")}</Text>
       </LinearGradient>
 
       {loading ? (
         <View style={s.loadingWrap}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={[s.loadingText, { color: colors.mutedForeground }]}>Ýüklenýär...</Text>
+          <Text style={[s.loadingText, { color: colors.mutedForeground }]}>{t("loading")}</Text>
         </View>
       ) : (
         <ScrollView
@@ -172,14 +242,36 @@ export default function ProfileScreen() {
             colors={[colors.headerGradientStart, colors.headerGradientEnd] as [string, string]}
             style={s.heroCard}
           >
-            {/* Avatar circle */}
-            <View style={s.avatarWrap}>
+            {/* Avatar circle with upload button */}
+            <Pressable onPress={pickAvatar} style={s.avatarWrap}>
               <View style={[s.avatar, { borderColor: "rgba(255,255,255,0.4)" }]}>
-                <Text style={s.avatarText}>{displayInitial}</Text>
+                {avatarUri ? (
+                  <Image
+                    source={{ uri: avatarUri }}
+                    style={s.avatarImg}
+                    contentFit="cover"
+                    transition={300}
+                  />
+                ) : (
+                  <Text style={s.avatarText}>{displayInitial}</Text>
+                )}
               </View>
               {/* Online dot */}
               <View style={s.onlineDot} />
-            </View>
+              {/* Camera overlay */}
+              <Animated.View
+                style={[
+                  s.cameraOverlay,
+                  { transform: [{ scale: cameraAnim }] },
+                ]}
+              >
+                {uploadingAvatar ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Ionicons name="camera" size={14} color="#fff" />
+                )}
+              </Animated.View>
+            </Pressable>
 
             {/* Name & nickname */}
             <Text style={s.heroName}>{displayName}</Text>
@@ -189,6 +281,15 @@ export default function ProfileScreen() {
                 <Text style={s.nicknameText}>{nickname}</Text>
               </View>
             ) : null}
+
+            {/* Upload hint */}
+            <Pressable
+              onPress={pickAvatar}
+              style={s.uploadHint}
+            >
+              <Ionicons name="camera-outline" size={12} color="rgba(255,255,255,0.65)" />
+              <Text style={s.uploadHintText}>{t("change_photo")}</Text>
+            </Pressable>
 
             {/* Stats row */}
             <View style={s.statsRow}>
@@ -230,7 +331,7 @@ export default function ProfileScreen() {
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              Alert.alert("Ulanyjy ID", deviceId, [{ text: "Ýap" }]);
+              Alert.alert("Ulanyjy ID", deviceId, [{ text: t("close") }]);
             }}
             style={({ pressed }) => [s.idChip, { backgroundColor: colors.muted, borderColor: colors.border, opacity: pressed ? 0.72 : 1 }]}
           >
@@ -244,23 +345,23 @@ export default function ProfileScreen() {
           {/* ── Şahsy maglumatlar ── */}
           {profile ? (
             <>
-              <SectionCard title="ŞAHSY MAGLUMATLAR" colors={colors}>
-                <InfoRow icon="person-outline" label="Ady" value={profile.name} colors={colors} />
-                <InfoRow icon="person-circle-outline" label="Familiýasy" value={profile.surname} colors={colors} />
-                <InfoRow icon="call-outline" label="Telefon belgi" value={profile.phone} colors={colors} />
-                <InfoRow icon="location-outline" label="Welaýat" value={profile.region} colors={colors} />
-                <InfoRow icon="map-outline" label="Etrap / Şäher" value={profile.district} colors={colors} />
+              <SectionCard title={t("personal_info").toUpperCase()} colors={colors}>
+                <InfoRow icon="person-outline" label={t("name")} value={profile.name} colors={colors} />
+                <InfoRow icon="person-circle-outline" label={t("surname")} value={profile.surname} colors={colors} />
+                <InfoRow icon="call-outline" label={t("phone")} value={profile.phone} colors={colors} />
+                <InfoRow icon="location-outline" label={t("region")} value={profile.region} colors={colors} />
+                <InfoRow icon="map-outline" label={t("district")} value={profile.district} colors={colors} />
               </SectionCard>
 
-              <SectionCard title="HÜNÄR MAGLUMATLARY" colors={colors}>
-                <InfoRow icon="briefcase-outline" label="Hünäri / Käri" value={profile.profession} colors={colors} />
+              <SectionCard title={t("profession").toUpperCase()} colors={colors}>
+                <InfoRow icon="briefcase-outline" label={t("profession")} value={profile.profession} colors={colors} />
                 {profile.bio ? (
                   <View style={[row.wrap, { borderBottomColor: "transparent" }]}>
                     <View style={[row.iconBox, { backgroundColor: colors.primary + "18" }]}>
                       <Ionicons name="document-text-outline" size={17} color={colors.primary} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={[row.label, { color: colors.mutedForeground }]}>Özüm hakynda</Text>
+                      <Text style={[row.label, { color: colors.mutedForeground }]}>{t("about_me")}</Text>
                       <Text style={[row.value, { color: colors.foreground, lineHeight: 20 }]}>{profile.bio}</Text>
                     </View>
                   </View>
@@ -268,24 +369,21 @@ export default function ProfileScreen() {
               </SectionCard>
             </>
           ) : (
-            /* Profile not set yet */
             <View style={[s.noProfileBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <Ionicons name="person-add-outline" size={36} color={colors.mutedForeground} />
-              <Text style={[s.noProfileTitle, { color: colors.foreground }]}>Profil doldurylmady</Text>
-              <Text style={[s.noProfileDesc, { color: colors.mutedForeground }]}>
-                Hasaba alynmak arkaly profiliňizi doluň
-              </Text>
+              <Text style={[s.noProfileTitle, { color: colors.foreground }]}>{t("profile_not_filled")}</Text>
+              <Text style={[s.noProfileDesc, { color: colors.mutedForeground }]}>{t("profile_not_filled_desc")}</Text>
             </View>
           )}
 
           {/* ── Hasap maglumaty ── */}
-          <SectionCard title="HASAP" colors={colors}>
+          <SectionCard title={t("account").toUpperCase()} colors={colors}>
             <View style={[row.wrap, { borderBottomColor: colors.border }]}>
               <View style={[row.iconBox, { backgroundColor: "#f59e0b18" }]}>
                 <Ionicons name="wallet-outline" size={17} color="#f59e0b" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[row.label, { color: colors.mutedForeground }]}>BonusPul balansy</Text>
+                <Text style={[row.label, { color: colors.mutedForeground }]}>{t("bonus_balance")}</Text>
                 <Text style={[row.value, { color: colors.foreground, fontWeight: "700" }]}>{balance.toFixed(2)} BP</Text>
               </View>
             </View>
@@ -294,7 +392,7 @@ export default function ProfileScreen() {
                 <Ionicons name={level.icon as any} size={17} color={level.color} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[row.label, { color: colors.mutedForeground }]}>Abraý derejesi</Text>
+                <Text style={[row.label, { color: colors.mutedForeground }]}>{t("reputation_level")}</Text>
                 <Text style={[row.value, { color: colors.foreground }]}>
                   {repData.score}/100 · {level.labelTm}
                 </Text>
@@ -302,42 +400,22 @@ export default function ProfileScreen() {
             </View>
           </SectionCard>
 
-          {/* ── SYNAG / TEST section ── */}
-          <Text style={[s.sectionTitle, { color: colors.mutedForeground }]}>SYNAG</Text>
-          <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 24 }]}>
-            <View style={[row.wrap, { borderBottomColor: "transparent" }]}>
-              <View style={[row.iconBox, { backgroundColor: "#7c3aed18" }]}>
-                <Ionicons name="flask-outline" size={17} color="#7c3aed" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[row.label, { color: colors.mutedForeground }]}>Synag rejimi</Text>
-                <Text style={[row.value, { color: colors.foreground }]}>
-                  Täze ulanyjy hökmünde başlamak üçin ulgamdan çykyň
-                </Text>
-              </View>
-            </View>
-          </View>
-
           {/* ── LOGOUT BUTTON ── */}
-          <Pressable
+          <RipplePress
             onPress={handleLogout}
             disabled={loggingOut}
-            style={({ pressed }) => [
-              s.logoutBtn,
-              {
-                borderColor: "#ef4444",
-                backgroundColor: pressed ? "#ef444410" : "transparent",
-                opacity: loggingOut ? 0.6 : 1,
-              },
-            ]}
+            style={[s.logoutBtn, { borderColor: "#ef4444", backgroundColor: "transparent", opacity: loggingOut ? 0.6 : 1 }]}
+            borderRadius={16}
+            rippleColor="#ef4444"
+            rippleSize={160}
           >
             {loggingOut ? (
               <ActivityIndicator size="small" color="#ef4444" />
             ) : (
               <Ionicons name="log-out-outline" size={20} color="#ef4444" />
             )}
-            <Text style={s.logoutText}>Ulgamdan çykmak</Text>
-          </Pressable>
+            <Text style={s.logoutText}>{t("logout")}</Text>
+          </RipplePress>
 
           <Text style={[s.footerNote, { color: colors.mutedForeground }]}>
             Çykanyňyzda Firebase'daky maglumatlaryňyz saklanýar. Diňe bu enjamdan çykylýar.
@@ -379,38 +457,14 @@ const row = StyleSheet.create({
 });
 
 const s = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#fff",
-    letterSpacing: -0.3,
-  },
-  headerSub: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.72)",
-    marginTop: 2,
-  },
-  scroll: {
-    padding: 16,
-  },
-  loadingWrap: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  loadingText: {
-    fontSize: 14,
-  },
+  root: { flex: 1 },
+  header: { paddingHorizontal: 20, paddingBottom: 16 },
+  headerTitle: { fontSize: 22, fontWeight: "800", color: "#fff", letterSpacing: -0.3 },
+  headerSub: { fontSize: 13, color: "rgba(255,255,255,0.72)", marginTop: 2 },
+  scroll: { padding: 16 },
+  loadingWrap: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
+  loadingText: { fontSize: 14 },
 
-  /* Hero card */
   heroCard: {
     borderRadius: 20,
     padding: 20,
@@ -425,6 +479,8 @@ const s = StyleSheet.create({
   avatarWrap: {
     position: "relative",
     marginBottom: 12,
+    width: 84,
+    height: 84,
   },
   avatar: {
     width: 80,
@@ -434,21 +490,36 @@ const s = StyleSheet.create({
     borderWidth: 2.5,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
-  avatarText: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#fff",
+  avatarImg: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
+  avatarText: { fontSize: 32, fontWeight: "800", color: "#fff" },
   onlineDot: {
     position: "absolute",
     right: 3,
-    bottom: 3,
+    bottom: 18,
     width: 14,
     height: 14,
     borderRadius: 7,
     backgroundColor: "#4ade80",
     borderWidth: 2.5,
+    borderColor: "#fff",
+  },
+  cameraOverlay: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
     borderColor: "#fff",
   },
   heroName: {
@@ -468,13 +539,16 @@ const s = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 20,
   },
-  nicknameText: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.88)",
-    fontWeight: "600",
+  nicknameText: { fontSize: 13, color: "rgba(255,255,255,0.88)", fontWeight: "600" },
+  uploadHint: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 6,
+    marginBottom: 4,
   },
+  uploadHintText: { fontSize: 11, color: "rgba(255,255,255,0.65)" },
 
-  /* Stats row */
   statsRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -485,141 +559,48 @@ const s = StyleSheet.create({
     paddingHorizontal: 10,
     width: "100%",
   },
-  statItem: {
-    flex: 1,
-    alignItems: "center",
-    gap: 5,
-  },
-  statNum: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#fff",
-  },
-  statLabel: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.68)",
-    fontWeight: "600",
-    letterSpacing: 0.3,
-  },
-  statDivider: {
-    width: 1,
-    height: 36,
-  },
+  statItem: { flex: 1, alignItems: "center", gap: 5 },
+  statNum: { fontSize: 18, fontWeight: "800", color: "#fff" },
+  statLabel: { fontSize: 11, color: "rgba(255,255,255,0.68)", fontWeight: "600", letterSpacing: 0.3 },
+  statDivider: { width: 1, height: 36 },
   levelPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1.5,
+    flexDirection: "row", alignItems: "center", gap: 3,
+    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20, borderWidth: 1.5,
   },
-  levelPillText: {
-    fontSize: 11,
-    fontWeight: "700",
-  },
+  levelPillText: { fontSize: 11, fontWeight: "700" },
+  repBarWrap: { width: "100%", marginTop: 14 },
+  repBarTrack: { height: 5, borderRadius: 3, overflow: "hidden" },
+  repBarFill: { height: "100%", borderRadius: 3 },
+  repBarHint: { marginTop: 5, fontSize: 11, color: "rgba(255,255,255,0.68)", textAlign: "center" },
 
-  /* Reputation bar */
-  repBarWrap: {
-    width: "100%",
-    marginTop: 14,
-  },
-  repBarTrack: {
-    height: 5,
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-  repBarFill: {
-    height: "100%",
-    borderRadius: 3,
-  },
-  repBarHint: {
-    marginTop: 5,
-    fontSize: 11,
-    color: "rgba(255,255,255,0.68)",
-    textAlign: "center",
-  },
-
-  /* ID chip */
   idChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    marginBottom: 20,
+    flexDirection: "row", alignItems: "center", gap: 6,
+    borderRadius: 10, borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 12, paddingVertical: 9, marginBottom: 20,
   },
-  idChipText: {
-    flex: 1,
-    fontSize: 12,
-    fontWeight: "500",
-  },
+  idChipText: { flex: 1, fontSize: 12, fontWeight: "500" },
 
-  /* Section */
   sectionTitle: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.8,
-    marginBottom: 8,
-    marginLeft: 4,
+    fontSize: 11, fontWeight: "700", letterSpacing: 0.8,
+    marginBottom: 8, marginLeft: 4,
   },
   card: {
-    borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, overflow: "hidden",
+    shadowColor: "#000", shadowOpacity: 0.06, shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 }, elevation: 2,
   },
 
-  /* No profile */
   noProfileBox: {
-    borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: 28,
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 20,
+    borderRadius: 16, borderWidth: StyleSheet.hairlineWidth,
+    padding: 28, alignItems: "center", gap: 10, marginBottom: 20,
   },
-  noProfileTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  noProfileDesc: {
-    fontSize: 13,
-    textAlign: "center",
-    lineHeight: 19,
-  },
+  noProfileTitle: { fontSize: 16, fontWeight: "700" },
+  noProfileDesc: { fontSize: 13, textAlign: "center", lineHeight: 19 },
 
-  /* Logout */
   logoutBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    borderWidth: 1.5,
-    borderRadius: 14,
-    paddingVertical: 15,
-    marginBottom: 12,
-    shadowColor: "#ef4444",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 10, borderWidth: 1.5, borderRadius: 14, paddingVertical: 15, marginBottom: 12,
   },
-  logoutText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#ef4444",
-    letterSpacing: 0.1,
-  },
-  footerNote: {
-    fontSize: 11,
-    textAlign: "center",
-    lineHeight: 16,
-    marginBottom: 4,
-  },
+  logoutText: { fontSize: 16, fontWeight: "700", color: "#ef4444", letterSpacing: 0.1 },
+  footerNote: { fontSize: 11, textAlign: "center", lineHeight: 16, marginBottom: 4 },
 });

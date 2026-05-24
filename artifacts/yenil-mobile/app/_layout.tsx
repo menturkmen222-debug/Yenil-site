@@ -15,7 +15,10 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import { BonusPulProvider } from "@/contexts/BonusPulContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
@@ -55,6 +58,8 @@ function RootLayoutNav() {
       <Stack.Screen name="kuryer" options={{ headerShown: false }} />
       <Stack.Screen name="sanly-bazar-sell" options={{ headerShown: false }} />
       <Stack.Screen name="e-bilim" options={{ headerShown: false }} />
+      <Stack.Screen name="ai-chat" options={{ headerShown: false }} />
+      <Stack.Screen name="konum" options={{ headerShown: false }} />
       <Stack.Screen name="auth/register" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
@@ -83,11 +88,16 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <KeyboardProvider>
-              <ThemeProvider>
-                <BonusPulProvider>
-                  <RootLayoutNav />
-                </BonusPulProvider>
-              </ThemeProvider>
+              <LanguageProvider>
+                <ThemeProvider>
+                  <BonusPulProvider>
+                    <NotificationProvider>
+                      <RootLayoutNav />
+                      <OfflineBanner />
+                    </NotificationProvider>
+                  </BonusPulProvider>
+                </ThemeProvider>
+              </LanguageProvider>
             </KeyboardProvider>
           </GestureHandlerRootView>
         </QueryClientProvider>

@@ -11,7 +11,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
+import { useNotifications } from "@/contexts/NotificationContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { PessimisticButton } from "@/components/PessimisticButton";
+import { RipplePress } from "@/components/RipplePress";
 import {
   listenHyzmatlar, addHyzmat, HYZMAT_CATEGORIES,
   type HyzmatItem, type HyzmatCategory,
@@ -19,6 +22,17 @@ import {
 import { getDeviceIdAsync } from "@/lib/deviceId";
 import { getUserNickname, watchCompletedLessons } from "@/lib/firebase";
 import { CATEGORIES, LESSONS } from "@/lib/ebilimData";
+
+function formatNotifTime(ts: number): string {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (mins < 1) return "Az öň";
+  if (mins < 60) return `${mins} min öň`;
+  if (hours < 24) return `${hours} sag öň`;
+  return `${days} gün öň`;
+}
 
 // ══════════════════════════════════════════════════════════════════
 // Service card (Ýeňil built-in services)
@@ -28,17 +42,16 @@ function ServiceCard({ icon, title, desc, onPress, color }: {
 }) {
   const colors = useColors();
   return (
-    <Pressable
+    <RipplePress
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.serviceCard,
-        { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.85 : 1 },
-      ]}
+      style={[styles.serviceCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+      borderRadius={20}
+      rippleSize={120}
     >
       <View style={[styles.serviceIconBg, { backgroundColor: color + "20" }]}>{icon}</View>
       <Text style={[styles.serviceTitle, { color: colors.primary }]}>{title}</Text>
       <Text style={[styles.serviceDesc, { color: colors.mutedForeground }]}>{desc}</Text>
-    </Pressable>
+    </RipplePress>
   );
 }
 
@@ -341,7 +354,7 @@ function HyzmatCard({ item }: { item: HyzmatItem }) {
   };
 
   return (
-    <Pressable
+    <RipplePress
       onPress={() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         Alert.alert(
@@ -353,10 +366,9 @@ function HyzmatCard({ item }: { item: HyzmatItem }) {
           ]
         );
       }}
-      style={({ pressed }) => [
-        hStyles.card,
-        { backgroundColor: colors.card, borderColor: cat.color + "33", opacity: pressed ? 0.87 : 1 },
-      ]}
+      style={[hStyles.card, { backgroundColor: colors.card, borderColor: cat.color + "33" }]}
+      borderRadius={16}
+      rippleColor={cat.color}
     >
       {/* Left accent bar */}
       <View style={[hStyles.accentBar, { backgroundColor: cat.color }]} />
@@ -407,7 +419,7 @@ function HyzmatCard({ item }: { item: HyzmatItem }) {
       >
         <Ionicons name="call" size={16} color="#fff" />
       </Pressable>
-    </Pressable>
+    </RipplePress>
   );
 }
 
@@ -420,6 +432,9 @@ export default function HomeScreen() {
   const { balance } = useBonusPul();
   const isWeb = Platform.OS === "web";
 
+  const { notifications, unreadCount, markAllRead, markRead } = useNotifications();
+  const { t } = useLanguage();
+
   const scrollViewRef = useRef<ScrollView>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [addHyzmatOpen, setAddHyzmatOpen] = useState(false);
@@ -429,7 +444,6 @@ export default function HomeScreen() {
   const [nickname, setNickname] = useState("");
   const [deviceId, setDeviceId] = useState("");
   const [notifOpen, setNotifOpen] = useState(false);
-  const [notifCount] = useState(2);
   const [hyzmatSearch, setHyzmatSearch] = useState("");
   const [eBilimCompleted, setEBilimCompleted] = useState<number>(0);
   const bellAnim = useRef(new Animated.Value(1)).current;
@@ -455,7 +469,10 @@ export default function HomeScreen() {
       Animated.timing(bellAnim, { toValue: 0.9, duration: 80, useNativeDriver: true }),
       Animated.timing(bellAnim, { toValue: 1.15, duration: 60, useNativeDriver: true }),
       Animated.timing(bellAnim, { toValue: 1, duration: 60, useNativeDriver: true }),
-    ]).start(() => setNotifOpen(true));
+    ]).start(() => {
+      setNotifOpen(true);
+      markAllRead();
+    });
   };
 
   // Listen to community services in real-time
@@ -501,32 +518,80 @@ export default function HomeScreen() {
           <View style={[notifStyles.header, { borderBottomColor: colors.border, paddingTop: insets.top + 16 }]}>
             <View style={[notifStyles.handle, { backgroundColor: colors.border }]} />
             <View style={notifStyles.headerRow}>
-              <Text style={[notifStyles.title, { color: colors.foreground }]}>Bildirişler</Text>
-              <Pressable onPress={() => setNotifOpen(false)} style={[notifStyles.closeBtn, { backgroundColor: colors.muted }]}>
-                <Ionicons name="close" size={18} color={colors.mutedForeground} />
-              </Pressable>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Text style={[notifStyles.title, { color: colors.foreground }]}>{t("notifications")}</Text>
+                {unreadCount > 0 && (
+                  <View style={[notifStyles.badge, { backgroundColor: colors.primary }]}>
+                    <Text style={notifStyles.badgeText}>{unreadCount}</Text>
+                  </View>
+                )}
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                {notifications.some((n) => !n.read) && (
+                  <Pressable
+                    onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); markAllRead(); }}
+                    style={[notifStyles.markReadBtn, { backgroundColor: colors.primary + "15" }]}
+                  >
+                    <Text style={[notifStyles.markReadText, { color: colors.primary }]}>{t("notif_mark_read")}</Text>
+                  </Pressable>
+                )}
+                <Pressable onPress={() => setNotifOpen(false)} style={[notifStyles.closeBtn, { backgroundColor: colors.muted }]}>
+                  <Ionicons name="close" size={18} color={colors.mutedForeground} />
+                </Pressable>
+              </View>
             </View>
           </View>
-          <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
-            {[
-              { icon: "checkmark-circle", color: "#16a34a", title: "Sargyt tamamlandy", desc: "Siziň №A-4821 sargydyňyz üstünlikli ýerine ýetirildi.", time: "5 min öň" },
-              { icon: "gift-outline", color: "#7c3aed", title: "Bonus pul alındı!", desc: "Hasabyňyza +5.00 BP bonus goşuldy. Hoş geldiňiz!", time: "1 sagat öň" },
-            ].map((n, i) => (
-              <Pressable
-                key={i}
-                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
-                style={({ pressed }) => [notifStyles.card, { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.82 : 1 }]}
-              >
-                <View style={[notifStyles.iconWrap, { backgroundColor: n.color + "18" }]}>
-                  <Ionicons name={n.icon as any} size={22} color={n.color} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[notifStyles.cardTitle, { color: colors.foreground }]}>{n.title}</Text>
-                  <Text style={[notifStyles.cardDesc, { color: colors.mutedForeground }]}>{n.desc}</Text>
-                  <Text style={[notifStyles.cardTime, { color: colors.mutedForeground }]}>{n.time}</Text>
-                </View>
-              </Pressable>
-            ))}
+          <ScrollView contentContainerStyle={{ padding: 16, gap: 10 }}>
+            {notifications.length === 0 ? (
+              <View style={[notifStyles.emptyWrap, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Ionicons name="notifications-off-outline" size={40} color={colors.mutedForeground} />
+                <Text style={[notifStyles.emptyTitle, { color: colors.foreground }]}>{t("notif_no_items")}</Text>
+                <Text style={[notifStyles.emptyDesc, { color: colors.mutedForeground }]}>{t("notif_no_items_desc")}</Text>
+              </View>
+            ) : (
+              notifications.map((n) => {
+                const iconMap: Record<string, { icon: string; color: string }> = {
+                  order: { icon: "checkmark-circle", color: "#16a34a" },
+                  bp: { icon: "gift-outline", color: "#7c3aed" },
+                  system: { icon: "information-circle-outline", color: "#0ea5e9" },
+                  promo: { icon: "megaphone-outline", color: "#f59e0b" },
+                };
+                const meta = iconMap[n.type ?? "system"] ?? iconMap.system;
+                const iconColor = n.iconColor ?? meta.color;
+                const iconName = n.icon ?? meta.icon;
+                return (
+                  <Pressable
+                    key={n.id}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      markRead(n.id);
+                    }}
+                    style={({ pressed }) => [
+                      notifStyles.card,
+                      {
+                        backgroundColor: n.read ? colors.card : colors.primary + "08",
+                        borderColor: n.read ? colors.border : colors.primary + "40",
+                        opacity: pressed ? 0.82 : 1,
+                      },
+                    ]}
+                  >
+                    <View style={[notifStyles.iconWrap, { backgroundColor: iconColor + "18" }]}>
+                      <Ionicons name={iconName as any} size={22} color={iconColor} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                        <Text style={[notifStyles.cardTitle, { color: colors.foreground, flex: 1 }]}>{n.title}</Text>
+                        {!n.read && (
+                          <View style={[notifStyles.unreadDot, { backgroundColor: colors.primary }]} />
+                        )}
+                      </View>
+                      <Text style={[notifStyles.cardDesc, { color: colors.mutedForeground }]}>{n.body}</Text>
+                      <Text style={[notifStyles.cardTime, { color: colors.mutedForeground }]}>{formatNotifTime(n.timestamp)}</Text>
+                    </View>
+                  </Pressable>
+                );
+              })
+            )}
           </ScrollView>
         </View>
       </Modal>
@@ -569,9 +634,9 @@ export default function HomeScreen() {
                 <Animated.View style={{ transform: [{ scale: bellAnim }] }}>
                   <Ionicons name="notifications" size={20} color="#fff" />
                 </Animated.View>
-                {notifCount > 0 && (
+                {unreadCount > 0 && (
                   <View style={styles.bellBadge}>
-                    <Text style={styles.bellBadgeText}>{notifCount}</Text>
+                    <Text style={styles.bellBadgeText}>{unreadCount > 99 ? "99+" : unreadCount}</Text>
                   </View>
                 )}
               </Pressable>
@@ -1186,8 +1251,12 @@ const notifStyles = StyleSheet.create({
   header: { paddingHorizontal: 20, paddingBottom: 16, borderBottomWidth: 1 },
   handle: { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 14 },
   headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  title: { fontSize: 22, fontWeight: "800", letterSpacing: -0.4 },
+  title: { fontSize: 20, fontWeight: "800", letterSpacing: -0.4 },
   closeBtn: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  badge: { borderRadius: 10, paddingHorizontal: 7, paddingVertical: 2, minWidth: 20, alignItems: "center" },
+  badgeText: { fontSize: 11, fontWeight: "800", color: "#fff" },
+  markReadBtn: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
+  markReadText: { fontSize: 11, fontWeight: "700" },
   card: {
     flexDirection: "row", alignItems: "flex-start", gap: 12,
     borderRadius: 16, borderWidth: 1, padding: 14,
@@ -1196,6 +1265,13 @@ const notifStyles = StyleSheet.create({
   cardTitle: { fontSize: 14, fontWeight: "700", marginBottom: 3 },
   cardDesc: { fontSize: 12, lineHeight: 17 },
   cardTime: { fontSize: 11, marginTop: 4 },
+  unreadDot: { width: 8, height: 8, borderRadius: 4 },
+  emptyWrap: {
+    alignItems: "center", padding: 40, borderRadius: 16,
+    borderWidth: 1, marginTop: 20, gap: 8,
+  },
+  emptyTitle: { fontSize: 16, fontWeight: "700" },
+  emptyDesc: { fontSize: 13, textAlign: "center", lineHeight: 19 },
 });
 
 const gatnawCardStyles = StyleSheet.create({

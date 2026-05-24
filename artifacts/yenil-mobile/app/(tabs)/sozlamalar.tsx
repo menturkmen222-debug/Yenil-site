@@ -12,8 +12,10 @@ import { router, type Href } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { PessimisticButton } from "@/components/PessimisticButton";
+import { RipplePress } from "@/components/RipplePress";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useBonusPul } from "@/contexts/BonusPulContext";
+import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
 import { type ThemeKey } from "@/constants/colors";
 import {
   getReputation, watchReputation, watchFriends, addFriend, removeFriend,
@@ -27,13 +29,6 @@ import {
 } from "@/lib/reputation";
 
 const APP_VERSION = "2.4.1";
-
-type Language = "tk" | "ru" | "en";
-const LANGUAGES: { code: Language; label: string; flag: string }[] = [
-  { code: "tk", label: "Türkmençe", flag: "TM" },
-  { code: "ru", label: "Русский", flag: "RU" },
-  { code: "en", label: "English", flag: "EN" },
-];
 
 const THEMES: {
   key: ThemeKey; label: string; sublabel: string; icon: string;
@@ -67,9 +62,12 @@ function SettingRow({
 }) {
   const ic = iconColor ?? colors.primary;
   return (
-    <Pressable
+    <RipplePress
       onPress={onPress}
-      style={({ pressed }) => [s.row, { opacity: pressed && onPress ? 0.74 : 1 }]}
+      style={s.row}
+      borderRadius={14}
+      rippleSize={140}
+      disabled={!onPress}
     >
       <View style={[s.rowIcon, { backgroundColor: ic + "22" }]}>
         <Ionicons name={icon} size={20} color={ic} />
@@ -83,7 +81,7 @@ function SettingRow({
         : onPress
           ? <Ionicons name="chevron-forward-outline" size={16} color={colors.mutedForeground} />
           : null)}
-    </Pressable>
+    </RipplePress>
   );
 }
 
@@ -925,9 +923,11 @@ export default function SozlamalarScreen() {
   const { balance, deviceId, sendBP } = useBonusPul();
   const isWeb = Platform.OS === "web";
 
+  // Language context
+  const { lang, setLang, t } = useLanguage();
+
   // Existing state
   const [notifications, setNotifications] = useState(true);
-  const [language, setLanguage] = useState<Language>("tk");
   const [showLangPicker, setShowLangPicker] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showThemePicker, setShowThemePicker] = useState(false);
@@ -948,9 +948,12 @@ export default function SozlamalarScreen() {
   const [confirmPinVal, setConfirmPinVal] = useState("");
   const [pinError, setPinError] = useState("");
 
-  // Load PIN status
+  // Load PIN status + notifications toggle
   useEffect(() => {
     AsyncStorage.getItem("app_pin_enabled").then(v => { if (v === "true") setPinEnabled(true); });
+    AsyncStorage.getItem("@yenil_notifications_enabled").then(v => {
+      if (v === "false") setNotifications(false);
+    });
   }, []);
 
   // Load nickname + watch reputation
@@ -1024,8 +1027,8 @@ export default function SozlamalarScreen() {
         colors={[colors.headerGradientStart, colors.headerGradientEnd] as [string, string]}
         style={[s.header, { paddingTop: (isWeb ? 0 : insets.top) + 14 }]}
       >
-        <Text style={s.headerTitle}>Sozlamalar</Text>
-        <Text style={s.headerSub}>Programma sazlamalary</Text>
+        <Text style={s.headerTitle}>{t("settings_title")}</Text>
+        <Text style={s.headerSub}>{t("settings_sub")}</Text>
       </LinearGradient>
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 130 }} showsVerticalScrollIndicator={false}>
@@ -1205,16 +1208,16 @@ export default function SozlamalarScreen() {
         </Pressable>
 
         {/* ══════════ DIL ══════════ */}
-        <SectionTitle title="DIL / TIL" colors={colors} />
+        <SectionTitle title={t("language")} colors={colors} />
         <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <SettingRow
             icon="language-outline" iconColor="#0ea5e9"
-            label="Dil saýlaň"
-            desc={LANGUAGES.find((l) => l.code === language)?.label}
+            label={t("choose_language")}
+            desc={LANGUAGES.find((l) => l.code === lang)?.label}
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowLangPicker(!showLangPicker); }}
             right={
               <View style={s.langRight}>
-                <Text style={s.langFlag}>{LANGUAGES.find((l) => l.code === language)?.flag}</Text>
+                <Text style={s.langFlag}>{LANGUAGES.find((l) => l.code === lang)?.flag}</Text>
                 <Ionicons name={showLangPicker ? "chevron-up-outline" : "chevron-down-outline"} size={16} color={colors.mutedForeground} />
               </View>
             }
@@ -1222,15 +1225,15 @@ export default function SozlamalarScreen() {
           />
           {showLangPicker && (
             <View style={[s.langPicker, { borderTopColor: colors.border }]}>
-              {LANGUAGES.map((lang) => (
+              {LANGUAGES.map((langItem) => (
                 <Pressable
-                  key={lang.code}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setLanguage(lang.code); setShowLangPicker(false); }}
-                  style={[s.langOption, language === lang.code && { backgroundColor: colors.primary + "12" }]}
+                  key={langItem.code}
+                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setLang(langItem.code); setShowLangPicker(false); }}
+                  style={[s.langOption, lang === langItem.code && { backgroundColor: colors.primary + "12" }]}
                 >
-                  <Text style={s.langOptionFlag}>{lang.flag}</Text>
-                  <Text style={[s.langOptionLabel, { color: colors.foreground }]}>{lang.label}</Text>
-                  {language === lang.code && <Ionicons name="checkmark-circle" size={20} color={colors.primary} />}
+                  <Text style={s.langOptionFlag}>{langItem.flag}</Text>
+                  <Text style={[s.langOptionLabel, { color: colors.foreground }]}>{langItem.label}</Text>
+                  {lang === langItem.code && <Ionicons name="checkmark-circle" size={20} color={colors.primary} />}
                 </Pressable>
               ))}
             </View>
@@ -1238,16 +1241,20 @@ export default function SozlamalarScreen() {
         </View>
 
         {/* ══════════ HABARNAMALAR ══════════ */}
-        <SectionTitle title="HABARNAMALAR" colors={colors} />
+        <SectionTitle title={t("notifications_toggle")} colors={colors} />
         <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <SettingRow
             icon="notifications-outline" iconColor="#ef4444"
-            label="Habarnamalar"
-            desc="Täzelikleri we sargyt habarlaryny al"
+            label={t("notifications_toggle")}
+            desc={t("notifications_desc")}
             right={
               <Switch
                 value={notifications}
-                onValueChange={(v) => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setNotifications(v); }}
+                onValueChange={(v) => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setNotifications(v);
+                  AsyncStorage.setItem("@yenil_notifications_enabled", v ? "true" : "false");
+                }}
                 trackColor={{ false: colors.border, true: colors.primary }}
                 thumbColor="#fff"
               />

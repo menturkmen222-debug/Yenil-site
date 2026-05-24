@@ -1305,3 +1305,23 @@ export async function getUserProfile(deviceId: string): Promise<UserProfile | nu
     return null;
   }
 }
+
+// ─── Avatar ───────────────────────────────────────────────────────────────────
+
+export async function setUserAvatar(deviceId: string, dataUri: string): Promise<void> {
+  await set(ref(db, `user-profiles/${deviceId}/avatar`), dataUri);
+}
+
+export async function getUserAvatar(deviceId: string): Promise<string | null> {
+  try {
+    const snap = await get(ref(db, `user-profiles/${deviceId}/avatar`));
+    return snap.exists() ? String(snap.val()) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function watchUserAvatar(deviceId: string, cb: (uri: string | null) => void): () => void {
+  const r = ref(db, `user-profiles/${deviceId}/avatar`);
+  return onValue(r, (snap) => cb(snap.exists() ? String(snap.val()) : null));
+}
