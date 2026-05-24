@@ -29,7 +29,7 @@ export async function getDeviceIdAsync(): Promise<string> {
       const newId = makeId();
       if (typeof localStorage !== "undefined") localStorage.setItem(KEY, newId);
       cachedId = newId;
-      return newId;
+      return n1ewId;
     }
     const stored = await SecureStore.getItemAsync(KEY);
     if (stored) { cachedId = stored; return stored; }
