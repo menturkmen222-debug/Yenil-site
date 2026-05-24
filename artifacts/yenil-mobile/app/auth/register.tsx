@@ -243,10 +243,10 @@ export default function RegisterScreen() {
 
   // ── Ädim nawigasiýasy ──
   const [step, setStep] = useState(0);
-  const progressAnim = useSharedValue(1 / TOTAL_STEPS);
+  const progressAnim = useSharedValue((1 / TOTAL_STEPS) * SCREEN_W);
 
   const progressStyle = useAnimatedStyle(() => ({
-    width: progressAnim.value * SCREEN_W,
+    width: progressAnim.value,
   }));
 
   const goToStep = useCallback(
@@ -382,25 +382,33 @@ export default function RegisterScreen() {
   const [saving, setSaving] = useState(false);
 
   const handleFinish = useCallback(async () => {
-    if (!deviceId || saving) return;
+    if (saving) return;
     setSaving(true);
     try {
-      const contact = loginMethod === "phone"
-        ? phone.replace(/\s/g, "")
-        : email.trim();
-      await saveUserProfile(deviceId, {
-        name: name.trim(),
-        surname: surname.trim(),
-        phone: contact,
-        region: welaýatLabel,
-        district: tumanLabel,
-        profession,
-        bio: bio.trim(),
-      });
-      router.replace("/(tabs)");
+      if (deviceId) {
+        const contact = loginMethod === "phone"
+          ? phone.replace(/\s/g, "")
+          : email.trim();
+        const savePromise = saveUserProfile(deviceId, {
+          name: name.trim(),
+          surname: surname.trim(),
+          phone: contact,
+          region: welaýatLabel,
+          district: tumanLabel,
+          profession,
+          bio: bio.trim(),
+        });
+        const timeoutPromise = new Promise<void>((_, reject) =>
+          setTimeout(() => reject(new Error("timeout")), 5000)
+        );
+        await Promise.race([savePromise, timeoutPromise]).catch(() => {});
+      }
     } catch {
+      // ignore — navigate regardless
+    } finally {
       setSaving(false);
     }
+    router.replace("/(tabs)");
   }, [
     deviceId,
     saving,
@@ -414,6 +422,10 @@ export default function RegisterScreen() {
     profession,
     bio,
   ]);
+
+  const handleSkip = useCallback(() => {
+    router.replace("/(tabs)");
+  }, []);
 
   // ─── Stil kömekçileri ──────────────────────────────────────────────────────
 
@@ -1014,8 +1026,7 @@ export default function RegisterScreen() {
             icon="checkmark-circle-outline"
           />
           <Pressable
-            onPress={handleFinish}
-            disabled={saving}
+            onPress={handleSkip}
             style={s.skipBtn}
           >
             <Text style={[s.skipText, { color: colors.mutedForeground }]}>
@@ -1032,7 +1043,7 @@ export default function RegisterScreen() {
   return (
     <KeyboardAvoidingView
       style={[s.root, { backgroundColor: colors.background }]}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       {/* Gradient sarlavha */}
       <LinearGradient
