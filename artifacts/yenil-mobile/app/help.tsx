@@ -8,6 +8,7 @@ import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { PessimisticButton } from "@/components/PessimisticButton";
 import { saveOrder } from "@/lib/firebase";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 const faqs = [
   { q: "Bilet satyn almak näçe wagt alýar?", a: "Sargydyňyz kabul edilenden soň 1-4 sagadyň içinde bilet SMS arkaly iberilýär." },
@@ -53,6 +54,34 @@ export default function HelpScreen() {
       </LinearGradient>
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: isWeb ? 110 : 110 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+
+        {/* AI Chat Banner */}
+        <Animated.View entering={FadeInDown.duration(400)}>
+          <Pressable
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push("/ai-chat"); }}
+            style={({ pressed }) => [styles.aiBanner, { opacity: pressed ? 0.85 : 1 }]}
+          >
+            <LinearGradient
+              colors={["#0d9488", "#0f766e"]}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+              style={styles.aiBannerGrad}
+            >
+              <View style={styles.aiBannerLeft}>
+                <View style={styles.aiIconBox}>
+                  <Ionicons name="sparkles" size={22} color="#fff" />
+                </View>
+                <View>
+                  <Text style={styles.aiBannerTitle}>Ýeňil AI</Text>
+                  <Text style={styles.aiBannerSub}>Soralyňyza derrew jogap alyň</Text>
+                </View>
+              </View>
+              <View style={styles.aiBannerBadge}>
+                <Text style={styles.aiBannerBadgeText}>Täze</Text>
+              </View>
+            </LinearGradient>
+          </Pressable>
+        </Animated.View>
+
         <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Köp soralýan soraglar</Text>
 
         {faqs.map((f, i) => (
@@ -135,4 +164,13 @@ const styles = StyleSheet.create({
   textarea: { height: 100, textAlignVertical: "top" },
   primaryBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 14, paddingVertical: 16 },
   primaryBtnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
+
+  aiBanner: { borderRadius: 18, overflow: "hidden", marginBottom: 20 },
+  aiBannerGrad: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 16 },
+  aiBannerLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
+  aiIconBox: { width: 44, height: 44, borderRadius: 13, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center" },
+  aiBannerTitle: { color: "#fff", fontSize: 16, fontWeight: "800" },
+  aiBannerSub: { color: "rgba(255,255,255,0.85)", fontSize: 12, marginTop: 2 },
+  aiBannerBadge: { backgroundColor: "#fbbf24", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4 },
+  aiBannerBadgeText: { color: "#78350f", fontSize: 11, fontWeight: "800" },
 });
