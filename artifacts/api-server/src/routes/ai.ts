@@ -3,7 +3,17 @@ import Groq from "groq-sdk";
 
 const router = Router();
 
-const groq = new Groq({ apiKey: process.env["GROQ_API_KEY"] });
+let _groq: Groq | null = null;
+function getGroq(): Groq {
+  if (!_groq) {
+    const apiKey = process.env["GROQ_API_KEY"];
+    if (!apiKey) {
+      throw new Error("GROQ_API_KEY is not configured");
+    }
+    _groq = new Groq({ apiKey });
+  }
+  return _groq;
+}
 
 const SYSTEM_PROMPT = `Sen Ýeňil super-app-yň AI kömekçisisin. Seniň adyň "Ýeňil AI".
 Diňe türkmen dilinde jogap ber (eger ulanyjy rus ýa-da iňlis dilinde ýazsa hem türkmen dilinde jogap ber).
@@ -40,7 +50,7 @@ router.post("/ai/chat", async (req, res) => {
       return res.status(400).json({ error: "last message must be user message" });
     }
 
-    const completion = await groq.chat.completions.create({
+    const completion = await getGroq().chat.completions.create({
       model: "llama-3.1-8b-instant",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
