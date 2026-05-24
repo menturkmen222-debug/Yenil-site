@@ -36,7 +36,7 @@ import { PessimisticButton } from "@/components/PessimisticButton";
 WebBrowser.maybeCompleteAuthSession();
 
 // Google Web Client ID — Firebase Console → Authentication → Sign-in method → Google → Web SDK configuration → Web client ID
-const GOOGLE_WEB_CLIENT_ID = "405972999183-PLACEHOLDER.apps.googleusercontent.com";
+const GOOGLE_WEB_CLIENT_ID = "405972999183-vsdse9e8tbn747fbhebu6kcegfd1rao9.apps.googleusercontent.com";
 
 // ─── Konstantalar ─────────────────────────────────────────────────────────────
 
