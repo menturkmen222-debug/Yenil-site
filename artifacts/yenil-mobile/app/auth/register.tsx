@@ -12,11 +12,14 @@ import {
   Dimensions,
   ScrollView,
   Share,
+  ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as ImagePicker from "expo-image-picker";
+import { Image } from "expo-image";
 import Animated, {
   FadeInDown,
   FadeOutUp,
@@ -38,6 +41,7 @@ import {
   saveUserProfile,
   getOrCreateReferralCode,
   setUserNickname,
+  setUserAvatar,
 } from "@/lib/firebase";
 import { saveLocalProfile } from "@/lib/localProfile";
 import { PessimisticButton } from "@/components/PessimisticButton";
@@ -295,6 +299,27 @@ export default function RegisterScreen() {
     goToStep(1);
   }, [otp, goToStep]);
 
+  // ── Step 2: avatar ──
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  const pickAvatar = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"], allowsEditing: true, aspect: [1, 1], quality: 0.45, base64: true,
+    });
+    if (result.canceled || !result.assets[0]) return;
+    const asset = result.assets[0];
+    const dataUri = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri;
+    setAvatarUploading(true);
+    setAvatarUri(dataUri);
+    await AsyncStorage.setItem("@yenil_avatar", dataUri).catch(() => {});
+    setAvatarUploading(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  }, []);
+
   // ── Step 2: personal info ──
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
@@ -364,6 +389,7 @@ export default function RegisterScreen() {
         ]);
         await Promise.race([savePromise, new Promise<void>((_, r) => setTimeout(() => r(new Error("timeout")), 5000))]).catch(() => {});
         await saveLocalProfile({ ...profileData }).catch(() => {});
+        if (avatarUri) { await setUserAvatar(deviceId, avatarUri).catch(() => {}); }
       }
     } catch {}
     setSaving(false);
@@ -443,31 +469,36 @@ export default function RegisterScreen() {
           <Animated.View style={phoneAnimStyle}>
             <LinearGradient
               colors={loginMethod === "phone"
-                ? [colors.primary + "18", colors.primary + "08"]
-                : ["transparent", "transparent"]}
+                ? [colors.primary, colors.primary + "dd"]
+                : [colors.card, colors.card]}
               style={[
                 s.socialBtn,
                 {
                   borderColor: loginMethod === "phone" ? colors.primary : colors.border,
-                  backgroundColor: loginMethod === "phone" ? "transparent" : colors.card,
+                  borderWidth: loginMethod === "phone" ? 2 : 1.5,
+                  shadowColor: loginMethod === "phone" ? colors.primary : "#000",
+                  shadowOpacity: loginMethod === "phone" ? 0.35 : 0.06,
+                  shadowRadius: loginMethod === "phone" ? 14 : 4,
+                  shadowOffset: { width: 0, height: loginMethod === "phone" ? 5 : 2 },
+                  elevation: loginMethod === "phone" ? 10 : 2,
                 },
               ]}
             >
-              <LinearGradient
-                colors={[colors.primary + "30", colors.primary + "15"]}
-                style={s.socialIconBox}
-              >
-                <Ionicons name="phone-portrait-outline" size={20} color={colors.primary} />
-              </LinearGradient>
+              <View style={[
+                s.socialIconBox,
+                { backgroundColor: loginMethod === "phone" ? "rgba(255,255,255,0.22)" : colors.primary + "20" },
+              ]}>
+                <Ionicons name="phone-portrait-outline" size={20} color={loginMethod === "phone" ? "#fff" : colors.primary} />
+              </View>
               <View style={{ flex: 1 }}>
-                <Text style={[s.socialBtnTitle, { color: colors.foreground }]}>Telefon belgisi bilen</Text>
-                <Text style={[s.socialBtnSub, { color: colors.mutedForeground }]}>+993 TM nomer · Iň çalt usul</Text>
+                <Text style={[s.socialBtnTitle, { color: loginMethod === "phone" ? "#fff" : colors.foreground }]}>Telefon belgisi bilen</Text>
+                <Text style={[s.socialBtnSub, { color: loginMethod === "phone" ? "rgba(255,255,255,0.75)" : colors.mutedForeground }]}>+993 TM nomer · Iň çalt usul</Text>
               </View>
               {loginMethod === "phone" ? (
                 <Animated.View entering={FadeInDown.duration(200)}>
-                  <LinearGradient colors={[colors.primary, colors.primary + "cc"]} style={s.checkCircle}>
-                    <Ionicons name="checkmark" size={14} color="#fff" />
-                  </LinearGradient>
+                  <View style={[s.checkCircle, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
+                    <Ionicons name="checkmark" size={15} color="#fff" />
+                  </View>
                 </Animated.View>
               ) : (
                 <View style={[s.emptyCircle, { borderColor: colors.border }]} />
@@ -551,27 +582,32 @@ export default function RegisterScreen() {
         <Pressable onPress={() => { pressBtn(googleScale); handleSelectMethod("google"); }}>
           <Animated.View style={googleAnimStyle}>
             <LinearGradient
-              colors={loginMethod === "google" ? ["#EA4335" + "18", "#EA4335" + "06"] : ["transparent", "transparent"]}
+              colors={loginMethod === "google" ? ["#EA4335", "#c0392b"] : [colors.card, colors.card]}
               style={[
                 s.socialBtn,
                 {
                   borderColor: loginMethod === "google" ? "#EA4335" : colors.border,
-                  backgroundColor: loginMethod === "google" ? "transparent" : colors.card,
+                  borderWidth: loginMethod === "google" ? 2 : 1.5,
+                  shadowColor: loginMethod === "google" ? "#EA4335" : "#000",
+                  shadowOpacity: loginMethod === "google" ? 0.35 : 0.06,
+                  shadowRadius: loginMethod === "google" ? 14 : 4,
+                  shadowOffset: { width: 0, height: loginMethod === "google" ? 5 : 2 },
+                  elevation: loginMethod === "google" ? 10 : 2,
                 },
               ]}
             >
-              <View style={[s.socialIconBox, { backgroundColor: "#EA4335" + "20" }]}>
-                <AntDesign name="google" size={20} color="#EA4335" />
+              <View style={[s.socialIconBox, { backgroundColor: loginMethod === "google" ? "rgba(255,255,255,0.22)" : "#EA4335" + "20" }]}>
+                <AntDesign name="google" size={20} color={loginMethod === "google" ? "#fff" : "#EA4335"} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[s.socialBtnTitle, { color: colors.foreground }]}>Google bilen dowam et</Text>
-                <Text style={[s.socialBtnSub, { color: colors.mutedForeground }]}>Gmail salgyňyz bilen</Text>
+                <Text style={[s.socialBtnTitle, { color: loginMethod === "google" ? "#fff" : colors.foreground }]}>Google bilen dowam et</Text>
+                <Text style={[s.socialBtnSub, { color: loginMethod === "google" ? "rgba(255,255,255,0.75)" : colors.mutedForeground }]}>Gmail salgyňyz bilen</Text>
               </View>
               {loginMethod === "google" ? (
                 <Animated.View entering={FadeInDown.duration(200)}>
-                  <LinearGradient colors={["#EA4335", "#EA4335cc"]} style={s.checkCircle}>
-                    <Ionicons name="checkmark" size={14} color="#fff" />
-                  </LinearGradient>
+                  <View style={[s.checkCircle, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
+                    <Ionicons name="checkmark" size={15} color="#fff" />
+                  </View>
                 </Animated.View>
               ) : (
                 <View style={[s.emptyCircle, { borderColor: colors.border }]} />
@@ -584,27 +620,32 @@ export default function RegisterScreen() {
         <Pressable onPress={() => { pressBtn(mailruScale); handleSelectMethod("mailru"); }}>
           <Animated.View style={mailruAnimStyle}>
             <LinearGradient
-              colors={loginMethod === "mailru" ? ["#005FF9" + "18", "#005FF9" + "06"] : ["transparent", "transparent"]}
+              colors={loginMethod === "mailru" ? ["#005FF9", "#0047cc"] : [colors.card, colors.card]}
               style={[
                 s.socialBtn,
                 {
                   borderColor: loginMethod === "mailru" ? "#005FF9" : colors.border,
-                  backgroundColor: loginMethod === "mailru" ? "transparent" : colors.card,
+                  borderWidth: loginMethod === "mailru" ? 2 : 1.5,
+                  shadowColor: loginMethod === "mailru" ? "#005FF9" : "#000",
+                  shadowOpacity: loginMethod === "mailru" ? 0.35 : 0.06,
+                  shadowRadius: loginMethod === "mailru" ? 14 : 4,
+                  shadowOffset: { width: 0, height: loginMethod === "mailru" ? 5 : 2 },
+                  elevation: loginMethod === "mailru" ? 10 : 2,
                 },
               ]}
             >
-              <View style={[s.socialIconBox, { backgroundColor: "#005FF9" + "20" }]}>
-                <Ionicons name="mail" size={20} color="#005FF9" />
+              <View style={[s.socialIconBox, { backgroundColor: loginMethod === "mailru" ? "rgba(255,255,255,0.22)" : "#005FF9" + "20" }]}>
+                <Ionicons name="mail" size={20} color={loginMethod === "mailru" ? "#fff" : "#005FF9"} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[s.socialBtnTitle, { color: colors.foreground }]}>Mail.ru bilen dowam et</Text>
-                <Text style={[s.socialBtnSub, { color: colors.mutedForeground }]}>Mail.ru ýa-da @mail.ru</Text>
+                <Text style={[s.socialBtnTitle, { color: loginMethod === "mailru" ? "#fff" : colors.foreground }]}>Mail.ru bilen dowam et</Text>
+                <Text style={[s.socialBtnSub, { color: loginMethod === "mailru" ? "rgba(255,255,255,0.75)" : colors.mutedForeground }]}>Mail.ru ýa-da @mail.ru</Text>
               </View>
               {loginMethod === "mailru" ? (
                 <Animated.View entering={FadeInDown.duration(200)}>
-                  <LinearGradient colors={["#005FF9", "#005FF9cc"]} style={s.checkCircle}>
-                    <Ionicons name="checkmark" size={14} color="#fff" />
-                  </LinearGradient>
+                  <View style={[s.checkCircle, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
+                    <Ionicons name="checkmark" size={15} color="#fff" />
+                  </View>
                 </Animated.View>
               ) : (
                 <View style={[s.emptyCircle, { borderColor: colors.border }]} />
@@ -650,6 +691,7 @@ export default function RegisterScreen() {
   // ─── Step 2 ────────────────────────────────────────────────────────────────
 
   function renderStep2() {
+    const displayInitial = (username || fullName || "Ý").slice(0, 1).toUpperCase();
     return (
       <Animated.View
         key="step-2"
@@ -667,6 +709,33 @@ export default function RegisterScreen() {
           <Text style={[s.compactHeaderTitle, { color: colors.foreground }]}>Şahsy maglumatlar</Text>
           <Text style={[s.compactHeaderSub, { color: colors.mutedForeground }]}>
             Profiliňiz üçin
+          </Text>
+        </View>
+
+        {/* ── Avatar upload ── */}
+        <View style={s.avatarSection}>
+          <Pressable onPress={pickAvatar} style={s.avatarPickWrap}>
+            <LinearGradient
+              colors={[colors.primary + "40", colors.primary + "18"]}
+              style={s.avatarPickCircle}
+            >
+              {avatarUri ? (
+                <Image source={{ uri: avatarUri }} style={s.avatarPickImg} contentFit="cover" />
+              ) : (
+                <Text style={[s.avatarPickInitial, { color: colors.primary }]}>{displayInitial}</Text>
+              )}
+            </LinearGradient>
+            <LinearGradient
+              colors={[colors.primary, colors.primary + "dd"]}
+              style={s.avatarPickCamera}
+            >
+              {avatarUploading
+                ? <ActivityIndicator size="small" color="#fff" />
+                : <Ionicons name="camera" size={14} color="#fff" />}
+            </LinearGradient>
+          </Pressable>
+          <Text style={[s.avatarPickLabel, { color: colors.mutedForeground }]}>
+            {avatarUri ? "Suraty üýtgetmek" : "Profil suraty goş"}
           </Text>
         </View>
 
@@ -1205,6 +1274,23 @@ const s = StyleSheet.create({
   inviteBtnText: {
     color: "#fff", fontSize: 15, fontWeight: "800", flex: 1, textAlign: "center",
   },
+
+  // Avatar picker in Step 2
+  avatarSection: { alignItems: "center", paddingVertical: 16, marginBottom: 4 },
+  avatarPickWrap: { position: "relative", width: 82, height: 82, marginBottom: 8 },
+  avatarPickCircle: {
+    width: 82, height: 82, borderRadius: 41,
+    alignItems: "center", justifyContent: "center", overflow: "hidden",
+  },
+  avatarPickImg: { width: 82, height: 82, borderRadius: 41 },
+  avatarPickInitial: { fontSize: 30, fontWeight: "800" },
+  avatarPickCamera: {
+    position: "absolute", bottom: 0, right: 0,
+    width: 26, height: 26, borderRadius: 13,
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 2, borderColor: "#fff",
+  },
+  avatarPickLabel: { fontSize: 12, fontWeight: "500" },
 
   btnWrap: { marginTop: 4 },
   retryBtn: { alignItems: "center", paddingVertical: 10 },

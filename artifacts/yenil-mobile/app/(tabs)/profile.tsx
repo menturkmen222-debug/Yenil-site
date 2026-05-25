@@ -190,8 +190,9 @@ export default function ProfileScreen() {
   const mergedProfession = profile?.profession || localProfile?.profession || "";
   const mergedBio = profile?.bio || localProfile?.bio || "";
 
-  const displayInitial = (nickname || mergedName || "Ý").slice(0, 1).toUpperCase();
-  const displayName = [mergedName, mergedSurname].filter(Boolean).join(" ") || nickname || "Ulanyjy";
+  const displayNickname = nickname || profile?.username || "";
+  const displayInitial = (displayNickname || mergedName || "Ý").slice(0, 1).toUpperCase();
+  const displayName = [mergedName, mergedSurname].filter(Boolean).join(" ") || displayNickname || "Ulanyjy";
   const hasAnyProfile = !!(mergedName || mergedSurname || localProfile || profile);
 
   async function handleLogout() {
@@ -282,10 +283,10 @@ export default function ProfileScreen() {
 
             {/* Name & nickname */}
             <Text style={s.heroName}>{displayName}</Text>
-            {nickname ? (
+            {displayNickname ? (
               <View style={s.nicknamePill}>
                 <Ionicons name="at-outline" size={13} color="rgba(255,255,255,0.85)" />
-                <Text style={s.nicknameText}>{nickname}</Text>
+                <Text style={s.nicknameText}>{displayNickname}</Text>
               </View>
             ) : null}
 
@@ -352,8 +353,26 @@ export default function ProfileScreen() {
           {/* ── Şahsy maglumatlar ── */}
           {hasAnyProfile ? (
             <>
+              {/* Edit profile button */}
+              <Pressable
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/edit-profile"); }}
+                style={({ pressed }) => [
+                  s.editProfileBtn,
+                  { backgroundColor: colors.card, borderColor: colors.primary + "50", opacity: pressed ? 0.75 : 1 },
+                ]}
+              >
+                <View style={[s.editProfileIconBox, { backgroundColor: colors.primary + "15" }]}>
+                  <Ionicons name="create-outline" size={18} color={colors.primary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[s.editProfileLabel, { color: colors.foreground }]}>Profili Düzet</Text>
+                  <Text style={[s.editProfileSub, { color: colors.mutedForeground }]}>Ady, ýeri, hünäri, bio...</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} />
+              </Pressable>
+
               <SectionCard title={t("personal_info").toUpperCase()} colors={colors}>
-                {nickname ? <InfoRow icon="at-outline" label="Username" value={"@" + nickname} colors={colors} /> : null}
+                {displayNickname ? <InfoRow icon="at-outline" label="Username" value={"@" + displayNickname} colors={colors} /> : null}
                 {(mergedName || mergedSurname) ? (
                   <InfoRow
                     icon="person-outline"
@@ -623,4 +642,17 @@ const s = StyleSheet.create({
   },
   logoutText: { fontSize: 16, fontWeight: "700", color: "#ef4444", letterSpacing: 0.1 },
   footerNote: { fontSize: 11, textAlign: "center", lineHeight: 16, marginBottom: 4 },
+
+  editProfileBtn: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    borderRadius: 14, borderWidth: 1.5, padding: 14, marginBottom: 14,
+    shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 }, elevation: 2,
+  },
+  editProfileIconBox: {
+    width: 38, height: 38, borderRadius: 11,
+    alignItems: "center", justifyContent: "center",
+  },
+  editProfileLabel: { fontSize: 14, fontWeight: "700" },
+  editProfileSub: { fontSize: 12, marginTop: 1 },
 });

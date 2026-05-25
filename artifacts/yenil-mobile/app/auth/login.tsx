@@ -126,21 +126,26 @@ export default function LoginScreen() {
         <Pressable onPress={() => { pressAnim(phoneScale); selectMethod("phone"); }}>
           <Animated.View style={phoneAnimStyle}>
             <LinearGradient
-              colors={method === "phone" ? [colors.primary + "18", colors.primary + "06"] : ["transparent","transparent"]}
+              colors={method === "phone" ? [colors.primary, colors.primary + "dd"] : [colors.card, colors.card]}
               style={[s.methodBtn, {
                 borderColor: method === "phone" ? colors.primary : colors.border,
-                backgroundColor: method === "phone" ? "transparent" : colors.card,
+                borderWidth: method === "phone" ? 2 : 1.5,
+                shadowColor: method === "phone" ? colors.primary : "#000",
+                shadowOpacity: method === "phone" ? 0.35 : 0.06,
+                shadowRadius: method === "phone" ? 14 : 4,
+                shadowOffset: { width: 0, height: method === "phone" ? 5 : 2 },
+                elevation: method === "phone" ? 10 : 2,
               }]}
             >
-              <LinearGradient colors={[colors.primary + "30", colors.primary + "15"]} style={s.methodIcon}>
-                <Ionicons name="phone-portrait-outline" size={20} color={colors.primary} />
-              </LinearGradient>
+              <View style={[s.methodIcon, { backgroundColor: method === "phone" ? "rgba(255,255,255,0.22)" : colors.primary + "20" }]}>
+                <Ionicons name="phone-portrait-outline" size={20} color={method === "phone" ? "#fff" : colors.primary} />
+              </View>
               <View style={{ flex: 1 }}>
-                <Text style={[s.methodTitle, { color: colors.foreground }]}>Telefon belgisi</Text>
-                <Text style={[s.methodSub, { color: colors.mutedForeground }]}>+993 TM nomer bilen</Text>
+                <Text style={[s.methodTitle, { color: method === "phone" ? "#fff" : colors.foreground }]}>Telefon belgisi</Text>
+                <Text style={[s.methodSub, { color: method === "phone" ? "rgba(255,255,255,0.75)" : colors.mutedForeground }]}>+993 TM nomer bilen</Text>
               </View>
               {method === "phone"
-                ? <LinearGradient colors={[colors.primary, colors.primary + "cc"]} style={s.checkCircle}><Ionicons name="checkmark" size={14} color="#fff" /></LinearGradient>
+                ? <View style={[s.checkCircle, { backgroundColor: "rgba(255,255,255,0.3)" }]}><Ionicons name="checkmark" size={15} color="#fff" /></View>
                 : <View style={[s.emptyCircle, { borderColor: colors.border }]} />}
             </LinearGradient>
           </Animated.View>
@@ -218,21 +223,26 @@ export default function LoginScreen() {
         <Pressable onPress={() => { pressAnim(googleScale); selectMethod("google"); }}>
           <Animated.View style={googleAnimStyle}>
             <LinearGradient
-              colors={method === "google" ? ["#EA4335" + "18", "#EA4335" + "06"] : ["transparent","transparent"]}
+              colors={method === "google" ? ["#EA4335", "#c0392b"] : [colors.card, colors.card]}
               style={[s.methodBtn, {
                 borderColor: method === "google" ? "#EA4335" : colors.border,
-                backgroundColor: method === "google" ? "transparent" : colors.card,
+                borderWidth: method === "google" ? 2 : 1.5,
+                shadowColor: method === "google" ? "#EA4335" : "#000",
+                shadowOpacity: method === "google" ? 0.35 : 0.06,
+                shadowRadius: method === "google" ? 14 : 4,
+                shadowOffset: { width: 0, height: method === "google" ? 5 : 2 },
+                elevation: method === "google" ? 10 : 2,
               }]}
             >
-              <View style={[s.methodIcon, { backgroundColor: "#EA4335" + "20" }]}>
-                <AntDesign name="google" size={20} color="#EA4335" />
+              <View style={[s.methodIcon, { backgroundColor: method === "google" ? "rgba(255,255,255,0.22)" : "#EA4335" + "20" }]}>
+                <AntDesign name="google" size={20} color={method === "google" ? "#fff" : "#EA4335"} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[s.methodTitle, { color: colors.foreground }]}>Google hesaby</Text>
-                <Text style={[s.methodSub, { color: colors.mutedForeground }]}>Gmail salgyňyz bilen</Text>
+                <Text style={[s.methodTitle, { color: method === "google" ? "#fff" : colors.foreground }]}>Google hesaby</Text>
+                <Text style={[s.methodSub, { color: method === "google" ? "rgba(255,255,255,0.75)" : colors.mutedForeground }]}>Gmail salgyňyz bilen</Text>
               </View>
               {method === "google"
-                ? <LinearGradient colors={["#EA4335", "#EA4335cc"]} style={s.checkCircle}><Ionicons name="checkmark" size={14} color="#fff" /></LinearGradient>
+                ? <View style={[s.checkCircle, { backgroundColor: "rgba(255,255,255,0.3)" }]}><Ionicons name="checkmark" size={15} color="#fff" /></View>
                 : <View style={[s.emptyCircle, { borderColor: colors.border }]} />}
             </LinearGradient>
           </Animated.View>
@@ -242,21 +252,26 @@ export default function LoginScreen() {
         <Pressable onPress={() => { pressAnim(mailruScale); selectMethod("mailru"); }}>
           <Animated.View style={mailruAnimStyle}>
             <LinearGradient
-              colors={method === "mailru" ? ["#005FF9" + "18", "#005FF9" + "06"] : ["transparent","transparent"]}
+              colors={method === "mailru" ? ["#005FF9", "#0047cc"] : [colors.card, colors.card]}
               style={[s.methodBtn, {
                 borderColor: method === "mailru" ? "#005FF9" : colors.border,
-                backgroundColor: method === "mailru" ? "transparent" : colors.card,
+                borderWidth: method === "mailru" ? 2 : 1.5,
+                shadowColor: method === "mailru" ? "#005FF9" : "#000",
+                shadowOpacity: method === "mailru" ? 0.35 : 0.06,
+                shadowRadius: method === "mailru" ? 14 : 4,
+                shadowOffset: { width: 0, height: method === "mailru" ? 5 : 2 },
+                elevation: method === "mailru" ? 10 : 2,
               }]}
             >
-              <View style={[s.methodIcon, { backgroundColor: "#005FF9" + "20" }]}>
-                <Ionicons name="mail" size={20} color="#005FF9" />
+              <View style={[s.methodIcon, { backgroundColor: method === "mailru" ? "rgba(255,255,255,0.22)" : "#005FF9" + "20" }]}>
+                <Ionicons name="mail" size={20} color={method === "mailru" ? "#fff" : "#005FF9"} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[s.methodTitle, { color: colors.foreground }]}>Mail.ru hesaby</Text>
-                <Text style={[s.methodSub, { color: colors.mutedForeground }]}>Mail.ru ýa-da @mail.ru</Text>
+                <Text style={[s.methodTitle, { color: method === "mailru" ? "#fff" : colors.foreground }]}>Mail.ru hesaby</Text>
+                <Text style={[s.methodSub, { color: method === "mailru" ? "rgba(255,255,255,0.75)" : colors.mutedForeground }]}>Mail.ru ýa-da @mail.ru</Text>
               </View>
               {method === "mailru"
-                ? <LinearGradient colors={["#005FF9", "#005FF9cc"]} style={s.checkCircle}><Ionicons name="checkmark" size={14} color="#fff" /></LinearGradient>
+                ? <View style={[s.checkCircle, { backgroundColor: "rgba(255,255,255,0.3)" }]}><Ionicons name="checkmark" size={15} color="#fff" /></View>
                 : <View style={[s.emptyCircle, { borderColor: colors.border }]} />}
             </LinearGradient>
           </Animated.View>
