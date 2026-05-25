@@ -1276,6 +1276,7 @@ export async function verifySmsAndConfirmDeposit(
 export interface UserProfile {
   name: string;
   surname: string;
+  username?: string;
   phone: string;
   region: string;
   district: string;

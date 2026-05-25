@@ -60,6 +60,7 @@ function RootLayoutNav() {
       <Stack.Screen name="ai-chat" options={{ headerShown: false }} />
       <Stack.Screen name="konum" options={{ headerShown: false }} />
       <Stack.Screen name="auth/register" options={{ headerShown: false }} />
+      <Stack.Screen name="auth/login" options={{ headerShown: false, animation: "slide_from_bottom" }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

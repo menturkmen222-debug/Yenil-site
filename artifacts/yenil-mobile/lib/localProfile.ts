@@ -5,6 +5,7 @@ const PROFILE_KEY = "@yenil_local_profile";
 export interface LocalProfile {
   name: string;
   surname: string;
+  username?: string;
   phone: string;
   region: string;
   district: string;
