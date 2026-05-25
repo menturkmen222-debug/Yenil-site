@@ -78,7 +78,7 @@ function prepareDirectories(timestamp) {
 
   const staticBuild = path.join(projectRoot, "static-build");
   if (fs.existsSync(staticBuild)) {
-    fs.rmSync(staticBuild, { recursive: true });
+    fs.rmSync(staticBuild, { recursive: true, force: true });
   }
 
   const dirs = [
