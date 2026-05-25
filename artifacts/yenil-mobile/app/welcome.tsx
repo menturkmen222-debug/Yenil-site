@@ -44,7 +44,7 @@ const FEATURES = [
   {
     icon: "diamond-outline" as const,
     title: "Bonus Pul — BP",
-    desc: "Her amalyňda gazanar­syň. Hiç zat ýitmez!",
+    desc: "Her amalyňda gazanarsyň. Hiç zat ýitmez!",
     color: "#f472b6",
     bg: "rgba(244,114,182,0.14)",
   },
@@ -77,7 +77,8 @@ export default function WelcomeScreen() {
 
   const btnScale   = useSharedValue(0.82);
   const btnOpacity = useSharedValue(0);
-  const skipO      = useSharedValue(0);
+  const loginScale = useSharedValue(0.88);
+  const loginO     = useSharedValue(0);
 
   useEffect(() => {
     logoOpacity.value = withDelay(150, withTiming(1, { duration: 450 }));
@@ -125,7 +126,8 @@ export default function WelcomeScreen() {
 
     btnScale.value   = withDelay(1450, withSpring(1, { damping: 9 }));
     btnOpacity.value = withDelay(1450, withTiming(1, { duration: 380 }));
-    skipO.value      = withDelay(1680, withTiming(1, { duration: 380 }));
+    loginScale.value = withDelay(1650, withSpring(1, { damping: 9 }));
+    loginO.value     = withDelay(1650, withTiming(1, { duration: 380 }));
   }, []);
 
   const logoAnim  = useAnimatedStyle(() => ({
@@ -136,34 +138,16 @@ export default function WelcomeScreen() {
     opacity: ringOpacity.value,
     transform: [{ scale: ringScale.value }],
   }));
-  const orb1Anim  = useAnimatedStyle(() => ({
-    opacity: orb1O.value,
-    transform: [{ translateY: orb1Y.value }],
-  }));
-  const orb2Anim  = useAnimatedStyle(() => ({
-    opacity: orb2O.value,
-    transform: [{ translateY: orb2Y.value }],
-  }));
-  const orb3Anim  = useAnimatedStyle(() => ({
-    opacity: orb3O.value,
-    transform: [{ translateY: orb3Y.value }],
-  }));
-  const titleAnim = useAnimatedStyle(() => ({
-    opacity: titleOpacity.value,
-    transform: [{ translateY: titleY.value }],
-  }));
-  const subAnim   = useAnimatedStyle(() => ({
-    opacity: subOpacity.value,
-    transform: [{ translateY: subY.value }],
-  }));
+  const orb1Anim  = useAnimatedStyle(() => ({ opacity: orb1O.value, transform: [{ translateY: orb1Y.value }] }));
+  const orb2Anim  = useAnimatedStyle(() => ({ opacity: orb2O.value, transform: [{ translateY: orb2Y.value }] }));
+  const orb3Anim  = useAnimatedStyle(() => ({ opacity: orb3O.value, transform: [{ translateY: orb3Y.value }] }));
+  const titleAnim = useAnimatedStyle(() => ({ opacity: titleOpacity.value, transform: [{ translateY: titleY.value }] }));
+  const subAnim   = useAnimatedStyle(() => ({ opacity: subOpacity.value,   transform: [{ translateY: subY.value }] }));
   const feat1Anim = useAnimatedStyle(() => ({ opacity: f1O.value, transform: [{ translateX: f1X.value }] }));
   const feat2Anim = useAnimatedStyle(() => ({ opacity: f2O.value, transform: [{ translateX: f2X.value }] }));
   const feat3Anim = useAnimatedStyle(() => ({ opacity: f3O.value, transform: [{ translateX: f3X.value }] }));
-  const btnAnim   = useAnimatedStyle(() => ({
-    opacity: btnOpacity.value,
-    transform: [{ scale: btnScale.value }],
-  }));
-  const skipAnim  = useAnimatedStyle(() => ({ opacity: skipO.value }));
+  const btnAnim   = useAnimatedStyle(() => ({ opacity: btnOpacity.value, transform: [{ scale: btnScale.value }] }));
+  const loginAnim = useAnimatedStyle(() => ({ opacity: loginO.value,     transform: [{ scale: loginScale.value }] }));
 
   const featAnims = [feat1Anim, feat2Anim, feat3Anim];
 
@@ -175,9 +159,7 @@ export default function WelcomeScreen() {
 
   async function handleLogin() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await AsyncStorage.setItem("onboarding_seen", "1");
-    await AsyncStorage.setItem("@yenil_show_confetti", "1");
-    router.replace("/(tabs)");
+    router.push("/auth/login");
   }
 
   const isWeb = Platform.OS === "web";
@@ -189,15 +171,15 @@ export default function WelcomeScreen() {
       end={{ x: 0.6, y: 1 }}
       style={[s.root, {
         paddingTop:    (isWeb ? 0 : insets.top) + 20,
-        paddingBottom: (isWeb ? 0 : insets.bottom) + 28,
+        paddingBottom: (isWeb ? 0 : insets.bottom) + 24,
       }]}
     >
-      {/* ── Floating orbs ── */}
+      {/* Floating orbs */}
       <Animated.View style={[s.orb1, orb1Anim]} />
       <Animated.View style={[s.orb2, orb2Anim]} />
       <Animated.View style={[s.orb3, orb3Anim]} />
 
-      {/* ── Logo section ── */}
+      {/* Logo section */}
       <View style={s.top}>
         <View style={s.logoContainer}>
           <Animated.View style={[s.logoRing, ringAnim]} />
@@ -220,7 +202,7 @@ export default function WelcomeScreen() {
         </Animated.Text>
       </View>
 
-      {/* ── Feature cards ── */}
+      {/* Feature cards */}
       <View style={s.features}>
         {FEATURES.map((f, i) => (
           <Animated.View key={f.title} style={[s.featRow, featAnims[i]]}>
@@ -238,8 +220,9 @@ export default function WelcomeScreen() {
         ))}
       </View>
 
-      {/* ── Buttons ── */}
+      {/* Buttons */}
       <View style={s.bottom}>
+        {/* Start button */}
         <Animated.View style={[{ width: "100%" }, btnAnim]}>
           <Pressable
             onPress={handleStart}
@@ -258,10 +241,25 @@ export default function WelcomeScreen() {
           </Pressable>
         </Animated.View>
 
-        <Animated.View style={skipAnim}>
-          <Pressable style={s.loginRow} onPress={handleLogin}>
-            <Ionicons name="person-circle-outline" size={17} color="rgba(255,255,255,0.55)" />
-            <Text style={s.loginText}>Hasabym bar — girýän</Text>
+        {/* Login button — proper card style */}
+        <Animated.View style={[{ width: "100%" }, loginAnim]}>
+          <Pressable
+            onPress={handleLogin}
+            style={({ pressed }) => [s.loginBtn, pressed && { opacity: 0.82 }]}
+          >
+            <LinearGradient
+              colors={["rgba(255,255,255,0.12)", "rgba(255,255,255,0.06)"]}
+              style={s.loginBtnInner}
+            >
+              <View style={s.loginIconWrap}>
+                <Ionicons name="person-circle-outline" size={20} color="rgba(255,255,255,0.9)" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={s.loginBtnTitle}>Hasabym bar — girýän</Text>
+                <Text style={s.loginBtnSub}>Telefon, Gmail ýa-da Mail.ru bilen</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.5)" />
+            </LinearGradient>
           </Pressable>
         </Animated.View>
       </View>
@@ -278,173 +276,89 @@ const s = StyleSheet.create({
   },
 
   orb1: {
-    position: "absolute",
-    width: 320,
-    height: 320,
-    borderRadius: 160,
-    backgroundColor: "rgba(52,211,153,0.08)",
-    top: -80,
-    right: -90,
+    position: "absolute", width: 320, height: 320, borderRadius: 160,
+    backgroundColor: "rgba(52,211,153,0.08)", top: -80, right: -90,
   },
   orb2: {
-    position: "absolute",
-    width: 240,
-    height: 240,
-    borderRadius: 120,
-    backgroundColor: "rgba(96,165,250,0.06)",
-    bottom: 160,
-    left: -70,
+    position: "absolute", width: 240, height: 240, borderRadius: 120,
+    backgroundColor: "rgba(96,165,250,0.06)", bottom: 160, left: -70,
   },
   orb3: {
-    position: "absolute",
-    width: 170,
-    height: 170,
-    borderRadius: 85,
-    backgroundColor: "rgba(167,139,250,0.06)",
-    bottom: 340,
-    right: 10,
+    position: "absolute", width: 170, height: 170, borderRadius: 85,
+    backgroundColor: "rgba(167,139,250,0.06)", bottom: 340, right: 10,
   },
 
-  top: { alignItems: "center", paddingTop: 16 },
+  top: { alignItems: "center", paddingTop: 10 },
 
   logoContainer: {
-    width: 120,
-    height: 120,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 26,
+    width: 110, height: 110,
+    alignItems: "center", justifyContent: "center", marginBottom: 20,
   },
   logoRing: {
-    position: "absolute",
-    width: 118,
-    height: 118,
-    borderRadius: 32,
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.14)",
+    position: "absolute", width: 108, height: 108, borderRadius: 30,
+    borderWidth: 1.5, borderColor: "rgba(255,255,255,0.14)",
   },
   logoRing2: {
-    position: "absolute",
-    width: 136,
-    height: 136,
-    borderRadius: 36,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    position: "absolute", width: 126, height: 126, borderRadius: 34,
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.07)",
   },
   logoBox: {
-    width: 100,
-    height: 100,
-    borderRadius: 26,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.18)",
-    shadowColor: "#4ade80",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 12,
+    width: 92, height: 92, borderRadius: 24,
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1.5, borderColor: "rgba(255,255,255,0.18)",
+    shadowColor: "#4ade80", shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25, shadowRadius: 20, elevation: 12,
   },
-  logoLetter: {
-    fontSize: 54,
-    fontWeight: "900",
-    color: "#ffffff",
-    letterSpacing: -1,
-  },
+  logoLetter: { fontSize: 50, fontWeight: "900", color: "#ffffff", letterSpacing: -1 },
 
   appName: {
-    fontSize: 34,
-    fontWeight: "900",
-    color: "#ffffff",
-    letterSpacing: 10,
-    marginBottom: 10,
+    fontSize: 32, fontWeight: "900", color: "#ffffff", letterSpacing: 10, marginBottom: 8,
   },
   tagline: {
-    fontSize: 15,
-    color: "rgba(255,255,255,0.62)",
-    textAlign: "center",
-    lineHeight: 22,
+    fontSize: 14, color: "rgba(255,255,255,0.62)", textAlign: "center", lineHeight: 21,
   },
 
-  features: {
-    width: "100%",
-    paddingHorizontal: 20,
-    gap: 10,
-  },
+  features: { width: "100%", paddingHorizontal: 18, gap: 8 },
   featRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 13,
+    flexDirection: "row", alignItems: "center", gap: 13,
     backgroundColor: "rgba(255,255,255,0.065)",
-    borderRadius: 16,
-    padding: 13,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.09)",
+    borderRadius: 14, padding: 12,
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.09)",
   },
-  featIconBox: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  featTitle: {
-    color: "#ffffff",
-    fontWeight: "700",
-    fontSize: 13.5,
-    marginBottom: 2,
-  },
-  featDesc: {
-    color: "rgba(255,255,255,0.55)",
-    fontSize: 11.5,
-  },
-  checkDot: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  featIconBox: { width: 40, height: 40, borderRadius: 11, alignItems: "center", justifyContent: "center" },
+  featTitle: { color: "#ffffff", fontWeight: "700", fontSize: 13, marginBottom: 2 },
+  featDesc:  { color: "rgba(255,255,255,0.55)", fontSize: 11 },
+  checkDot:  { width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center" },
 
-  bottom: {
-    width: "100%",
-    paddingHorizontal: 20,
-    alignItems: "center",
-    gap: 10,
-  },
+  bottom: { width: "100%", paddingHorizontal: 18, alignItems: "center", gap: 10 },
+
   startBtn: {
-    width: "100%",
-    borderRadius: 18,
-    overflow: "hidden",
-    shadowColor: "#ffffff",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 14,
-    elevation: 8,
+    width: "100%", borderRadius: 18, overflow: "hidden",
+    shadowColor: "#ffffff", shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18, shadowRadius: 14, elevation: 8,
   },
   startBtnInner: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    paddingVertical: 17,
-    borderRadius: 18,
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 10, paddingVertical: 16, borderRadius: 18,
   },
-  startBtnText: {
-    fontSize: 17,
-    fontWeight: "800",
-    color: "#0b4228",
-    letterSpacing: 0.3,
+  startBtnText: { fontSize: 16, fontWeight: "800", color: "#0b4228", letterSpacing: 0.3 },
+
+  // Login button — premium card style
+  loginBtn: {
+    width: "100%", borderRadius: 16, overflow: "hidden",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.18)",
+    shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15, shadowRadius: 8, elevation: 3,
   },
-  loginRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+  loginBtnInner: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    paddingVertical: 13, paddingHorizontal: 16, borderRadius: 16,
   },
-  loginText: {
-    color: "rgba(255,255,255,0.55)",
-    fontSize: 14,
-    fontWeight: "500",
+  loginIconWrap: {
+    width: 38, height: 38, borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    alignItems: "center", justifyContent: "center",
   },
+  loginBtnTitle: { color: "rgba(255,255,255,0.92)", fontSize: 14, fontWeight: "700" },
+  loginBtnSub:   { color: "rgba(255,255,255,0.48)", fontSize: 11, marginTop: 1 },
 });

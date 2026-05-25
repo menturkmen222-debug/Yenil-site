@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable,
   Platform, ActivityIndicator, Share, TextInput, Alert,
@@ -7,6 +7,10 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, {
+  useSharedValue, useAnimatedStyle,
+  withSpring, withSequence, withRepeat, withTiming, Easing,
+} from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import { useColors } from "@/hooks/useColors";
@@ -26,9 +30,62 @@ export default function ReferalScreen() {
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [applyCode, setApplyCode] = useState("");
   const [applying, setApplying] = useState(false);
   const [applyMsg, setApplyMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Premium invite button animations
+  const inviteScale = useSharedValue(1);
+  const invitePulse = useSharedValue(1);
+  const inviteGlow  = useSharedValue(0.6);
+
+  const inviteAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: inviteScale.value * invitePulse.value }],
+  }));
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: inviteGlow.value,
+    transform: [{ scale: 1 + (1 - inviteGlow.value) * 0.15 }],
+  }));
+
+  useEffect(() => {
+    invitePulse.value = withRepeat(
+      withSequence(
+        withTiming(1.025, { duration: 1000, easing: Easing.inOut(Easing.sin) }),
+        withTiming(1.0,   { duration: 1000, easing: Easing.inOut(Easing.sin) }),
+      ), -1, false
+    );
+    inviteGlow.value = withRepeat(
+      withSequence(
+        withTiming(1,   { duration: 1100, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0.5, { duration: 1100, easing: Easing.inOut(Easing.sin) }),
+      ), -1, false
+    );
+  }, []);
+
+  const handleInvitePress = useCallback(async () => {
+    if (sharing || !stats?.code) return;
+    inviteScale.value = withSequence(
+      withSpring(0.94, { damping: 14, stiffness: 300 }),
+      withSpring(1.0,  { damping: 11, stiffness: 250 }),
+    );
+    setSharing(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await Share.share({
+      message: [
+        "🎉 Ýeňile goşulyň — Türkmenistanyň iň ynamly onlayn platformasy!",
+        "",
+        `Meniň çakylyk kodum: ${stats.code}`,
+        "(Goşulsaň — ikimiz hem 1 BP bonus alýarys!)",
+        "",
+        "✅ Kartsyz demirýol bileti",
+        "✅ Payeer / WebMoney çalyşmak",
+        "✅ Bonus Pul (BP) ulgamy",
+      ].join("\n"),
+      title: "Ýeňile goşulyň!",
+    }).catch(() => {});
+    setSharing(false);
+  }, [sharing, stats, inviteScale]);
 
   useEffect(() => {
     if (!deviceId) return;
@@ -138,6 +195,41 @@ export default function ReferalScreen() {
                 </Pressable>
               </View>
             </LinearGradient>
+
+            {/* ── Premium invite button ── */}
+            <View style={s.inviteSection}>
+              {/* Glow ring behind button */}
+              <Animated.View style={[s.inviteGlow, glowStyle, { backgroundColor: "#6366f1" + "30" }]} />
+              <Pressable
+                onPress={handleInvitePress}
+                disabled={sharing || !stats?.code}
+                style={{ opacity: !stats?.code ? 0.6 : 1 }}
+              >
+                <Animated.View style={inviteAnimStyle}>
+                  <LinearGradient
+                    colors={["#6366f1", "#8b5cf6"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={s.inviteBtn}
+                  >
+                    {/* Top shimmer */}
+                    <View style={s.inviteBtnShimmer} />
+                    <View style={s.inviteBtnIconWrap}>
+                      <Ionicons name="people" size={22} color="#fff" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={s.inviteBtnTitle}>
+                        {sharing ? "Paýlaşylýar..." : "🎉 Ýakynlarymy çagyr — bonus gazan!"}
+                      </Text>
+                      <Text style={s.inviteBtnSub}>
+                        Her çagyrylana +1 BP · Passiwli gazanç
+                      </Text>
+                    </View>
+                    <Ionicons name="share-social" size={19} color="rgba(255,255,255,0.85)" />
+                  </LinearGradient>
+                </Animated.View>
+              </Pressable>
+            </View>
 
             {/* ── How it works ── */}
             <Text style={[s.sectionLabel, { color: colors.mutedForeground }]}>NÄHILI IŞLEÝÄR?</Text>
@@ -321,4 +413,38 @@ const s = StyleSheet.create({
   },
   earningsTitle: { fontSize: 13, fontWeight: "700", marginBottom: 4 },
   earningsRow: { fontSize: 12, lineHeight: 19 },
+
+  // Premium invite button
+  inviteSection: {
+    marginHorizontal: 16, marginTop: 20, marginBottom: 4,
+    position: "relative", alignItems: "center",
+  },
+  inviteGlow: {
+    position: "absolute",
+    width: "110%", height: 70,
+    borderRadius: 24, top: "15%",
+  },
+  inviteBtn: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    borderRadius: 20, paddingVertical: 16, paddingHorizontal: 20,
+    overflow: "hidden",
+    shadowColor: "#6366f1", shadowOpacity: 0.4, shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 }, elevation: 10,
+  },
+  inviteBtnShimmer: {
+    position: "absolute", top: 0, left: 0, right: 0, height: "50%",
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderTopLeftRadius: 20, borderTopRightRadius: 20,
+  },
+  inviteBtnIconWrap: {
+    width: 44, height: 44, borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center", justifyContent: "center",
+  },
+  inviteBtnTitle: {
+    color: "#fff", fontSize: 14, fontWeight: "800", marginBottom: 2,
+  },
+  inviteBtnSub: {
+    color: "rgba(255,255,255,0.72)", fontSize: 11,
+  },
 });

@@ -353,11 +353,24 @@ export default function ProfileScreen() {
           {hasAnyProfile ? (
             <>
               <SectionCard title={t("personal_info").toUpperCase()} colors={colors}>
-                {mergedName ? <InfoRow icon="person-outline" label={t("name")} value={mergedName} colors={colors} /> : null}
-                {mergedSurname ? <InfoRow icon="person-circle-outline" label={t("surname")} value={mergedSurname} colors={colors} /> : null}
+                {nickname ? <InfoRow icon="at-outline" label="Username" value={"@" + nickname} colors={colors} /> : null}
+                {(mergedName || mergedSurname) ? (
+                  <InfoRow
+                    icon="person-outline"
+                    label="Adyňyz Familýaňyz"
+                    value={[mergedName, mergedSurname].filter(Boolean).join(" ")}
+                    colors={colors}
+                  />
+                ) : null}
                 {mergedPhone ? <InfoRow icon="call-outline" label={t("phone")} value={mergedPhone} colors={colors} /> : null}
-                {mergedRegion ? <InfoRow icon="location-outline" label={t("region")} value={mergedRegion} colors={colors} /> : null}
-                {mergedDistrict ? <InfoRow icon="map-outline" label={t("district")} value={mergedDistrict} colors={colors} /> : null}
+                {(mergedRegion || mergedDistrict) ? (
+                  <InfoRow
+                    icon="location-outline"
+                    label={t("region")}
+                    value={[mergedRegion, mergedDistrict].filter(Boolean).join(", ")}
+                    colors={colors}
+                  />
+                ) : null}
               </SectionCard>
 
               <SectionCard title={t("profession").toUpperCase()} colors={colors}>
