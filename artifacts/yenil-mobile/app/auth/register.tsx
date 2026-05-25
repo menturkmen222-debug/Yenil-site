@@ -11,6 +11,7 @@ import {
   FlatList,
   Dimensions,
   ScrollView,
+  Share,
 } from "react-native";
 import { router } from "expo-router";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
@@ -29,7 +30,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
-import { saveUserProfile } from "@/lib/firebase";
+import { saveUserProfile, getOrCreateReferralCode } from "@/lib/firebase";
 import { saveLocalProfile } from "@/lib/localProfile";
 import { PessimisticButton } from "@/components/PessimisticButton";
 
@@ -39,10 +40,10 @@ const TOTAL_STEPS = 4;
 const { width: SCREEN_W } = Dimensions.get("window");
 
 const STEP_SUBTITLES = [
-  "Hasaby açmak üçin usuly saýlaň",
-  "Şahsy maglumatlaryňyz",
-  "Hünär maglumatlaryňyz",
-  "Ynamdar adamlar toruňyz",
+  "Bary-ýogy 2 minutda — mugt, çalt, ygtybarly",
+  "Sizi tanaýarys — bu mümkinçilik siziňki",
+  "Käriňiz — siziň güýjüňiz",
+  "Tanyşlaryňyz bilen has güýçli boluň",
 ];
 
 const WELAÝATLAR: { id: string; label: string }[] = [
@@ -387,6 +388,35 @@ export default function RegisterScreen() {
     router.replace("/(tabs)");
   }, []);
 
+  const [sharing, setSharing] = useState(false);
+
+  const handleShareAndFinish = useCallback(async () => {
+    if (sharing || saving) return;
+    setSharing(true);
+    try {
+      const code = deviceId
+        ? await getOrCreateReferralCode(deviceId).catch(() => "")
+        : "";
+      const msg = [
+        "🎉 Ýeňil programmasyna goşulyň!",
+        code
+          ? `Meniň çakylyk kodum: ${code}\n(Ikimiz hem 1 BP bonus gazanarys!)`
+          : "",
+        "",
+        "✅ Bank kartsyz demirýol bileti",
+        "✅ Payeer / WebMoney çalyşmak",
+        "✅ Bonus Pul (BP) ulgamy",
+        "",
+        "👉 App Store ýa-da Google Play-dan häzir ýükle!",
+      ]
+        .filter(Boolean)
+        .join("\n");
+      await Share.share({ message: msg, title: "Ýeňile goşulyň!" }).catch(() => {});
+    } catch {}
+    setSharing(false);
+    await handleFinish();
+  }, [sharing, saving, deviceId, handleFinish]);
+
   // ─── Stil kömekçileri ──────────────────────────────────────────────────────
 
   const inputStyle = [
@@ -417,121 +447,14 @@ export default function RegisterScreen() {
             <Ionicons name="shield-checkmark-outline" size={32} color={colors.primary} />
           </View>
           <Text style={[s.stepCardTitle, { color: colors.foreground }]}>
-            Hasaby açmak
+            Ýeňile goşulyň
           </Text>
           <Text style={[s.stepCardDesc, { color: colors.mutedForeground }]}>
-            Aşakdaky usullaryň birini saýlaň
+            Bary-ýogy 2 minutda — mugt, çalt, ygtybarly
           </Text>
         </View>
 
-        {/* ── Social buttons ── */}
-        <Pressable
-          onPress={() => handleSelectMethod("google")}
-          style={({ pressed }) => [
-            s.socialBtn,
-            {
-              backgroundColor: loginMethod === "google"
-                ? "#EA4335" + "15"
-                : colors.card,
-              borderColor: loginMethod === "google" ? "#EA4335" : colors.border,
-              opacity: pressed ? 0.7 : 1,
-            },
-          ]}
-        >
-          <View style={[s.socialIconBox, { backgroundColor: "#EA4335" + "18" }]}>
-            <AntDesign name="google" size={20} color="#EA4335" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[s.socialBtnTitle, { color: colors.foreground }]}>
-              Google bilen dowam et
-            </Text>
-            <Text style={[s.socialBtnSub, { color: colors.mutedForeground }]}>
-              Gmail salgyňyz bilen
-            </Text>
-          </View>
-          {loginMethod === "google" && (
-            <Ionicons name="checkmark-circle" size={20} color="#EA4335" />
-          )}
-        </Pressable>
-
-        <Pressable
-          onPress={() => handleSelectMethod("mailru")}
-          style={({ pressed }) => [
-            s.socialBtn,
-            {
-              backgroundColor: loginMethod === "mailru"
-                ? "#005FF9" + "15"
-                : colors.card,
-              borderColor: loginMethod === "mailru" ? "#005FF9" : colors.border,
-              opacity: pressed ? 0.8 : 1,
-            },
-          ]}
-        >
-          <View style={[s.socialIconBox, { backgroundColor: "#005FF9" + "18" }]}>
-            <Ionicons name="mail" size={20} color="#005FF9" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[s.socialBtnTitle, { color: colors.foreground }]}>
-              Mail.ru bilen dowam et
-            </Text>
-            <Text style={[s.socialBtnSub, { color: colors.mutedForeground }]}>
-              Mail.ru ýa-da @mail.ru
-            </Text>
-          </View>
-          {loginMethod === "mailru" && (
-            <Ionicons name="checkmark-circle" size={20} color="#005FF9" />
-          )}
-        </Pressable>
-
-        {/* Email input (shown for google/mailru) */}
-        {loginMethod !== "phone" && (
-          <Animated.View entering={FadeInDown.duration(260)} style={{ marginTop: 4 }}>
-            {sectionTitle(
-              loginMethod === "google"
-                ? "Gmail salgyňyz"
-                : "Mail.ru salgyňyz"
-            )}
-            <TextInput
-              ref={emailRef}
-              style={[
-                ...inputStyle,
-                { borderColor: emailValid ? colors.primary : colors.border },
-              ]}
-              value={email}
-              onChangeText={setEmail}
-              placeholder={
-                loginMethod === "google"
-                  ? "mysal@gmail.com"
-                  : "mysal@mail.ru"
-              }
-              placeholderTextColor={colors.mutedForeground}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="done"
-              onSubmitEditing={handleEmailContinue}
-            />
-            <View style={s.btnWrap}>
-              <PessimisticButton
-                label="Dowam et"
-                disabled={!emailValid}
-                onPress={handleEmailContinue}
-                icon="arrow-forward-outline"
-              />
-            </View>
-          </Animated.View>
-        )}
-
-        {/* Divider */}
-        <View style={s.divider}>
-          <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
-          <Text style={[s.dividerText, { color: colors.mutedForeground }]}>
-            ýa-da telefon bilen
-          </Text>
-          <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
-        </View>
-
-        {/* Phone button (tap to switch) */}
+        {/* ── TELEFON BILEN (ilki) ── */}
         <Pressable
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -557,7 +480,7 @@ export default function RegisterScreen() {
               Telefon belgisi bilen
             </Text>
             <Text style={[s.socialBtnSub, { color: colors.mutedForeground }]}>
-              +993 TM nomer
+              +993 TM nomer · Iň çalt usul
             </Text>
           </View>
           {loginMethod === "phone" && (
@@ -565,7 +488,7 @@ export default function RegisterScreen() {
           )}
         </Pressable>
 
-        {/* Phone + OTP section (shown only when phone method selected) */}
+        {/* Phone + OTP section */}
         {loginMethod === "phone" && (
           <Animated.View entering={FadeInDown.duration(260)} style={{ marginTop: 4 }}>
             {sectionTitle("Telefon belgisi")}
@@ -653,6 +576,125 @@ export default function RegisterScreen() {
             )}
           </Animated.View>
         )}
+
+        {/* Divider */}
+        <View style={s.divider}>
+          <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
+          <Text style={[s.dividerText, { color: colors.mutedForeground }]}>
+            ýa-da e-poçta bilen
+          </Text>
+          <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
+        </View>
+
+        {/* Google */}
+        <Pressable
+          onPress={() => handleSelectMethod("google")}
+          style={({ pressed }) => [
+            s.socialBtn,
+            {
+              backgroundColor: loginMethod === "google"
+                ? "#EA4335" + "15"
+                : colors.card,
+              borderColor: loginMethod === "google" ? "#EA4335" : colors.border,
+              opacity: pressed ? 0.7 : 1,
+            },
+          ]}
+        >
+          <View style={[s.socialIconBox, { backgroundColor: "#EA4335" + "18" }]}>
+            <AntDesign name="google" size={20} color="#EA4335" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.socialBtnTitle, { color: colors.foreground }]}>
+              Google bilen dowam et
+            </Text>
+            <Text style={[s.socialBtnSub, { color: colors.mutedForeground }]}>
+              Gmail salgyňyz bilen
+            </Text>
+          </View>
+          {loginMethod === "google" && (
+            <Ionicons name="checkmark-circle" size={20} color="#EA4335" />
+          )}
+        </Pressable>
+
+        {/* Mail.ru */}
+        <Pressable
+          onPress={() => handleSelectMethod("mailru")}
+          style={({ pressed }) => [
+            s.socialBtn,
+            {
+              backgroundColor: loginMethod === "mailru"
+                ? "#005FF9" + "15"
+                : colors.card,
+              borderColor: loginMethod === "mailru" ? "#005FF9" : colors.border,
+              opacity: pressed ? 0.8 : 1,
+            },
+          ]}
+        >
+          <View style={[s.socialIconBox, { backgroundColor: "#005FF9" + "18" }]}>
+            <Ionicons name="mail" size={20} color="#005FF9" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.socialBtnTitle, { color: colors.foreground }]}>
+              Mail.ru bilen dowam et
+            </Text>
+            <Text style={[s.socialBtnSub, { color: colors.mutedForeground }]}>
+              Mail.ru ýa-da @mail.ru
+            </Text>
+          </View>
+          {loginMethod === "mailru" && (
+            <Ionicons name="checkmark-circle" size={20} color="#005FF9" />
+          )}
+        </Pressable>
+
+        {/* Email input (shown for google/mailru) */}
+        {loginMethod !== "phone" && (
+          <Animated.View entering={FadeInDown.duration(260)} style={{ marginTop: 4 }}>
+            {sectionTitle(
+              loginMethod === "google"
+                ? "Gmail salgyňyz"
+                : "Mail.ru salgyňyz"
+            )}
+            <TextInput
+              ref={emailRef}
+              style={[
+                ...inputStyle,
+                { borderColor: emailValid ? colors.primary : colors.border },
+              ]}
+              value={email}
+              onChangeText={setEmail}
+              placeholder={
+                loginMethod === "google"
+                  ? "mysal@gmail.com"
+                  : "mysal@mail.ru"
+              }
+              placeholderTextColor={colors.mutedForeground}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="done"
+              onSubmitEditing={handleEmailContinue}
+            />
+            <View style={s.btnWrap}>
+              <PessimisticButton
+                label="Dowam et"
+                disabled={!emailValid}
+                onPress={handleEmailContinue}
+                icon="arrow-forward-outline"
+              />
+            </View>
+          </Animated.View>
+        )}
+
+        {/* Already have account */}
+        <Pressable
+          onPress={handleSkip}
+          style={s.alreadyHaveAccount}
+        >
+          <Ionicons name="person-circle-outline" size={16} color={colors.primary} />
+          <Text style={[s.alreadyHaveAccountText, { color: colors.primary }]}>
+            Hasabym bar — girýän
+          </Text>
+        </Pressable>
       </Animated.View>
     );
   }
@@ -878,20 +920,26 @@ export default function RegisterScreen() {
           })}
         </View>
 
-        {sectionTitle("Özüňiz hakda (islege bagly)")}
+        {sectionTitle("✦ Özüňizi tanyşdyryň — bu siziň ilkinji täsiriniz!")}
         <TextInput
           style={[...inputStyle, s.bioInput]}
           value={bio}
-          onChangeText={(t) => setBio(t.slice(0, 200))}
-          placeholder="Gysga tanytma ýazyň..."
+          onChangeText={(t) => setBio(t.slice(0, 300))}
+          placeholder={"Mysal: «Men Aşgabatly ulag sürüjisi, 7 ýyl tejribeli. Ygtybarly we wagtynda ýerine ýetirýärin. Ýeňil üsti bilen täze tanyşlyk we amatly hyzmatdaşlyk gözleýärin. Habarlaşmaga mydama taýyn!»"}
           placeholderTextColor={colors.mutedForeground}
           multiline
-          numberOfLines={4}
+          numberOfLines={5}
           textAlignVertical="top"
         />
         <Text style={[s.charCount, { color: colors.mutedForeground }]}>
-          {bio.length} / 200
+          {bio.length} / 300
         </Text>
+        <View style={[s.bioTip, { backgroundColor: colors.primary + "12", borderColor: colors.primary + "28" }]}>
+          <Ionicons name="trending-up-outline" size={14} color={colors.primary} />
+          <Text style={[s.bioTipText, { color: colors.primary }]}>
+            Doly profilli ulanyjylar 3× köp ynam we teklip gazanýarlar
+          </Text>
+        </View>
 
         <View style={s.btnWrap}>
           <PessimisticButton
@@ -924,28 +972,28 @@ export default function RegisterScreen() {
             <Ionicons name="people-outline" size={32} color={colors.primary} />
           </View>
           <Text style={[s.stepCardTitle, { color: colors.foreground }]}>
-            Ynamdar adamlar toruňyz
+            Ýakynlaryňy Ýeňile çagyr!
           </Text>
           <Text style={[s.stepCardDesc, { color: colors.mutedForeground }]}>
-            Ynamdar adamlaryňyz bilen has uly ynamlylyga eýe boluň
+            Tanyşlaryňy çak — ikimiz hem bonus gazanarys
           </Text>
         </View>
 
         {[
           {
+            icon: "gift-outline" as IoniconsName,
+            title: "1 BP bonus — ikimize",
+            desc: "Tanyşyň Ýeňile goşulsa, seniň hasabyňa 1 BP bonus gelýär.",
+          },
+          {
             icon: "shield-checkmark-outline" as IoniconsName,
-            title: "Abraý artýar",
-            desc: "Ynamdar adamlaryňyz sizi tassyklasa, abraý balyňyz ýokarlanýar.",
+            title: "Abraý we ynam",
+            desc: "Her çakylan tanyş abraý balyňy ýokarlandyrýar — platformadaky ornyňy pugtalandyr.",
           },
           {
-            icon: "lock-closed-outline" as IoniconsName,
-            title: "Howpsuz amallar",
-            desc: "Uly möçberli P2P amallar üçin ynamdar tor hökman bolýar.",
-          },
-          {
-            icon: "notifications-outline" as IoniconsName,
-            title: "Öz wagtynda habarlar",
-            desc: "Toruňyzdaky adamlar amal habarnamalarynda ilki görkezilýär.",
+            icon: "flash-outline" as IoniconsName,
+            title: "Çalt paýlaşmak",
+            desc: "WhatsApp, Telegram ýa-da SMS — bir basym bilen çakylygy iber.",
           },
         ].map((item, i) => (
           <View
@@ -976,11 +1024,19 @@ export default function RegisterScreen() {
 
         <View style={[s.btnWrap, { gap: 10 }]}>
           <PessimisticButton
-            label="Hasaby açyp tamamla"
-            loading={saving}
-            onPress={handleFinish}
-            icon="checkmark-circle-outline"
+            label={sharing ? "Paýlaşylýar..." : "🎉 Ýakynlarymy çagyr — bonus gazan!"}
+            loading={sharing || saving}
+            onPress={handleShareAndFinish}
+            icon="share-social-outline"
           />
+          <Pressable
+            onPress={handleFinish}
+            style={[s.skipBtn, { opacity: saving ? 0.55 : 1 }]}
+          >
+            <Text style={[s.skipText, { color: colors.primary, fontWeight: "600" }]}>
+              Çakyryşsyz tamamla
+            </Text>
+          </Pressable>
           <Pressable
             onPress={handleSkip}
             style={s.skipBtn}
@@ -1281,6 +1337,34 @@ const s = StyleSheet.create({
   },
   retryText: { fontSize: 14 },
 
+  alreadyHaveAccount: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 20,
+    paddingVertical: 10,
+  },
+  alreadyHaveAccountText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  bioTip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginTop: 8,
+  },
+  bioTipText: {
+    fontSize: 12,
+    fontWeight: "500",
+    flex: 1,
+    lineHeight: 17,
+  },
   skipBtn: {
     alignItems: "center",
     paddingVertical: 12,

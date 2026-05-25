@@ -118,7 +118,7 @@ export function ConfettiOverlay({ onDone }: { onDone?: () => void }) {
   }, []);
 
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+    <View style={[StyleSheet.absoluteFill, { zIndex: 9999, elevation: 9999 }]} pointerEvents="none">
       {particles.map((p) => (
         <Animated.View
           key={p.id}

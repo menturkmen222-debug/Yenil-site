@@ -30,21 +30,21 @@ const FEATURES = [
   {
     icon: "train-outline" as const,
     title: "Demirýol biletleri",
-    desc: "Bank kartsyz bilet satyn alyň",
+    desc: "Nobatsyz, kartsyz, stressiz — sekuntlar içinde",
     color: "#4ade80",
     bg: "rgba(74,222,128,0.14)",
   },
   {
     icon: "swap-horizontal-outline" as const,
     title: "Pul çalyşmak",
-    desc: "Payeer, WebMoney, Perfect Money",
+    desc: "Payeer, WebMoney — howpsuz we çalt",
     color: "#60a5fa",
     bg: "rgba(96,165,250,0.14)",
   },
   {
     icon: "diamond-outline" as const,
-    title: "Bonus Pul ulgamy",
-    desc: "Amallar üçin bonus gazan we ulan",
+    title: "Bonus Pul — BP",
+    desc: "Her amalyňda gazanar­syň. Hiç zat ýitmez!",
     color: "#f472b6",
     bg: "rgba(244,114,182,0.14)",
   },
@@ -176,6 +176,7 @@ export default function WelcomeScreen() {
   async function handleLogin() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await AsyncStorage.setItem("onboarding_seen", "1");
+    await AsyncStorage.setItem("@yenil_show_confetti", "1");
     router.replace("/(tabs)");
   }
 
@@ -215,7 +216,7 @@ export default function WelcomeScreen() {
 
         <Animated.Text style={[s.appName, titleAnim]}>ÝEŇIL</Animated.Text>
         <Animated.Text style={[s.tagline, subAnim]}>
-          Türkmenistanyň sanly{"\n"}hyzmatlar platformasy
+          Her kesiň eline sygýan{"\n"}güýçli mümkinçilikler
         </Animated.Text>
       </View>
 
@@ -251,7 +252,7 @@ export default function WelcomeScreen() {
               style={s.startBtnInner}
             >
               <Ionicons name="rocket-outline" size={19} color="#0b4228" />
-              <Text style={s.startBtnText}>Başlamak</Text>
+              <Text style={s.startBtnText}>Häzir başla — mugt!</Text>
               <Ionicons name="arrow-forward" size={17} color="#0b4228" />
             </LinearGradient>
           </Pressable>
