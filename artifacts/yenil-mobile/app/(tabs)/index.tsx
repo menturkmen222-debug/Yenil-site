@@ -19,9 +19,11 @@ import {
   listenHyzmatlar, addHyzmat, HYZMAT_CATEGORIES,
   type HyzmatItem, type HyzmatCategory,
 } from "@/lib/hyzmatlar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getDeviceIdAsync } from "@/lib/deviceId";
 import { getUserNickname, watchCompletedLessons } from "@/lib/firebase";
 import { CATEGORIES, LESSONS } from "@/lib/ebilimData";
+import { ConfettiOverlay } from "@/components/ConfettiOverlay";
 
 function formatNotifTime(ts: number): string {
   const diff = Date.now() - ts;
@@ -447,6 +449,16 @@ export default function HomeScreen() {
   const [hyzmatSearch, setHyzmatSearch] = useState("");
   const [eBilimCompleted, setEBilimCompleted] = useState<number>(0);
   const bellAnim = useRef(new Animated.Value(1)).current;
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem("@yenil_show_confetti").then((v) => {
+      if (v === "1") {
+        setShowConfetti(true);
+        AsyncStorage.removeItem("@yenil_show_confetti");
+      }
+    });
+  }, []);
 
   useEffect(() => {
     getDeviceIdAsync().then(async (id) => {
@@ -505,6 +517,9 @@ export default function HomeScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      {showConfetti && (
+        <ConfettiOverlay onDone={() => setShowConfetti(false)} />
+      )}
       <AgentChatModal visible={chatOpen} onClose={() => setChatOpen(false)} />
       <AddHyzmatModal
         visible={addHyzmatOpen}

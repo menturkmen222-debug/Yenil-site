@@ -21,6 +21,7 @@ import {
   setUserAvatar, getUserAvatar, watchUserAvatar,
   type UserProfile, type ReputationData,
 } from "@/lib/firebase";
+import { getLocalProfile, type LocalProfile } from "@/lib/localProfile";
 import { getLevel, getProgressPercent, getNextLevel } from "@/lib/reputation";
 import { clearDeviceId } from "@/lib/deviceId";
 
@@ -73,6 +74,7 @@ export default function ProfileScreen() {
   const { t } = useLanguage();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [localProfile, setLocalProfile] = useState<LocalProfile | null>(null);
   const [nickname, setNickname] = useState("");
   const [repData, setRepData] = useState<ReputationData>({ score: 20, entries: [] });
   const [loading, setLoading] = useState(true);
@@ -88,12 +90,16 @@ export default function ProfileScreen() {
   }, []);
 
   useEffect(() => {
+    getLocalProfile().then(p => { if (p) setLocalProfile(p); });
+  }, []);
+
+  useEffect(() => {
     if (!deviceId) return;
     let cancelled = false;
     setLoading(true);
 
     const timeout = setTimeout(() => {
-      if (!cancelled) setGoRegister(true);
+      if (!cancelled) setLoading(false);
     }, 8000);
 
     // Watch avatar in real-time
@@ -112,18 +118,14 @@ export default function ProfileScreen() {
       .then(([prof, nick, rep]) => {
         clearTimeout(timeout);
         if (cancelled) return;
-        if (!prof) {
-          setGoRegister(true);
-          return;
-        }
-        setProfile(prof);
+        if (prof) setProfile(prof);
         setNickname(nick);
         setRepData(rep);
         setLoading(false);
       })
       .catch(() => {
         clearTimeout(timeout);
-        if (!cancelled) setGoRegister(true);
+        if (!cancelled) setLoading(false);
       });
 
     return () => {
@@ -176,16 +178,21 @@ export default function ProfileScreen() {
     }
   }, [deviceId, t, cameraAnim]);
 
-  if (goRegister) return <Redirect href="/auth/register" />;
-
   const level = getLevel(repData.score);
   const pct = getProgressPercent(repData.score);
   const nextLv = getNextLevel(repData.score);
 
-  const displayInitial = (nickname || profile?.name || "Ý").slice(0, 1).toUpperCase();
-  const displayName = profile
-    ? `${profile.name} ${profile.surname}`.trim()
-    : nickname || "Ulanyjy";
+  const mergedName = profile?.name || localProfile?.name || "";
+  const mergedSurname = profile?.surname || localProfile?.surname || "";
+  const mergedPhone = profile?.phone || localProfile?.phone || "";
+  const mergedRegion = profile?.region || localProfile?.region || "";
+  const mergedDistrict = profile?.district || localProfile?.district || "";
+  const mergedProfession = profile?.profession || localProfile?.profession || "";
+  const mergedBio = profile?.bio || localProfile?.bio || "";
+
+  const displayInitial = (nickname || mergedName || "Ý").slice(0, 1).toUpperCase();
+  const displayName = [mergedName, mergedSurname].filter(Boolean).join(" ") || nickname || "Ulanyjy";
+  const hasAnyProfile = !!(mergedName || mergedSurname || localProfile || profile);
 
   async function handleLogout() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -343,26 +350,26 @@ export default function ProfileScreen() {
           </Pressable>
 
           {/* ── Şahsy maglumatlar ── */}
-          {profile ? (
+          {hasAnyProfile ? (
             <>
               <SectionCard title={t("personal_info").toUpperCase()} colors={colors}>
-                <InfoRow icon="person-outline" label={t("name")} value={profile.name} colors={colors} />
-                <InfoRow icon="person-circle-outline" label={t("surname")} value={profile.surname} colors={colors} />
-                <InfoRow icon="call-outline" label={t("phone")} value={profile.phone} colors={colors} />
-                <InfoRow icon="location-outline" label={t("region")} value={profile.region} colors={colors} />
-                <InfoRow icon="map-outline" label={t("district")} value={profile.district} colors={colors} />
+                {mergedName ? <InfoRow icon="person-outline" label={t("name")} value={mergedName} colors={colors} /> : null}
+                {mergedSurname ? <InfoRow icon="person-circle-outline" label={t("surname")} value={mergedSurname} colors={colors} /> : null}
+                {mergedPhone ? <InfoRow icon="call-outline" label={t("phone")} value={mergedPhone} colors={colors} /> : null}
+                {mergedRegion ? <InfoRow icon="location-outline" label={t("region")} value={mergedRegion} colors={colors} /> : null}
+                {mergedDistrict ? <InfoRow icon="map-outline" label={t("district")} value={mergedDistrict} colors={colors} /> : null}
               </SectionCard>
 
               <SectionCard title={t("profession").toUpperCase()} colors={colors}>
-                <InfoRow icon="briefcase-outline" label={t("profession")} value={profile.profession} colors={colors} />
-                {profile.bio ? (
+                {mergedProfession ? <InfoRow icon="briefcase-outline" label={t("profession")} value={mergedProfession} colors={colors} /> : null}
+                {mergedBio ? (
                   <View style={[row.wrap, { borderBottomColor: "transparent" }]}>
                     <View style={[row.iconBox, { backgroundColor: colors.primary + "18" }]}>
                       <Ionicons name="document-text-outline" size={17} color={colors.primary} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={[row.label, { color: colors.mutedForeground }]}>{t("about_me")}</Text>
-                      <Text style={[row.value, { color: colors.foreground, lineHeight: 20 }]}>{profile.bio}</Text>
+                      <Text style={[row.value, { color: colors.foreground, lineHeight: 20 }]}>{mergedBio}</Text>
                     </View>
                   </View>
                 ) : null}

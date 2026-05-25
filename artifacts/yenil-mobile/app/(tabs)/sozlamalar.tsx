@@ -23,6 +23,7 @@ import {
   getReputation as fetchReputation, seedTestAccount,
   type ReputationData, type FriendEntry, type BPTransfer,
 } from "@/lib/firebase";
+import { getLocalProfile, type LocalProfile } from "@/lib/localProfile";
 import {
   getLevel, getNextLevel, getProgressPercent, getImprovementTips,
   getWhyDescription, formatRelativeTime, LEVELS,
@@ -935,6 +936,7 @@ export default function SozlamalarScreen() {
   // New feature state
   const [repData, setRepData] = useState<ReputationData>({ score: 20, entries: [] });
   const [nickname, setNickname] = useState("");
+  const [localProfile, setLocalProfile] = useState<LocalProfile | null>(null);
   const [showRepModal, setShowRepModal] = useState(false);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [showBPModal, setShowBPModal] = useState(false);
@@ -954,6 +956,11 @@ export default function SozlamalarScreen() {
     AsyncStorage.getItem("@yenil_notifications_enabled").then(v => {
       if (v === "false") setNotifications(false);
     });
+  }, []);
+
+  // Load local profile from AsyncStorage
+  useEffect(() => {
+    getLocalProfile().then(p => { if (p) setLocalProfile(p); });
   }, []);
 
   // Load nickname + watch reputation
@@ -1018,7 +1025,10 @@ export default function SozlamalarScreen() {
   const pct = getProgressPercent(repData.score);
   const nextLv = getNextLevel(repData.score);
   const currentTheme = THEMES.find((t) => t.key === themeKey) ?? THEMES[0];
-  const displayName = nickname || (deviceId ? deviceId.slice(0, 10) + "..." : "Ýüklenýär...");
+  const fullName = localProfile
+    ? [localProfile.name, localProfile.surname].filter(Boolean).join(" ").trim()
+    : "";
+  const displayName = fullName || nickname || (deviceId ? deviceId.slice(0, 10) + "..." : "Ýüklenýär...");
 
   return (
     <View style={[s.container, { backgroundColor: colors.background }]}>
@@ -1047,7 +1057,7 @@ export default function SozlamalarScreen() {
           >
             <View style={[s.accountAvatar, { borderColor: "rgba(255,255,255,0.35)" }]}>
               <Text style={{ fontSize: 24, color: "white" }}>
-                {(nickname || "Y").slice(0, 1).toUpperCase()}
+                {(fullName || nickname || "Y").slice(0, 1).toUpperCase()}
               </Text>
             </View>
             <View style={{ flex: 1 }}>

@@ -25,10 +25,12 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { saveUserProfile } from "@/lib/firebase";
+import { saveLocalProfile } from "@/lib/localProfile";
 import { PessimisticButton } from "@/components/PessimisticButton";
 
 // ─── Konstantalar ─────────────────────────────────────────────────────────────
@@ -349,12 +351,22 @@ export default function RegisterScreen() {
           setTimeout(() => reject(new Error("timeout")), 5000)
         );
         await Promise.race([savePromise, timeoutPromise]).catch(() => {});
+        await saveLocalProfile({
+          name: name.trim(),
+          surname: surname.trim(),
+          phone: contact,
+          region: welaýatLabel,
+          district: tumanLabel,
+          profession,
+          bio: bio.trim(),
+        }).catch(() => {});
       }
     } catch {
       // ignore — navigate regardless
     } finally {
       setSaving(false);
     }
+    await AsyncStorage.setItem("@yenil_show_confetti", "1").catch(() => {});
     router.replace("/(tabs)");
   }, [
     deviceId,
@@ -370,7 +382,8 @@ export default function RegisterScreen() {
     bio,
   ]);
 
-  const handleSkip = useCallback(() => {
+  const handleSkip = useCallback(async () => {
+    await AsyncStorage.setItem("@yenil_show_confetti", "1").catch(() => {});
     router.replace("/(tabs)");
   }, []);
 
