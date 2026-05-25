@@ -25,18 +25,11 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
-import * as Google from "expo-auth-session/providers/google";
-import * as WebBrowser from "expo-web-browser";
 
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { saveUserProfile } from "@/lib/firebase";
 import { PessimisticButton } from "@/components/PessimisticButton";
-
-WebBrowser.maybeCompleteAuthSession();
-
-// Google Web Client ID — Firebase Console → Authentication → Sign-in method → Google → Web SDK configuration → Web client ID
-const GOOGLE_WEB_CLIENT_ID = "405972999183-vsdse9e8tbn747fbhebu6kcegfd1rao9.apps.googleusercontent.com";
 
 // ─── Konstantalar ─────────────────────────────────────────────────────────────
 
@@ -234,13 +227,6 @@ export default function RegisterScreen() {
   const isWeb = Platform.OS === "web";
   const { deviceId } = useBonusPul();
 
-  // ── Google OAuth ──
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [_request, response, promptAsync] = Google.useAuthRequest({
-    webClientId: GOOGLE_WEB_CLIENT_ID,
-    scopes: ["openid", "profile", "email"],
-  });
-
   // ── Ädim nawigasiýasy ──
   const [step, setStep] = useState(0);
   const progressAnim = useSharedValue((1 / TOTAL_STEPS) * SCREEN_W);
@@ -260,45 +246,6 @@ export default function RegisterScreen() {
     },
     [progressAnim]
   );
-
-  // ── Google OAuth handlers (goToStep declared above) ──
-  const handleGoogleSuccess = useCallback(
-    async (accessToken: string) => {
-      try {
-        const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        const info = await res.json() as {
-          email?: string; given_name?: string; family_name?: string;
-        };
-        if (info.email) setEmail(info.email);
-        if (info.given_name) setName(info.given_name);
-        if (info.family_name) setSurname(info.family_name);
-        setLoginMethod("google");
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        goToStep(1);
-      } catch {
-        setGoogleLoading(false);
-      }
-    },
-    [goToStep]
-  );
-
-  useEffect(() => {
-    if (response?.type === "success") {
-      const token = response.authentication?.accessToken;
-      if (token) handleGoogleSuccess(token);
-      else setGoogleLoading(false);
-    } else if (response?.type === "error" || response?.type === "cancel") {
-      setGoogleLoading(false);
-    }
-  }, [response, handleGoogleSuccess]);
-
-  const handleGooglePress = useCallback(async () => {
-    setGoogleLoading(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    await promptAsync();
-  }, [promptAsync]);
 
   // ── 1-ädim: Giriş usuly ──
   const [loginMethod, setLoginMethod] = useState<"phone" | "google" | "mailru">("phone");
@@ -466,8 +413,7 @@ export default function RegisterScreen() {
 
         {/* ── Social buttons ── */}
         <Pressable
-          onPress={handleGooglePress}
-          disabled={googleLoading}
+          onPress={() => handleSelectMethod("google")}
           style={({ pressed }) => [
             s.socialBtn,
             {
@@ -475,7 +421,7 @@ export default function RegisterScreen() {
                 ? "#EA4335" + "15"
                 : colors.card,
               borderColor: loginMethod === "google" ? "#EA4335" : colors.border,
-              opacity: pressed || googleLoading ? 0.7 : 1,
+              opacity: pressed ? 0.7 : 1,
             },
           ]}
         >
@@ -484,18 +430,15 @@ export default function RegisterScreen() {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[s.socialBtnTitle, { color: colors.foreground }]}>
-              {googleLoading ? "Açylýar..." : "Google bilen dowam et"}
+              Google bilen dowam et
             </Text>
             <Text style={[s.socialBtnSub, { color: colors.mutedForeground }]}>
               Gmail salgyňyz bilen
             </Text>
           </View>
-          {googleLoading
-            ? <Ionicons name="reload-outline" size={20} color="#EA4335" />
-            : loginMethod === "google"
-              ? <Ionicons name="checkmark-circle" size={20} color="#EA4335" />
-              : null
-          }
+          {loginMethod === "google" && (
+            <Ionicons name="checkmark-circle" size={20} color="#EA4335" />
+          )}
         </Pressable>
 
         <Pressable
