@@ -283,12 +283,17 @@ export default function ProfileScreen() {
 
             {/* Name & nickname */}
             <Text style={s.heroName}>{displayName}</Text>
-            <View style={s.nicknamePill}>
-              <Ionicons name="at-outline" size={13} color="rgba(255,255,255,0.85)" />
-              <Text style={s.nicknameText}>
-                {displayNickname || "username"}
-              </Text>
-            </View>
+            {displayNickname ? (
+              <View style={s.nicknamePill}>
+                <Ionicons name="at-outline" size={13} color="rgba(255,255,255,0.85)" />
+                <Text style={s.nicknameText}>{displayNickname}</Text>
+              </View>
+            ) : (
+              <View style={s.nicknamePill}>
+                <Ionicons name="at-outline" size={13} color="rgba(255,255,255,0.5)" />
+                <Text style={[s.nicknameText, { color: "rgba(255,255,255,0.5)" }]}>belirlenmedik</Text>
+              </View>
+            )}
 
             {/* Upload hint */}
             <Pressable
