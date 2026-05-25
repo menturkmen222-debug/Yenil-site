@@ -2,12 +2,15 @@ import React, { useEffect, useRef } from "react";
 import { Animated, Dimensions, StyleSheet, View } from "react-native";
 
 const { width: W, height: H } = Dimensions.get("window");
+const CX = W / 2;
+const CY = H * 0.42;
 
-const COUNT = 60;
+const COUNT = 90;
 const COLORS = [
   "#FFD700", "#FF4444", "#4ECDC4", "#45B7D1", "#96CEB4",
   "#FF6B9D", "#C3A6FF", "#FFB347", "#69D2E7", "#F9A825",
-  "#A8E063", "#FF8C94", "#88D8B0", "#FFAAA5", "#FF6F61",
+  "#A8E063", "#FF8C94", "#88D8B0", "#FD79A8", "#6C5CE7",
+  "#00CEC9", "#FDCB6E", "#E17055", "#74B9FF", "#55EFC4",
 ];
 
 function rnd(min: number, max: number) {
@@ -16,34 +19,52 @@ function rnd(min: number, max: number) {
 
 interface Particle {
   id: number;
-  x: number;
   color: string;
-  size: number;
-  isCircle: boolean;
-  isRect: boolean;
+  width: number;
+  height: number;
+  borderRadius: number;
   delay: number;
   dur: number;
-  ty: Animated.Value;
+  rotDeg: number;
   tx: Animated.Value;
+  ty: Animated.Value;
   rot: Animated.Value;
   op: Animated.Value;
+  scale: Animated.Value;
+  targetTx: number;
+  targetTy: number;
 }
 
 function createParticles(): Particle[] {
-  return Array.from({ length: COUNT }, (_, i) => ({
-    id: i,
-    x: rnd(-10, W),
-    color: COLORS[Math.floor(rnd(0, COLORS.length))],
-    size: rnd(7, 15),
-    isCircle: Math.random() > 0.6,
-    isRect: Math.random() > 0.7,
-    delay: rnd(0, 1200),
-    dur: rnd(2000, 3800),
-    ty: new Animated.Value(-40),
-    tx: new Animated.Value(0),
-    rot: new Animated.Value(0),
-    op: new Animated.Value(1),
-  }));
+  return Array.from({ length: COUNT }, (_, i) => {
+    const angle = rnd(0, Math.PI * 2);
+    const distance = rnd(80, Math.max(W, H) * 0.78);
+    const isCircle = Math.random() > 0.52;
+    const isRect = !isCircle && Math.random() > 0.45;
+    const size = rnd(7, 15);
+    const w = isRect ? size * 2.8 : size;
+    const h = isRect ? size * 0.52 : size;
+    const br = isCircle ? size / 2 : isRect ? 2 : 3;
+    const gravity = distance * 0.35;
+
+    return {
+      id: i,
+      color: COLORS[Math.floor(rnd(0, COLORS.length))],
+      width: w,
+      height: h,
+      borderRadius: br,
+      delay: rnd(0, 250),
+      dur: rnd(1400, 2800),
+      rotDeg: rnd(360, 1260) * (Math.random() > 0.5 ? 1 : -1),
+      tx: new Animated.Value(0),
+      ty: new Animated.Value(0),
+      rot: new Animated.Value(0),
+      op: new Animated.Value(0),
+      scale: new Animated.Value(0),
+      targetTx: Math.cos(angle) * distance,
+      targetTy: Math.sin(angle) * distance + gravity,
+    };
+  });
 }
 
 export function ConfettiOverlay({ onDone }: { onDone?: () => void }) {
@@ -54,13 +75,13 @@ export function ConfettiOverlay({ onDone }: { onDone?: () => void }) {
       Animated.sequence([
         Animated.delay(p.delay),
         Animated.parallel([
-          Animated.timing(p.ty, {
-            toValue: H + 60,
+          Animated.timing(p.tx, {
+            toValue: p.targetTx,
             duration: p.dur,
             useNativeDriver: true,
           }),
-          Animated.timing(p.tx, {
-            toValue: rnd(-80, 80),
+          Animated.timing(p.ty, {
+            toValue: p.targetTy,
             duration: p.dur,
             useNativeDriver: true,
           }),
@@ -70,14 +91,20 @@ export function ConfettiOverlay({ onDone }: { onDone?: () => void }) {
             useNativeDriver: true,
           }),
           Animated.sequence([
-            Animated.timing(p.op, {
+            Animated.timing(p.scale, {
               toValue: 1,
-              duration: p.dur * 0.65,
+              duration: 180,
               useNativeDriver: true,
             }),
             Animated.timing(p.op, {
+              toValue: 1,
+              duration: 80,
+              useNativeDriver: true,
+            }),
+            Animated.delay(p.dur * 0.45),
+            Animated.timing(p.op, {
               toValue: 0,
-              duration: p.dur * 0.35,
+              duration: p.dur * 0.5,
               useNativeDriver: true,
             }),
           ]),
@@ -92,37 +119,32 @@ export function ConfettiOverlay({ onDone }: { onDone?: () => void }) {
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      {particles.map((p) => {
-        const w = p.isRect ? p.size * 2.8 : p.size;
-        const h = p.isRect ? p.size * 0.55 : p.size;
-        const br = p.isCircle ? p.size / 2 : p.isRect ? 2 : 3;
-
-        return (
-          <Animated.View
-            key={p.id}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: p.x,
-              width: w,
-              height: h,
-              borderRadius: br,
-              backgroundColor: p.color,
-              opacity: p.op,
-              transform: [
-                { translateY: p.ty },
-                { translateX: p.tx },
-                {
-                  rotate: p.rot.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ["0deg", `${rnd(360, 1080)}deg`],
-                  }),
-                },
-              ],
-            }}
-          />
-        );
-      })}
+      {particles.map((p) => (
+        <Animated.View
+          key={p.id}
+          style={{
+            position: "absolute",
+            top: CY - p.height / 2,
+            left: CX - p.width / 2,
+            width: p.width,
+            height: p.height,
+            borderRadius: p.borderRadius,
+            backgroundColor: p.color,
+            opacity: p.op,
+            transform: [
+              { translateX: p.tx },
+              { translateY: p.ty },
+              { scale: p.scale },
+              {
+                rotate: p.rot.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ["0deg", `${p.rotDeg}deg`],
+                }),
+              },
+            ],
+          }}
+        />
+      ))}
     </View>
   );
 }
