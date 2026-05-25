@@ -857,6 +857,65 @@ export default function RegisterScreen() {
 
   // ─── Step 3 ────────────────────────────────────────────────────────────────
 
+  function KarCardItem({ kar }: { kar: typeof KARLER[0] }) {
+    const isSelected = profession === kar.id;
+    const scale = useSharedValue(1);
+    const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
+    function handlePress() {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      scale.value = withSequence(
+        withSpring(0.93, { damping: 12, stiffness: 400 }),
+        withSpring(1.0, { damping: 10, stiffness: 320 }),
+      );
+      setProfession(kar.id);
+    }
+
+    return (
+      <Pressable key={kar.id} onPress={handlePress} style={{ width: "47%" }}>
+        <Animated.View style={animStyle}>
+          <LinearGradient
+            colors={isSelected ? [colors.primary, colors.primary + "d0"] : [colors.card, colors.card]}
+            start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+            style={[
+              s.karCard,
+              {
+                borderColor: isSelected ? colors.primary : colors.border,
+                borderWidth: isSelected ? 2 : 1.5,
+                shadowColor: isSelected ? colors.primary : "#000",
+                shadowOpacity: isSelected ? 0.30 : 0.05,
+                shadowRadius: isSelected ? 12 : 4,
+                shadowOffset: { width: 0, height: isSelected ? 4 : 2 },
+                elevation: isSelected ? 8 : 1,
+              },
+            ]}
+          >
+            {/* Icon box */}
+            <View style={[
+              s.karIconBox,
+              { backgroundColor: isSelected ? "rgba(255,255,255,0.22)" : colors.primary + "18" },
+            ]}>
+              <Ionicons name={kar.icon} size={22} color={isSelected ? "#fff" : colors.primary} />
+            </View>
+
+            <Text style={[s.karLabel, { color: isSelected ? "#fff" : colors.foreground, marginTop: 6 }]}>
+              {kar.label}
+            </Text>
+
+            {/* Check badge */}
+            {isSelected && (
+              <Animated.View entering={FadeInDown.duration(180)} style={s.karCheck}>
+                <View style={[s.karCheckInner, { backgroundColor: "rgba(255,255,255,0.35)" }]}>
+                  <Ionicons name="checkmark" size={11} color="#fff" />
+                </View>
+              </Animated.View>
+            )}
+          </LinearGradient>
+        </Animated.View>
+      </Pressable>
+    );
+  }
+
   function renderStep3() {
     return (
       <Animated.View
@@ -874,33 +933,7 @@ export default function RegisterScreen() {
 
         {label("Käriňiz")}
         <View style={s.karGrid}>
-          {KARLER.map((kar) => {
-            const isSelected = profession === kar.id;
-            return (
-              <Pressable
-                key={kar.id}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setProfession(kar.id);
-                }}
-                style={[
-                  s.karCard,
-                  {
-                    backgroundColor: isSelected ? colors.primary + "15" : colors.card,
-                    borderColor: isSelected ? colors.primary : colors.border,
-                  },
-                ]}
-              >
-                <Ionicons name={kar.icon} size={20} color={isSelected ? colors.primary : colors.mutedForeground} />
-                <Text style={[s.karLabel, { color: isSelected ? colors.primary : colors.foreground }]}>{kar.label}</Text>
-                {isSelected && (
-                  <View style={[s.karCheck, { backgroundColor: colors.primary }]}>
-                    <Ionicons name="checkmark" size={10} color="#fff" />
-                  </View>
-                )}
-              </Pressable>
-            );
-          })}
+          {KARLER.map((kar) => <KarCardItem key={kar.id} kar={kar} />)}
         </View>
 
         {label("Özüňizi tanyşdyryň")}
@@ -1024,7 +1057,8 @@ export default function RegisterScreen() {
   return (
     <KeyboardAvoidingView
       style={[s.root, { backgroundColor: colors.background }]}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={0}
     >
       <LinearGradient
         colors={[colors.headerGradientStart, colors.headerGradientEnd]}
@@ -1222,18 +1256,21 @@ const s = StyleSheet.create({
   selectBtnText: { fontSize: 15 },
 
   // Profession grid
-  karGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 16 },
+  karGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 16 },
   karCard: {
-    width: "47%", flexDirection: "row", alignItems: "center",
-    gap: 8, borderRadius: 13, borderWidth: 1.5, padding: 12,
-    position: "relative",
-    shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 }, elevation: 1,
+    borderRadius: 16, borderWidth: 1.5, padding: 14,
+    position: "relative", alignItems: "flex-start",
   },
-  karLabel: { fontSize: 12, fontWeight: "600", flex: 1 },
+  karIconBox: {
+    width: 44, height: 44, borderRadius: 13,
+    alignItems: "center", justifyContent: "center",
+  },
+  karLabel: { fontSize: 13, fontWeight: "700" },
   karCheck: {
-    position: "absolute", top: 7, right: 7,
-    width: 15, height: 15, borderRadius: 8,
+    position: "absolute", top: 8, right: 8,
+  },
+  karCheckInner: {
+    width: 20, height: 20, borderRadius: 10,
     alignItems: "center", justifyContent: "center",
   },
 
