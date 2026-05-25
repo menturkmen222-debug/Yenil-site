@@ -802,38 +802,6 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* ── E-BILIM PREMIUM SECTION ── */}
-        <View style={eb.sectionHead}>
-          <View style={{ flex: 1 }}>
-            <Text style={[eb.sectionTitle, { color: colors.foreground }]}>E-Bilim Ekosistemi</Text>
-            <Text style={[eb.sectionSub, { color: colors.mutedForeground }]}>O'qi, test ber, BP gazan</Text>
-          </View>
-          <Pressable
-            onPress={() => nav("/e-bilim")}
-            style={[eb.seeAllBtn, { backgroundColor: "#6366f1" + "18", borderColor: "#6366f1" + "40" }]}
-          >
-            <Text style={eb.seeAllText}>Barchasi</Text>
-            <Ionicons name="arrow-forward" size={12} color="#6366f1" />
-          </Pressable>
-        </View>
-
-        <Pressable
-          onPress={() => nav("/e-bilim")}
-          style={({ pressed }) => [
-            styles.banner,
-            { opacity: pressed ? 0.9 : 1, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
-          ]}
-        >
-          <View style={[styles.bannerIcon, { backgroundColor: "#6366f1" + "20" }]}>
-            <Ionicons name="school-outline" size={26} color="#6366f1" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.bannerTitle, { color: colors.foreground }]}>E-Bilim</Text>
-            <Text style={[styles.bannerDesc, { color: colors.mutedForeground }]}>O'qi, test ber, BP gazan</Text>
-          </View>
-          <Feather name="arrow-right" size={20} color="#6366f1" />
-        </Pressable>
-
         {/* SANLY BAZAR BANNER */}
         <Pressable
           onPress={() => nav("/bazar")}
