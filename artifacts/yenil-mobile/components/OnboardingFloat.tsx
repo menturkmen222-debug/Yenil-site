@@ -1,3 +1,12 @@
+/**
+ * OnboardingFloat
+ *
+ * • Foydalanuvchi ilovani birinchi marta ochganda (AsyncStorage key yo'q bo'lsa)
+ *   2 soniyadan keyin avtomatik pastdan yuqoriga suzib chiqadi.
+ * • Hech qanday float button yo'q — to'g'ridan-to'g'ri onboarding sheet.
+ * • Emoji o'rniga kuchli Ionicons / LinearGradient ikonkalar.
+ */
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   View, Text, StyleSheet, Modal, Pressable,
@@ -10,156 +19,267 @@ import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColors } from "@/hooks/useColors";
 
-const KEY = "@yenil_onboarding_v1_seen";
+const STORAGE_KEY = "@yenil_onboarding_v2_seen";
 const { width: SW } = Dimensions.get("window");
 
-// ── Onboarding steps ─────────────────────────────────────────────────
-const STEPS = [
+// ─────────────────────────────────────────────────────────────────────────────
+// Onboarding steps
+// ─────────────────────────────────────────────────────────────────────────────
+interface Step {
+  title: string;
+  desc: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  gradient: readonly [string, string, ...string[]];
+  accentColor: string;
+}
+
+const STEPS: Step[] = [
   {
-    emoji: "👋",
     title: "Ýeňil'e hoş geldiňiz!",
-    desc: "Ýeňil — Türkmenistanyň iň ýeňil super-programmasy. Bilet almakdan başlap, pul gazanmaga çenli — hemmesi bir ýerde!",
-    color: "#10b981",
-    gradient: ["#065f46", "#10b981"] as const,
-    icon: "sparkles-outline" as const,
+    desc: "Ýeňil — Türkmenistanyň iň ýeňil super-programmasy. Bilet almakdan pul gazanmaga çenli — hemmesi bir ýerde.",
+    icon: "rocket-outline",
+    gradient: ["#064e3b", "#059669", "#10b981"],
+    accentColor: "#10b981",
   },
   {
-    emoji: "🚂",
     title: "Demirýol biletleri",
-    desc: "Bank karty bolmasa-da otly bilet alyp bilersiňiz! 6 sanly zakaz koduňyzy giriziň — biletini biz tölüýäris.",
-    color: "#3b82f6",
-    gradient: ["#1e3a8a", "#3b82f6"] as const,
-    icon: "train-outline" as const,
+    desc: "Bank kartyňyz bolmasa-da otly bilet alyp bilersiňiz! 6 sanly zakaz koduňyzy giriziň — töleg biz tarapdan edilýär.",
+    icon: "train-outline",
+    gradient: ["#1e3a8a", "#1d4ed8", "#3b82f6"],
+    accentColor: "#3b82f6",
   },
   {
-    emoji: "💱",
     title: "Ýeňil Pay",
-    desc: "Payeer, Perfect Money we WebMoney pul birliklerini TMT'ye çalşyp bilersiňiz. Tiz, ygtybarly we amatly!",
-    color: "#8b5cf6",
-    gradient: ["#4c1d95", "#8b5cf6"] as const,
-    icon: "swap-horizontal-outline" as const,
+    desc: "Payeer, Perfect Money we WebMoney walýutalaryny TMT'ye çalşyp bilersiňiz. Tiz, ygtybarly we has amatly.",
+    icon: "swap-horizontal-outline",
+    gradient: ["#4c1d95", "#6d28d9", "#8b5cf6"],
+    accentColor: "#8b5cf6",
   },
   {
-    emoji: "🤖",
     title: "AI Agent kömekçi",
-    desc: "Islendik soragyňyza AI kömekçimiz jogap berýär. Maslakat, maglumat, kömek — elmydama elýeterli!",
-    color: "#6366f1",
-    gradient: ["#312e81", "#6366f1"] as const,
-    icon: "hardware-chip-outline" as const,
+    desc: "Islendik soragyňyza AI kömekçimiz jogap berýär. Maslahata, maglumata ýa-da kömege mätäç bolsaňyz — elmydama taýyn.",
+    icon: "hardware-chip-outline",
+    gradient: ["#1e1b4b", "#4338ca", "#6366f1"],
+    accentColor: "#6366f1",
   },
   {
-    emoji: "📚",
-    title: "E-Bilim ekosistemi",
-    desc: "Sapak geç → test ber → BP gazan! Gazanan BP'leriňizi goşmaça hyzmatlara ulanyp bilersiňiz.",
-    color: "#f59e0b",
-    gradient: ["#78350f", "#f59e0b"] as const,
-    icon: "school-outline" as const,
+    title: "E-Bilim — Öwren, Gazan",
+    desc: "Sapak geç → synag ber → BP gazan! 25+ sapak bar: AI, Frilanser, Kripto we beýlekiler.",
+    icon: "school-outline",
+    gradient: ["#78350f", "#b45309", "#f59e0b"],
+    accentColor: "#f59e0b",
   },
   {
-    emoji: "💰",
-    title: "BP – Bonus Pul",
-    desc: "BP (Bonus Pul) – biziň içki pulluk ulgamymyz. Sapak geçip, dost çagyryp, kuryer bolup BP gazanyp bilersiňiz!",
-    color: "#10b981",
-    gradient: ["#064e3b", "#059669"] as const,
-    icon: "wallet-outline" as const,
+    title: "BP — Bonus Pul",
+    desc: "BP (Bonus Pul) — biziň içki pul ulgamymyz. Sapak geçip, dost çagyryp, kuryer bolup BP gazanyp bilersiňiz.",
+    icon: "wallet-outline",
+    gradient: ["#065f46", "#047857", "#059669"],
+    accentColor: "#059669",
   },
   {
-    emoji: "🎉",
     title: "Başlamaga taýyn!",
-    desc: "Ähli mümkinçilikler siziň eliňizde. Isledigiňiz hyzmaty ulanyp başlaň. Kömek gerek bolsa AI Agent elmydama elýeterli!",
-    color: "#e11d48",
-    gradient: ["#881337", "#e11d48"] as const,
-    icon: "rocket-outline" as const,
+    desc: "Ähli mümkinçilikler eliňizde. Islän hyzmaty ulanyp başlaň. Kömek gerek bolsa AI Agent hemişe elýeterli!",
+    icon: "checkmark-circle-outline",
+    gradient: ["#7f1d1d", "#b91c1c", "#ef4444"],
+    accentColor: "#ef4444",
   },
 ];
 
-// ── Onboarding Sheet ─────────────────────────────────────────────────
-function OnboardingSheet({
-  visible,
-  onClose,
-}: {
-  visible: boolean;
-  onClose: () => void;
-}) {
+// ─────────────────────────────────────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────────────────────────────────────
+export function OnboardingFloat() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const [step, setStep] = useState(0);
-  const slideX = useRef(new Animated.Value(0)).current;
-  const sheetAnim = useRef(new Animated.Value(600)).current;
 
+  const [visible, setVisible] = useState(false);
+  const [step, setStep] = useState(0);
+
+  // Sheet slide animation
+  const sheetAnim = useRef(new Animated.Value(700)).current;
+  // Step slide animation
+  const slideX = useRef(new Animated.Value(0)).current;
+  // Progress bar animation
+  const progressAnim = useRef(new Animated.Value(0)).current;
+
+  // ── Check AsyncStorage on mount ──────────────────────────────────────────
   useEffect(() => {
-    if (visible) {
-      setStep(0);
-      Animated.spring(sheetAnim, {
-        toValue: 0, useNativeDriver: true, damping: 20, stiffness: 200,
+    AsyncStorage.getItem(STORAGE_KEY).then((val) => {
+      if (!val) {
+        // Delay so home screen fully loads first
+        const timer = setTimeout(() => {
+          setVisible(true);
+          setStep(0);
+          sheetAnim.setValue(700);
+          Animated.spring(sheetAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            damping: 22,
+            stiffness: 180,
+          }).start();
+          animateProgress(0);
+        }, 1800);
+        return () => clearTimeout(timer);
+      }
+    });
+  }, []);
+
+  // ── Progress bar ─────────────────────────────────────────────────────────
+  const animateProgress = (targetStep: number) => {
+    Animated.timing(progressAnim, {
+      toValue: (targetStep + 1) / STEPS.length,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  // ── Navigate steps ───────────────────────────────────────────────────────
+  const gotoStep = (nextStep: number, direction: "forward" | "back") => {
+    const outX = direction === "forward" ? -SW : SW;
+    const inX = direction === "forward" ? SW : -SW;
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    Animated.timing(slideX, {
+      toValue: outX,
+      duration: 220,
+      useNativeDriver: true,
+    }).start(() => {
+      setStep(nextStep);
+      slideX.setValue(inX);
+      Animated.spring(slideX, {
+        toValue: 0,
+        useNativeDriver: true,
+        damping: 20,
+        stiffness: 220,
       }).start();
-    } else {
-      Animated.timing(sheetAnim, { toValue: 600, duration: 260, useNativeDriver: true }).start();
-    }
-  }, [visible]);
+      animateProgress(nextStep);
+    });
+  };
 
   const goNext = () => {
     if (step >= STEPS.length - 1) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      onClose();
+      handleClose();
       return;
     }
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Animated.sequence([
-      Animated.timing(slideX, { toValue: -SW, duration: 200, useNativeDriver: true }),
-    ]).start(() => {
-      setStep((s) => s + 1);
-      slideX.setValue(SW);
-      Animated.spring(slideX, { toValue: 0, useNativeDriver: true, damping: 18, stiffness: 200 }).start();
-    });
+    gotoStep(step + 1, "forward");
   };
 
   const goPrev = () => {
     if (step === 0) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Animated.sequence([
-      Animated.timing(slideX, { toValue: SW, duration: 200, useNativeDriver: true }),
-    ]).start(() => {
-      setStep((s) => s - 1);
-      slideX.setValue(-SW);
-      Animated.spring(slideX, { toValue: 0, useNativeDriver: true, damping: 18, stiffness: 200 }).start();
+    gotoStep(step - 1, "back");
+  };
+
+  const handleClose = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Animated.timing(sheetAnim, {
+      toValue: 700,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setVisible(false);
+      AsyncStorage.setItem(STORAGE_KEY, "1");
     });
   };
 
+  // ── Skip ─────────────────────────────────────────────────────────────────
+  const handleSkip = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Animated.timing(sheetAnim, {
+      toValue: 700,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      setVisible(false);
+      AsyncStorage.setItem(STORAGE_KEY, "1");
+    });
+  };
+
+  if (!visible) return null;
+
   const cur = STEPS[step];
   const isLast = step === STEPS.length - 1;
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0%", "100%"],
+  });
 
   return (
-    <Modal visible={visible} animationType="none" transparent statusBarTranslucent onRequestClose={onClose}>
-      <Pressable style={ob.backdrop} onPress={onClose} />
+    <Modal
+      visible={visible}
+      animationType="none"
+      transparent
+      statusBarTranslucent
+      onRequestClose={handleSkip}
+    >
+      {/* Backdrop */}
+      <Pressable style={ob.backdrop} onPress={handleSkip} />
+
+      {/* Sheet */}
       <Animated.View
-        style={[ob.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + 16, transform: [{ translateY: sheetAnim }] }]}
+        style={[
+          ob.sheet,
+          {
+            backgroundColor: colors.background,
+            paddingBottom: insets.bottom + 20,
+            transform: [{ translateY: sheetAnim }],
+          },
+        ]}
       >
         {/* Handle */}
         <View style={[ob.handle, { backgroundColor: colors.border }]} />
 
-        {/* Skip */}
-        <Pressable onPress={onClose} style={ob.skipBtn}>
-          <Text style={[ob.skipText, { color: colors.mutedForeground }]}>Geçir</Text>
-        </Pressable>
+        {/* Top row: step counter + skip */}
+        <View style={ob.topRow}>
+          <Text style={[ob.stepCount, { color: colors.mutedForeground }]}>
+            {step + 1} / {STEPS.length}
+          </Text>
+          <Pressable onPress={handleSkip} hitSlop={12} style={[ob.skipBtn, { backgroundColor: colors.muted }]}>
+            <Text style={[ob.skipTxt, { color: colors.mutedForeground }]}>Geçir</Text>
+          </Pressable>
+        </View>
 
-        {/* Content */}
+        {/* Progress bar */}
+        <View style={[ob.progressTrack, { backgroundColor: colors.border }]}>
+          <Animated.View
+            style={[ob.progressFill, { width: progressWidth, backgroundColor: cur.accentColor }]}
+          />
+        </View>
+
+        {/* Content — animated on step change */}
         <Animated.View style={[ob.content, { transform: [{ translateX: slideX }] }]}>
-          {/* Gradient card */}
+          {/* Icon card */}
           <LinearGradient
             colors={cur.gradient}
-            start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-            style={ob.card}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={ob.iconCard}
           >
             {/* Decorative rings */}
-            <View style={[ob.ring, { width: 180, height: 180, top: -60, right: -60, borderColor: "rgba(255,255,255,0.1)" }]} />
-            <View style={[ob.ring, { width: 120, height: 120, bottom: -30, left: -30, borderColor: "rgba(255,255,255,0.08)" }]} />
+            <View style={[ob.ring1, { borderColor: "rgba(255,255,255,0.12)" }]} />
+            <View style={[ob.ring2, { borderColor: "rgba(255,255,255,0.07)" }]} />
 
-            <View style={ob.cardInner}>
-              <Text style={ob.emoji}>{cur.emoji}</Text>
-              <View style={[ob.iconBox, { backgroundColor: "rgba(255,255,255,0.18)" }]}>
-                <Ionicons name={cur.icon} size={28} color="#fff" />
+            {/* Center icon */}
+            <View style={[ob.iconCircle, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
+              <View style={[ob.iconInner, { backgroundColor: "rgba(255,255,255,0.20)" }]}>
+                <Ionicons name={cur.icon} size={40} color="#fff" />
               </View>
+            </View>
+
+            {/* Step dots on card */}
+            <View style={ob.cardDots}>
+              {STEPS.map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    ob.cardDot,
+                    {
+                      backgroundColor: i === step ? "#fff" : "rgba(255,255,255,0.35)",
+                      width: i === step ? 20 : 6,
+                    },
+                  ]}
+                />
+              ))}
             </View>
           </LinearGradient>
 
@@ -168,34 +288,37 @@ function OnboardingSheet({
           <Text style={[ob.desc, { color: colors.mutedForeground }]}>{cur.desc}</Text>
         </Animated.View>
 
-        {/* Step dots */}
-        <View style={ob.dots}>
-          {STEPS.map((_, i) => (
-            <Pressable key={i} onPress={() => { setStep(i); slideX.setValue(0); }}>
-              <View style={[ob.dot, {
-                backgroundColor: i === step ? cur.color : colors.border,
-                width: i === step ? 22 : 7,
-              }]} />
-            </Pressable>
-          ))}
-        </View>
-
         {/* Navigation */}
         <View style={ob.navRow}>
+          {/* Back */}
           <Pressable
             onPress={goPrev}
-            style={[ob.prevBtn, { backgroundColor: colors.card, borderColor: colors.border, opacity: step === 0 ? 0.35 : 1 }]}
             disabled={step === 0}
+            style={[
+              ob.backBtn,
+              {
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+                opacity: step === 0 ? 0.3 : 1,
+              },
+            ]}
           >
             <Ionicons name="arrow-back" size={20} color={colors.foreground} />
           </Pressable>
 
+          {/* Next / Finish */}
           <Pressable
             onPress={goNext}
-            style={[ob.nextBtn, { backgroundColor: cur.color }]}
+            style={({ pressed }) => [ob.nextBtn, { backgroundColor: cur.accentColor, opacity: pressed ? 0.88 : 1 }]}
           >
-            <Text style={ob.nextText}>{isLast ? "Başla! 🚀" : "Dowam et"}</Text>
-            {!isLast && <Ionicons name="arrow-forward" size={18} color="#fff" />}
+            <Text style={ob.nextTxt}>
+              {isLast ? "Başlalyň!" : "Dowam et"}
+            </Text>
+            <Ionicons
+              name={isLast ? "checkmark" : "arrow-forward"}
+              size={18}
+              color="#fff"
+            />
           </Pressable>
         </View>
       </Animated.View>
@@ -203,209 +326,156 @@ function OnboardingSheet({
   );
 }
 
-// ── Float Trigger ─────────────────────────────────────────────────────
-export function OnboardingFloat() {
-  const colors = useColors();
-  const insets = useSafeAreaInsets();
-  const [showFloat, setShowFloat] = useState(false);
-  const [showSheet, setShowSheet] = useState(false);
-
-  const floatAnim = useRef(new Animated.Value(120)).current;
-  const bounceAnim = useRef(new Animated.Value(1)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    AsyncStorage.getItem(KEY).then((val) => {
-      if (!val) {
-        setTimeout(() => {
-          setShowFloat(true);
-          Animated.spring(floatAnim, {
-            toValue: 0, useNativeDriver: true, damping: 14, stiffness: 120, delay: 600,
-          }).start(() => {
-            startPulse();
-          });
-        }, 1200);
-      }
-    });
-  }, []);
-
-  const startPulse = () => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(bounceAnim, { toValue: 1.06, duration: 900, useNativeDriver: true }),
-        Animated.timing(bounceAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
-      ])
-    ).start();
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.4, duration: 1200, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 1, duration: 1200, useNativeDriver: true }),
-      ])
-    ).start();
-  };
-
-  const handleOpen = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setShowFloat(false);
-    setShowSheet(true);
-  };
-
-  const handleClose = () => {
-    setShowSheet(false);
-    AsyncStorage.setItem(KEY, "1");
-  };
-
-  const handleDismiss = () => {
-    Animated.timing(floatAnim, { toValue: 200, duration: 280, useNativeDriver: true }).start(() => {
-      setShowFloat(false);
-      AsyncStorage.setItem(KEY, "1");
-    });
-  };
-
-  if (!showFloat && !showSheet) return null;
-
-  return (
-    <>
-      <OnboardingSheet visible={showSheet} onClose={handleClose} />
-
-      {showFloat && (
-        <Animated.View
-          style={[
-            fl.container,
-            {
-              bottom: insets.bottom + 100,
-              right: 16,
-              transform: [{ translateY: floatAnim }, { scale: bounceAnim }],
-            },
-          ]}
-          pointerEvents="box-none"
-        >
-          {/* Pulse ring */}
-          <Animated.View
-            style={[
-              fl.pulseRing,
-              { transform: [{ scale: pulseAnim }], opacity: pulseAnim.interpolate({ inputRange: [1, 1.4], outputRange: [0.5, 0] }) },
-            ]}
-          />
-
-          {/* Card */}
-          <Pressable onPress={handleOpen} style={({ pressed }) => [fl.card, { opacity: pressed ? 0.88 : 1 }]}>
-            <LinearGradient
-              colors={["#065f46", "#10b981"]}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-              style={fl.gradient}
-            >
-              {/* Close tiny */}
-              <Pressable onPress={handleDismiss} style={fl.closeBtn} hitSlop={12}>
-                <Ionicons name="close" size={12} color="rgba(255,255,255,0.7)" />
-              </Pressable>
-
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                <View style={fl.iconBox}>
-                  <Text style={{ fontSize: 20 }}>✨</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={fl.title}>Biz bilen tanyşyň!</Text>
-                  <Text style={fl.sub}>Ýeňil'i doly öwreniň →</Text>
-                </View>
-              </View>
-            </LinearGradient>
-          </Pressable>
-        </Animated.View>
-      )}
-    </>
-  );
-}
-
-// ── Styles ────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Styles
+// ─────────────────────────────────────────────────────────────────────────────
 const ob = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.55)",
   },
   sheet: {
-    position: "absolute", bottom: 0, left: 0, right: 0,
-    borderTopLeftRadius: 32, borderTopRightRadius: 32,
+    position: "absolute",
+    bottom: 0, left: 0, right: 0,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
     paddingTop: 10,
+    overflow: "hidden",
   },
   handle: {
     width: 40, height: 4, borderRadius: 2,
-    alignSelf: "center", marginBottom: 8,
+    alignSelf: "center", marginBottom: 14,
+  },
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
+  stepCount: {
+    fontSize: 13,
+    fontWeight: "700",
   },
   skipBtn: {
-    alignSelf: "flex-end", paddingHorizontal: 20, paddingVertical: 8, marginBottom: 4,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
-  skipText: { fontSize: 14, fontWeight: "600" },
+  skipTxt: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  progressTrack: {
+    height: 3,
+    marginHorizontal: 20,
+    borderRadius: 2,
+    marginBottom: 20,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: 3,
+    borderRadius: 2,
+  },
 
-  content: { paddingHorizontal: 20 },
+  // ── Animated content ──
+  content: {
+    paddingHorizontal: 20,
+  },
 
-  card: {
-    borderRadius: 24, height: 200, marginBottom: 20,
-    overflow: "hidden", justifyContent: "center", alignItems: "center",
+  // ── Icon card ──
+  iconCard: {
+    borderRadius: 24,
+    height: 210,
+    marginBottom: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
     position: "relative",
   },
-  ring: {
-    position: "absolute", borderRadius: 999, borderWidth: 1.5,
+  ring1: {
+    position: "absolute",
+    width: 200, height: 200,
+    borderRadius: 100,
+    borderWidth: 1.5,
+    top: -60, right: -60,
   },
-  cardInner: { alignItems: "center", gap: 14 },
-  emoji: { fontSize: 48 },
-  iconBox: {
-    width: 56, height: 56, borderRadius: 18,
-    alignItems: "center", justifyContent: "center",
+  ring2: {
+    position: "absolute",
+    width: 140, height: 140,
+    borderRadius: 70,
+    borderWidth: 1.5,
+    bottom: -40, left: -40,
+  },
+  iconCircle: {
+    width: 100, height: 100,
+    borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconInner: {
+    width: 76, height: 76,
+    borderRadius: 38,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardDots: {
+    position: "absolute",
+    bottom: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  cardDot: {
+    height: 6,
+    borderRadius: 3,
   },
 
-  title: { fontSize: 22, fontWeight: "900", textAlign: "center", marginBottom: 10, letterSpacing: -0.4 },
-  desc: { fontSize: 14.5, lineHeight: 22, textAlign: "center", marginBottom: 24 },
-
-  dots: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 6, marginBottom: 20,
+  // ── Text ──
+  title: {
+    fontSize: 22,
+    fontWeight: "900",
+    letterSpacing: -0.5,
+    marginBottom: 10,
+    textAlign: "center",
   },
-  dot: { height: 7, borderRadius: 4 },
+  desc: {
+    fontSize: 14.5,
+    lineHeight: 22,
+    textAlign: "center",
+    marginBottom: 26,
+  },
 
-  navRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 20 },
-  prevBtn: {
-    width: 48, height: 48, borderRadius: 15, borderWidth: 1,
-    alignItems: "center", justifyContent: "center",
+  // ── Nav ──
+  navRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 20,
+  },
+  backBtn: {
+    width: 50, height: 50,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   nextBtn: {
-    flex: 1, height: 52, borderRadius: 16,
-    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+    flex: 1,
+    height: 52,
+    borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
   },
-  nextText: { color: "#fff", fontSize: 16, fontWeight: "800" },
-});
-
-const fl = StyleSheet.create({
-  container: { position: "absolute", zIndex: 999 },
-  pulseRing: {
-    position: "absolute",
-    width: 220, height: 70,
-    borderRadius: 22,
-    backgroundColor: "#10b98130",
-    alignSelf: "center",
-    top: 0,
+  nextTxt: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "800",
   },
-  card: {
-    borderRadius: 22,
-    shadowColor: "#10b981",
-    shadowOpacity: 0.4, shadowRadius: 16, shadowOffset: { width: 0, height: 6 },
-    elevation: 14,
-    overflow: "hidden",
-    width: 220,
-  },
-  gradient: { padding: 14, borderRadius: 22, position: "relative" },
-  closeBtn: {
-    position: "absolute", top: 8, right: 8,
-    width: 20, height: 20, borderRadius: 10,
-    backgroundColor: "rgba(0,0,0,0.2)",
-    alignItems: "center", justifyContent: "center",
-    zIndex: 1,
-  },
-  iconBox: {
-    width: 40, height: 40, borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center", justifyContent: "center",
-  },
-  title: { color: "#fff", fontSize: 13, fontWeight: "800", lineHeight: 18 },
-  sub: { color: "rgba(255,255,255,0.75)", fontSize: 11, marginTop: 2 },
 });
