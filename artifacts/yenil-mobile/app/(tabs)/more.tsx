@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, Platform, Modal,
   TextInput, KeyboardAvoidingView, FlatList, Dimensions, StatusBar,
+  ActivityIndicator, Animated,
 } from "react-native";
 import { router, type Href } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -159,86 +160,353 @@ const PLANS = [
   },
 ];
 
-function TarifSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+// ── Payment Modal ────────────────────────────────────────────────────
+type PayPlan = typeof PLANS[number];
+type PayMethod = "tmcell" | "bank";
+
+function PaymentModal({
+  plan, onClose, onSuccess,
+}: {
+  plan: PayPlan;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const [method, setMethod] = useState<PayMethod>("tmcell");
+  const [paying, setPaying] = useState(false);
+
+  const handlePay = async () => {
+    setPaying(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    await new Promise(r => setTimeout(r, 1600));
+    setPaying(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    onSuccess();
+  };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <Pressable style={ts.overlay} onPress={onClose} />
-      <View style={[ts.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + 24 }]}>
-        <View style={[ts.handle, { backgroundColor: colors.border }]} />
+    <Modal visible animationType="slide" transparent onRequestClose={onClose}>
+      <Pressable style={pm.overlay} onPress={onClose} />
+      <View style={[pm.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + 28 }]}>
+        <View style={[pm.handle, { backgroundColor: colors.border }]} />
 
-        <View style={ts.sheetHead}>
-          <View style={{ gap: 2 }}>
-            <Text style={[ts.sheetTitle, { color: colors.foreground }]}>Tarif saýlaň</Text>
-            <Text style={[ts.sheetSub, { color: colors.mutedForeground }]}>Özüňize laýyk teklip</Text>
+        {/* Header */}
+        <View style={pm.header}>
+          <View style={[pm.planIconBg, { backgroundColor: plan.color + "20" }]}>
+            <Ionicons name={plan.icon} size={24} color={plan.color} />
           </View>
-          <Pressable onPress={onClose} style={[ts.sheetClose, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View style={{ flex: 1 }}>
+            <Text style={[pm.planName, { color: colors.foreground }]}>{plan.name} Tarifi</Text>
+            <Text style={[pm.planPrice, { color: plan.color }]}>
+              {plan.free ? "Mugt" : `${plan.price} TMT / aý`}
+            </Text>
+          </View>
+          <Pressable onPress={onClose} style={[pm.closeBtn, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Ionicons name="close" size={18} color={colors.mutedForeground} />
           </Pressable>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}>
-          {PLANS.map(plan => (
-            <View
-              key={plan.id}
-              style={[ts.planCard, {
-                backgroundColor: plan.popular ? plan.color : colors.card,
-                borderColor: plan.popular ? plan.color : colors.border,
-                shadowColor: plan.color,
-                shadowOpacity: plan.popular ? 0.25 : 0.06,
-                shadowRadius: 16, shadowOffset: { width: 0, height: 6 }, elevation: plan.popular ? 8 : 1,
-              }]}
-            >
-              {plan.popular && (
-                <View style={ts.popularChip}>
-                  <Ionicons name="flame" size={10} color={plan.color} />
-                  <Text style={[ts.popularChipText, { color: plan.color }]}>Meşhur saýlaw</Text>
-                </View>
-              )}
-              <View style={ts.planRow}>
-                <View style={[ts.planIconBg, { backgroundColor: plan.popular ? "rgba(255,255,255,0.2)" : plan.bg }]}>
-                  <Ionicons name={plan.icon} size={22} color={plan.popular ? "#fff" : plan.color} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[ts.planName, { color: plan.popular ? "#fff" : colors.foreground }]}>{plan.name}</Text>
-                  {plan.free ? (
-                    <Text style={[ts.planPrice, { color: plan.popular ? "#fff" : plan.color, fontSize: 20 }]}>Mugt</Text>
-                  ) : (
-                    <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
-                      <Text style={[ts.planPrice, { color: plan.popular ? "#fff" : plan.color }]}>{plan.price}</Text>
-                      <Text style={[ts.planPer, { color: plan.popular ? "rgba(255,255,255,0.7)" : colors.mutedForeground }]}>TMT/aý</Text>
-                    </View>
-                  )}
-                </View>
-                <Pressable
-                  onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
-                  style={[ts.planBtn, {
-                    backgroundColor: plan.popular ? "#fff" : plan.color + "15",
-                    borderWidth: plan.popular ? 0 : 1.5,
-                    borderColor: plan.color,
-                  }]}
-                >
-                  <Text style={[ts.planBtnText, { color: plan.color }]}>
-                    {plan.free ? "Mugt başla" : plan.popular ? "Pro almak" : "Almak"}
-                  </Text>
-                </Pressable>
-              </View>
-              <View style={[ts.divider, { backgroundColor: plan.popular ? "rgba(255,255,255,0.2)" : colors.border }]} />
-              {plan.features.map((f, fi) => (
-                <View key={fi} style={ts.featureRow}>
-                  <View style={[ts.checkCircle, { backgroundColor: plan.popular ? "rgba(255,255,255,0.2)" : plan.bg }]}>
-                    <Ionicons name="checkmark" size={11} color={plan.popular ? "#fff" : plan.color} />
-                  </View>
-                  <Text style={[ts.featureText, { color: plan.popular ? "rgba(255,255,255,0.85)" : colors.mutedForeground }]}>{f}</Text>
-                </View>
-              ))}
+        <View style={[pm.divider, { backgroundColor: colors.border }]} />
+
+        {/* Method */}
+        <Text style={[pm.sectionLabel, { color: colors.mutedForeground }]}>TÖLEG USULY</Text>
+
+        <Pressable
+          onPress={() => { setMethod("tmcell"); Haptics.selectionAsync(); }}
+          style={[pm.methodRow, {
+            backgroundColor: method === "tmcell" ? "#0ea5e9" + "12" : colors.card,
+            borderColor: method === "tmcell" ? "#0ea5e9" : colors.border,
+          }]}
+        >
+          <View style={[pm.methodIcon, { backgroundColor: "#0ea5e912" }]}>
+            <Ionicons name="phone-portrait-outline" size={20} color="#0ea5e9" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[pm.methodName, { color: colors.foreground }]}>TMCell balans</Text>
+            <Text style={[pm.methodDesc, { color: colors.mutedForeground }]}>Mobil balansdan göni töleg</Text>
+          </View>
+          <View style={[pm.radio, {
+            borderColor: method === "tmcell" ? "#0ea5e9" : colors.border,
+            backgroundColor: method === "tmcell" ? "#0ea5e9" : "transparent",
+          }]}>
+            {method === "tmcell" && <View style={pm.radioDot} />}
+          </View>
+        </Pressable>
+
+        <Pressable
+          onPress={() => { setMethod("bank"); Haptics.selectionAsync(); }}
+          style={[pm.methodRow, {
+            backgroundColor: method === "bank" ? "#8b5cf6" + "12" : colors.card,
+            borderColor: method === "bank" ? "#8b5cf6" : colors.border,
+          }]}
+        >
+          <View style={[pm.methodIcon, { backgroundColor: "#8b5cf612" }]}>
+            <Ionicons name="card-outline" size={20} color="#8b5cf6" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[pm.methodName, { color: colors.foreground }]}>Bank kartasy</Text>
+            <Text style={[pm.methodDesc, { color: colors.mutedForeground }]}>Milli bank kartasy arkaly</Text>
+          </View>
+          <View style={[pm.radio, {
+            borderColor: method === "bank" ? "#8b5cf6" : colors.border,
+            backgroundColor: method === "bank" ? "#8b5cf6" : "transparent",
+          }]}>
+            {method === "bank" && <View style={pm.radioDot} />}
+          </View>
+        </Pressable>
+
+        {/* Summary */}
+        <View style={[pm.summary, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={[pm.summaryLabel, { color: colors.mutedForeground }]}>Jemi töleg</Text>
+          <Text style={[pm.summaryAmount, { color: colors.foreground }]}>
+            {plan.free ? "0.00 TMT" : `${plan.price}.00 TMT`}
+          </Text>
+        </View>
+
+        {/* Confirm */}
+        <Pressable
+          onPress={handlePay}
+          disabled={paying}
+          style={({ pressed }) => [pm.confirmBtn, { backgroundColor: plan.color, opacity: pressed || paying ? 0.8 : 1 }]}
+        >
+          {paying ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <ActivityIndicator size="small" color="#fff" />
+              <Text style={pm.confirmText}>Tassyklanýar...</Text>
             </View>
-          ))}
-        </ScrollView>
+          ) : (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Ionicons name={plan.free ? "checkmark-circle-outline" : "lock-closed-outline"} size={18} color="#fff" />
+              <Text style={pm.confirmText}>{plan.free ? "Mugt işe başla" : `${plan.price} TMT Töle`}</Text>
+            </View>
+          )}
+        </Pressable>
+
+        <Text style={[pm.footnote, { color: colors.mutedForeground }]}>
+          {plan.free
+            ? "Tölegsiz. Islän wagtyňyz ýatyrып bilersiňiz."
+            : "Töleg tassyklanansoň tarifyňyz derhal işjeňleşer."}
+        </Text>
       </View>
     </Modal>
+  );
+}
+
+// ── Success Modal ────────────────────────────────────────────────────
+function SuccessModal({ plan, onClose }: { plan: PayPlan; onClose: () => void }) {
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const scale = React.useRef(new Animated.Value(0.6)).current;
+  const opacity = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true, damping: 12, stiffness: 160 }),
+      Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  return (
+    <Modal visible animationType="fade" transparent onRequestClose={onClose}>
+      <View style={sc.overlay}>
+        <Animated.View style={[sc.card, { backgroundColor: colors.card, transform: [{ scale }], opacity }]}>
+          <View style={[sc.iconRing, { borderColor: plan.color + "40", backgroundColor: plan.color + "15" }]}>
+            <View style={[sc.iconInner, { backgroundColor: plan.color }]}>
+              <Ionicons name="checkmark" size={32} color="#fff" />
+            </View>
+          </View>
+          <Text style={[sc.title, { color: colors.foreground }]}>Gutlaýarys! 🎉</Text>
+          <Text style={[sc.planName, { color: plan.color }]}>{plan.name} tarifi işjeňleşdi</Text>
+          <Text style={[sc.desc, { color: colors.mutedForeground }]}>
+            {plan.free
+              ? "Başlangyç mümkinçiliklerden peýdalanyp başlap bilersiňiz."
+              : "Ähli premium mümkinçilikler elýeterli boldy."}
+          </Text>
+          <Pressable
+            onPress={onClose}
+            style={[sc.btn, { backgroundColor: plan.color }]}
+          >
+            <Text style={sc.btnText}>Dowam et</Text>
+          </Pressable>
+        </Animated.View>
+      </View>
+    </Modal>
+  );
+}
+
+// ── Tarif Sheet ──────────────────────────────────────────────────────
+function TarifSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const [payPlan, setPayPlan] = useState<PayPlan | null>(null);
+  const [successPlan, setSuccessPlan] = useState<PayPlan | null>(null);
+
+  const handleSelect = (plan: PayPlan) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setPayPlan(plan);
+  };
+
+  const handleSuccess = () => {
+    const p = payPlan;
+    setPayPlan(null);
+    setSuccessPlan(p);
+  };
+
+  return (
+    <>
+      {payPlan && (
+        <PaymentModal
+          plan={payPlan}
+          onClose={() => setPayPlan(null)}
+          onSuccess={handleSuccess}
+        />
+      )}
+      {successPlan && (
+        <SuccessModal
+          plan={successPlan}
+          onClose={() => { setSuccessPlan(null); onClose(); }}
+        />
+      )}
+
+      <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+        <Pressable style={ts.overlay} onPress={onClose} />
+        <View style={[ts.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + 16 }]}>
+          <View style={[ts.handle, { backgroundColor: colors.border }]} />
+
+          {/* Sheet header */}
+          <View style={ts.sheetHead}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <View style={ts.crownBox}>
+                <Ionicons name="ribbon" size={18} color="#f59e0b" />
+              </View>
+              <View>
+                <Text style={[ts.sheetTitle, { color: colors.foreground }]}>Tarif saýlaň</Text>
+                <Text style={[ts.sheetSub, { color: colors.mutedForeground }]}>Özüňize laýyk meýilnama</Text>
+              </View>
+            </View>
+            <Pressable onPress={onClose} style={[ts.sheetClose, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Ionicons name="close" size={18} color={colors.mutedForeground} />
+            </Pressable>
+          </View>
+
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 8, gap: 12 }}>
+            {PLANS.map((plan) => {
+              const isPopular = plan.popular;
+              const isPremium = plan.id === "premium";
+              const cardBg = isPremium ? "#0f0a00" : isPopular ? plan.color : colors.card;
+              const textColor = (isPopular || isPremium) ? "#fff" : colors.foreground;
+              const subColor = (isPopular || isPremium) ? "rgba(255,255,255,0.65)" : colors.mutedForeground;
+
+              return (
+                <View
+                  key={plan.id}
+                  style={[ts.planCard, {
+                    backgroundColor: cardBg,
+                    borderColor: isPremium ? plan.color + "60" : isPopular ? plan.color : colors.border,
+                    shadowColor: plan.color,
+                    shadowOpacity: (isPopular || isPremium) ? 0.3 : 0.05,
+                    shadowRadius: 20, shadowOffset: { width: 0, height: 8 },
+                    elevation: (isPopular || isPremium) ? 10 : 1,
+                  }]}
+                >
+                  {/* Decorative orb for premium */}
+                  {isPremium && (
+                    <>
+                      <View style={[ts.premOrb, { top: -30, right: -30, backgroundColor: plan.color + "25", width: 100, height: 100 }]} />
+                      <View style={[ts.premOrb, { bottom: -20, left: -20, backgroundColor: plan.color + "15", width: 80, height: 80 }]} />
+                    </>
+                  )}
+
+                  {/* Chip */}
+                  {(isPopular || isPremium) && (
+                    <View style={[ts.chip, { backgroundColor: isPopular ? "rgba(255,255,255,0.2)" : plan.color + "35" }]}>
+                      <Ionicons name={isPopular ? "flame" : "star"} size={11} color={isPopular ? "#fff" : plan.color} />
+                      <Text style={[ts.chipText, { color: isPopular ? "#fff" : plan.color }]}>
+                        {isPopular ? "Meşhur saýlaw" : "PREMIUM"}
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Plan header row */}
+                  <View style={ts.planHeaderRow}>
+                    <View style={[ts.planIconBg, {
+                      backgroundColor: (isPopular || isPremium) ? "rgba(255,255,255,0.15)" : plan.bg,
+                    }]}>
+                      <Ionicons name={plan.icon} size={22} color={(isPopular || isPremium) ? "#fff" : plan.color} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[ts.planName, { color: textColor }]}>{plan.name}</Text>
+                      {plan.free ? (
+                        <View style={[ts.freeBadge, { backgroundColor: plan.color + "20" }]}>
+                          <Text style={[ts.freeBadgeText, { color: plan.color }]}>MUGT</Text>
+                        </View>
+                      ) : (
+                        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 3 }}>
+                          <Text style={[ts.planPrice, { color: (isPopular || isPremium) ? "#fff" : plan.color }]}>
+                            {plan.price}
+                          </Text>
+                          <Text style={[ts.planPer, { color: subColor }]}>TMT/aý</Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+
+                  {/* Divider */}
+                  <View style={[ts.divider, { backgroundColor: (isPopular || isPremium) ? "rgba(255,255,255,0.12)" : colors.border }]} />
+
+                  {/* Features */}
+                  <View style={{ gap: 7, marginBottom: 16 }}>
+                    {plan.features.map((f, fi) => (
+                      <View key={fi} style={ts.featureRow}>
+                        <View style={[ts.checkCircle, {
+                          backgroundColor: (isPopular || isPremium) ? "rgba(255,255,255,0.15)" : plan.color + "18",
+                        }]}>
+                          <Ionicons name="checkmark" size={11} color={(isPopular || isPremium) ? "#fff" : plan.color} />
+                        </View>
+                        <Text style={[ts.featureText, { color: subColor }]}>{f}</Text>
+                      </View>
+                    ))}
+                  </View>
+
+                  {/* CTA Button */}
+                  <Pressable
+                    onPress={() => handleSelect(plan)}
+                    style={({ pressed }) => [ts.planBtn, {
+                      backgroundColor: isPopular ? "#fff"
+                        : isPremium ? plan.color
+                        : plan.color + "18",
+                      borderWidth: isPopular ? 0 : isPremium ? 0 : 1.5,
+                      borderColor: plan.color,
+                      opacity: pressed ? 0.82 : 1,
+                      shadowColor: plan.color,
+                      shadowOpacity: (isPopular || isPremium) ? 0.35 : 0,
+                      shadowRadius: 12, shadowOffset: { width: 0, height: 4 },
+                      elevation: (isPopular || isPremium) ? 6 : 0,
+                    }]}
+                  >
+                    <Ionicons
+                      name={plan.free ? "rocket-outline" : isPopular ? "diamond-outline" : "ribbon-outline"}
+                      size={16}
+                      color={isPopular ? plan.color : isPremium ? "#fff" : plan.color}
+                    />
+                    <Text style={[ts.planBtnText, {
+                      color: isPopular ? plan.color : isPremium ? "#fff" : plan.color,
+                    }]}>
+                      {plan.free ? "Mugt başla" : isPopular ? "Pro almak" : "Premium almak"}
+                    </Text>
+                  </Pressable>
+                </View>
+              );
+            })}
+
+            <Text style={[ts.footNote, { color: colors.mutedForeground }]}>
+              Tölegler her aýyň başynda ýazylýar. Islän wagtyňyz ýatyryp bilersiňiz.
+            </Text>
+          </ScrollView>
+        </View>
+      </Modal>
+    </>
   );
 }
 
@@ -418,30 +686,36 @@ export default function MoreScreen() {
         <Text style={[s.groupTitle, { color: colors.mutedForeground }]}>HASAP</Text>
         <Pressable
           onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setTarifOpen(true); }}
-          style={({ pressed }) => [s.tarifCard, { opacity: pressed ? 0.92 : 1 }]}
+          style={({ pressed }) => [s.tarifCard, { transform: [{ scale: pressed ? 0.975 : 1 }] }]}
         >
-          {/* Top row */}
+          {/* Decorative orbs */}
+          <View style={[s.tarifOrb, { top: -40, right: -40, width: 130, height: 130, backgroundColor: "#10b98122" }]} />
+          <View style={[s.tarifOrb, { bottom: -30, left: -20, width: 100, height: 100, backgroundColor: "#8b5cf618" }]} />
+          <View style={[s.tarifOrb, { top: 20, left: 60, width: 60, height: 60, backgroundColor: "#f59e0b0e" }]} />
+
+          {/* Top: icon + title + badge */}
           <View style={s.tarifTop}>
-            <View style={s.tarifIconStack}>
-              {/* Background glow */}
-              <View style={s.tarifGlowCircle} />
-              <Ionicons name="star" size={28} color="#fff" />
+            <View style={s.tarifIconBox}>
+              <View style={s.tarifIconGlow} />
+              <Ionicons name="ribbon" size={26} color="#f59e0b" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={s.tarifTitle}>Tarif satyn almak</Text>
-              <Text style={s.tarifSub}>Pro we Premium hyzmatlar</Text>
+              <Text style={s.tarifTitle}>Tarif Meýilnamasy</Text>
+              <Text style={s.tarifSub}>Mugt · Pro · Premium</Text>
             </View>
-            <View style={s.tarifBadge}>
-              <Text style={s.tarifBadgeText}>Mugt & Pro</Text>
+            <View style={s.tarifCurrentBadge}>
+              <View style={s.tarifCurrentDot} />
+              <Text style={s.tarifCurrentText}>Başlangyç</Text>
             </View>
           </View>
 
-          {/* Plan pills */}
-          <View style={s.tarifPlansRow}>
+          {/* Plan tier row */}
+          <View style={s.tarifTierRow}>
             {PLANS.map(p => (
-              <View key={p.id} style={[s.tarifPlanPill, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
-                <Ionicons name={p.icon} size={12} color="#fff" />
-                <Text style={s.tarifPlanPillText}>{p.name}</Text>
+              <View key={p.id} style={[s.tarifTier, { borderColor: p.color + "50", backgroundColor: p.color + "15" }]}>
+                <Ionicons name={p.icon} size={13} color={p.color} />
+                <Text style={[s.tarifTierText, { color: p.color }]}>{p.name}</Text>
+                {p.free && <Text style={[s.tarifTierFree, { color: p.color }]}>mugt</Text>}
               </View>
             ))}
           </View>
@@ -450,21 +724,32 @@ export default function MoreScreen() {
           <View style={s.tarifDivider} />
 
           {/* Feature hints */}
-          <View style={s.tarifFeatures}>
-            {["AI Agent & AI Kömekçi", "Ýer Paýlaşmak & Çanly ýer", "Premium: adyňyz, ilkinji orda"].map((f, i) => (
+          <View style={{ gap: 8, marginBottom: 18 }}>
+            {[
+              { icon: "sparkles-outline" as const, color: "#8b5cf6", text: "AI Agent & AI Kömekçi hyzmatlary" },
+              { icon: "location-outline" as const, color: "#10b981", text: "Ýer Paýlaşmak & Çanly ýer görkezmek" },
+              { icon: "star-outline" as const, color: "#f59e0b", text: "Premium: adyňyz öňde, nobatsyz hyzmat" },
+            ].map((f, i) => (
               <View key={i} style={s.tarifFeatureRow}>
-                <View style={s.tarifCheckCircle}>
-                  <Ionicons name="checkmark" size={10} color="#10b981" />
+                <View style={[s.tarifCheckCircle, { backgroundColor: f.color + "18" }]}>
+                  <Ionicons name={f.icon} size={12} color={f.color} />
                 </View>
-                <Text style={s.tarifFeatureText}>{f}</Text>
+                <Text style={s.tarifFeatureText}>{f.text}</Text>
               </View>
             ))}
           </View>
 
-          {/* CTA button */}
+          {/* CTA */}
           <View style={s.tarifCta}>
-            <Text style={s.tarifCtaText}>Tarif saýlamak</Text>
-            <Ionicons name="arrow-forward" size={16} color="#fff" />
+            <LinearGradient
+              colors={["#10b981", "#059669"]}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+              style={s.tarifCtaGradient}
+            >
+              <Ionicons name="diamond-outline" size={17} color="#fff" />
+              <Text style={s.tarifCtaText}>Tarif saýlamak</Text>
+              <Ionicons name="chevron-forward" size={17} color="rgba(255,255,255,0.8)" />
+            </LinearGradient>
           </View>
         </Pressable>
 
@@ -513,41 +798,61 @@ const ch = StyleSheet.create({
 });
 
 const ts = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)" },
+  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)" },
   sheet: {
-    borderTopLeftRadius: 30, borderTopRightRadius: 30,
-    paddingTop: 12, maxHeight: SCREEN_H * 0.88,
+    borderTopLeftRadius: 32, borderTopRightRadius: 32,
+    paddingTop: 10, maxHeight: SCREEN_H * 0.92,
   },
-  handle: { width: 38, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 18 },
+  handle: { width: 42, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 20 },
   sheetHead: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-    paddingHorizontal: 20, marginBottom: 16,
+    paddingHorizontal: 20, marginBottom: 18,
   },
-  sheetTitle: { fontSize: 20, fontWeight: "800" },
-  sheetSub: { fontSize: 12, marginTop: 2 },
+  crownBox: {
+    width: 36, height: 36, borderRadius: 11,
+    backgroundColor: "#fef3c7",
+    alignItems: "center", justifyContent: "center",
+  },
+  sheetTitle: { fontSize: 21, fontWeight: "800", letterSpacing: -0.3 },
+  sheetSub: { fontSize: 12, marginTop: 1 },
   sheetClose: {
     width: 34, height: 34, borderRadius: 17,
     alignItems: "center", justifyContent: "center", borderWidth: 1,
   },
-  planCard: { borderRadius: 20, padding: 16, borderWidth: 1.5, overflow: "visible" },
-  popularChip: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    backgroundColor: "#fff", borderRadius: 20,
-    alignSelf: "flex-start",
-    paddingHorizontal: 10, paddingVertical: 4, marginBottom: 12,
+
+  /* Plan card */
+  planCard: {
+    borderRadius: 24, padding: 18, borderWidth: 1.5,
+    overflow: "hidden", position: "relative",
   },
-  popularChipText: { fontSize: 11, fontWeight: "800" },
-  planRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  planIconBg: { width: 46, height: 46, borderRadius: 13, alignItems: "center", justifyContent: "center" },
-  planName: { fontSize: 15, fontWeight: "800", marginBottom: 2 },
-  planPrice: { fontSize: 26, fontWeight: "800" },
-  planPer: { fontSize: 12 },
-  planBtn: { borderRadius: 11, paddingVertical: 9, paddingHorizontal: 14, alignItems: "center" },
-  planBtnText: { fontWeight: "700", fontSize: 13 },
-  divider: { height: 1, marginVertical: 12 },
-  featureRow: { flexDirection: "row", alignItems: "center", gap: 9, marginBottom: 6 },
-  checkCircle: { width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center" },
-  featureText: { fontSize: 13, flex: 1 },
+  premOrb: { position: "absolute", borderRadius: 999 },
+  chip: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    alignSelf: "flex-start", borderRadius: 20,
+    paddingHorizontal: 10, paddingVertical: 4, marginBottom: 14,
+  },
+  chipText: { fontSize: 11, fontWeight: "800" },
+
+  planHeaderRow: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 4 },
+  planIconBg: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  planName: { fontSize: 17, fontWeight: "800", marginBottom: 3 },
+  freeBadge: { alignSelf: "flex-start", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  freeBadgeText: { fontSize: 11, fontWeight: "900", letterSpacing: 0.5 },
+  planPrice: { fontSize: 28, fontWeight: "800", lineHeight: 32 },
+  planPer: { fontSize: 13 },
+
+  divider: { height: 1, marginVertical: 14 },
+  featureRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  checkCircle: { width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center" },
+  featureText: { fontSize: 13.5, flex: 1, lineHeight: 19 },
+
+  planBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 8, borderRadius: 14, paddingVertical: 13, paddingHorizontal: 20,
+  },
+  planBtnText: { fontWeight: "800", fontSize: 15 },
+
+  footNote: { textAlign: "center", fontSize: 12, lineHeight: 17, paddingHorizontal: 8 },
 });
 
 const gr = StyleSheet.create({
@@ -666,57 +971,57 @@ const s = StyleSheet.create({
   },
   aiChipText: { color: "rgba(255,255,255,0.85)", fontSize: 11, fontWeight: "600" },
 
-  // Tarif card
+  // Tarif entry card
   tarifCard: {
-    marginHorizontal: 16, borderRadius: 22, overflow: "hidden",
-    backgroundColor: "#111827",
-    shadowColor: "#000",
-    shadowOpacity: 0.28, shadowRadius: 20, shadowOffset: { width: 0, height: 8 },
-    elevation: 10, padding: 20,
+    marginHorizontal: 16, borderRadius: 26, overflow: "hidden",
+    backgroundColor: "#0d1117",
+    shadowColor: "#10b981",
+    shadowOpacity: 0.22, shadowRadius: 24, shadowOffset: { width: 0, height: 10 },
+    elevation: 12, padding: 20,
   },
-  tarifTop: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 16 },
-  tarifIconStack: {
-    width: 52, height: 52, borderRadius: 16,
-    backgroundColor: "#10b981",
+  tarifOrb: { position: "absolute", borderRadius: 999 },
+  tarifTop: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 18 },
+  tarifIconBox: {
+    width: 54, height: 54, borderRadius: 17,
+    backgroundColor: "#1a1000",
+    borderWidth: 1.5, borderColor: "#f59e0b30",
     alignItems: "center", justifyContent: "center",
     position: "relative",
-    shadowColor: "#10b981", shadowOpacity: 0.4, shadowRadius: 10, shadowOffset: { width: 0, height: 4 },
   },
-  tarifGlowCircle: {
-    position: "absolute",
-    width: 70, height: 70, borderRadius: 35,
-    backgroundColor: "#10b98140",
+  tarifIconGlow: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 17,
+    backgroundColor: "#f59e0b0c",
   },
-  tarifTitle: { color: "#fff", fontSize: 18, fontWeight: "800" },
-  tarifSub: { color: "rgba(255,255,255,0.55)", fontSize: 12, marginTop: 2 },
-  tarifBadge: {
-    backgroundColor: "#10b981",
-    borderRadius: 12, paddingHorizontal: 10, paddingVertical: 6,
-  },
-  tarifBadgeText: { color: "#fff", fontSize: 12, fontWeight: "800" },
-
-  tarifPlansRow: { flexDirection: "row", gap: 8, marginBottom: 16 },
-  tarifPlanPill: {
+  tarifTitle: { color: "#fff", fontSize: 17, fontWeight: "800", letterSpacing: -0.3 },
+  tarifSub: { color: "rgba(255,255,255,0.45)", fontSize: 12, marginTop: 3 },
+  tarifCurrentBadge: {
     flexDirection: "row", alignItems: "center", gap: 5,
-    borderRadius: 20, paddingHorizontal: 11, paddingVertical: 6,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 10, paddingHorizontal: 9, paddingVertical: 5,
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.12)",
   },
-  tarifPlanPillText: { color: "rgba(255,255,255,0.85)", fontSize: 11, fontWeight: "700" },
+  tarifCurrentDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: "#4ade80" },
+  tarifCurrentText: { color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: "700" },
 
-  tarifDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.1)", marginBottom: 14 },
+  tarifTierRow: { flexDirection: "row", gap: 8, marginBottom: 16 },
+  tarifTier: {
+    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 4, borderRadius: 12, paddingVertical: 7,
+    borderWidth: 1, flexWrap: "wrap",
+  },
+  tarifTierText: { fontSize: 11, fontWeight: "800" },
+  tarifTierFree: { fontSize: 9, fontWeight: "700", opacity: 0.8 },
 
-  tarifFeatures: { gap: 8, marginBottom: 18 },
+  tarifDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.08)", marginBottom: 14 },
   tarifFeatureRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  tarifCheckCircle: {
-    width: 20, height: 20, borderRadius: 10,
-    backgroundColor: "#10b98120",
-    alignItems: "center", justifyContent: "center",
-  },
-  tarifFeatureText: { color: "rgba(255,255,255,0.7)", fontSize: 13, flex: 1 },
+  tarifCheckCircle: { width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center" },
+  tarifFeatureText: { color: "rgba(255,255,255,0.6)", fontSize: 13, flex: 1, lineHeight: 18 },
 
-  tarifCta: {
+  tarifCta: { borderRadius: 16, overflow: "hidden", marginTop: 2 },
+  tarifCtaGradient: {
     flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 8, backgroundColor: "#10b981",
-    borderRadius: 14, paddingVertical: 14,
+    gap: 8, paddingVertical: 15, borderRadius: 16,
   },
   tarifCtaText: { color: "#fff", fontSize: 16, fontWeight: "800" },
 
@@ -727,5 +1032,75 @@ const s = StyleSheet.create({
   },
   versionDot: { width: 6, height: 6, borderRadius: 3 },
   versionText: { fontSize: 12 },
+});
+
+// ── Payment Modal styles ─────────────────────────────────────────────
+const pm = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.55)" },
+  sheet: {
+    borderTopLeftRadius: 32, borderTopRightRadius: 32,
+    paddingTop: 10, paddingHorizontal: 20,
+  },
+  handle: { width: 42, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 22 },
+  header: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 20 },
+  planIconBg: { width: 50, height: 50, borderRadius: 15, alignItems: "center", justifyContent: "center" },
+  planName: { fontSize: 17, fontWeight: "800" },
+  planPrice: { fontSize: 15, fontWeight: "700", marginTop: 2 },
+  closeBtn: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center", borderWidth: 1 },
+  divider: { height: 1, marginBottom: 20 },
+  sectionLabel: { fontSize: 11, fontWeight: "700", letterSpacing: 0.7, marginBottom: 10 },
+  methodRow: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    borderRadius: 16, padding: 14, borderWidth: 1.5, marginBottom: 10,
+  },
+  methodIcon: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  methodName: { fontSize: 15, fontWeight: "700" },
+  methodDesc: { fontSize: 12, marginTop: 2 },
+  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, alignItems: "center", justifyContent: "center" },
+  radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: "#fff" },
+  summary: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    borderRadius: 14, padding: 14, borderWidth: 1, marginTop: 6, marginBottom: 16,
+  },
+  summaryLabel: { fontSize: 13, fontWeight: "600" },
+  summaryAmount: { fontSize: 22, fontWeight: "900" },
+  confirmBtn: {
+    borderRadius: 16, paddingVertical: 16,
+    alignItems: "center", justifyContent: "center",
+    shadowOpacity: 0.3, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 8,
+  },
+  confirmText: { color: "#fff", fontSize: 17, fontWeight: "800" },
+  footnote: { textAlign: "center", fontSize: 12, lineHeight: 17, marginTop: 12 },
+});
+
+// ── Success Modal styles ─────────────────────────────────────────────
+const sc = StyleSheet.create({
+  overlay: {
+    flex: 1, backgroundColor: "rgba(0,0,0,0.6)",
+    alignItems: "center", justifyContent: "center", padding: 32,
+  },
+  card: {
+    width: "100%", borderRadius: 28, padding: 32,
+    alignItems: "center",
+    shadowColor: "#000", shadowOpacity: 0.3, shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 }, elevation: 16,
+  },
+  iconRing: {
+    width: 90, height: 90, borderRadius: 45,
+    borderWidth: 3, alignItems: "center", justifyContent: "center",
+    marginBottom: 22,
+  },
+  iconInner: {
+    width: 64, height: 64, borderRadius: 32,
+    alignItems: "center", justifyContent: "center",
+  },
+  title: { fontSize: 24, fontWeight: "900", marginBottom: 6, letterSpacing: -0.5 },
+  planName: { fontSize: 16, fontWeight: "800", marginBottom: 12 },
+  desc: { textAlign: "center", fontSize: 14, lineHeight: 20, marginBottom: 28 },
+  btn: {
+    width: "100%", borderRadius: 16, paddingVertical: 15,
+    alignItems: "center",
+  },
+  btnText: { color: "#fff", fontSize: 16, fontWeight: "800" },
 });
 
