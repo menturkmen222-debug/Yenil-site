@@ -33,7 +33,28 @@ export async function saveOrder(path: string, data: Record<string, unknown>): Pr
 
 // ─── Balance ──────────────────────────────────────────────────────────────────
 
+/**
+ * Jemi BP (real + bonus) — diňe görkezmek üçin.
+ * Çykaryş üçin getUserRealBalance() ulanyň.
+ */
 export async function getUserBalance(deviceId: string): Promise<number> {
+  try {
+    const snap = await get(ref(db, `user-balances/${deviceId}`));
+    if (snap.exists()) {
+      const v = snap.val();
+      return (v.balance ?? 0) + (v.bonusBalance ?? 0);
+    }
+    return 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Diňe hakyky BP (TMT → BP çalyşylandan gelen) — çykaryş üçin.
+ * Bonus BP (sowgat, referal, e-bilim) bu ýere girmeýär.
+ */
+export async function getUserRealBalance(deviceId: string): Promise<number> {
   try {
     const snap = await get(ref(db, `user-balances/${deviceId}`));
     if (snap.exists()) return snap.val().balance ?? 0;
@@ -43,23 +64,115 @@ export async function getUserBalance(deviceId: string): Promise<number> {
   }
 }
 
+/** Hakyky BP goş (TMT → BP agent çalşy). Çykarylyp bilner. */
 export async function addBalance(deviceId: string, amount: number): Promise<void> {
-  const current = await getUserBalance(deviceId);
-  await set(ref(db, `user-balances/${deviceId}`), {
-    balance: current + amount,
+  const snap = await get(ref(db, `user-balances/${deviceId}`));
+  const cur = snap.exists() ? (snap.val().balance ?? 0) : 0;
+  await update(ref(db, `user-balances/${deviceId}`), {
+    balance: cur + amount,
     updatedAt: new Date().toISOString(),
   });
 }
 
+/**
+ * Bonus BP goş — tizim tarapyndan berilýän sylag (sowgat, referal, e-bilim...).
+ * Bu BP çykarylyp bilmez, diňe içerde ulanylyp bilner.
+ */
+export async function addBonusBalance(deviceId: string, amount: number): Promise<void> {
+  try {
+    const snap = await get(ref(db, `user-balances/${deviceId}`));
+    const cur = snap.exists() ? (snap.val().bonusBalance ?? 0) : 0;
+    await update(ref(db, `user-balances/${deviceId}`), {
+      bonusBalance: cur + amount,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch {}
+}
+
+/**
+ * BP aýyr (içerde harçlamak üçin — bonus first, soň hakyky).
+ * Çykaryş üçin cashout screenlerinde getUserRealBalance() barlaň.
+ */
 export async function deductBalance(deviceId: string, amount: number): Promise<boolean> {
   try {
-    const current = await getUserBalance(deviceId);
-    if (current < amount) return false;
-    await set(ref(db, `user-balances/${deviceId}`), {
-      balance: current - amount,
+    const snap = await get(ref(db, `user-balances/${deviceId}`));
+    const val = snap.exists() ? snap.val() : {};
+    const real  = val.balance      ?? 0;
+    const bonus = val.bonusBalance ?? 0;
+    const total = real + bonus;
+    if (total < amount) return false;
+    // Bonus öňi bilen harçlanýar
+    const newBonus = Math.max(0, bonus - amount);
+    const remainder = amount - (bonus - newBonus);
+    const newReal  = Math.max(0, real - remainder);
+    await update(ref(db, `user-balances/${deviceId}`), {
+      balance: newReal,
+      bonusBalance: newBonus,
       updatedAt: new Date().toISOString(),
     });
     return true;
+  } catch {
+    return false;
+  }
+}
+
+// ─── Gündelik Sowgat (Daily Gift) ────────────────────────────────────────────
+
+/**
+ * Gündelik sowgat alyş. Her 24 sagatda 1 gezek.
+ * Firebase: `users/{deviceId}/lastGiftDate` (YYYY-MM-DD)
+ *
+ * Sylag (tizim tarapyndan bellenilýär):
+ *   • 95% ähtimallyk — 0.01–0.10 BP
+ *   •  5% ähtimallyk — 2.00 BP (seýrek)
+ *
+ * Berlen BP bonus balansa goşulýar (çykarylyp bilmez).
+ */
+export async function claimDailyGift(
+  deviceId: string
+): Promise<{ canClaim: boolean; reward?: number }> {
+  try {
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    // Anti-cheat: serwerde saklanýan sene
+    const lastSnap = await get(ref(db, `users/${deviceId}/lastGiftDate`));
+    if (lastSnap.exists() && lastSnap.val() === today) {
+      return { canClaim: false };
+    }
+
+    // Sylag kesgitle
+    const rand = Math.random();
+    const reward = rand < 0.05
+      ? 2
+      : Math.round((Math.random() * 0.09 + 0.01) * 100) / 100;
+
+    // Serwerde senäni ýazgyla (anti-cheat)
+    await set(ref(db, `users/${deviceId}/lastGiftDate`), today);
+
+    // Bonus balansa goş
+    await addBonusBalance(deviceId, reward);
+
+    // Tranzaksiýa ýazgyla
+    const txRef = push(ref(db, `transactions/${deviceId}`));
+    await set(txRef, {
+      type: "bonus",
+      label: "Gündelik Sowgat",
+      amount: reward,
+      direction: "in",
+      timestamp: new Date().toISOString(),
+    });
+
+    return { canClaim: true, reward };
+  } catch {
+    return { canClaim: false };
+  }
+}
+
+export async function checkDailyGiftClaimed(deviceId: string): Promise<boolean> {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const snap = await get(ref(db, `users/${deviceId}/lastGiftDate`));
+    return snap.exists() && snap.val() === today;
   } catch {
     return false;
   }
@@ -326,7 +439,7 @@ export async function applyReferralCode(newUserDeviceId: string, code: string): 
     await set(ref(db, `referral-joins/${ownerDeviceId}/${newUserDeviceId}`), { joinedAt: new Date().toISOString() });
 
     const joinBonus = 0.5;
-    await addBalance(ownerDeviceId, joinBonus);
+    await addBonusBalance(ownerDeviceId, joinBonus);
     await saveReputationEntry(ownerDeviceId, {
       type: "positive",
       reason: "Täze agza çagyryldy (Referral)",
@@ -367,7 +480,7 @@ export async function addPassiveReferralCommission(deviceId: string, amount = 0.
     const referredBySnap = await get(ref(db, `user-profiles/${deviceId}/referredBy`));
     if (!referredBySnap.exists()) return;
     const referrerId = String(referredBySnap.val());
-    await addBalance(referrerId, amount);
+    await addBonusBalance(referrerId, amount);
     const earningsSnap = await get(ref(db, `referral-earnings/${referrerId}`));
     const cur = earningsSnap.exists() ? earningsSnap.val() : { total: 0, passive: 0 };
     await set(ref(db, `referral-earnings/${referrerId}`), {
@@ -481,7 +594,7 @@ export async function upvoteRoadReport(reportId: string, voterDeviceId: string):
 
     if (newCount >= 3 && !report.rewarded) {
       await update(ref(db, `road-reports/${reportId}`), { rewarded: true });
-      await addBalance(report.reporterDeviceId, 1);
+      await addBonusBalance(report.reporterDeviceId, 1);
       await saveReputationEntry(report.reporterDeviceId, {
         type: "positive",
         reason: "Informator sylagy — 3 tassyklama aldy",

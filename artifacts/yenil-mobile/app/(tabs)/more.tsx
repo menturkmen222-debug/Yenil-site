@@ -10,6 +10,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
+import { DailyGiftModal } from "@/components/DailyGiftModal";
 
 const { height: SCREEN_H, width: SCREEN_W } = Dimensions.get("window");
 
@@ -562,6 +563,7 @@ export default function MoreScreen() {
   const isWeb = Platform.OS === "web";
   const [aiOpen, setAiOpen] = useState(false);
   const [tarifOpen, setTarifOpen] = useState(false);
+  const [giftOpen, setGiftOpen] = useState(false);
 
   const topPad = (isWeb ? 0 : insets.top);
 
@@ -569,6 +571,7 @@ export default function MoreScreen() {
     <>
       <AiChatModal visible={aiOpen} onClose={() => setAiOpen(false)} />
       <TarifSheet visible={tarifOpen} onClose={() => setTarifOpen(false)} />
+      <DailyGiftModal visible={giftOpen} onClose={() => setGiftOpen(false)} />
 
       <ScrollView
         style={[s.root, { backgroundColor: colors.background }]}
@@ -676,8 +679,20 @@ export default function MoreScreen() {
             iconColor="#f59e0b"
             label="Teklip ibermek"
             desc="Öz hyzmatyňyzy teklip ediň"
-            last
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/teklip" as Href); }}
+            colors={colors}
+          />
+          <GroupRow
+            icon="gift-outline"
+            iconBg="#ecfdf5"
+            iconColor="#10b981"
+            label="Gündelik Sowgat"
+            desc="Her 24 sagatda 1 gezek mugt BP sowgat"
+            badge="TÄZE"
+            badgeBg="#10b981"
+            badgeColor="#fff"
+            last
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setGiftOpen(true); }}
             colors={colors}
           />
         </View>
