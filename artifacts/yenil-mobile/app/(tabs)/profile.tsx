@@ -420,30 +420,6 @@ export default function ProfileScreen() {
             </View>
           )}
 
-          {/* ── Hasap maglumaty ── */}
-          <SectionCard title={t("account").toUpperCase()} colors={colors}>
-            <View style={[row.wrap, { borderBottomColor: colors.border }]}>
-              <View style={[row.iconBox, { backgroundColor: "#f59e0b18" }]}>
-                <Ionicons name="wallet-outline" size={17} color="#f59e0b" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[row.label, { color: colors.mutedForeground }]}>{t("bonus_balance")}</Text>
-                <Text style={[row.value, { color: colors.foreground, fontWeight: "700" }]}>{balance.toFixed(2)} BP</Text>
-              </View>
-            </View>
-            <View style={[row.wrap, { borderBottomColor: "transparent" }]}>
-              <View style={[row.iconBox, { backgroundColor: level.bg + "80" }]}>
-                <Ionicons name={level.icon as any} size={17} color={level.color} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[row.label, { color: colors.mutedForeground }]}>{t("reputation_level")}</Text>
-                <Text style={[row.value, { color: colors.foreground }]}>
-                  {repData.score}/100 · {level.labelTm}
-                </Text>
-              </View>
-            </View>
-          </SectionCard>
-
           {/* ── LOGOUT BUTTON ── */}
           <RipplePress
             onPress={handleLogout}
