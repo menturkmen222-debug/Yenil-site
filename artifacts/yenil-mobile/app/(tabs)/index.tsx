@@ -24,6 +24,8 @@ import { getDeviceIdAsync } from "@/lib/deviceId";
 import { getUserNickname, watchCompletedLessons } from "@/lib/firebase";
 import { CATEGORIES, LESSONS } from "@/lib/ebilimData";
 import { ConfettiOverlay } from "@/components/ConfettiOverlay";
+import { GlobalSearch } from "@/components/GlobalSearch";
+import { OnboardingFloat } from "@/components/OnboardingFloat";
 
 function formatNotifTime(ts: number): string {
   const diff = Date.now() - ts;
@@ -446,6 +448,7 @@ export default function HomeScreen() {
   const [nickname, setNickname] = useState("");
   const [deviceId, setDeviceId] = useState("");
   const [notifOpen, setNotifOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [hyzmatSearch, setHyzmatSearch] = useState("");
   const [eBilimCompleted, setEBilimCompleted] = useState<number>(0);
   const bellAnim = useRef(new Animated.Value(1)).current;
@@ -517,9 +520,11 @@ export default function HomeScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      <OnboardingFloat />
       {showConfetti && (
         <ConfettiOverlay onDone={() => setShowConfetti(false)} />
       )}
+      <GlobalSearch visible={searchOpen} onClose={() => setSearchOpen(false)} />
       <AgentChatModal visible={chatOpen} onClose={() => setChatOpen(false)} />
       <AddHyzmatModal
         visible={addHyzmatOpen}
@@ -640,6 +645,15 @@ export default function HomeScreen() {
                 )}
               </LinearGradient>
               <View style={styles.profileOnlineDot} />
+            </Pressable>
+
+            {/* Center: Global Search bar */}
+            <Pressable
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSearchOpen(true); }}
+              style={styles.searchBarBtn}
+            >
+              <Ionicons name="search" size={15} color="rgba(255,255,255,0.65)" />
+              <Text style={styles.searchBarText} numberOfLines={1}>Gözleg...</Text>
             </Pressable>
 
             {/* Right: Bell + Balance grouped */}
@@ -1048,6 +1062,18 @@ const styles = StyleSheet.create({
     width: 12, height: 12, borderRadius: 6,
     backgroundColor: "#4ade80",
     borderWidth: 2, borderColor: "rgba(255,255,255,0.5)",
+  },
+
+  searchBarBtn: {
+    flex: 1,
+    flexDirection: "row", alignItems: "center", gap: 8,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 14, paddingHorizontal: 12, paddingVertical: 10,
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.18)",
+    marginHorizontal: 8,
+  },
+  searchBarText: {
+    color: "rgba(255,255,255,0.65)", fontSize: 13, fontWeight: "500", flex: 1,
   },
 
   heroRightGroup: { flexDirection: "row", alignItems: "center", gap: 8 },
