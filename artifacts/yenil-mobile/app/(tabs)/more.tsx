@@ -108,31 +108,53 @@ const PLANS = [
   {
     id: "base",
     name: "Başlangyç",
-    price: "15",
+    price: "Mugt",
+    free: true,
     color: "#6366f1",
     bg: "#eef2ff",
     icon: "rocket-outline" as const,
-    features: ["Demirýol biletleri", "Ýeňil Pay", "TMCell", "Sanly bazar"],
+    features: [
+      "AI Agent günlik 3 sorag",
+      "AI Kömekçi günlik 5 sorag",
+      "Ýer Paýlaşmak günlik 3 gezek",
+      "Çanly Ýer Paýlaşmak günlik 10/min",
+    ],
     popular: false,
   },
   {
     id: "pro",
     name: "Pro",
     price: "35",
+    free: false,
     color: "#10b981",
     bg: "#d1fae5",
     icon: "diamond-outline" as const,
-    features: ["Başlangyçdaky ähli", "AI Kömekçi (çäksiz)", "Ýeňil AI Agent", "Ilkinji goldaw"],
+    features: [
+      "Başlangyçdaky ähli",
+      "AI Agent günlik 10 sorag",
+      "AI Kömekçi (Çäksiz)",
+      "Ýer Paýlaşmak günlik 15 gezek",
+      "Çanly Ýer Paýlaşmak günlik 6/sag",
+    ],
     popular: true,
   },
   {
     id: "premium",
     name: "Premium",
     price: "65",
+    free: false,
     color: "#f59e0b",
     bg: "#fef3c7",
     icon: "ribbon-outline" as const,
-    features: ["Prodaky ähli", "AI Agent (doly)", "Şahsy menejer", "Ähli hyzmatlar"],
+    features: [
+      "Adyňyz ýanyna galyçka",
+      "Ähli orunlarda iň ýokaryda",
+      "Ulgamda nobatsyz ýerine ýetirmek",
+      "AI Agent (Çäksiz)",
+      "AI Kömekçi (Çäksiz)",
+      "Ýer Paýlaşmak (Çäksiz)",
+      "Çanly Ýer Paýlaşmak (Çäksiz)",
+    ],
     popular: false,
   },
 ];
@@ -181,10 +203,14 @@ function TarifSheet({ visible, onClose }: { visible: boolean; onClose: () => voi
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[ts.planName, { color: plan.popular ? "#fff" : colors.foreground }]}>{plan.name}</Text>
-                  <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
-                    <Text style={[ts.planPrice, { color: plan.popular ? "#fff" : plan.color }]}>{plan.price}</Text>
-                    <Text style={[ts.planPer, { color: plan.popular ? "rgba(255,255,255,0.7)" : colors.mutedForeground }]}>TMT/aý</Text>
-                  </View>
+                  {plan.free ? (
+                    <Text style={[ts.planPrice, { color: plan.popular ? "#fff" : plan.color, fontSize: 20 }]}>Mugt</Text>
+                  ) : (
+                    <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
+                      <Text style={[ts.planPrice, { color: plan.popular ? "#fff" : plan.color }]}>{plan.price}</Text>
+                      <Text style={[ts.planPer, { color: plan.popular ? "rgba(255,255,255,0.7)" : colors.mutedForeground }]}>TMT/aý</Text>
+                    </View>
+                  )}
                 </View>
                 <Pressable
                   onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
@@ -194,8 +220,8 @@ function TarifSheet({ visible, onClose }: { visible: boolean; onClose: () => voi
                     borderColor: plan.color,
                   }]}
                 >
-                  <Text style={[ts.planBtnText, { color: plan.popular ? plan.color : plan.color }]}>
-                    {plan.popular ? "Pro almak" : "Saýlamak"}
+                  <Text style={[ts.planBtnText, { color: plan.color }]}>
+                    {plan.free ? "Mugt başla" : plan.popular ? "Pro almak" : "Almak"}
                   </Text>
                 </Pressable>
               </View>
@@ -406,7 +432,7 @@ export default function MoreScreen() {
               <Text style={s.tarifSub}>Pro we Premium hyzmatlar</Text>
             </View>
             <View style={s.tarifBadge}>
-              <Text style={s.tarifBadgeText}>15 TMT+</Text>
+              <Text style={s.tarifBadgeText}>Mugt & Pro</Text>
             </View>
           </View>
 
@@ -425,7 +451,7 @@ export default function MoreScreen() {
 
           {/* Feature hints */}
           <View style={s.tarifFeatures}>
-            {["AI Kömekçi (çäksiz)", "Ilkinji hyzmat goldawy", "Ähli premium mümkinçilikler"].map((f, i) => (
+            {["AI Agent & AI Kömekçi", "Ýer Paýlaşmak & Çanly ýer", "Premium: adyňyz, ilkinji orda"].map((f, i) => (
               <View key={i} style={s.tarifFeatureRow}>
                 <View style={s.tarifCheckCircle}>
                   <Ionicons name="checkmark" size={10} color="#10b981" />
