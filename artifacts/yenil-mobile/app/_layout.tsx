@@ -18,6 +18,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { BonusPulProvider } from "@/contexts/BonusPulContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
+import { RatesProvider } from "@/contexts/RatesContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
@@ -52,8 +53,6 @@ function RootLayoutNav() {
       <Stack.Screen name="agent-topup" options={{ headerShown: false }} />
       <Stack.Screen name="referal" options={{ headerShown: false }} />
       <Stack.Screen name="informator" options={{ headerShown: false }} />
-      <Stack.Screen name="kripto-birja" options={{ headerShown: false }} />
-      <Stack.Screen name="nagt-cashout" options={{ headerShown: false }} />
       <Stack.Screen name="kuryer" options={{ headerShown: false }} />
       <Stack.Screen name="sanly-bazar-sell" options={{ headerShown: false }} />
       <Stack.Screen name="e-bilim" options={{ headerShown: false }} />
@@ -89,12 +88,14 @@ export default function RootLayout() {
           <GestureHandlerRootView style={{ flex: 1 }}>
               <LanguageProvider>
                 <ThemeProvider>
-                  <BonusPulProvider>
-                    <NotificationProvider>
-                      <RootLayoutNav />
-                      <OfflineBanner />
-                    </NotificationProvider>
-                  </BonusPulProvider>
+                  <RatesProvider>
+                    <BonusPulProvider>
+                      <NotificationProvider>
+                        <RootLayoutNav />
+                        <OfflineBanner />
+                      </NotificationProvider>
+                    </BonusPulProvider>
+                  </RatesProvider>
                 </ThemeProvider>
               </LanguageProvider>
           </GestureHandlerRootView>

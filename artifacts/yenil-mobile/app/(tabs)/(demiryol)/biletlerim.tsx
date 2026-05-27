@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, StyleSheet, Pressable,
   TextInput, Alert, Platform,
 } from "react-native";
+import { router } from "expo-router";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -85,6 +86,9 @@ export default function BiletlerimScreen() {
         style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12 }]}
       >
         <View style={styles.headerRow}>
+          <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.back(); }} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={20} color="#fff" />
+          </Pressable>
           <Ionicons name="ticket-outline" size={22} color="#fff" />
           <Text style={styles.headerTitle}>Biletlerim</Text>
         </View>
@@ -263,6 +267,7 @@ const styles = StyleSheet.create({
   headerTitle: { color: "#fff", fontSize: 18, fontWeight: "700" },
   headerSub: { color: "rgba(255,255,255,0.8)", fontSize: 13, marginTop: 2 },
   tabSelector: { flexDirection: "row", margin: 16, borderRadius: 12, borderWidth: 1, padding: 4, gap: 4 },
+  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: "rgba(255,255,255,0.18)", alignItems: "center", justifyContent: "center" },
   tabBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 10, borderRadius: 10 },
   tabBtnText: { fontSize: 13, fontWeight: "700" },
   sectionTitle: { fontSize: 16, fontWeight: "700", marginBottom: 12 },

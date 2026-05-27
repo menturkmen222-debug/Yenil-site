@@ -9,25 +9,27 @@ import { useColors } from "@/hooks/useColors";
 import { PessimisticButton } from "@/components/PessimisticButton";
 import { saveOrder } from "@/lib/firebase";
 import Animated, { FadeInDown } from "react-native-reanimated";
-
-const faqs = [
-  { q: "Bilet satyn almak näçe wagt alýar?", a: "Sargydyňyz kabul edilenden soň 1-4 sagadyň içinde bilet SMS arkaly iberilýär." },
-  { q: "Nähili töleg usullary bar?", a: "TMCell arkaly pul geçiriş, SMS tassyklamasy ýa-da Bonus Pul arkaly töleg edip bilersiňiz." },
-  { q: "Bonus pul nähili almaly?", a: "TMCell sahypasyna geçip, bonus pul satyn alyň. Töleg edenden soň balansynyz doldurylar." },
-  { q: "Ýalňyş maglumatlary girizendim, näme etmeli?", a: "Dessine biziň bilen habarlaşyň: +993 71 789091 ýa-da +993 64 629487." },
-  { q: "Daşary ýurt walýutasy näçeden çalşylýar?", a: "Satyn almak: 1 USD = 29 TMT. Satmak: 1 USD = 19 TMT." },
-  { q: "Içerki ulgamlar nähili işleýär?", a: "Aydym, Hiňlen, Belet üçin premium abonelik satyn almak mümkin. Töleg edip, SMS arkaly bron koduňyzy iberiň." },
-];
+import { useRates } from "@/contexts/RatesContext";
 
 export default function HelpScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const rates = useRates();
   const isWeb = Platform.OS === "web";
   const [expanded, setExpanded] = useState<number | null>(null);
   const [question, setQuestion] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+
+  const faqs = [
+    { q: "Bilet satyn almak näçe wagt alýar?", a: "Sargydyňyz kabul edilenden soň 1-4 sagadyň içinde bilet SMS arkaly iberilýär." },
+    { q: "Nähili töleg usullary bar?", a: "TMCell arkaly pul geçiriş, SMS tassyklamasy ýa-da Bonus Pul arkaly töleg edip bilersiňiz." },
+    { q: "Bonus pul nähili almaly?", a: "TMCell sahypasyna geçip, bonus pul satyn alyň. Töleg edenden soň balansynyz doldurylar." },
+    { q: "Ýalňyş maglumatlary girizendim, näme etmeli?", a: "Dessine biziň bilen habarlaşyň: +993 71 789091 ýa-da +993 64 629487." },
+    { q: "Daşary ýurt walýutasy näçeden çalşylýar?", a: `Satyn almak: 1 USD = ${rates.usd_buy_tmt} TMT. Satmak: 1 USD = ${rates.usd_sell_tmt} TMT.` },
+    { q: "Içerki ulgamlar nähili işleýär?", a: "Aydym, Hiňlen, Belet üçin premium abonelik satyn almak mümkin. Töleg edip, SMS arkaly bron koduňyzy iberiň." },
+  ];
 
   async function submitQuestion() {
     if (!question.trim() || !phone.trim()) {

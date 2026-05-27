@@ -587,18 +587,10 @@ const USDT_WALLETS: Record<"trc20"|"bep20"|"ton", string> = {
 const BP_PER_USDT  = COMMISSION_RATES.crypto_bp_per_usdt;
 const USDT_PER_BP  = COMMISSION_RATES.crypto_usdt_per_bp;
 
-const P2P_ORDERS_DATA = [
-  { id:"po1", pair:"BP/USDT",  type:"sell" as const, price:34.5, min:100,  max:2000, seller:"YenilOfficial", premium:true,  pay:"Ýeňil BP"  },
-  { id:"po2", pair:"TMT/USDT", type:"sell" as const, price:34.5, min:200,  max:5000, seller:"YenilOfficial", premium:true,  pay:"TMT Nagt"  },
-  { id:"po3", pair:"BP/USDT",  type:"buy"  as const, price:33.8, min:50,   max:1000, seller:"AlparslanT",   premium:false, pay:"Ýeňil BP"  },
-  { id:"po4", pair:"BP/USDT",  type:"sell" as const, price:34.2, min:100,  max:1500, seller:"MergenD",      premium:false, pay:"Ýeňil BP"  },
-  { id:"po5", pair:"TMT/USDT", type:"buy"  as const, price:33.5, min:300,  max:4000, seller:"NurgeldiA",    premium:false, pay:"TMT Nagt"  },
-  { id:"po6", pair:"TMT/USDT", type:"sell" as const, price:34.3, min:100,  max:2000, seller:"AysoltanO",    premium:false, pay:"TMT Bank"  },
-];
 
 function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
   const { balance, deduct, deviceId } = useBonusPul();
-  type CTab = "deposit" | "withdraw" | "p2p";
+  type CTab = "deposit" | "withdraw";
   const [ctab, setCtab] = useState<CTab>("deposit");
 
   // deposit
@@ -618,8 +610,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
   const [wdErr, setWdErr] = useState("");
   const [wdShowCheckout, setWdShowCheckout] = useState(false);
 
-  // p2p
-  const [p2pPair, setP2pPair] = useState<"all"|"BP/USDT"|"TMT/USDT">("all");
 
   const depUsdtNum  = parseFloat(depUsdt)  || 0;
   const depBPCalc   = depUsdtNum * BP_PER_USDT;
@@ -670,19 +660,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
       setWdDone(true);
     } catch { setWdErr("Ulgam ýalňyşlygy. Gaýtadan synanyşyň."); }
     finally { setWdLoading(false); }
-  }
-
-  function handleP2P(o: typeof P2P_ORDERS_DATA[0]) {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert(
-      `${o.pair} — ${o.type === "buy" ? "Satyn al" : "Sat"}`,
-      `Satyjy: ${o.seller}\nBaha: ${o.price}/USDT\nDiapazon: ${o.min}–${o.max}\nTöleg: ${o.pay}\n\nOperator size ýakyn wagtda ýüz tutar.`,
-      [
-        { text: "Ýatyr", style: "cancel" },
-        { text: o.type === "buy" ? "Satyn al" : "Sat", onPress: () =>
-          Alert.alert("Sargyt iberildi!", `${o.pair} sargydyňyz kabul edildi. Operator habarlaşar.`) },
-      ]
-    );
   }
 
   // ─── Deposit done screen ───
@@ -737,9 +714,8 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
       {/* ── Sub-tabs ── */}
       <View style={[s.segment, { backgroundColor: colors.muted, marginBottom: 16 }]}>
         {([
-          { id: "deposit"  as const, icon: "arrow-down-circle-outline" as const, label: "Depozit"   },
-          { id: "withdraw" as const, icon: "arrow-up-circle-outline"   as const, label: "Çykaryş"   },
-          { id: "p2p"      as const, icon: "swap-horizontal-outline"   as const, label: "P2P Bazar" },
+          { id: "deposit"  as const, icon: "arrow-down-circle-outline" as const, label: "Depozit"  },
+          { id: "withdraw" as const, icon: "arrow-up-circle-outline"   as const, label: "Çykaryş" },
         ]).map(t => (
           <Pressable key={t.id}
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setCtab(t.id); }}
@@ -760,7 +736,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
       {/* ════════════ DEPOSIT TAB ════════════ */}
       {ctab === "deposit" && (
         <>
-          {/* Rate summary card */}
           <View style={[cs.depSummaryCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={cs.depSummaryRow}>
               <View style={[cs.depSummaryIcon, { backgroundColor: "#05966915" }]}>
@@ -776,7 +751,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
             </View>
           </View>
 
-          {/* Network selector */}
           <Text style={[cs.depSectionLabel, { color: colors.mutedForeground }]}>Tarmogy saýlaň</Text>
           <View style={cs.netRow}>
             {USDT_NETWORKS.map(n => (
@@ -794,7 +768,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
             ))}
           </View>
 
-          {/* Amount input */}
           <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Iberjek USDT mukdaryňyz</Text>
           <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: depUsdtNum > 0 ? colors.primary : colors.border, borderWidth: 1.5 }]}>
             <View style={[cs.depPfxBadge, { backgroundColor: "#2563eb18" }]}>
@@ -808,7 +781,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
             </View>
           </View>
 
-          {/* Conversion preview */}
           {depUsdtNum > 0 && (
             <View style={[cs.depConvCard, { backgroundColor: colors.primary + "0e", borderColor: colors.primary + "30" }]}>
               <View style={cs.depConvRow}>
@@ -827,7 +799,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
             </View>
           )}
 
-          {/* Wallet address */}
           <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>
             Ýeňil {USDT_NETWORKS.find(n=>n.id===depNet)?.name} Manzili
           </Text>
@@ -857,7 +828,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
             </Text>
           </View>
 
-          {/* TX Hash */}
           <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Tranzaksiýa haşy (TX ID)</Text>
           <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: depTx.length > 10 ? "#059669" : colors.border, borderWidth: 1.5 }]}>
             <Ionicons name="receipt-outline" size={15} color={depTx.length > 10 ? "#059669" : colors.mutedForeground} />
@@ -874,7 +844,7 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
           ) : null}
 
           {depLoading ? (
-            <View style={[cs.depLoadingWrap]}>
+            <View style={cs.depLoadingWrap}>
               <ActivityIndicator color={colors.primary} />
               <Text style={{ color: colors.mutedForeground, fontSize: 12, marginTop: 6 }}>Tassyklanýar...</Text>
             </View>
@@ -886,7 +856,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
             </Pressable>
           )}
 
-          {/* How-to guide */}
           <View style={[cs.stepsCard, { backgroundColor: colors.card, borderColor: colors.border, marginTop: 20 }]}>
             <View style={cs.stepsTitleRow}>
               <Ionicons name="information-circle-outline" size={16} color={colors.primary} />
@@ -913,7 +882,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
       {/* ════════════ WITHDRAW TAB ════════════ */}
       {ctab === "withdraw" && (
         <>
-          {/* Balance hero card */}
           <View style={[cs.wdBalHero, { backgroundColor: colors.primary, shadowColor: colors.primary }]}>
             <View style={{ flex: 1 }}>
               <Text style={cs.wdBalHeroLabel}>Balansiňiz</Text>
@@ -929,7 +897,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
             </View>
           </View>
 
-          {/* Network selector */}
           <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 4 }]}>Çykaryş tarmagyňyz</Text>
           <View style={cs.netRow}>
             {USDT_NETWORKS.map(n => (
@@ -947,7 +914,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
             ))}
           </View>
 
-          {/* BP amount input */}
           <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Näçe BP çykarmak isleýärsiňiz?</Text>
           <View style={[cs.inputRow, { backgroundColor: colors.card, borderColor: wdBPNum > 0 ? colors.primary : colors.border, borderWidth: 1.5 }]}>
             <Ionicons name="logo-bitcoin" size={15} color={wdBPNum > 0 ? colors.primary : colors.mutedForeground} />
@@ -959,7 +925,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
             </View>
           </View>
 
-          {/* Fee breakdown — shown when amount entered */}
           {wdBPNum > 0 && (
             <>
               <View style={[cs.wdFeeCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -985,8 +950,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
                   </Text>
                 </View>
               </View>
-
-              {/* Plain-language summary */}
               <View style={[cs.wdSummaryBanner, { backgroundColor: "#f0fdf4", borderColor: "#bbf7d0" }]}>
                 <Ionicons name="information-circle" size={16} color="#059669" />
                 <Text style={[cs.wdSummaryText, { color: "#166534" }]}>
@@ -999,7 +962,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
             </>
           )}
 
-          {/* Wallet address */}
           <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>
             {wdNetData.name} Kripto Manziliniz
           </Text>
@@ -1025,7 +987,7 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
           ) : null}
 
           {wdLoading ? (
-            <View style={[cs.depLoadingWrap]}>
+            <View style={cs.depLoadingWrap}>
               <ActivityIndicator color={colors.primary} />
               <Text style={{ color: colors.mutedForeground, fontSize: 12, marginTop: 6 }}>Iberilýär...</Text>
             </View>
@@ -1039,7 +1001,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
         </>
       )}
 
-      {/* BP Checkout Modal for crypto withdrawal */}
       <BPCheckoutModal
         visible={wdShowCheckout}
         onClose={() => setWdShowCheckout(false)}
@@ -1049,85 +1010,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
         deviceId={deviceId}
         onPaymentComplete={() => { setWdShowCheckout(false); submitWithdraw(); }}
       />
-
-      {/* ════════════ P2P TAB ════════════ */}
-      {ctab === "p2p" && (
-        <>
-          {/* Pair chips */}
-          <View style={cs.pairRow}>
-            {(["all", "BP/USDT", "TMT/USDT"] as const).map(p => (
-              <Pressable key={p}
-                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setP2pPair(p); }}
-                style={[cs.pairChip, p2pPair === p
-                  ? { backgroundColor: colors.primary }
-                  : { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }
-                ]}
-              >
-                <Text style={[cs.pairChipTxt, { color: p2pPair === p ? "#fff" : colors.foreground }]}>
-                  {p === "all" ? "Hemmesi" : p}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
-          {/* Premium banner */}
-          <View style={[cs.premBanner, { borderColor: "#f59e0b" }]}>
-            <LinearGradient colors={["#f59e0b15","#fbbf2415"]} style={cs.premBannerGrad}>
-              <Ionicons name="star" size={15} color="#f59e0b" />
-              <View style={{ flex: 1 }}>
-                <Text style={[cs.premBannerTitle, { color: colors.foreground }]}>Premium Jübütler — BP/USDT · TMT/USDT</Text>
-                <Text style={[cs.premBannerSub, { color: colors.mutedForeground }]}>Escrow goragy · Operator kepilligi</Text>
-              </View>
-            </LinearGradient>
-          </View>
-
-          {/* Orders */}
-          <View style={{ gap: 10 }}>
-            {P2P_ORDERS_DATA
-              .filter(o => p2pPair === "all" || o.pair === p2pPair)
-              .map(order => (
-                <Pressable key={order.id} onPress={() => handleP2P(order)}
-                  style={({ pressed }) => [cs.orderCard, {
-                    backgroundColor: colors.card,
-                    borderColor: order.premium ? "#f59e0b" : colors.border,
-                    borderWidth: order.premium ? 1.5 : 1,
-                    opacity: pressed ? 0.88 : 1,
-                  }]}
-                >
-                  {order.premium && (
-                    <View style={cs.premTag}>
-                      <Ionicons name="star" size={8} color="#fff" />
-                      <Text style={cs.premTagTxt}>PREMIUM</Text>
-                    </View>
-                  )}
-                  <View style={cs.orderTop}>
-                    <View style={[cs.orderTypeBadge, { backgroundColor: order.type === "buy" ? "#05966920" : "#0284c720" }]}>
-                      <Text style={[cs.orderTypeText, { color: order.type === "buy" ? "#059669" : "#0284c7" }]}>
-                        {order.type === "buy" ? "ALMAK" : "SATMAK"}
-                      </Text>
-                    </View>
-                    <Text style={[cs.orderPair, { color: colors.foreground }]}>{order.pair}</Text>
-                    <View style={{ flex: 1 }} />
-                    <Text style={[cs.orderPrice, { color: colors.primary }]}>{order.price}</Text>
-                    <Text style={[cs.orderPriceUnit, { color: colors.mutedForeground }]}>/USDT</Text>
-                  </View>
-                  <View style={cs.orderBottom}>
-                    <Text style={[cs.orderMeta, { color: colors.mutedForeground }]}>
-                      <Ionicons name="person-outline" size={11} /> {order.seller}
-                    </Text>
-                    <Text style={[cs.orderMeta, { color: colors.mutedForeground }]}>  ·  {order.pay}</Text>
-                    <View style={{ flex: 1 }} />
-                    <Text style={[cs.orderLimit, { color: colors.mutedForeground }]}>{order.min}–{order.max}</Text>
-                  </View>
-                  <Pressable onPress={() => handleP2P(order)}
-                    style={[cs.orderBtn, { backgroundColor: order.type === "buy" ? "#059669" : colors.primary }]}>
-                    <Text style={cs.orderBtnTxt}>{order.type === "buy" ? "Satmak" : "Satyn al"}</Text>
-                  </Pressable>
-                </Pressable>
-              ))}
-          </View>
-        </>
-      )}
     </>
   );
 }

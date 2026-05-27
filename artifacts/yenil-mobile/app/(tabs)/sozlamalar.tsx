@@ -16,6 +16,7 @@ import { RipplePress } from "@/components/RipplePress";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { type ThemeKey } from "@/constants/colors";
 import {
   getReputation, watchReputation, watchFriends, addFriend, removeFriend,
@@ -922,6 +923,7 @@ export default function SozlamalarScreen() {
   const { themeKey, setTheme } = useTheme();
   const insets = useSafeAreaInsets();
   const { balance, deviceId, sendBP } = useBonusPul();
+  const { addNotification } = useNotifications();
   const isWeb = Platform.OS === "web";
 
   // Language context
@@ -1357,6 +1359,11 @@ export default function SozlamalarScreen() {
                     onPress: async () => {
                       try {
                         await seedTestAccount(deviceId);
+                        await addNotification({
+                          title: "Synag Bildirnama",
+                          body: "1000 BP we 80 abraý baly balansynyza üstünlikli goşuldy! 🎉",
+                          type: "bp",
+                        });
                         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                         Alert.alert("Üstünlikli", "1000 BP we 80 abraý baly goşuldy!");
                       } catch {

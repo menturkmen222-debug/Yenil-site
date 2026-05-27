@@ -256,6 +256,44 @@ export default function DemiryolScreen() {
         ══════════════════════════════════════════ */}
         {main === "choose" && (
           <View>
+            {/* Quick-access row: Biletlerim + Sozlamalar */}
+            <View style={{ flexDirection: "row", gap: 10, marginBottom: 16 }}>
+              <Pressable
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/(tabs)/(demiryol)/biletlerim"); }}
+                style={({ pressed }) => [{
+                  flex: 1, flexDirection: "row" as const, alignItems: "center" as const, gap: 8,
+                  backgroundColor: colors.card, borderRadius: 14, padding: 12,
+                  borderWidth: 1, borderColor: colors.border, opacity: pressed ? 0.8 : 1,
+                }]}
+              >
+                <View style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: colors.primary + "18", alignItems: "center" as const, justifyContent: "center" as const }}>
+                  <Ionicons name="ticket-outline" size={18} color={colors.primary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 13, fontWeight: "700" as const, color: colors.foreground }}>Biletlerim</Text>
+                  <Text style={{ fontSize: 11, color: colors.mutedForeground }}>Bron sora / taryh</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={14} color={colors.mutedForeground} />
+              </Pressable>
+              <Pressable
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/(tabs)/(demiryol)/d-sozlamalar"); }}
+                style={({ pressed }) => [{
+                  flex: 1, flexDirection: "row" as const, alignItems: "center" as const, gap: 8,
+                  backgroundColor: colors.card, borderRadius: 14, padding: 12,
+                  borderWidth: 1, borderColor: colors.border, opacity: pressed ? 0.8 : 1,
+                }]}
+              >
+                <View style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: "#10b98118", alignItems: "center" as const, justifyContent: "center" as const }}>
+                  <Ionicons name="settings-outline" size={18} color="#10b981" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 13, fontWeight: "700" as const, color: colors.foreground }}>Sozlamalar</Text>
+                  <Text style={{ fontSize: 11, color: colors.mutedForeground }}>Habarnamalar</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={14} color={colors.mutedForeground} />
+              </Pressable>
+            </View>
+
             <Text style={[s.chooseTitle, { color: colors.foreground }]}>Hyzmat saýlaň</Text>
             <Text style={[s.chooseSub, { color: colors.mutedForeground }]}>
               Size laýyk görnüşde bilet alyberiş hyzmatyny saýlaň

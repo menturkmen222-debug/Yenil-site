@@ -339,7 +339,7 @@ export default function BazarScreen() {
             </View>
             <View>
               <Text style={styles.ulanyjyBtnTitle}>Ulanyjy Bazary</Text>
-              <Text style={styles.ulanyjyBtnSub}>P2P • Sanly harydy sat / al</Text>
+              <Text style={styles.ulanyjyBtnSub}>Sanly harydy sat / al</Text>
             </View>
           </View>
           <View style={styles.ulanyjyArrow}>

@@ -23,9 +23,6 @@ export const BANK_CARD_CASHOUT_BLOCKED = true as const;
 /** Abraý satyn almak elmydama gadagan */
 export const REPUTATION_PURCHASABLE = false as const;
 
-/** P2P amal içki geçiriş komissiýasy */
-export const P2P_INTERNAL_FEE = 0.01; // 1%
-
 // ─── Minimum limitler ─────────────────────────────────────────────────────────
 
 export const MIN_CASHOUT_BP    = 10;   // Iň az çykaryş mukdary (TMCell)
@@ -35,7 +32,6 @@ export const MIN_TRANSFER_BP   = 1;    // Iň az geçiriş mukdary
 // ─── Abraý basgançak serhetleri ───────────────────────────────────────────────
 
 export const REP_THRESHOLDS = {
-  MIN_P2P_POST: 45, // Kripto birjada yglan goýmak üçin iň az abraý
   MIN_AGENT:    30, // Nagt agent bolmak üçin iň az abraý
   TRUSTED:      45, // "Abraýly" derejesi başlanýan ýer
   GOLD:         70, // "Altyn" derejesi başlanýan ýer

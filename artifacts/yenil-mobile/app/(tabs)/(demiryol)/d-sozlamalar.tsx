@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, StyleSheet, Pressable, Switch,
   Alert, Platform,
 } from "react-native";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -28,6 +29,9 @@ export default function DemiryolSozlamalarScreen() {
         style={[styles.header, { paddingTop: (isWeb ? 0 : insets.top) + 12 }]}
       >
         <View style={styles.headerRow}>
+          <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.back(); }} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={20} color="#fff" />
+          </Pressable>
           <Ionicons name="settings-outline" size={22} color="#fff" />
           <Text style={styles.headerTitle}>Demirýol sozlamalary</Text>
         </View>
@@ -168,6 +172,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   headerTitle: { color: "#fff", fontSize: 18, fontWeight: "700" },
   headerSub: { color: "rgba(255,255,255,0.8)", fontSize: 13, marginTop: 2 },
+  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: "rgba(255,255,255,0.18)", alignItems: "center", justifyContent: "center" },
   groupTitle: { fontSize: 11, fontWeight: "700", letterSpacing: 1, marginBottom: 8, marginTop: 20, marginLeft: 4 },
   card: { borderRadius: 16, borderWidth: 1, overflow: "hidden" },
   cardLabel: { fontSize: 12, fontWeight: "600", padding: 14, paddingBottom: 10 },

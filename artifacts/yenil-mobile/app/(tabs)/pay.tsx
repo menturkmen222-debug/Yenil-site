@@ -14,7 +14,7 @@ import { COMMISSION_RATES, calcCryptoDepositBP, calcCryptoWithdrawUSDT, getCrypt
 import { saveOrder } from "@/lib/firebase";
 
 type Network = "trc20" | "bep20" | "ton";
-type TabId = "deposit" | "withdraw" | "p2p";
+type TabId = "deposit" | "withdraw";
 
 const NETWORKS: { id: Network; name: string; full: string; color: string; fee: number; icon: keyof typeof Ionicons.glyphMap; time: string }[] = [
   { id: "trc20", name: "TRC20", full: "Tron Network", color: "#ef4444", fee: 1.0, icon: "flash-outline", time: "~1-3 min" },
@@ -28,26 +28,10 @@ const WALLET_ADDRESSES: Record<Network, string> = {
   ton: "UQBvAzI7nB5RFxeJ7c9YpqT8L5m2kNpTgQP4zX6wKjV1hW",
 };
 
-type P2POrder = {
-  id: string; pair: string; type: "buy" | "sell";
-  price: number; unit: string; amount: number;
-  min: number; max: number; seller: string;
-  premium?: boolean; payMethod: string;
-};
-
-const P2P_ORDERS: P2POrder[] = [
-  { id: "o1", pair: "BP/USDT", type: "sell", price: 34.5, unit: "BP", amount: 5000, min: 100, max: 2000, seller: "YenilOfficial", premium: true, payMethod: "Ýeňil BP" },
-  { id: "o2", pair: "TMT/USDT", type: "sell", price: 34.5, unit: "TMT", amount: 10000, min: 200, max: 5000, seller: "YenilOfficial", premium: true, payMethod: "TMT Nagt" },
-  { id: "o3", pair: "BP/USDT", type: "buy", price: 33.8, unit: "BP", amount: 2000, min: 50, max: 1000, seller: "AlparslanT", premium: false, payMethod: "Ýeňil BP" },
-  { id: "o4", pair: "BP/USDT", type: "sell", price: 34.2, unit: "BP", amount: 3000, min: 100, max: 1500, seller: "MergenD", premium: false, payMethod: "Ýeňil BP" },
-  { id: "o5", pair: "TMT/USDT", type: "buy", price: 33.5, unit: "TMT", amount: 8000, min: 300, max: 4000, seller: "NurgeldiA", premium: false, payMethod: "TMT Nagt" },
-  { id: "o6", pair: "TMT/USDT", type: "sell", price: 34.3, unit: "TMT", amount: 5000, min: 100, max: 2000, seller: "AysoltanO", premium: false, payMethod: "TMT Bank" },
-];
 
 const TABS: { id: TabId; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { id: "deposit", label: "Depozit", icon: "arrow-down-circle-outline" },
   { id: "withdraw", label: "Çykaryş", icon: "arrow-up-circle-outline" },
-  { id: "p2p", label: "P2P Bazary", icon: "swap-horizontal-outline" },
 ];
 
 export default function PayScreen() {
@@ -74,7 +58,6 @@ export default function PayScreen() {
   const [wdError, setWdError] = useState("");
 
   // P2P state
-  const [p2pPair, setP2pPair] = useState<"all" | "BP/USDT" | "TMT/USDT">("all");
 
   const topPad = (isWeb ? 0 : insets.top) + 0;
 
@@ -134,16 +117,6 @@ export default function PayScreen() {
     } finally { setLoading(false); }
   }
 
-  function handleP2POrder(order: P2POrder) {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert(
-      `${order.pair} — ${order.type === "buy" ? "Satyn al" : "Sat"}`,
-      `Satyjy: ${order.seller}\nBaha: ${order.price} ${order.unit}/USDT\nMin: ${order.min} ${order.unit} | Maks: ${order.max} ${order.unit}\nTöleg: ${order.payMethod}\n\nOperator size ýakyn wagtda ýüz tutar.`,
-      [{ text: "Ýatyr", style: "cancel" }, { text: order.type === "buy" ? "Satyn al" : "Sat", onPress: () => Alert.alert("Sargyt iberildi!", `${order.pair} sargydyňyz kabul edildi. Operator size habarlaşar.`) }]
-    );
-  }
-
-  const filteredOrders = P2P_ORDERS.filter((o) => p2pPair === "all" || o.pair === p2pPair);
 
   function NetworkCard({ net, selected, onPress }: { net: typeof NETWORKS[0]; selected: boolean; onPress: () => void }) {
     return (
@@ -412,119 +385,6 @@ export default function PayScreen() {
     );
   }
 
-  function P2PTab() {
-    return (
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: isWeb ? 120 : 120 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Pair filter */}
-        <View style={s.pairFilterRow}>
-          {(["all", "BP/USDT", "TMT/USDT"] as const).map((p) => (
-            <Pressable
-              key={p}
-              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setP2pPair(p); }}
-              style={[
-                s.pairChip,
-                p2pPair === p
-                  ? { backgroundColor: colors.primary }
-                  : { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 },
-              ]}
-            >
-              <Text style={[s.pairChipText, { color: p2pPair === p ? "#fff" : colors.foreground }]}>
-                {p === "all" ? "Hemmesi" : p}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {/* Premium pairs banner */}
-        <View style={[s.premiumBanner, { borderColor: "#f59e0b" }]}>
-          <LinearGradient colors={["#f59e0b18", "#fbbf2418"]} style={s.premiumBannerGrad}>
-            <Ionicons name="star" size={16} color="#f59e0b" />
-            <View style={{ flex: 1 }}>
-              <Text style={[s.premiumBannerTitle, { color: colors.foreground }]}>
-                Premium Jübütler — BP/USDT · TMT/USDT
-              </Text>
-              <Text style={[s.premiumBannerSub, { color: colors.mutedForeground }]}>
-                Escrow goragy bilen ygtybarly söwda. Operator garantiýasy.
-              </Text>
-            </View>
-          </LinearGradient>
-        </View>
-
-        {/* Orders */}
-        <View style={{ paddingHorizontal: 16, gap: 10 }}>
-          {filteredOrders.map((order) => (
-            <Pressable
-              key={order.id}
-              onPress={() => handleP2POrder(order)}
-              style={({ pressed }) => [
-                s.orderCard,
-                {
-                  backgroundColor: colors.card,
-                  borderColor: order.premium ? "#f59e0b" : colors.border,
-                  borderWidth: order.premium ? 1.5 : 1,
-                  opacity: pressed ? 0.88 : 1,
-                },
-              ]}
-            >
-              {order.premium && (
-                <View style={s.premiumTag}>
-                  <Ionicons name="star" size={9} color="#fff" />
-                  <Text style={s.premiumTagText}>PREMIUM</Text>
-                </View>
-              )}
-              <View style={s.orderTopRow}>
-                <View style={[
-                  s.orderTypeBadge,
-                  { backgroundColor: order.type === "buy" ? "#059669" + "20" : "#0284c7" + "20" },
-                ]}>
-                  <Text style={[
-                    s.orderTypeText,
-                    { color: order.type === "buy" ? "#059669" : "#0284c7" },
-                  ]}>
-                    {order.type === "buy" ? "SATYN ALMAK" : "SATMAK"}
-                  </Text>
-                </View>
-                <Text style={[s.orderPairText, { color: colors.foreground }]}>{order.pair}</Text>
-                <View style={{ flex: 1 }} />
-                <Text style={[s.orderPrice, { color: colors.primary }]}>
-                  {order.price} {order.unit}
-                </Text>
-                <Text style={[s.orderPriceUnit, { color: colors.mutedForeground }]}>/USDT</Text>
-              </View>
-              <View style={s.orderBottomRow}>
-                <View style={s.orderMeta}>
-                  <Ionicons name="person-circle-outline" size={13} color={colors.mutedForeground} />
-                  <Text style={[s.orderMetaText, { color: colors.mutedForeground }]}>{order.seller}</Text>
-                </View>
-                <View style={s.orderMeta}>
-                  <Ionicons name="card-outline" size={13} color={colors.mutedForeground} />
-                  <Text style={[s.orderMetaText, { color: colors.mutedForeground }]}>{order.payMethod}</Text>
-                </View>
-                <View style={{ flex: 1 }} />
-                <Text style={[s.orderLimit, { color: colors.mutedForeground }]}>
-                  {order.min}–{order.max} {order.unit}
-                </Text>
-              </View>
-              <Pressable
-                onPress={() => handleP2POrder(order)}
-                style={[
-                  s.orderBtn,
-                  { backgroundColor: order.type === "buy" ? "#059669" : colors.primary },
-                ]}
-              >
-                <Text style={s.orderBtnText}>
-                  {order.type === "buy" ? "Satmak" : "Satyn al"}
-                </Text>
-              </Pressable>
-            </Pressable>
-          ))}
-        </View>
-      </ScrollView>
-    );
-  }
 
   if (mode === "success") {
     return (
@@ -606,7 +466,6 @@ export default function PayScreen() {
       {/* CONTENT */}
       {tab === "deposit" && <DepositTab />}
       {tab === "withdraw" && <WithdrawTab />}
-      {tab === "p2p" && <P2PTab />}
     </View>
   );
 }
@@ -724,24 +583,7 @@ const s = StyleSheet.create({
   feeRowVal: { fontSize: 13, fontWeight: "700" },
   feeDivider: { height: 1, marginVertical: 4 },
 
-  // P2P
-  pairFilterRow: { flexDirection: "row", gap: 8, padding: 16, paddingBottom: 8 },
-  pairChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 50 },
-  pairChipText: { fontSize: 13, fontWeight: "600" },
-  premiumBanner: { marginHorizontal: 16, marginBottom: 12, borderRadius: 14, borderWidth: 1.5, overflow: "hidden" },
-  premiumBannerGrad: { flexDirection: "row", alignItems: "center", gap: 10, padding: 13 },
-  premiumBannerTitle: { fontSize: 13, fontWeight: "700" },
-  premiumBannerSub: { fontSize: 11, marginTop: 2 },
-  orderCard: { borderRadius: 16, padding: 14, gap: 10 },
-  premiumTag: {
-    position: "absolute", top: 12, right: 12,
-    flexDirection: "row", alignItems: "center", gap: 3,
-    backgroundColor: "#f59e0b", borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2,
-  },
-  premiumTagText: { color: "#fff", fontSize: 8, fontWeight: "800" },
-  orderTopRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  orderTypeBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
-  orderTypeText: { fontSize: 10, fontWeight: "800" },
+
   orderPairText: { fontSize: 14, fontWeight: "700" },
   orderPrice: { fontSize: 16, fontWeight: "800" },
   orderPriceUnit: { fontSize: 12, fontWeight: "600" },

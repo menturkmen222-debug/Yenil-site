@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, Platform, Modal,
-  TextInput, KeyboardAvoidingView, FlatList, Dimensions, StatusBar,
-  ActivityIndicator, Animated,
+  Dimensions, ActivityIndicator, Animated,
 } from "react-native";
 import { router, type Href } from "expo-router";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -14,96 +13,6 @@ import { DailyGiftModal } from "@/components/DailyGiftModal";
 
 const { height: SCREEN_H, width: SCREEN_W } = Dimensions.get("window");
 
-// ── AI Chat Modal ──────────────────────────────────────────────────
-type Msg = { id: string; role: "user" | "agent"; text: string };
-
-function AiChatModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  const colors = useColors();
-  const insets = useSafeAreaInsets();
-  const [messages, setMessages] = useState<Msg[]>([
-    { id: "0", role: "agent", text: "Salam! Men AI Kömekçi. Size çalt kömek edip bilerin.\n\nSoragy ýazyň!" },
-  ]);
-  const [input, setInput] = useState("");
-  const flatRef = React.useRef<FlatList>(null);
-
-  const send = () => {
-    if (!input.trim()) return;
-    const userMsg: Msg = { id: Date.now().toString(), role: "user", text: input.trim() };
-    const agentMsg: Msg = {
-      id: (Date.now() + 1).toString(),
-      role: "agent",
-      text: "Bu Beta synag görnüşi. Ýakyn wagtda doly işleýän AI kömekçi bolýar!",
-    };
-    setMessages(prev => [...prev, userMsg, agentMsg]);
-    setInput("");
-    setTimeout(() => flatRef.current?.scrollToEnd({ animated: true }), 100);
-  };
-
-  return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: colors.background }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        {/* Chat header */}
-        <View style={[ch.header, { paddingTop: insets.top + 10, backgroundColor: "#6366f1" }]}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-            <View style={ch.avatarWrap}>
-              <MaterialCommunityIcons name="robot-outline" size={22} color="#fff" />
-              <View style={ch.onlineDot} />
-            </View>
-            <View>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <Text style={ch.agentName}>AI Kömekçi</Text>
-                <View style={ch.betaBadge}><Text style={ch.betaText}>BETA</Text></View>
-              </View>
-              <Text style={ch.agentSub}>Çalt kömek & akylly jogap</Text>
-            </View>
-          </View>
-          <Pressable style={ch.closeBtn} onPress={onClose}>
-            <Ionicons name="close" size={20} color="rgba(255,255,255,0.85)" />
-          </Pressable>
-        </View>
-
-        <FlatList
-          ref={flatRef}
-          data={messages}
-          keyExtractor={m => m.id}
-          contentContainerStyle={{ padding: 16, gap: 10 }}
-          renderItem={({ item }) => (
-            <View style={[ch.bubble,
-              item.role === "user"
-                ? [ch.bubbleUser, { backgroundColor: "#6366f1" }]
-                : [ch.bubbleAgent, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }],
-            ]}>
-              <Text style={{ color: item.role === "user" ? "#fff" : colors.foreground, fontSize: 14, lineHeight: 20 }}>
-                {item.text}
-              </Text>
-            </View>
-          )}
-        />
-
-        <View style={[ch.inputRow, { borderTopColor: colors.border, backgroundColor: colors.background, paddingBottom: insets.bottom + 8 }]}>
-          <TextInput
-            value={input}
-            onChangeText={setInput}
-            placeholder="Soragyňyzy ýazyň..."
-            placeholderTextColor={colors.mutedForeground}
-            style={[ch.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
-            onSubmitEditing={send}
-            returnKeyType="send"
-          />
-          <Pressable
-            onPress={send}
-            style={[ch.sendBtn, { backgroundColor: input.trim() ? "#6366f1" : colors.border }]}
-          >
-            <Ionicons name="send" size={16} color="#fff" />
-          </Pressable>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
-  );
-}
 
 // ── Plans ──────────────────────────────────────────────────────────
 const PLANS = [
@@ -561,7 +470,6 @@ export default function MoreScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const isWeb = Platform.OS === "web";
-  const [aiOpen, setAiOpen] = useState(false);
   const [tarifOpen, setTarifOpen] = useState(false);
   const [giftOpen, setGiftOpen] = useState(false);
 
@@ -569,7 +477,6 @@ export default function MoreScreen() {
 
   return (
     <>
-      <AiChatModal visible={aiOpen} onClose={() => setAiOpen(false)} />
       <TarifSheet visible={tarifOpen} onClose={() => setTarifOpen(false)} />
       <DailyGiftModal visible={giftOpen} onClose={() => setGiftOpen(false)} />
 
@@ -589,7 +496,7 @@ export default function MoreScreen() {
 
         {/* ── AI HERO CARD ── */}
         <Pressable
-          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setAiOpen(true); }}
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push("/ai-chat" as Href); }}
           style={({ pressed }) => [s.aiHero, { opacity: pressed ? 0.92 : 1 }]}
         >
           {/* Gradient background layer */}
@@ -600,7 +507,7 @@ export default function MoreScreen() {
             <View style={s.aiHeroLeft}>
               <View style={s.aiAvatarOuter}>
                 <View style={s.aiAvatarInner}>
-                  <MaterialCommunityIcons name="robot-outline" size={26} color="#6366f1" />
+                  <Ionicons name="sparkles-outline" size={26} color="#6366f1" />
                 </View>
                 <View style={s.aiOnlineDot} />
               </View>
@@ -664,6 +571,15 @@ export default function MoreScreen() {
         </Pressable>
 
         <View style={[s.group, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <GroupRow
+            icon="storefront-outline"
+            iconBg="#f0fdf4"
+            iconColor="#10b981"
+            label="Hyzmatlar"
+            desc="Ähli hyzmatlary gör we öz hyzmatyňy teklip et"
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/hyzmatlar" as Href); }}
+            colors={colors}
+          />
           <GroupRow
             icon="location-outline"
             iconBg="#eef2ff"
@@ -775,42 +691,6 @@ export default function MoreScreen() {
 
 // ── Styles ─────────────────────────────────────────────────────────
 
-const ch = StyleSheet.create({
-  header: {
-    paddingHorizontal: 16, paddingBottom: 14,
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-  },
-  avatarWrap: {
-    width: 42, height: 42, borderRadius: 21,
-    backgroundColor: "rgba(255,255,255,0.25)",
-    alignItems: "center", justifyContent: "center", position: "relative",
-  },
-  onlineDot: {
-    position: "absolute", bottom: 0, right: 0,
-    width: 11, height: 11, borderRadius: 6,
-    backgroundColor: "#fbbf24", borderWidth: 2, borderColor: "#fff",
-  },
-  agentName: { color: "#fff", fontWeight: "800", fontSize: 16 },
-  agentSub: { color: "rgba(255,255,255,0.75)", fontSize: 11, marginTop: 1 },
-  betaBadge: { backgroundColor: "#f59e0b", borderRadius: 5, paddingHorizontal: 6, paddingVertical: 2 },
-  betaText: { color: "#fff", fontSize: 8, fontWeight: "800", letterSpacing: 0.5 },
-  closeBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.15)", alignItems: "center", justifyContent: "center",
-  },
-  bubble: { maxWidth: "80%", borderRadius: 18, padding: 12 },
-  bubbleUser: { alignSelf: "flex-end", borderBottomRightRadius: 4 },
-  bubbleAgent: { alignSelf: "flex-start", borderBottomLeftRadius: 4 },
-  inputRow: {
-    flexDirection: "row", alignItems: "center", gap: 10,
-    paddingHorizontal: 16, paddingTop: 10, borderTopWidth: 1,
-  },
-  input: {
-    flex: 1, borderRadius: 24, paddingHorizontal: 16, paddingVertical: 10,
-    fontSize: 14, borderWidth: 1,
-  },
-  sendBtn: { width: 42, height: 42, borderRadius: 21, alignItems: "center", justifyContent: "center" },
-});
 
 const ts = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)" },

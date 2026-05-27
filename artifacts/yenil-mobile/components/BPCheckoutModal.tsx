@@ -12,12 +12,9 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
+import { useRates } from "@/contexts/RatesContext";
 import { addBalance, saveOrder } from "@/lib/firebase";
-import {
-  COMMISSION_RATES,
-  calcMissingBP,
-  calcTopUpTotal,
-} from "@/lib/payments";
+import { calcMissingBP } from "@/lib/payments";
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>["name"];
 type TopUpMethod = "card" | "tmcell";
@@ -69,11 +66,12 @@ export function BPCheckoutModal({
   const [topUpLoading, setTopUpLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const rates = useRates();
   const missingBP = checkInsufficientAmount(amount);
   const isSufficient = missingBP === 0;
 
-  const cardTotal = calcTopUpTotal(missingBP, "bank");
-  const tmcellTotal = calcTopUpTotal(missingBP, "tmcell");
+  const cardTotal    = parseFloat((missingBP * (1 + rates.bank_topup)).toFixed(2));
+  const tmcellTotal  = parseFloat((missingBP * (1 + rates.tmcell_topup)).toFixed(2));
 
   const handleClose = useCallback(() => {
     if (paymentLocked || topUpLoading) return;
@@ -117,8 +115,8 @@ export function BPCheckoutModal({
         tmtAmount: tmtPaid,
         commissionRate:
           selectedMethod === "card"
-            ? COMMISSION_RATES.bank_topup
-            : COMMISSION_RATES.tmcell_topup,
+            ? rates.bank_topup
+            : rates.tmcell_topup,
         serviceName,
         serviceCost: amount,
         status: "pending",
@@ -167,9 +165,9 @@ export function BPCheckoutModal({
       iconBg: "#6366f115",
       iconColor: "#6366f1",
       label: "Bank kartasy",
-      sublabel: `+${(COMMISSION_RATES.bank_topup * 100).toFixed(0)}% komissiýa`,
+      sublabel: `+${(rates.bank_topup * 100).toFixed(0)}% komissiýa`,
       total: cardTotal,
-      badge: `${(COMMISSION_RATES.bank_topup * 100).toFixed(0)}%`,
+      badge: `${(rates.bank_topup * 100).toFixed(0)}%`,
     },
     {
       id: "tmcell" as const,
@@ -177,9 +175,9 @@ export function BPCheckoutModal({
       iconBg: "#05966915",
       iconColor: "#059669",
       label: "TMCell balans",
-      sublabel: `+${(COMMISSION_RATES.tmcell_topup * 100).toFixed(0)}% komissiýa`,
+      sublabel: `+${(rates.tmcell_topup * 100).toFixed(0)}% komissiýa`,
       total: tmcellTotal,
-      badge: `${(COMMISSION_RATES.tmcell_topup * 100).toFixed(0)}%`,
+      badge: `${(rates.tmcell_topup * 100).toFixed(0)}%`,
     },
   ] as const;
 
