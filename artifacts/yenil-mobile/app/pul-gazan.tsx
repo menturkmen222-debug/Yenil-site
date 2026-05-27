@@ -127,7 +127,7 @@ export default function PulGazanScreen() {
         </Pressable>
         <View style={{ flex: 1, marginLeft: 12 }}>
           <Text style={s.headerTitle}>Pul Gazan</Text>
-          <Text style={s.headerSub}>7 usul bilen BP we TMT gazanyň</Text>
+          <Text style={s.headerSub}>{METHODS.length} usul bilen BP we TMT gazanyň</Text>
         </View>
       </LinearGradient>
 

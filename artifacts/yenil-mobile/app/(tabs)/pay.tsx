@@ -11,8 +11,7 @@ import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { PessimisticButton } from "@/components/PessimisticButton";
 import { COMMISSION_RATES, calcCryptoDepositBP, calcCryptoWithdrawUSDT, getCryptoDepositRatePct } from "@/lib/payments";
-
-const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AEDA785F26CB/9A8CACA4-5889-4D47-903E-BF12F059E175`;
+import { saveOrder } from "@/lib/firebase";
 
 type Network = "trc20" | "bep20" | "ton";
 type TabId = "deposit" | "withdraw" | "p2p";
@@ -99,15 +98,10 @@ export default function PayScreen() {
     if (depTxHash.length < 20) { setDepError("TX Hash ýalňyş görünýär. Barlaň."); return; }
     setLoading(true); setDepError("");
     try {
-      await fetch(`${BACKENDLESS_URL}/data/orders`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "crypto-deposit", network: depNetwork,
-          usdtAmount: depUsdt, bpAmount: depBp,
-          txHash: depTxHash.trim(),
-          timestamp: new Date().toISOString(),
-        }),
+      await saveOrder("crypto-orders", {
+        type: "crypto-deposit", network: depNetwork,
+        usdtAmount: depUsdt, bpAmount: depBp,
+        txHash: depTxHash.trim(),
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setSuccessMsg(`${depBp.toFixed(1)} BP balansynyza geçirildi!\n\nTX tassyklanandan soň (${NETWORKS.find((n) => n.id === depNetwork)?.time}) BP hasabynda görüner.`);
@@ -125,15 +119,10 @@ export default function PayScreen() {
     if (wdReceive <= 0) { setWdError("Mukdar komissiyadan az. Köpräk giriziň."); return; }
     setLoading(true); setWdError("");
     try {
-      await fetch(`${BACKENDLESS_URL}/data/orders`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "crypto-withdraw", network: wdNetwork,
-          bpAmount: wdBp, usdtAmount: wdUsdt, fee: wdNet.fee,
-          receiveAmount: wdReceive, walletAddress: wdAddress.trim(),
-          timestamp: new Date().toISOString(),
-        }),
+      await saveOrder("crypto-orders", {
+        type: "crypto-withdraw", network: wdNetwork,
+        bpAmount: wdBp, usdtAmount: wdUsdt, fee: wdNet.fee,
+        receiveAmount: wdReceive, walletAddress: wdAddress.trim(),
       });
       deduct(wdBp);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

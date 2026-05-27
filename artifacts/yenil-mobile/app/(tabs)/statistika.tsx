@@ -16,8 +16,6 @@ import {
 } from "@/lib/orderHistory";
 import { saveOrder } from "@/lib/firebase";
 
-const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AEDA785F26CB/9A8CACA4-5889-4D47-903E-BF12F059E175`;
-
 type FilterType = "all" | OrderType;
 
 const TYPE_META: Record<OrderType, { icon: keyof typeof Ionicons.glyphMap; color: string; label: string }> = {
@@ -107,20 +105,14 @@ export default function StatistikaScreen() {
           status: "pending",
         });
       } else if (type === "currency-buy" || type === "currency-sell") {
-        const resp = await fetch(`${BACKENDLESS_URL}/data/orders`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: type === "currency-buy" ? "pay-buy" : "pay-sell",
-            crypto: repeatItem.crypto ?? "usdt",
-            currency: repeatItem.currency ?? "usd",
-            amount: repeatItem.amount,
-            phone: repeatItem.phone ?? "",
-            walletId: repeatItem.walletId ?? "",
-            timestamp: new Date().toISOString(),
-          }),
+        await saveOrder("currency-orders", {
+          type: type === "currency-buy" ? "pay-buy" : "pay-sell",
+          crypto: repeatItem.crypto ?? "usdt",
+          currency: repeatItem.currency ?? "usd",
+          amount: repeatItem.amount,
+          phone: repeatItem.phone ?? "",
+          walletId: repeatItem.walletId ?? "",
         });
-        if (!resp.ok) throw new Error(`Status: ${resp.status}`);
       } else if (type === "sim") {
         await saveOrder("sim-topup-orders", {
           deviceId,

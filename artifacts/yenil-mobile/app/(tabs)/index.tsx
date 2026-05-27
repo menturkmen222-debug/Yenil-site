@@ -868,13 +868,21 @@ export default function HomeScreen() {
               </Text>
             </View>
           </View>
-          <Pressable
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setAddHyzmatOpen(true); }}
-            style={[mktStyles.addBtn, { backgroundColor: colors.primary }]}
-          >
-            <Ionicons name="add" size={18} color="#fff" />
-            <Text style={mktStyles.addBtnText}>Goş</Text>
-          </Pressable>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <Pressable
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); nav("/hyzmatlar"); }}
+              style={[mktStyles.addBtn, { backgroundColor: colors.muted, borderColor: colors.border, borderWidth: 1 }]}
+            >
+              <Text style={[mktStyles.addBtnText, { color: colors.foreground }]}>Hemmesi</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setAddHyzmatOpen(true); }}
+              style={[mktStyles.addBtn, { backgroundColor: colors.primary }]}
+            >
+              <Ionicons name="add" size={18} color="#fff" />
+              <Text style={mktStyles.addBtnText}>Goş</Text>
+            </Pressable>
+          </View>
         </View>
 
         {/* Search bar */}

@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, StyleSheet, Pressable, Linking, Platform } from "react-native";
 import { router } from "expo-router";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { db, ref, get } from "@/lib/firebase";
 
 const values = [
   { icon: "shield-checkmark-outline" as const, title: "Ynamly", desc: "Her sargyt howpsuz we kepillendirilen" },
@@ -13,14 +14,39 @@ const values = [
   { icon: "star-outline" as const, title: "Hilli", desc: "Premium hyzmat, arzan baha" },
 ];
 
-const team = [
-  { name: "Ýeňil topary", role: "Hyzmat we goldaw" },
-];
-
 export default function AboutScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const isWeb = Platform.OS === "web";
+
+  const [userCount, setUserCount] = useState<string>("...");
+  const [orderCount, setOrderCount] = useState<string>("...");
+
+  useEffect(() => {
+    get(ref(db, "user-balances")).then((snap) => {
+      if (snap.exists()) {
+        const count = Object.keys(snap.val()).length;
+        setUserCount(count >= 1000 ? `${(count / 1000).toFixed(1)}k+` : `${count}+`);
+      } else {
+        setUserCount("0");
+      }
+    }).catch(() => setUserCount("500+"));
+
+    get(ref(db, "orders")).then((snap) => {
+      if (snap.exists()) {
+        const count = Object.keys(snap.val()).length;
+        setOrderCount(count >= 1000 ? `${(count / 1000).toFixed(1)}k+` : `${count}+`);
+      } else {
+        setOrderCount("0");
+      }
+    }).catch(() => setOrderCount("1200+"));
+  }, []);
+
+  const stats: [string, string][] = [
+    [userCount, "Müşderi"],
+    [orderCount, "Tamamlanan sargyt"],
+    ["98%", "Kanagatlanma"],
+  ];
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -60,11 +86,7 @@ export default function AboutScreen() {
         {/* Stats */}
         <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Sanlar</Text>
         <View style={[styles.statsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          {[
-            ["500+", "Müşderi"],
-            ["1200+", "Tamamlanan sargyt"],
-            ["98%", "Kanagatlanma"],
-          ].map(([num, label], i) => (
+          {stats.map(([num, label], i) => (
             <View key={i} style={[styles.stat, i < 2 && { borderRightWidth: 1, borderRightColor: colors.border }]}>
               <Text style={[styles.statNum, { color: colors.primary }]}>{num}</Text>
               <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{label}</Text>

@@ -10,11 +10,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
-import { deductBalanceAtomic } from "@/lib/firebase";
+import { deductBalanceAtomic, saveOrder } from "@/lib/firebase";
 import { PessimisticButton } from "@/components/PessimisticButton";
 import BPCheckoutModal from "@/components/BPCheckoutModal";
-
-const BACKENDLESS_URL = `https://api.backendless.com/C3BB5032-1DCC-4DB3-888F-AEDA785F26CB/9A8CACA4-5889-4D47-903E-BF12F059E175`;
 
 const DEMIRYOL_API = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api/demiryol`
@@ -182,11 +180,7 @@ export default function DemiryolScreen() {
         timestamp: new Date().toISOString(),
         created: new Date().toISOString(), updated: new Date().toISOString(),
       };
-      const response = await fetch(`${BACKENDLESS_URL}/data/orders`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
-      });
-      if (!response.ok) throw new Error(`Status: ${response.status}`);
+      await saveOrder("orders", orderData);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setDirectStep("success");
     } catch (e: any) {
@@ -200,14 +194,9 @@ export default function DemiryolScreen() {
     }
     setAgentLoading(true);
     try {
-      await fetch(`${BACKENDLESS_URL}/data/orders`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "agent_monitor", name: agentName, phone: agentPhone,
-          route: agentRoute, date: agentDate, note: agentNote,
-          timestamp: new Date().toISOString(),
-          created: new Date().toISOString(), updated: new Date().toISOString(),
-        }),
+      await saveOrder("agent-orders", {
+        type: "agent_monitor", name: agentName, phone: agentPhone,
+        route: agentRoute, date: agentDate, note: agentNote,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setAgentDone(true);
