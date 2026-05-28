@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, Platform, Modal,
   Dimensions, ActivityIndicator, Animated,
@@ -75,9 +75,12 @@ type PayPlan = typeof PLANS[number];
 type PayMethod = "tmcell" | "bank";
 
 function PaymentModal({
-  plan, onClose, onSuccess,
+  plan, billingAmount, billingLabel, billingCycle, onClose, onSuccess,
 }: {
   plan: PayPlan;
+  billingAmount: number;
+  billingLabel: string;
+  billingCycle: "monthly" | "yearly";
   onClose: () => void;
   onSuccess: () => void;
 }) {
@@ -109,7 +112,7 @@ function PaymentModal({
           <View style={{ flex: 1 }}>
             <Text style={[pm.planName, { color: colors.foreground }]}>{plan.name} Tarifi</Text>
             <Text style={[pm.planPrice, { color: plan.color }]}>
-              {plan.free ? "Mugt" : `${plan.price} TMT / aý`}
+              {plan.free ? "Mugt" : billingLabel}
             </Text>
           </View>
           <Pressable onPress={onClose} style={[pm.closeBtn, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -170,7 +173,7 @@ function PaymentModal({
         <View style={[pm.summary, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[pm.summaryLabel, { color: colors.mutedForeground }]}>Jemi töleg</Text>
           <Text style={[pm.summaryAmount, { color: colors.foreground }]}>
-            {plan.free ? "0.00 TMT" : `${plan.price}.00 TMT`}
+            {plan.free ? "0.00 TMT" : `${billingAmount}.00 TMT`}
           </Text>
         </View>
 
@@ -188,7 +191,7 @@ function PaymentModal({
           ) : (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
               <Ionicons name={plan.free ? "checkmark-circle-outline" : "lock-closed-outline"} size={18} color="#fff" />
-              <Text style={pm.confirmText}>{plan.free ? "Mugt işe başla" : `${plan.price} TMT Töle`}</Text>
+              <Text style={pm.confirmText}>{plan.free ? "Mugt işe başla" : `${billingAmount} TMT Töle`}</Text>
             </View>
           )}
         </Pressable>
@@ -250,10 +253,45 @@ function TarifSheet({ visible, onClose }: { visible: boolean; onClose: () => voi
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [payPlan, setPayPlan] = useState<PayPlan | null>(null);
+  const [payBillingAmount, setPayBillingAmount] = useState(0);
+  const [payBillingLabel, setPayBillingLabel] = useState("");
   const [successPlan, setSuccessPlan] = useState<PayPlan | null>(null);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  const TOGGLE_W = SCREEN_W - 64;
+  const PILL_W = (TOGGLE_W - 6) / 2;
+  const slideX = slideAnim.interpolate({ inputRange: [0, 1], outputRange: [0, PILL_W] });
+
+  const switchCycle = (cycle: "monthly" | "yearly") => {
+    Haptics.selectionAsync();
+    setBillingCycle(cycle);
+    Animated.spring(slideAnim, {
+      toValue: cycle === "monthly" ? 0 : 1,
+      useNativeDriver: true,
+      damping: 22, stiffness: 260,
+    }).start();
+  };
+
+  const getPricing = (plan: PayPlan) => {
+    if (plan.free) return { monthlyDisplay: "0", yearlyTotal: 0, perMonthInYearly: "0", saved: 0 };
+    const monthly = Number(plan.price);
+    const yearlyTotal = Math.round(monthly * 12 * 0.9);
+    const perMonthInYearly = (yearlyTotal / 12).toFixed(1);
+    const saved = Math.round(monthly * 12 * 0.1);
+    return { monthlyDisplay: plan.price, yearlyTotal, perMonthInYearly, saved };
+  };
 
   const handleSelect = (plan: PayPlan) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const pricing = getPricing(plan);
+    const isYearly = billingCycle === "yearly";
+    const amount = plan.free ? 0 : isYearly ? pricing.yearlyTotal : Number(plan.price);
+    const label = plan.free ? "Mugt" : isYearly
+      ? `${pricing.yearlyTotal} TMT / ýyl`
+      : `${plan.price} TMT / aý`;
+    setPayBillingAmount(amount);
+    setPayBillingLabel(label);
     setPayPlan(plan);
   };
 
@@ -268,6 +306,9 @@ function TarifSheet({ visible, onClose }: { visible: boolean; onClose: () => voi
       {payPlan && (
         <PaymentModal
           plan={payPlan}
+          billingAmount={payBillingAmount}
+          billingLabel={payBillingLabel}
+          billingCycle={billingCycle}
           onClose={() => setPayPlan(null)}
           onSuccess={handleSuccess}
         />
@@ -300,6 +341,61 @@ function TarifSheet({ visible, onClose }: { visible: boolean; onClose: () => voi
             </Pressable>
           </View>
 
+          {/* ── Billing cycle toggle ── */}
+          <View style={[ts.toggleWrap, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+            <Animated.View
+              style={[
+                ts.toggleSlider,
+                {
+                  width: PILL_W,
+                  transform: [{ translateX: slideX }],
+                  backgroundColor: billingCycle === "yearly" ? "#10b981" : colors.card,
+                  shadowColor: billingCycle === "yearly" ? "#10b981" : "#000",
+                  shadowOpacity: billingCycle === "yearly" ? 0.35 : 0.12,
+                  shadowRadius: 8, shadowOffset: { width: 0, height: 3 },
+                  elevation: 4,
+                },
+              ]}
+            />
+            <Pressable style={[ts.toggleBtn, { width: PILL_W }]} onPress={() => switchCycle("monthly")}>
+              <Text style={[ts.toggleLabel, {
+                color: billingCycle === "monthly" ? colors.foreground : colors.mutedForeground,
+                fontWeight: billingCycle === "monthly" ? "800" : "500",
+              }]}>
+                Aýlyk
+              </Text>
+            </Pressable>
+            <Pressable style={[ts.toggleBtn, { width: PILL_W }]} onPress={() => switchCycle("yearly")}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <Text style={[ts.toggleLabel, {
+                  color: billingCycle === "yearly" ? "#fff" : colors.mutedForeground,
+                  fontWeight: billingCycle === "yearly" ? "800" : "500",
+                }]}>
+                  Ýyllyk
+                </Text>
+                <View style={[
+                  ts.toggleDiscount,
+                  {
+                    backgroundColor: billingCycle === "yearly" ? "rgba(255,255,255,0.22)" : "#10b98118",
+                    borderColor: billingCycle === "yearly" ? "rgba(255,255,255,0.3)" : "#10b98140",
+                  }
+                ]}>
+                  <Text style={[ts.toggleDiscountText, { color: billingCycle === "yearly" ? "#fff" : "#10b981" }]}>
+                    −10%
+                  </Text>
+                </View>
+              </View>
+            </Pressable>
+          </View>
+
+          {/* Yearly savings hint */}
+          {billingCycle === "yearly" && (
+            <View style={ts.savingsHint}>
+              <Ionicons name="checkmark-circle" size={14} color="#10b981" />
+              <Text style={ts.savingsHintText}>Ýyllyk tölemek bilen tygşytlaň!</Text>
+            </View>
+          )}
+
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 8, gap: 12 }}>
             {PLANS.map((plan) => {
               const isPopular = plan.popular;
@@ -307,6 +403,8 @@ function TarifSheet({ visible, onClose }: { visible: boolean; onClose: () => voi
               const cardBg = isPremium ? "#0f0a00" : isPopular ? plan.color : colors.card;
               const textColor = (isPopular || isPremium) ? "#fff" : colors.foreground;
               const subColor = (isPopular || isPremium) ? "rgba(255,255,255,0.65)" : colors.mutedForeground;
+              const pricing = getPricing(plan);
+              const isYearly = billingCycle === "yearly";
 
               return (
                 <View
@@ -352,11 +450,23 @@ function TarifSheet({ visible, onClose }: { visible: boolean; onClose: () => voi
                           <Text style={[ts.freeBadgeText, { color: plan.color }]}>MUGT</Text>
                         </View>
                       ) : (
-                        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 3 }}>
-                          <Text style={[ts.planPrice, { color: (isPopular || isPremium) ? "#fff" : plan.color }]}>
-                            {plan.price}
-                          </Text>
-                          <Text style={[ts.planPer, { color: subColor }]}>TMT/aý</Text>
+                        <View>
+                          <View style={{ flexDirection: "row", alignItems: "baseline", gap: 4 }}>
+                            <Text style={[ts.planPrice, { color: (isPopular || isPremium) ? "#fff" : plan.color }]}>
+                              {isYearly ? pricing.perMonthInYearly : plan.price}
+                            </Text>
+                            <Text style={[ts.planPer, { color: subColor }]}>TMT/aý</Text>
+                            {isYearly && (
+                              <Text style={[ts.strikePrice, { color: subColor }]}>
+                                {plan.price}
+                              </Text>
+                            )}
+                          </View>
+                          {isYearly && (
+                            <Text style={[ts.yearlyLine, { color: subColor }]}>
+                              Jemi {pricing.yearlyTotal} TMT/ýyl · {pricing.saved} TMT tygşyt
+                            </Text>
+                          )}
                         </View>
                       )}
                     </View>
@@ -411,7 +521,9 @@ function TarifSheet({ visible, onClose }: { visible: boolean; onClose: () => voi
             })}
 
             <Text style={[ts.footNote, { color: colors.mutedForeground }]}>
-              Tölegler her aýyň başynda ýazylýar. Islän wagtyňyz ýatyryp bilersiňiz.
+              {billingCycle === "yearly"
+                ? "Ýyllyk abonement bir gezek tölenýär. Islän wagtyňyz ýatyryp bilersiňiz."
+                : "Tölegler her aýyň başynda ýazylýar. Islän wagtyňyz ýatyryp bilersiňiz."}
             </Text>
           </ScrollView>
         </View>
@@ -739,6 +851,42 @@ const ts = StyleSheet.create({
   planBtnText: { fontWeight: "800", fontSize: 15 },
 
   footNote: { textAlign: "center", fontSize: 12, lineHeight: 17, paddingHorizontal: 8 },
+
+  /* Billing toggle */
+  toggleWrap: {
+    flexDirection: "row", alignItems: "center",
+    marginHorizontal: 16, marginBottom: 4, marginTop: 10,
+    borderRadius: 16, padding: 3,
+    borderWidth: 1, position: "relative",
+    height: 50,
+  },
+  toggleSlider: {
+    position: "absolute", top: 3, left: 3,
+    height: 44, borderRadius: 13,
+  },
+  toggleBtn: {
+    height: 44, borderRadius: 13,
+    alignItems: "center", justifyContent: "center", zIndex: 1,
+  },
+  toggleLabel: { fontSize: 15, letterSpacing: -0.2 },
+  toggleDiscount: {
+    borderRadius: 8, paddingHorizontal: 7, paddingVertical: 3,
+    borderWidth: 1,
+  },
+  toggleDiscountText: { fontSize: 11, fontWeight: "800", letterSpacing: 0.2 },
+
+  savingsHint: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    marginHorizontal: 16, marginBottom: 10, marginTop: 4,
+    justifyContent: "center",
+  },
+  savingsHintText: { fontSize: 12, color: "#10b981", fontWeight: "600" },
+
+  /* Yearly price display */
+  strikePrice: {
+    fontSize: 14, textDecorationLine: "line-through", marginLeft: 2,
+  },
+  yearlyLine: { fontSize: 11, marginTop: 2, lineHeight: 16 },
 });
 
 const gr = StyleSheet.create({
