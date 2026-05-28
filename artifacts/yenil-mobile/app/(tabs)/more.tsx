@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { DailyGiftModal } from "@/components/DailyGiftModal";
+import { METHODS as PUL_GAZAN_METHODS } from "@/app/pul-gazan";
 
 const { height: SCREEN_H, width: SCREEN_W } = Dimensions.get("window");
 
@@ -670,13 +671,13 @@ export default function MoreScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <Text style={pulGazanCard.title}>Pul Gazan</Text>
+                <Text style={pulGazanCard.title}>Pul/Abraý gazan</Text>
                 <View style={pulGazanCard.hotBadge}>
                   <Ionicons name="flame" size={9} color="#fff" />
                   <Text style={pulGazanCard.hotText}>HOT</Text>
                 </View>
               </View>
-              <Text style={pulGazanCard.desc}>7 usul bilen BP gazanyň — Agent, Referal, Kuryer we beýlekiler</Text>
+              <Text style={pulGazanCard.desc}>{PUL_GAZAN_METHODS.length} usul bilen BP gazanyň — Agent, Referal, Kuryer we beýlekiler</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
           </View>

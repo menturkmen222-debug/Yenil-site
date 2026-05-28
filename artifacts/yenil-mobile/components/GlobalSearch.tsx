@@ -26,6 +26,7 @@ import { CATEGORIES, LESSONS } from "@/lib/ebilimData";
 import { HYZMAT_CATEGORIES } from "@/lib/hyzmatlar";
 import { TRANSPORT_CATEGORIES } from "@/config/transportFeatures";
 import { PAYMENT_CATEGORIES } from "@/config/paymentFeatures";
+import { METHODS as PUL_GAZAN_METHODS } from "@/app/pul-gazan";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -131,8 +132,8 @@ const SCREEN_ITEMS: SearchItem[] = [
   {
     id: "s-pulgazan",
     type: "ekran",
-    title: "Pul Gazan",
-    subtitle: "7 usul bilen BP gazan",
+    title: "Pul/Abraý gazan",
+    subtitle: `${PUL_GAZAN_METHODS.length} usul bilen BP gazan`,
     icon: "trophy-outline",
     color: "#eab308",
     route: "/pul-gazan",

@@ -10,7 +10,7 @@ import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 
-const METHODS = [
+export const METHODS = [
   {
     id: "e-bilim",
     title: "E-Bilim — Öwren we Gazan",
@@ -102,7 +102,7 @@ export default function PulGazanScreen() {
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </Pressable>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={s.headerTitle}>Pul Gazan</Text>
+          <Text style={s.headerTitle}>Pul/Abraý gazan</Text>
           <Text style={s.headerSub}>{METHODS.length} usul bilen BP we TMT gazanyň</Text>
         </View>
       </LinearGradient>
