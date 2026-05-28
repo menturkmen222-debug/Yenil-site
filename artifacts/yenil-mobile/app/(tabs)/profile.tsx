@@ -270,12 +270,12 @@ export default function ProfileScreen() {
 
             {/* Name & nickname */}
             <Text style={s.heroName}>{displayName}</Text>
-            {displayNickname ? (
-              <View style={s.nicknamePill}>
-                <Ionicons name="at-outline" size={13} color="rgba(255,255,255,0.85)" />
-                <Text style={s.nicknameText}>{displayNickname}</Text>
-              </View>
-            ) : null}
+            <View style={s.nicknamePill}>
+              <Ionicons name="at-outline" size={13} color={displayNickname ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.5)"} />
+              <Text style={[s.nicknameText, !displayNickname && { color: "rgba(255,255,255,0.5)" }]}>
+                {displayNickname || "belirlenmedik"}
+              </Text>
+            </View>
           </LinearGradient>
 
           {/* ── Device ID chip ── */}
