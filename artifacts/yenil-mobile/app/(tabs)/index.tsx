@@ -828,7 +828,7 @@ export default function HomeScreen() {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[styles.bannerTitle, { color: colors.foreground }]}>E-Bilim</Text>
-            <Text style={[styles.bannerDesc, { color: colors.mutedForeground }]}>O'qi, test ber, BP gazan</Text>
+            <Text style={[styles.bannerDesc, { color: colors.mutedForeground }]}>Öwren, test ber, Abraý gazan</Text>
           </View>
           <Feather name="arrow-right" size={20} color="#6366f1" />
         </Pressable>

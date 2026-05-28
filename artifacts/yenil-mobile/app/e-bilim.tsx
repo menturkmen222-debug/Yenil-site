@@ -15,7 +15,7 @@ import { CATEGORIES, LESSONS, type Lesson, type EBilimCategory } from "@/lib/ebi
 import {
   watchCompletedLessons,
   watchUnlockedLessons,
-  submitQuizAndEarnBP,
+  submitQuizAndEarnReputation,
   unlockPremiumLesson,
 } from "@/lib/firebase";
 
@@ -106,7 +106,7 @@ function LessonCard({
           ) : (
             <View style={[lc.badge, { backgroundColor: "#10b98118", borderColor: "#10b98135" }]}>
               <Ionicons name="gift-outline" size={11} color="#10b981" />
-              <Text style={[lc.badgeText, { color: "#10b981" }]}>+{lesson.bpReward} BP</Text>
+              <Text style={[lc.badgeText, { color: "#10b981" }]}>+{lesson.reputationReward} Abraý</Text>
             </View>
           )}
         </View>
@@ -144,14 +144,14 @@ export default function EBilimScreen() {
   const [selectedCatId, setSelectedCatId] = useState<string>("all");
   const [completedIds, setCompletedIds] = useState<string[]>([]);
   const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
-  const [totalBPEarned, setTotalBPEarned] = useState<number>(0);
+  const [totalReputationEarned, setTotalReputationEarned] = useState<number>(0);
 
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [modalPhase, setModalPhase] = useState<ModalPhase>("content");
   const [currentQ, setCurrentQ] = useState<number>(0);
   const [answers, setAnswers] = useState<(number | null)[]>([]);
   const [quizScore, setQuizScore] = useState<number>(0);
-  const [bpAwarded, setBpAwarded] = useState<number>(0);
+  const [reputationAwarded, setReputationAwarded] = useState<number>(0);
   const [alreadyClaimed, setAlreadyClaimed] = useState<boolean>(false);
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
   const [unlockLoading, setUnlockLoading] = useState<boolean>(false);
@@ -166,9 +166,9 @@ export default function EBilimScreen() {
   useEffect(() => {
     const earned = completedIds.reduce((sum, id) => {
       const l = LESSONS.find(x => x.id === id);
-      return l ? sum + l.bpReward : sum;
+      return l ? sum + l.reputationReward : sum;
     }, 0);
-    setTotalBPEarned(Math.round(earned * 100) / 100);
+    setTotalReputationEarned(earned);
   }, [completedIds]);
 
   const filteredLessons = selectedCatId === "all"
@@ -182,7 +182,7 @@ export default function EBilimScreen() {
     setCurrentQ(0);
     setAnswers(new Array(lesson.quiz.length).fill(null));
     setQuizScore(0);
-    setBpAwarded(0);
+    setReputationAwarded(0);
     setAlreadyClaimed(false);
     setSubmitLoading(false);
     setUnlockLoading(false);
@@ -240,9 +240,9 @@ export default function EBilimScreen() {
     const correct = selectedLesson.quiz.reduce((sum, q, i) => answers[i] === q.correct ? sum + 1 : sum, 0);
     const score = correct / selectedLesson.quiz.length;
     const passed = score >= PASS_THRESHOLD;
-    const res = await submitQuizAndEarnBP(deviceId, selectedLesson.id, passed, selectedLesson.bpReward);
+    const res = await submitQuizAndEarnReputation(deviceId, selectedLesson.id, passed, selectedLesson.reputationReward);
     setQuizScore(score);
-    setBpAwarded(res.bpAwarded);
+    setReputationAwarded(res.reputationAwarded);
     setAlreadyClaimed(res.alreadyClaimed);
     setSubmitLoading(false);
     setModalPhase("result");
@@ -272,7 +272,7 @@ export default function EBilimScreen() {
         </Pressable>
         <View style={{ flex: 1, marginLeft: 12 }}>
           <Text style={sc.headerTitle}>E-Bilim</Text>
-          <Text style={sc.headerSub}>Öwren, test ber, BP gazan</Text>
+          <Text style={sc.headerSub}>Öwren, test ber, Abraý gazan</Text>
         </View>
         <View style={{ gap: 5, alignItems: "flex-end" }}>
           <View style={sc.statChip}>
@@ -280,8 +280,8 @@ export default function EBilimScreen() {
             <Text style={sc.statChipText}>{completedIds.length} tamam</Text>
           </View>
           <View style={sc.statChip}>
-            <Ionicons name="wallet-outline" size={12} color="#22d3ee" />
-            <Text style={sc.statChipText}>{totalBPEarned.toFixed(2)} BP</Text>
+            <Ionicons name="star-outline" size={12} color="#22d3ee" />
+            <Text style={sc.statChipText}>{totalReputationEarned} Abraý</Text>
           </View>
         </View>
       </LinearGradient>
@@ -326,7 +326,7 @@ export default function EBilimScreen() {
           <Ionicons name="school-outline" size={30} color="#fff" />
           <View style={{ flex: 1 }}>
             <Text style={sc.promoTitle}>Learn & Earn</Text>
-            <Text style={sc.promoSub}>Bir sabaq = 0.05–0.3 BP + Abraý +1</Text>
+            <Text style={sc.promoSub}>Bir sapak = Abraý +1 · +2 · +3</Text>
           </View>
           <View style={{ alignItems: "center" }}>
             <Text style={sc.promoCount}>{LESSONS.length}</Text>
@@ -408,8 +408,8 @@ export default function EBilimScreen() {
                     </View>
                   ))}
                   <View style={[mo.metaChip, { backgroundColor: cat.color + "18", borderColor: cat.color + "30" }]}>
-                    <Ionicons name="gift-outline" size={13} color={cat.color} />
-                    <Text style={[mo.metaChipText, { color: cat.color }]}>+{selectedLesson.bpReward} BP</Text>
+                    <Ionicons name="star-outline" size={13} color={cat.color} />
+                    <Text style={[mo.metaChipText, { color: cat.color }]}>+{selectedLesson.reputationReward} Abraý</Text>
                   </View>
                 </View>
 
@@ -480,7 +480,7 @@ export default function EBilimScreen() {
                         <View style={{ flex: 1 }}>
                           <Text style={[mo.completedNoticeTitle, { color: cat.color }]}>Sapak tamamlandy!</Text>
                           <Text style={[mo.completedNoticeSub, { color: colors.mutedForeground }]}>
-                            BP eýýäm alyndy. Täzeden test berip bilersiňiz (BP berilmez).
+                            Abraý eýýäm alyndy. Täzeden test berip bilersiňiz (Abraý berilmez).
                           </Text>
                         </View>
                       </View>
@@ -593,16 +593,16 @@ export default function EBilimScreen() {
                     <Text style={[mo.resultTitle, { color: cat.color }]}>Ajaýyp netije!</Text>
                     {alreadyClaimed ? (
                       <Text style={[mo.resultSub, { color: colors.mutedForeground }]}>
-                        Bu sapak üçin BP eýýäm alyndy.
+                        Bu sapak üçin Abraý eýýäm alyndy.
                       </Text>
                     ) : (
                       <>
                         <View style={mo.bpRow}>
                           <Text style={[mo.bpRowLabel, { color: colors.foreground }]}>Gazanyldy:</Text>
-                          <Text style={[mo.bpRowValue, { color: cat.color }]}>+{bpAwarded.toFixed(2)} BP</Text>
+                          <Text style={[mo.bpRowValue, { color: cat.color }]}>+{reputationAwarded} Abraý</Text>
                         </View>
                         <Text style={[mo.bpMeta, { color: colors.mutedForeground }]}>
-                          Abraý: +1 bal • Balans täzelendi
+                          Abraý reýtingiňiz täzelendi
                         </Text>
                       </>
                     )}

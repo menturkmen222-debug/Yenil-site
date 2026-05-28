@@ -15,7 +15,7 @@ export interface Lesson {
   isPremium: boolean;
   premiumBPCost?: number;
   premiumRepRequired?: number;
-  bpReward: number;
+  reputationReward: number;
   emoji: string;
   quiz: QuizQuestion[];
 }
@@ -98,7 +98,7 @@ export const LESSONS: Lesson[] = [
     duration: "1 daqiqa",
     emoji: "🚀",
     isPremium: false,
-    bpReward: 0.05,
+    reputationReward: 1,
     content: `🚀 Ýeňil — Türkmenistanyň aqıllı onlayn hyzmat platformasy.
 
 📱 Ilovada neler bor:
@@ -135,7 +135,7 @@ export const LESSONS: Lesson[] = [
     duration: "1 daqiqa",
     emoji: "💰",
     isPremium: false,
-    bpReward: 0.1,
+    reputationReward: 1,
     content: `💰 BP (Bonus Pul) — Ýeňil ichki valyutasi. 1 BP ≈ 1 TMT.
 
 📈 BP qanday OLINADI:
@@ -182,7 +182,7 @@ export const LESSONS: Lesson[] = [
     duration: "1 daqiqa",
     emoji: "⚡",
     isPremium: false,
-    bpReward: 0.15,
+    reputationReward: 2,
     content: `⚡ P2P Kripto Birja — Ýeňil eng kuchli funksiyasi.
 
 🔒 Kim foydalana oladi?
@@ -226,7 +226,7 @@ export const LESSONS: Lesson[] = [
     duration: "1 daqiqa",
     emoji: "⭐",
     isPremium: false,
-    bpReward: 0.1,
+    reputationReward: 1,
     content: `⭐ Abraý — Ýeňil tizimidagi ishonch kapitali.
 
 📌 Abraý qanday OSHADI:
@@ -272,7 +272,7 @@ Bu tizimda qat'iy blokirovka mavjud.
     duration: "1 daqiqa",
     emoji: "📶",
     isPremium: false,
-    bpReward: 0.1,
+    reputationReward: 1,
     content: `📶 Wi-Fi routeringizni xavfsizlashtirish — oddiy lekin muhim.
 
 🔧 Qadamlar:
@@ -313,7 +313,7 @@ Yenil@2025#Secure ✅
     duration: "1 daqiqa",
     emoji: "💻",
     isPremium: false,
-    bpReward: 0.1,
+    reputationReward: 1,
     content: `💻 Eski kompyuter sekin ishlaydi? Muammo emas!
 
 ⚡ TOP-5 BEPUL usul:
@@ -359,7 +359,7 @@ Yenil@2025#Secure ✅
     duration: "1 daqiqa",
     emoji: "📡",
     isPremium: false,
-    bpReward: 0.15,
+    reputationReward: 2,
     content: `📡 DIY Wi-Fi antennasi yasash — 15 daqiqa, pulsiz!
 
 🛠️ Kerak bo'ladiganlar:
@@ -403,7 +403,7 @@ Yenil@2025#Secure ✅
     emoji: "🛡️",
     isPremium: true,
     premiumBPCost: 2,
-    bpReward: 0.2,
+    reputationReward: 2,
     content: `🛡️ Telefoningizni 7 oddiy qadam bilan xavfsizlashtiring.
 
 🔒 1. Ekran qulfi
@@ -454,7 +454,7 @@ Security patch = himoya devori`,
     duration: "1 daqiqa",
     emoji: "▶️",
     isPremium: false,
-    bpReward: 0.15,
+    reputationReward: 2,
     content: `▶️ Evergreen kontent = yillar davomida ko'riluvchi video.
 
 🎯 Trend kontent vs Evergreen:
@@ -498,7 +498,7 @@ Security patch = himoya devori`,
     duration: "1 daqiqa",
     emoji: "📊",
     isPremium: false,
-    bpReward: 0.15,
+    reputationReward: 2,
     content: `📊 Treyding — pul ishlash emas, avvalo risk boshqaruvi.
 
 ⚠️ ASOSIY QOIDA:
@@ -543,7 +543,7 @@ Misol: 100 USDT kapital → 1 savdoda max 1 USDT risk
     duration: "1 daqiqa",
     emoji: "🎵",
     isPremium: false,
-    bpReward: 0.1,
+    reputationReward: 1,
     content: `🎵 TikTok algoritmi siri: FYP (For You Page) ga kirish.
 
 🧠 TikTok nimani ko'radi:
@@ -589,7 +589,7 @@ Misol: 100 USDT kapital → 1 savdoda max 1 USDT risk
     emoji: "📱",
     isPremium: true,
     premiumBPCost: 3,
-    bpReward: 0.25,
+    reputationReward: 3,
     content: `📱 SMM (Social Media Manager) — uydan ishlash mumkin.
 
 💼 Klient qayerda topiladi:
@@ -638,7 +638,7 @@ Screenshotlarni saqlang → portfolio yarating`,
     duration: "1 daqiqa",
     emoji: "🧠",
     isPremium: false,
-    bpReward: 0.1,
+    reputationReward: 1,
     content: `🧠 Bolalar miyasi katta odamlar miyasidan farq qiladi.
 
 📚 3 ta asosiy fakt:
@@ -681,7 +681,7 @@ Maktabgacha bolalar: 10–13 soat uyqu kerak
     duration: "1 daqiqa",
     emoji: "📵",
     isPremium: false,
-    bpReward: 0.1,
+    reputationReward: 1,
     content: `📵 Raqamli gigiyena — texnologiya bilan sog'lom munosabat.
 
 ⏱️ Ekran vaqti tavsiyalari (JSSST):
@@ -725,7 +725,7 @@ Maktabgacha bolalar: 10–13 soat uyqu kerak
     duration: "1 daqiqa",
     emoji: "🎮",
     isPremium: false,
-    bpReward: 0.1,
+    reputationReward: 1,
     content: `🎮 Barcha o'yinlar bir xil emas — to'g'ri tanlash muhim.
 
 📋 PEGI Reytingi tizimi:
@@ -772,7 +772,7 @@ Keyin qaror qabul qiling`,
     duration: "1 daqiqa",
     emoji: "💬",
     isPremium: false,
-    bpReward: 0.15,
+    reputationReward: 2,
     content: `💬 Prompt Engineering — AI dan yaxshi javob olish san'ati.
 
 🎯 YAXSHI PROMPT = KONTEKST + VAZIFA + FORMAT
@@ -814,7 +814,7 @@ Keyin qaror qabul qiling`,
     duration: "1 daqiqa",
     emoji: "🤖",
     isPremium: false,
-    bpReward: 0.2,
+    reputationReward: 2,
     content: `🤖 AI yordamida 2025-yilda pul ishlashning 5 yo'li.
 
 1. 🎨 AI dizayn (Midjourney, DALL-E)
@@ -862,7 +862,7 @@ ChatGPT bilan SMM matnlar yozing → mahalliy bizneslarga soting`,
     duration: "1 daqiqa",
     emoji: "🌐",
     isPremium: false,
-    bpReward: 0.15,
+    reputationReward: 2,
     content: `🌐 AI Agent — oddiy chatbot emas, mustaqil ishlashga qodir tizim.
 
 🔄 ChatGPT vs AI Agent farqi:
@@ -913,7 +913,7 @@ Hozir bunday biladigan odam = kelajakka tayyorlanmoqda.
     duration: "1 daqiqa",
     emoji: "💼",
     isPremium: false,
-    bpReward: 0.15,
+    reputationReward: 2,
     content: `💼 Fiverr — xalqaro freelance bozori. Hozir boshlang!
 
 📝 Hisob yaratish (bepul):
@@ -957,7 +957,7 @@ Payoneer karta (Fiverr'dan bepul) → bank o'tkazmasi`,
     duration: "1 daqiqa",
     emoji: "🗂️",
     isPremium: false,
-    bpReward: 0.15,
+    reputationReward: 2,
     content: `🗂️ Portfolio — sizning onlayn vizit kartangiz.
 
 🎯 Portfolio nima bo'lishi kerak:
@@ -1004,7 +1004,7 @@ Umumiy: Notion, Canva portfolio
     emoji: "💸",
     isPremium: true,
     premiumBPCost: 3,
-    bpReward: 0.3,
+    reputationReward: 3,
     content: `💸 Türkmenistandan xalqaro to'lov olishning haqiqiy usuli.
 
 🌍 Muammo:
@@ -1052,7 +1052,7 @@ Türkmenistanlik freelancerlar PayPal, Stripe dan foydalana olmaydi.
     duration: "1 daqiqa",
     emoji: "🚨",
     isPremium: false,
-    bpReward: 0.15,
+    reputationReward: 2,
     content: `🚨 Scam (firibgarlik) belgilari — bilsangiz qutulasiz!
 
 🔴 7 ta xavf belgisi:
@@ -1108,7 +1108,7 @@ Türkmenistanlik freelancerlar PayPal, Stripe dan foydalana olmaydi.
     duration: "1 daqiqa",
     emoji: "🔑",
     isPremium: false,
-    bpReward: 0.2,
+    reputationReward: 2,
     content: `🔑 Seed Phrase (kalit ibora) — kripto hamyoningiz kaliti.
 
 📌 Seed phrase nima?
@@ -1159,7 +1159,7 @@ Seed phrase yo'qolsa → PULSIZ.
     emoji: "🤝",
     isPremium: true,
     premiumBPCost: 2,
-    bpReward: 0.25,
+    reputationReward: 3,
     content: `🤝 P2P savdo xavfsizligi — pul yo'qotmaslik uchun.
 
 🔒 Escrow tizimi nima?

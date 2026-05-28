@@ -964,39 +964,38 @@ export function watchUnlockedLessons(
   });
 }
 
-export async function submitQuizAndEarnBP(
+export async function submitQuizAndEarnReputation(
   deviceId: string,
   lessonId: string,
   passed: boolean,
-  bpReward: number
-): Promise<{ alreadyClaimed: boolean; bpAwarded: number }> {
+  reputationReward: number
+): Promise<{ alreadyClaimed: boolean; reputationAwarded: number }> {
   try {
     const claimedSnap = await get(ref(db, `e-bilim/${deviceId}/completed/${lessonId}`));
-    if (claimedSnap.exists()) return { alreadyClaimed: true, bpAwarded: 0 };
+    if (claimedSnap.exists()) return { alreadyClaimed: true, reputationAwarded: 0 };
 
     await set(ref(db, `e-bilim/${deviceId}/completed/${lessonId}`), {
       completedAt: new Date().toISOString(),
       passed,
-      bpAwarded: passed ? bpReward : 0,
+      reputationAwarded: passed ? reputationReward : 0,
     });
 
     if (passed) {
-      await addBalance(deviceId, bpReward);
-      const totalSnap = await get(ref(db, `e-bilim/${deviceId}/totalBPEarned`));
+      const totalSnap = await get(ref(db, `e-bilim/${deviceId}/totalReputationEarned`));
       const prev = totalSnap.exists() ? (totalSnap.val() as number) : 0;
-      await set(ref(db, `e-bilim/${deviceId}/totalBPEarned`), prev + bpReward);
+      await set(ref(db, `e-bilim/${deviceId}/totalReputationEarned`), prev + reputationReward);
       await saveReputationEntry(deviceId, {
         type: "positive",
-        reason: `E-Bilim sapak tamamlandy (+${bpReward.toFixed(2)} BP)`,
-        delta: 1,
+        reason: `E-Bilim sapak tamamlandy — Abraý +${reputationReward}`,
+        delta: reputationReward,
         timestamp: new Date().toISOString(),
         isPublic: false,
       });
     }
 
-    return { alreadyClaimed: false, bpAwarded: passed ? bpReward : 0 };
+    return { alreadyClaimed: false, reputationAwarded: passed ? reputationReward : 0 };
   } catch {
-    return { alreadyClaimed: false, bpAwarded: 0 };
+    return { alreadyClaimed: false, reputationAwarded: 0 };
   }
 }
 
@@ -1027,18 +1026,18 @@ export async function unlockPremiumLesson(
 
 export async function getEBilimStats(
   deviceId: string
-): Promise<{ completedCount: number; totalBPEarned: number }> {
+): Promise<{ completedCount: number; totalReputationEarned: number }> {
   try {
-    const [completedSnap, bpSnap] = await Promise.all([
+    const [completedSnap, repSnap] = await Promise.all([
       get(ref(db, `e-bilim/${deviceId}/completed`)),
-      get(ref(db, `e-bilim/${deviceId}/totalBPEarned`)),
+      get(ref(db, `e-bilim/${deviceId}/totalReputationEarned`)),
     ]);
     return {
       completedCount: completedSnap.exists() ? Object.keys(completedSnap.val()).length : 0,
-      totalBPEarned: bpSnap.exists() ? (bpSnap.val() as number) : 0,
+      totalReputationEarned: repSnap.exists() ? (repSnap.val() as number) : 0,
     };
   } catch {
-    return { completedCount: 0, totalBPEarned: 0 };
+    return { completedCount: 0, totalReputationEarned: 0 };
   }
 }
 

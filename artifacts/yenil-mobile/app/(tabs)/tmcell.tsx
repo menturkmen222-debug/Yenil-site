@@ -383,19 +383,6 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
               <Text style={[s.rateText, { color: "#059669" }]}>TMCell çykaryş · {(COMMISSION_RATES.tmcell_cashout * 100).toFixed(1)}% komissiya</Text>
             </View>
 
-            {/* Balance card */}
-            <View style={[s.balanceCard, { backgroundColor: colors.primary }]}>
-              <View style={s.balanceCardRow}>
-                <View style={[s.balanceCardIcon, { backgroundColor: "rgba(255,255,255,0.2)" }]}>
-                  <Ionicons name="wallet" size={22} color="#fff" />
-                </View>
-                <View>
-                  <Text style={s.balanceCardLabel}>Häzirki balans</Text>
-                  <Text style={s.balanceCardVal}>{balance.toFixed(2)} BP</Text>
-                </View>
-              </View>
-            </View>
-
             <View style={{ marginTop: 16 }}>
               <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Çykarmak üçin mukdar (BP)</Text>
               <TextInput value={sellAmount} onChangeText={setSellAmount} placeholder="Meseläň: 100"
@@ -466,17 +453,6 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
         </View>
       ) : (
         <View style={{ gap: 14 }}>
-          <LinearGradient
-            colors={[colors.headerGradientStart, colors.headerGradientEnd] as [string, string]}
-            style={{ borderRadius: 16, padding: 16, flexDirection: "row", alignItems: "center", gap: 12 }}
-          >
-            <Ionicons name="wallet-outline" size={22} color="rgba(255,255,255,0.85)" />
-            <View>
-              <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: "600" }}>Mowjut balans</Text>
-              <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800" }}>{balance.toFixed(2)} BP</Text>
-            </View>
-          </LinearGradient>
-
           <View>
             <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Alyjynyň ID-si *</Text>
             <TextInput
@@ -736,21 +712,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
       {/* ════════════ DEPOSIT TAB ════════════ */}
       {ctab === "deposit" && (
         <>
-          <View style={[cs.depSummaryCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={cs.depSummaryRow}>
-              <View style={[cs.depSummaryIcon, { backgroundColor: "#05966915" }]}>
-                <Ionicons name="arrow-down-circle" size={22} color="#059669" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[cs.depSummaryLabel, { color: colors.mutedForeground }]}>Depozit kursy</Text>
-                <Text style={[cs.depSummaryVal, { color: colors.foreground }]}>1 USDT = <Text style={{ color: colors.primary, fontWeight: "800" }}>{BP_PER_USDT} BP</Text></Text>
-              </View>
-              <View style={[cs.depRateBadge, { backgroundColor: "#05966912", borderColor: "#05966930" }]}>
-                <Text style={{ color: "#059669", fontSize: 11, fontWeight: "700" }}>Anyk kurs</Text>
-              </View>
-            </View>
-          </View>
-
           <Text style={[cs.depSectionLabel, { color: colors.mutedForeground }]}>Tarmogy saýlaň</Text>
           <View style={cs.netRow}>
             {USDT_NETWORKS.map(n => (
@@ -882,21 +843,6 @@ function CurrencySection({ colors }: { colors: ReturnType<typeof useColors> }) {
       {/* ════════════ WITHDRAW TAB ════════════ */}
       {ctab === "withdraw" && (
         <>
-          <View style={[cs.wdBalHero, { backgroundColor: colors.primary, shadowColor: colors.primary }]}>
-            <View style={{ flex: 1 }}>
-              <Text style={cs.wdBalHeroLabel}>Balansiňiz</Text>
-              <Text style={cs.wdBalHeroVal}>{balance.toFixed(2)} <Text style={{ fontSize: 16, fontWeight: "600", opacity: 0.85 }}>BP</Text></Text>
-            </View>
-            <View style={cs.wdBalHeroRight}>
-              <View style={cs.wdRatePill}>
-                <Text style={cs.wdRatePillText}>1 BP = {USDT_PER_BP} USDT</Text>
-              </View>
-              <View style={cs.wdBalIconWrap}>
-                <Ionicons name="wallet" size={24} color="rgba(255,255,255,0.9)" />
-              </View>
-            </View>
-          </View>
-
           <Text style={[cs.depSectionLabel, { color: colors.mutedForeground, marginTop: 4 }]}>Çykaryş tarmagyňyz</Text>
           <View style={cs.netRow}>
             {USDT_NETWORKS.map(n => (
