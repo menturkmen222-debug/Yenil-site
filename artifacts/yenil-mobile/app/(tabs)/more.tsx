@@ -572,15 +572,6 @@ export default function MoreScreen() {
 
         <View style={[s.group, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <GroupRow
-            icon="storefront-outline"
-            iconBg="#f0fdf4"
-            iconColor="#10b981"
-            label="Hyzmatlar"
-            desc="Ähli hyzmatlary gör we öz hyzmatyňy teklip et"
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/hyzmatlar" as Href); }}
-            colors={colors}
-          />
-          <GroupRow
             icon="location-outline"
             iconBg="#eef2ff"
             iconColor="#6366f1"
