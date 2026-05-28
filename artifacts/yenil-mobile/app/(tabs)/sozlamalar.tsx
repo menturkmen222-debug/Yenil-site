@@ -1295,16 +1295,6 @@ export default function SozlamalarScreen() {
           <SettingRow icon="share-social-outline" iconColor="#6366f1" label="Dostlaryňa paýlaş" desc="Referal koduňyzy paýlaşyň, her dost üçin 0.5 BP + passiv daromad gazanyň" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/referal" as Href); }} colors={colors} />
         </View>
 
-        {/* ══════════ GOLDAW ══════════ */}
-        <SectionTitle title="GOLDAW" colors={colors} />
-        <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <SettingRow icon="help-circle-outline" iconColor="#0ea5e9" label="Kömek / FAQ" desc="Köp soralýan soraglar" onPress={() => Linking.openURL("https://yenil.tm/help")} colors={colors} />
-          <Divider colors={colors} />
-          <SettingRow icon="paper-plane-outline" iconColor="#0088cc" label="Telegram goldawy" desc="@yenil_tm" onPress={() => Linking.openURL("http://t.me/yenil_tm")} colors={colors} />
-          <Divider colors={colors} />
-          <SettingRow icon="call-outline" iconColor="#15803d" label="Jaň et" desc="+993 71 789091" onPress={() => Linking.openURL("tel:+99371789091")} colors={colors} />
-        </View>
-
         {/* ══════════ BIZ HAKYNDA ══════════ */}
         <SectionTitle title="BIZ HAKYNDA" colors={colors} />
         <Pressable

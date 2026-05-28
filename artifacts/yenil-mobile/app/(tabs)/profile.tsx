@@ -266,19 +266,6 @@ export default function ProfileScreen() {
               </View>
               {/* Online dot */}
               <View style={s.onlineDot} />
-              {/* Camera overlay */}
-              <Animated.View
-                style={[
-                  s.cameraOverlay,
-                  { transform: [{ scale: cameraAnim }] },
-                ]}
-              >
-                {uploadingAvatar ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Ionicons name="camera" size={14} color="#fff" />
-                )}
-              </Animated.View>
             </Pressable>
 
             {/* Name & nickname */}
@@ -288,56 +275,7 @@ export default function ProfileScreen() {
                 <Ionicons name="at-outline" size={13} color="rgba(255,255,255,0.85)" />
                 <Text style={s.nicknameText}>{displayNickname}</Text>
               </View>
-            ) : (
-              <View style={s.nicknamePill}>
-                <Ionicons name="at-outline" size={13} color="rgba(255,255,255,0.5)" />
-                <Text style={[s.nicknameText, { color: "rgba(255,255,255,0.5)" }]}>belirlenmedik</Text>
-              </View>
-            )}
-
-            {/* Upload hint */}
-            <Pressable
-              onPress={pickAvatar}
-              style={s.uploadHint}
-            >
-              <Ionicons name="camera-outline" size={12} color="rgba(255,255,255,0.65)" />
-              <Text style={s.uploadHintText}>{t("change_photo")}</Text>
-            </Pressable>
-
-            {/* Stats row */}
-            <View style={s.statsRow}>
-              <View style={s.statItem}>
-                <Text style={s.statNum}>{balance.toFixed(2)}</Text>
-                <Text style={s.statLabel}>BP</Text>
-              </View>
-              <View style={[s.statDivider, { backgroundColor: "rgba(255,255,255,0.25)" }]} />
-              <View style={s.statItem}>
-                <Text style={s.statNum}>{repData.score}</Text>
-                <Text style={s.statLabel}>Abraý</Text>
-              </View>
-              <View style={[s.statDivider, { backgroundColor: "rgba(255,255,255,0.25)" }]} />
-              <View style={s.statItem}>
-                <View style={[s.levelPill, { backgroundColor: level.bg, borderColor: level.border }]}>
-                  <Ionicons name={level.icon as any} size={12} color={level.color} />
-                  <Text style={[s.levelPillText, { color: level.color }]}>{level.labelTm}</Text>
-                </View>
-                <Text style={s.statLabel}>Dereje</Text>
-              </View>
-            </View>
-
-            {/* Reputation progress bar */}
-            <View style={s.repBarWrap}>
-              <View style={[s.repBarTrack, { backgroundColor: "rgba(255,255,255,0.2)" }]}>
-                <View style={[s.repBarFill, { width: `${repData.score}%` as any, backgroundColor: "rgba(255,255,255,0.9)" }]} />
-              </View>
-              {nextLv ? (
-                <Text style={s.repBarHint}>
-                  {nextLv.label} derejesine {nextLv.minScore - repData.score} bal galdy ({pct}%)
-                </Text>
-              ) : (
-                <Text style={s.repBarHint}>Iň ýokary dereje — {pct}%</Text>
-              )}
-            </View>
+            ) : null}
           </LinearGradient>
 
           {/* ── Device ID chip ── */}
