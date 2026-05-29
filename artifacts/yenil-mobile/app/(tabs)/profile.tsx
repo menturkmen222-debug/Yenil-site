@@ -190,7 +190,7 @@ export default function ProfileScreen() {
   const mergedProfession = profile?.profession || localProfile?.profession || "";
   const mergedBio = profile?.bio || localProfile?.bio || "";
 
-  const displayNickname = nickname || profile?.username || "";
+  const displayNickname = nickname || profile?.username || localProfile?.username || "";
   const displayInitial = (displayNickname || mergedName || "Ý").slice(0, 1).toUpperCase();
   const displayName = [mergedName, mergedSurname].filter(Boolean).join(" ") || displayNickname || "Ulanyjy";
   const hasAnyProfile = !!(mergedName || mergedSurname || localProfile || profile);
