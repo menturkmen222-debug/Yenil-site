@@ -79,6 +79,7 @@ export default function WelcomeScreen() {
   const btnOpacity = useSharedValue(0);
   const loginScale = useSharedValue(0.88);
   const loginO     = useSharedValue(0);
+  const btnGlow    = useSharedValue(1);
 
   useEffect(() => {
     logoOpacity.value = withDelay(150, withTiming(1, { duration: 450 }));
@@ -128,6 +129,14 @@ export default function WelcomeScreen() {
     btnOpacity.value = withDelay(1450, withTiming(1, { duration: 380 }));
     loginScale.value = withDelay(1650, withSpring(1, { damping: 9 }));
     loginO.value     = withDelay(1650, withTiming(1, { duration: 380 }));
+
+    btnGlow.value = withDelay(1800, withRepeat(
+      withSequence(
+        withTiming(1.04, { duration: 1600, easing: Easing.inOut(Easing.sin) }),
+        withTiming(1.00, { duration: 1600, easing: Easing.inOut(Easing.sin) })
+      ),
+      -1, false
+    ));
   }, []);
 
   const logoAnim  = useAnimatedStyle(() => ({
@@ -146,8 +155,8 @@ export default function WelcomeScreen() {
   const feat1Anim = useAnimatedStyle(() => ({ opacity: f1O.value, transform: [{ translateX: f1X.value }] }));
   const feat2Anim = useAnimatedStyle(() => ({ opacity: f2O.value, transform: [{ translateX: f2X.value }] }));
   const feat3Anim = useAnimatedStyle(() => ({ opacity: f3O.value, transform: [{ translateX: f3X.value }] }));
-  const btnAnim   = useAnimatedStyle(() => ({ opacity: btnOpacity.value, transform: [{ scale: btnScale.value }] }));
-  const loginAnim = useAnimatedStyle(() => ({ opacity: loginO.value,     transform: [{ scale: loginScale.value }] }));
+  const btnAnim   = useAnimatedStyle(() => ({ opacity: btnOpacity.value, transform: [{ scale: btnScale.value * btnGlow.value }] }));
+  const loginAnim = useAnimatedStyle(() => ({ opacity: loginO.value, transform: [{ scale: loginScale.value }] }));
 
   const featAnims = [feat1Anim, feat2Anim, feat3Anim];
 
@@ -171,7 +180,7 @@ export default function WelcomeScreen() {
       end={{ x: 0.6, y: 1 }}
       style={[s.root, {
         paddingTop:    (isWeb ? 0 : insets.top) + 20,
-        paddingBottom: (isWeb ? 0 : insets.bottom) + 24,
+        paddingBottom: (isWeb ? 0 : insets.bottom) + 20,
       }]}
     >
       {/* Floating orbs */}
@@ -220,48 +229,55 @@ export default function WelcomeScreen() {
         ))}
       </View>
 
-      {/* Buttons */}
+      {/* ── Buttons ── */}
       <View style={s.bottom}>
-        {/* Start button */}
+
+        {/* Primary CTA — premium emerald gradient */}
         <Animated.View style={[{ width: "100%" }, btnAnim]}>
-          <Pressable
-            onPress={handleStart}
-            style={({ pressed }) => [s.startBtn, pressed && { opacity: 0.88 }]}
-          >
+          <Pressable onPress={handleStart} style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1 })}>
             <LinearGradient
-              colors={["#ffffff", "#ddf0e8"]}
+              colors={["#10b981", "#059669", "#047857"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={s.startBtnInner}
+              style={s.startBtn}
             >
-              <Ionicons name="rocket-outline" size={19} color="#0b4228" />
-              <Text style={s.startBtnText}>Häzir başla — mugt!</Text>
-              <Ionicons name="arrow-forward" size={17} color="#0b4228" />
+              {/* Inner top sheen */}
+              <View style={s.startBtnSheen} />
+              {/* Icon circle */}
+              <View style={s.startBtnIconWrap}>
+                <Ionicons name="rocket" size={21} color="#fff" />
+              </View>
+              {/* Text block */}
+              <View style={{ flex: 1, marginLeft: 4 }}>
+                <Text style={s.startBtnText}>Häzir başla — mugt!</Text>
+                <Text style={s.startBtnSub}>30 sekuntda · Kart gerek däl</Text>
+              </View>
+              {/* Arrow badge */}
+              <View style={s.startBtnArrow}>
+                <Ionicons name="arrow-forward" size={16} color="#fff" />
+              </View>
             </LinearGradient>
           </Pressable>
         </Animated.View>
 
-        {/* Login button — proper card style */}
+        {/* Divider */}
+        <View style={s.orDivider}>
+          <View style={s.orLine} />
+          <Text style={s.orText}>ýa-da</Text>
+          <View style={s.orLine} />
+        </View>
+
+        {/* Login — ghost pill */}
         <Animated.View style={[{ width: "100%" }, loginAnim]}>
-          <Pressable
-            onPress={handleLogin}
-            style={({ pressed }) => [s.loginBtn, pressed && { opacity: 0.82 }]}
-          >
-            <LinearGradient
-              colors={["rgba(255,255,255,0.12)", "rgba(255,255,255,0.06)"]}
-              style={s.loginBtnInner}
-            >
-              <View style={s.loginIconWrap}>
-                <Ionicons name="person-circle-outline" size={20} color="rgba(255,255,255,0.9)" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={s.loginBtnTitle}>Hasabym bar — girýän</Text>
-                <Text style={s.loginBtnSub}>Telefon, Gmail ýa-da Mail.ru bilen</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.5)" />
-            </LinearGradient>
+          <Pressable onPress={handleLogin} style={({ pressed }) => [s.loginBtn, pressed && { opacity: 0.72 }]}>
+            <View style={s.loginIconWrap}>
+              <Ionicons name="log-in-outline" size={18} color="rgba(255,255,255,0.88)" />
+            </View>
+            <Text style={s.loginBtnText}>Hasabym bar — girýän</Text>
+            <Ionicons name="chevron-forward" size={15} color="rgba(255,255,255,0.38)" />
           </Pressable>
         </Animated.View>
+
       </View>
     </LinearGradient>
   );
@@ -330,35 +346,83 @@ const s = StyleSheet.create({
   featDesc:  { color: "rgba(255,255,255,0.55)", fontSize: 11 },
   checkDot:  { width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center" },
 
-  bottom: { width: "100%", paddingHorizontal: 18, alignItems: "center", gap: 10 },
+  bottom: { width: "100%", paddingHorizontal: 18, alignItems: "center", gap: 0 },
 
+  // ── Premium CTA button ──────────────────────────────────────────
   startBtn: {
-    width: "100%", borderRadius: 18, overflow: "hidden",
-    shadowColor: "#ffffff", shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18, shadowRadius: 14, elevation: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 15,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#059669",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.60,
+    shadowRadius: 22,
+    elevation: 16,
   },
-  startBtnInner: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 10, paddingVertical: 16, borderRadius: 18,
+  startBtnSheen: {
+    position: "absolute", top: 0, left: 0, right: 0,
+    height: "42%",
+    backgroundColor: "rgba(255,255,255,0.17)",
+    borderTopLeftRadius: 20, borderTopRightRadius: 20,
   },
-  startBtnText: { fontSize: 16, fontWeight: "800", color: "#0b4228", letterSpacing: 0.3 },
+  startBtnIconWrap: {
+    width: 44, height: 44, borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.22)",
+    alignItems: "center", justifyContent: "center",
+  },
+  startBtnText: {
+    fontSize: 16, fontWeight: "900", color: "#fff", letterSpacing: 0.2,
+  },
+  startBtnSub: {
+    fontSize: 11, color: "rgba(255,255,255,0.72)", marginTop: 2,
+  },
+  startBtnArrow: {
+    width: 34, height: 34, borderRadius: 11,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center", justifyContent: "center",
+  },
 
-  // Login button — premium card style
-  loginBtn: {
-    width: "100%", borderRadius: 16, overflow: "hidden",
-    borderWidth: 1, borderColor: "rgba(255,255,255,0.18)",
-    shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15, shadowRadius: 8, elevation: 3,
+  // ── Divider ─────────────────────────────────────────────────────
+  orDivider: {
+    flexDirection: "row", alignItems: "center",
+    width: "100%", gap: 10,
+    marginVertical: 12,
   },
-  loginBtnInner: {
-    flexDirection: "row", alignItems: "center", gap: 12,
-    paddingVertical: 13, paddingHorizontal: 16, borderRadius: 16,
+  orLine: {
+    flex: 1, height: StyleSheet.hairlineWidth,
+    backgroundColor: "rgba(255,255,255,0.15)",
+  },
+  orText: {
+    fontSize: 11, fontWeight: "600",
+    color: "rgba(255,255,255,0.38)",
+    letterSpacing: 0.5,
+  },
+
+  // ── Ghost login button ──────────────────────────────────────────
+  loginBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingVertical: 13,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.20)",
+    backgroundColor: "rgba(255,255,255,0.07)",
+    width: "100%",
   },
   loginIconWrap: {
-    width: 38, height: 38, borderRadius: 12,
+    width: 32, height: 32, borderRadius: 10,
     backgroundColor: "rgba(255,255,255,0.12)",
     alignItems: "center", justifyContent: "center",
   },
-  loginBtnTitle: { color: "rgba(255,255,255,0.92)", fontSize: 14, fontWeight: "700" },
-  loginBtnSub:   { color: "rgba(255,255,255,0.48)", fontSize: 11, marginTop: 1 },
+  loginBtnText: {
+    flex: 1,
+    color: "rgba(255,255,255,0.88)",
+    fontSize: 14, fontWeight: "700",
+  },
 });

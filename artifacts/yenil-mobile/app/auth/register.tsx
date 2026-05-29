@@ -857,57 +857,40 @@ export default function RegisterScreen() {
 
   // ─── Step 3 ────────────────────────────────────────────────────────────────
 
-  function KarCardItem({ kar }: { kar: typeof KARLER[0] }) {
+  function KarChip({ kar }: { kar: typeof KARLER[0] }) {
     const isSelected = profession === kar.id;
     const scale = useSharedValue(1);
     const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
     function handlePress() {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       scale.value = withSequence(
-        withSpring(0.93, { damping: 12, stiffness: 400 }),
-        withSpring(1.0, { damping: 10, stiffness: 320 }),
+        withSpring(0.88, { damping: 14, stiffness: 500 }),
+        withSpring(1.0, { damping: 10, stiffness: 350 }),
       );
       setProfession(kar.id);
     }
 
     return (
-      <Pressable key={kar.id} onPress={handlePress} style={{ width: "47%" }}>
+      <Pressable onPress={handlePress}>
         <Animated.View style={animStyle}>
           <LinearGradient
-            colors={isSelected ? [colors.primary, colors.primary + "d0"] : [colors.card, colors.card]}
+            colors={isSelected ? [colors.primary, colors.primary + "cc"] : [colors.card, colors.card]}
             start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-            style={[
-              s.karCard,
-              {
-                borderColor: isSelected ? colors.primary : colors.border,
-                borderWidth: isSelected ? 2 : 1.5,
-                shadowColor: isSelected ? colors.primary : "#000",
-                shadowOpacity: isSelected ? 0.30 : 0.05,
-                shadowRadius: isSelected ? 12 : 4,
-                shadowOffset: { width: 0, height: isSelected ? 4 : 2 },
-                elevation: isSelected ? 8 : 1,
-              },
-            ]}
+            style={[s.karChip, {
+              borderColor: isSelected ? colors.primary : colors.border,
+              borderWidth: isSelected ? 2 : 1.5,
+              shadowColor: isSelected ? colors.primary : "transparent",
+              shadowOpacity: isSelected ? 0.4 : 0,
+              shadowRadius: 8, shadowOffset: { width: 0, height: 3 },
+              elevation: isSelected ? 6 : 0,
+            }]}
           >
-            {/* Icon box */}
-            <View style={[
-              s.karIconBox,
-              { backgroundColor: isSelected ? "rgba(255,255,255,0.22)" : colors.primary + "18" },
-            ]}>
-              <Ionicons name={kar.icon} size={22} color={isSelected ? "#fff" : colors.primary} />
-            </View>
-
-            <Text style={[s.karLabel, { color: isSelected ? "#fff" : colors.foreground, marginTop: 6 }]}>
-              {kar.label}
-            </Text>
-
-            {/* Check badge */}
+            <Ionicons name={kar.icon} size={14} color={isSelected ? "#fff" : colors.primary} />
+            <Text style={[s.karChipText, { color: isSelected ? "#fff" : colors.foreground }]}>{kar.label}</Text>
             {isSelected && (
-              <Animated.View entering={FadeInDown.duration(180)} style={s.karCheck}>
-                <View style={[s.karCheckInner, { backgroundColor: "rgba(255,255,255,0.35)" }]}>
-                  <Ionicons name="checkmark" size={11} color="#fff" />
-                </View>
+              <Animated.View entering={FadeInDown.duration(160)}>
+                <Ionicons name="checkmark-circle" size={13} color="rgba(255,255,255,0.9)" />
               </Animated.View>
             )}
           </LinearGradient>
@@ -923,40 +906,57 @@ export default function RegisterScreen() {
         entering={FadeInDown.duration(300).easing(Easing.out(Easing.quad))}
         exiting={FadeOutUp.duration(160).easing(Easing.in(Easing.quad))}
       >
-        <View style={s.compactHeader}>
-          <LinearGradient colors={[colors.primary + "22", colors.primary + "08"]} style={s.compactHeaderIcon}>
-            <Ionicons name="briefcase-outline" size={24} color={colors.primary} />
+        {/* Compact header — smaller than default */}
+        <View style={s.step3Header}>
+          <LinearGradient colors={[colors.primary + "22", colors.primary + "08"]} style={s.step3HeaderIcon}>
+            <Ionicons name="briefcase-outline" size={22} color={colors.primary} />
           </LinearGradient>
-          <Text style={[s.compactHeaderTitle, { color: colors.foreground }]}>Hünär maglumatlar</Text>
-          <Text style={[s.compactHeaderSub, { color: colors.mutedForeground }]}>Käriňizi saýlaň</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.step3Title, { color: colors.foreground }]}>Hünär maglumatlar</Text>
+            <Text style={[s.step3Sub, { color: colors.mutedForeground }]}>Käriňize laýyk teklifler alarys</Text>
+          </View>
         </View>
 
+        {/* Social proof stats row */}
+        <View style={[s.statRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          {[
+            { num: "12 430+", lbl: "Işjeň agza",  color: colors.primary },
+            { num: "3×",      lbl: "Köp teklip",  color: "#f59e0b" },
+            { num: "100%",    lbl: "Mugt hemişe", color: "#22c55e" },
+          ].map((st, i) => (
+            <View key={i} style={[s.statCell, i < 2 && { borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: colors.border }]}>
+              <Text style={[s.statNum, { color: st.color }]}>{st.num}</Text>
+              <Text style={[s.statLbl, { color: colors.mutedForeground }]}>{st.lbl}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Profession chips — compact wrap */}
         {label("Käriňiz")}
-        <View style={s.karGrid}>
-          {KARLER.map((kar) => <KarCardItem key={kar.id} kar={kar} />)}
+        <View style={s.karChipWrap}>
+          {KARLER.map((kar) => <KarChip key={kar.id} kar={kar} />)}
         </View>
 
-        {label("Özüňizi tanyşdyryň")}
+        {/* Bio — compact */}
+        {label("Gysga tanyşdyryş (islege görä)")}
         <TextInput
           style={[...inputStyle, s.bioInput]}
           value={bio}
-          onChangeText={(t) => setBio(t.slice(0, 300))}
-          placeholder="Gysga, gyzykly tanyşdyryş..."
+          onChangeText={(t) => setBio(t.slice(0, 200))}
+          placeholder="Mysal: Aşgabatda sürüji, 5 ýyl tejribe..."
           placeholderTextColor={colors.mutedForeground}
-          multiline
-          numberOfLines={4}
-          textAlignVertical="top"
+          multiline numberOfLines={2} textAlignVertical="top"
         />
-        <Text style={[s.charCount, { color: colors.mutedForeground }]}>{bio.length} / 300</Text>
 
-        <View style={[s.bioTip, { backgroundColor: colors.primary + "10", borderColor: colors.primary + "25" }]}>
-          <Ionicons name="trending-up-outline" size={13} color={colors.primary} />
-          <Text style={[s.bioTipText, { color: colors.primary }]}>
-            Doly profilli ulanyjylar 3× köp ynam we teklip gazanýarlar
+        {/* Persuasion tip */}
+        <View style={[s.persuasionTip, { backgroundColor: "#f59e0b10", borderColor: "#f59e0b35" }]}>
+          <Ionicons name="star" size={12} color="#f59e0b" />
+          <Text style={[s.persuasionTipText, { color: colors.foreground }]}>
+            Doly profil = <Text style={{ fontWeight: "800", color: "#f59e0b" }}>3× köp ynam</Text> — teklifler awtomatik gelýär
           </Text>
         </View>
 
-        <View style={s.btnWrap}>
+        <View style={[s.btnWrap, { marginTop: 6 }]}>
           <PessimisticButton label="Dowam et" disabled={!profession} onPress={() => goToStep(3)} icon="arrow-forward-outline" />
         </View>
       </Animated.View>
@@ -972,6 +972,7 @@ export default function RegisterScreen() {
         entering={FadeInDown.duration(300).easing(Easing.out(Easing.quad))}
         exiting={FadeOutUp.duration(160).easing(Easing.in(Easing.quad))}
       >
+        {/* Header */}
         <View style={s.compactHeader}>
           <LinearGradient colors={[colors.primary + "22", colors.primary + "08"]} style={s.compactHeaderIcon}>
             <Ionicons name="people-outline" size={24} color={colors.primary} />
@@ -982,69 +983,101 @@ export default function RegisterScreen() {
           </Text>
         </View>
 
-        {/* Feature rows */}
+        {/* Numbered benefit cards */}
         {[
           {
+            num: "01",
             icon: "gift-outline" as IoniconsName,
             title: "1 BP bonus — ikimize",
             desc: "Tanyşyň goşulsa, ikimiz hem bonus alýarys",
             color: "#f59e0b",
+            bg: "#fef3c710",
+            border: "#f59e0b28",
           },
           {
-            icon: "shield-checkmark-outline" as IoniconsName,
+            num: "02",
+            icon: "trending-up-outline" as IoniconsName,
             title: "Abraý ýokarlanýar",
             desc: "Her çakylan tanyş abraý balyňy artdyrýar",
             color: colors.primary,
+            bg: colors.primary + "0d",
+            border: colors.primary + "28",
           },
           {
-            icon: "flash-outline" as IoniconsName,
-            title: "Çalt paýlaşmak",
-            desc: "WhatsApp, Telegram, SMS — bir basymda",
+            num: "03",
+            icon: "flash" as IoniconsName,
+            title: "Bir basymda paýlaş",
+            desc: "WhatsApp, Telegram, SMS — dessine",
             color: "#22c55e",
+            bg: "#22c55e10",
+            border: "#22c55e28",
           },
         ].map((item, i) => (
-          <View
+          <Animated.View
             key={i}
-            style={[s.featureRow, { backgroundColor: colors.card, borderColor: colors.border }]}
+            entering={FadeInDown.duration(260).delay(i * 80)}
+            style={[s.benefitCard, { backgroundColor: item.bg, borderColor: item.border }]}
           >
-            <View style={[s.featureIcon, { backgroundColor: item.color + "18" }]}>
-              <Ionicons name={item.icon} size={18} color={item.color} />
+            {/* Number badge */}
+            <View style={[s.benefitNum, { backgroundColor: item.color + "18" }]}>
+              <Text style={[s.benefitNumText, { color: item.color }]}>{item.num}</Text>
             </View>
+            {/* Icon */}
+            <View style={[s.benefitIcon, { backgroundColor: item.color + "18" }]}>
+              <Ionicons name={item.icon} size={20} color={item.color} />
+            </View>
+            {/* Text */}
             <View style={{ flex: 1 }}>
-              <Text style={[s.featureTitle, { color: colors.foreground }]}>{item.title}</Text>
-              <Text style={[s.featureDesc, { color: colors.mutedForeground }]}>{item.desc}</Text>
+              <Text style={[s.benefitTitle, { color: colors.foreground }]}>{item.title}</Text>
+              <Text style={[s.benefitDesc, { color: colors.mutedForeground }]}>{item.desc}</Text>
             </View>
-          </View>
+          </Animated.View>
         ))}
 
-        {/* Premium invite button */}
-        <View style={[s.btnWrap, { marginTop: 16 }]}>
+        {/* Referral code preview */}
+        <View style={[s.refCodeBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Ionicons name="link-outline" size={15} color={colors.mutedForeground} />
+          <Text style={[s.refCodeText, { color: colors.mutedForeground }]}>
+            Seniň çakylyş koduň: <Text style={{ color: colors.primary, fontWeight: "800" }}>ÝEŇIL-{deviceId?.slice(-5).toUpperCase()}</Text>
+          </Text>
+        </View>
+
+        {/* Premium CTA */}
+        <View style={[s.btnWrap, { marginTop: 12 }]}>
           <Pressable
             onPress={handleShareAndFinish}
             disabled={sharing || saving}
-            style={{ opacity: sharing || saving ? 0.8 : 1 }}
+            style={({ pressed }) => ({ opacity: pressed || sharing || saving ? 0.85 : 1 })}
           >
             <Animated.View style={[inviteAnimStyle, invitePulseStyle]}>
               <LinearGradient
-                colors={[colors.primary, colors.primary + "cc"]}
+                colors={[colors.primary, "#047857"]}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+                end={{ x: 1, y: 1 }}
                 style={s.inviteBtn}
               >
-                {/* Shimmer overlay */}
                 <View style={s.inviteBtnShimmer} />
-                <Ionicons name="people" size={20} color="#fff" />
-                <Text style={s.inviteBtnText}>
-                  {sharing ? "Paýlaşylýar..." : "🎉 Ýakynlarymy çagyr — bonus gazan!"}
-                </Text>
-                <Ionicons name="arrow-forward" size={17} color="rgba(255,255,255,0.8)" />
+                <View style={s.inviteBtnIconWrap}>
+                  <Ionicons name="people" size={19} color="#fff" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.inviteBtnText}>
+                    {sharing ? "Paýlaşylýar..." : "Ýakynlarymy çagyr"}
+                  </Text>
+                  <Text style={s.inviteBtnSub}>bonus gazan — ikimize!</Text>
+                </View>
+                <View style={s.inviteBtnArrow}>
+                  <Ionicons name="arrow-forward" size={15} color="#fff" />
+                </View>
               </LinearGradient>
             </Animated.View>
           </Pressable>
 
+          {/* Skip — styled as conscious choice */}
           <Pressable onPress={handleFinish} style={s.skipBtn}>
+            <Ionicons name="checkmark-done-outline" size={14} color={colors.mutedForeground} />
             <Text style={[s.skipText, { color: colors.mutedForeground }]}>
-              Çakyryşsyz tamamla
+              Häzirlikçe geçirmek
             </Text>
           </Pressable>
         </View>
@@ -1255,61 +1288,102 @@ const s = StyleSheet.create({
   },
   selectBtnText: { fontSize: 15 },
 
-  // Profession grid
-  karGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 16 },
-  karCard: {
-    borderRadius: 16, borderWidth: 1.5, padding: 14,
-    position: "relative", alignItems: "flex-start",
-  },
-  karIconBox: {
-    width: 44, height: 44, borderRadius: 13,
-    alignItems: "center", justifyContent: "center",
-  },
-  karLabel: { fontSize: 13, fontWeight: "700" },
-  karCheck: {
-    position: "absolute", top: 8, right: 8,
-  },
-  karCheckInner: {
-    width: 20, height: 20, borderRadius: 10,
-    alignItems: "center", justifyContent: "center",
-  },
-
-  bioInput: { height: 90, paddingTop: 12 },
-  charCount: { fontSize: 11, textAlign: "right", marginTop: -8, marginBottom: 12 },
-  bioTip: {
-    flexDirection: "row", alignItems: "center", gap: 7,
-    paddingHorizontal: 12, paddingVertical: 9,
-    borderRadius: 10, borderWidth: 1, marginBottom: 8,
-  },
-  bioTipText: { fontSize: 12, fontWeight: "500", flex: 1, lineHeight: 17 },
-
-  // Feature rows (step 4)
-  featureRow: {
+  // ── Step 3 compact header ────────────────────────────────────────────────
+  step3Header: {
     flexDirection: "row", alignItems: "center", gap: 12,
-    borderRadius: 14, borderWidth: 1, padding: 13, marginBottom: 9,
-    shadowColor: "#000", shadowOpacity: 0.03, shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 }, elevation: 1,
+    paddingVertical: 12, marginBottom: 12,
   },
-  featureIcon: { width: 38, height: 38, borderRadius: 11, alignItems: "center", justifyContent: "center" },
-  featureTitle: { fontSize: 13, fontWeight: "700", marginBottom: 2 },
-  featureDesc:  { fontSize: 11, lineHeight: 17 },
+  step3HeaderIcon: {
+    width: 46, height: 46, borderRadius: 14,
+    alignItems: "center", justifyContent: "center",
+  },
+  step3Title: { fontSize: 17, fontWeight: "800" },
+  step3Sub:   { fontSize: 12, marginTop: 2 },
+
+  // Social proof stats row
+  statRow: {
+    flexDirection: "row", borderRadius: 14, borderWidth: 1,
+    overflow: "hidden", marginBottom: 14,
+  },
+  statCell: {
+    flex: 1, alignItems: "center", paddingVertical: 10,
+  },
+  statNum: { fontSize: 16, fontWeight: "900" },
+  statLbl: { fontSize: 10, fontWeight: "500", marginTop: 2 },
+
+  // Compact profession chips (wrap row)
+  karChipWrap: {
+    flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 14,
+  },
+  karChip: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    borderRadius: 20, paddingVertical: 7, paddingHorizontal: 11,
+  },
+  karChipText: { fontSize: 13, fontWeight: "600" },
+
+  // Bio
+  bioInput: { height: 65, paddingTop: 10, marginBottom: 10 },
+
+  // Persuasion tip
+  persuasionTip: {
+    flexDirection: "row", alignItems: "center", gap: 7,
+    paddingHorizontal: 11, paddingVertical: 8,
+    borderRadius: 10, borderWidth: 1, marginBottom: 6,
+  },
+  persuasionTipText: { fontSize: 12, flex: 1, lineHeight: 17 },
+
+  // ── Step 4 benefit cards ─────────────────────────────────────────────────
+  benefitCard: {
+    flexDirection: "row", alignItems: "center", gap: 10,
+    borderRadius: 16, borderWidth: 1,
+    paddingVertical: 13, paddingHorizontal: 14,
+    marginBottom: 9,
+  },
+  benefitNum: {
+    width: 32, height: 32, borderRadius: 10,
+    alignItems: "center", justifyContent: "center",
+  },
+  benefitNumText: { fontSize: 11, fontWeight: "900", letterSpacing: 0.5 },
+  benefitIcon: {
+    width: 38, height: 38, borderRadius: 11,
+    alignItems: "center", justifyContent: "center",
+  },
+  benefitTitle: { fontSize: 13, fontWeight: "700", marginBottom: 2 },
+  benefitDesc:  { fontSize: 11, lineHeight: 16 },
+
+  // Referral code preview
+  refCodeBox: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    borderRadius: 12, borderWidth: 1,
+    paddingHorizontal: 13, paddingVertical: 10,
+    marginBottom: 4,
+  },
+  refCodeText: { fontSize: 12, flex: 1 },
 
   // Premium invite button
   inviteBtn: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 10, paddingVertical: 17, paddingHorizontal: 20,
-    borderRadius: 18, overflow: "hidden",
-    shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 }, elevation: 8,
+    flexDirection: "row", alignItems: "center",
+    gap: 12, paddingVertical: 15, paddingHorizontal: 18,
+    borderRadius: 20, overflow: "hidden",
+    shadowColor: "#059669", shadowOpacity: 0.5, shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 }, elevation: 12,
   },
   inviteBtnShimmer: {
-    position: "absolute", top: 0, left: 0, right: 0,
-    height: "50%",
-    backgroundColor: "rgba(255,255,255,0.12)",
-    borderTopLeftRadius: 18, borderTopRightRadius: 18,
+    position: "absolute", top: 0, left: 0, right: 0, height: "44%",
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderTopLeftRadius: 20, borderTopRightRadius: 20,
   },
-  inviteBtnText: {
-    color: "#fff", fontSize: 15, fontWeight: "800", flex: 1, textAlign: "center",
+  inviteBtnIconWrap: {
+    width: 40, height: 40, borderRadius: 13,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center", justifyContent: "center",
+  },
+  inviteBtnText: { color: "#fff", fontSize: 15, fontWeight: "900" },
+  inviteBtnSub:  { color: "rgba(255,255,255,0.72)", fontSize: 11, marginTop: 1 },
+  inviteBtnArrow: {
+    width: 32, height: 32, borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center", justifyContent: "center",
   },
 
   // Avatar picker in Step 2
@@ -1332,8 +1406,11 @@ const s = StyleSheet.create({
   btnWrap: { marginTop: 4 },
   retryBtn: { alignItems: "center", paddingVertical: 10 },
   retryText: { fontSize: 13 },
-  skipBtn: { alignItems: "center", paddingVertical: 12 },
-  skipText: { fontSize: 14 },
+  skipBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 6, paddingVertical: 14,
+  },
+  skipText: { fontSize: 13, fontWeight: "500" },
 });
 
 const sm = StyleSheet.create({
