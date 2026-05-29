@@ -444,18 +444,15 @@ export default function RegisterScreen() {
         entering={FadeInDown.duration(300).easing(Easing.out(Easing.quad))}
         exiting={FadeOutUp.duration(160).easing(Easing.in(Easing.quad))}
       >
-        {/* Compact header */}
-        <View style={s.compactHeader}>
-          <LinearGradient
-            colors={[colors.primary + "22", colors.primary + "08"]}
-            style={s.compactHeaderIcon}
-          >
-            <Ionicons name="shield-checkmark" size={26} color={colors.primary} />
+        {/* Inline header */}
+        <View style={s.step3Header}>
+          <LinearGradient colors={[colors.primary + "22", colors.primary + "08"]} style={s.step3HeaderIcon}>
+            <Ionicons name="shield-checkmark" size={22} color={colors.primary} />
           </LinearGradient>
-          <Text style={[s.compactHeaderTitle, { color: colors.foreground }]}>Ýeňile goşulyň</Text>
-          <Text style={[s.compactHeaderSub, { color: colors.mutedForeground }]}>
-            Giriş usulyny saýlaň
-          </Text>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.step3Title, { color: colors.foreground }]}>Ýeňile goşulyň</Text>
+            <Text style={[s.step3Sub, { color: colors.mutedForeground }]}>Giriş usulyny saýlaň</Text>
+          </View>
         </View>
 
         {/* ── Phone button ── */}
@@ -698,18 +695,15 @@ export default function RegisterScreen() {
         entering={FadeInDown.duration(300).easing(Easing.out(Easing.quad))}
         exiting={FadeOutUp.duration(160).easing(Easing.in(Easing.quad))}
       >
-        {/* Compact header */}
-        <View style={s.compactHeader}>
-          <LinearGradient
-            colors={[colors.primary + "22", colors.primary + "08"]}
-            style={s.compactHeaderIcon}
-          >
-            <Ionicons name="person-outline" size={24} color={colors.primary} />
+        {/* Inline header */}
+        <View style={s.step3Header}>
+          <LinearGradient colors={[colors.primary + "22", colors.primary + "08"]} style={s.step3HeaderIcon}>
+            <Ionicons name="person-outline" size={22} color={colors.primary} />
           </LinearGradient>
-          <Text style={[s.compactHeaderTitle, { color: colors.foreground }]}>Şahsy maglumatlar</Text>
-          <Text style={[s.compactHeaderSub, { color: colors.mutedForeground }]}>
-            Profiliňiz üçin
-          </Text>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.step3Title, { color: colors.foreground }]}>Şahsy maglumatlar</Text>
+            <Text style={[s.step3Sub, { color: colors.mutedForeground }]}>Profiliňiz üçin</Text>
+          </View>
         </View>
 
         {/* ── Avatar upload ── */}
@@ -917,20 +911,6 @@ export default function RegisterScreen() {
           </View>
         </View>
 
-        {/* Social proof stats row */}
-        <View style={[s.statRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          {[
-            { num: "12 430+", lbl: "Işjeň agza",  color: colors.primary },
-            { num: "3×",      lbl: "Köp teklip",  color: "#f59e0b" },
-            { num: "100%",    lbl: "Mugt hemişe", color: "#22c55e" },
-          ].map((st, i) => (
-            <View key={i} style={[s.statCell, i < 2 && { borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: colors.border }]}>
-              <Text style={[s.statNum, { color: st.color }]}>{st.num}</Text>
-              <Text style={[s.statLbl, { color: colors.mutedForeground }]}>{st.lbl}</Text>
-            </View>
-          ))}
-        </View>
-
         {/* Profession chips — compact wrap */}
         {label("Käriňiz")}
         <View style={s.karChipWrap}>
@@ -972,15 +952,15 @@ export default function RegisterScreen() {
         entering={FadeInDown.duration(300).easing(Easing.out(Easing.quad))}
         exiting={FadeOutUp.duration(160).easing(Easing.in(Easing.quad))}
       >
-        {/* Header */}
-        <View style={s.compactHeader}>
-          <LinearGradient colors={[colors.primary + "22", colors.primary + "08"]} style={s.compactHeaderIcon}>
-            <Ionicons name="people-outline" size={24} color={colors.primary} />
+        {/* Inline header */}
+        <View style={s.step3Header}>
+          <LinearGradient colors={[colors.primary + "22", colors.primary + "08"]} style={s.step3HeaderIcon}>
+            <Ionicons name="people-outline" size={22} color={colors.primary} />
           </LinearGradient>
-          <Text style={[s.compactHeaderTitle, { color: colors.foreground }]}>Ýakynlaryňy çagyr!</Text>
-          <Text style={[s.compactHeaderSub, { color: colors.mutedForeground }]}>
-            Her çagyrylana bonus — ikimize!
-          </Text>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.step3Title, { color: colors.foreground }]}>Ýakynlaryňy çagyr!</Text>
+            <Text style={[s.step3Sub, { color: colors.mutedForeground }]}>Her çagyrylana bonus — ikimize!</Text>
+          </View>
         </View>
 
         {/* Numbered benefit cards */}
@@ -1056,7 +1036,6 @@ export default function RegisterScreen() {
                 end={{ x: 1, y: 1 }}
                 style={s.inviteBtn}
               >
-                <View style={s.inviteBtnShimmer} />
                 <View style={s.inviteBtnIconWrap}>
                   <Ionicons name="people" size={19} color="#fff" />
                 </View>
@@ -1300,17 +1279,6 @@ const s = StyleSheet.create({
   step3Title: { fontSize: 17, fontWeight: "800" },
   step3Sub:   { fontSize: 12, marginTop: 2 },
 
-  // Social proof stats row
-  statRow: {
-    flexDirection: "row", borderRadius: 14, borderWidth: 1,
-    overflow: "hidden", marginBottom: 14,
-  },
-  statCell: {
-    flex: 1, alignItems: "center", paddingVertical: 10,
-  },
-  statNum: { fontSize: 16, fontWeight: "900" },
-  statLbl: { fontSize: 10, fontWeight: "500", marginTop: 2 },
-
   // Compact profession chips (wrap row)
   karChipWrap: {
     flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 14,
@@ -1367,11 +1335,6 @@ const s = StyleSheet.create({
     borderRadius: 20, overflow: "hidden",
     shadowColor: "#059669", shadowOpacity: 0.5, shadowRadius: 18,
     shadowOffset: { width: 0, height: 8 }, elevation: 12,
-  },
-  inviteBtnShimmer: {
-    position: "absolute", top: 0, left: 0, right: 0, height: "44%",
-    backgroundColor: "rgba(255,255,255,0.14)",
-    borderTopLeftRadius: 20, borderTopRightRadius: 20,
   },
   inviteBtnIconWrap: {
     width: 40, height: 40, borderRadius: 13,

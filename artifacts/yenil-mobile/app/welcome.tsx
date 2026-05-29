@@ -241,8 +241,6 @@ export default function WelcomeScreen() {
               end={{ x: 1, y: 1 }}
               style={s.startBtn}
             >
-              {/* Inner top sheen */}
-              <View style={s.startBtnSheen} />
               {/* Icon circle */}
               <View style={s.startBtnIconWrap}>
                 <Ionicons name="rocket" size={21} color="#fff" />
@@ -361,12 +359,6 @@ const s = StyleSheet.create({
     shadowOpacity: 0.60,
     shadowRadius: 22,
     elevation: 16,
-  },
-  startBtnSheen: {
-    position: "absolute", top: 0, left: 0, right: 0,
-    height: "42%",
-    backgroundColor: "rgba(255,255,255,0.17)",
-    borderTopLeftRadius: 20, borderTopRightRadius: 20,
   },
   startBtnIconWrap: {
     width: 44, height: 44, borderRadius: 14,

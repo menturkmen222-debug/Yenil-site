@@ -126,6 +126,7 @@ export function PessimisticButton({
       style={[
         { transform: [{ scale: scaleAnim }] },
         fullWidth ? { alignSelf: "stretch" } : { alignSelf: "auto" },
+        isDisabled && { opacity: 0.42 },
       ]}
     >
       <Pressable
@@ -136,10 +137,10 @@ export function PessimisticButton({
         style={[
           btn.base,
           {
-            backgroundColor: isDisabled ? bgColor + "70" : bgColor,
+            backgroundColor: bgColor,
             height: heights[size],
             borderRadius: radii[size],
-            shadowColor: isDisabled || variant === "ghost" ? "transparent" : bgColor,
+            shadowColor: variant === "ghost" ? "transparent" : bgColor,
             shadowOpacity: isDisabled ? 0 : 0.28,
             shadowRadius: 10,
             shadowOffset: { width: 0, height: 4 },
