@@ -41,6 +41,7 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
 
   // buy state
   const [selectedBuy, setSelectedBuy] = useState<number | null>(null);
+  const [buyAmountText, setBuyAmountText] = useState("");
   const [buyPhone, setBuyPhone] = useState("");
   const [buyLoading, setBuyLoading] = useState(false);
   const [buyDone, setBuyDone] = useState(false);
@@ -97,7 +98,7 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
     finally { setSellLoading(false); }
   }
 
-  const resetBuy = () => { setBuyDone(false); setSelectedBuy(null); setBuyPhone(""); setShowPayment(false); setBuyPayMethod(""); setBuyCardBank(""); setBuyCardType(""); setBuyCardLast4(""); };
+  const resetBuy = () => { setBuyDone(false); setSelectedBuy(null); setBuyAmountText(""); setBuyPhone(""); setShowPayment(false); setBuyPayMethod(""); setBuyCardBank(""); setBuyCardType(""); setBuyCardLast4(""); };
   const resetSell = () => { setSellDone(false); setSellAmount(""); setSellPhone(""); };
 
   // transfer state
@@ -188,27 +189,71 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
             </Text>
             {!showPayment ? (
               <>
-                <View style={s.amountGrid}>
+                {/* Big amount input */}
+                <View style={[s.bigInputCard, {
+                  backgroundColor: colors.card,
+                  borderColor: selectedBuy ? colors.primary : colors.border,
+                  shadowColor: selectedBuy ? colors.primary : "transparent",
+                }]}>
+                  <View style={[s.bigInputIconWrap, { backgroundColor: colors.primary + "15" }]}>
+                    <MaterialCommunityIcons name="cash-multiple" size={24} color={colors.primary} />
+                  </View>
+                  <TextInput
+                    value={buyAmountText}
+                    onChangeText={t => {
+                      const clean = t.replace(/[^0-9]/g, "");
+                      setBuyAmountText(clean);
+                      setSelectedBuy(clean ? parseInt(clean, 10) : null);
+                    }}
+                    placeholder="0"
+                    placeholderTextColor={colors.mutedForeground + "80"}
+                    keyboardType="number-pad"
+                    style={[s.bigInputField, { color: selectedBuy ? colors.primary : colors.foreground }]}
+                  />
+                  <Text style={[s.bigInputSuffix, { color: colors.mutedForeground }]}>BP</Text>
+                </View>
+
+                {/* Real-time conversion */}
+                {selectedBuy ? (
+                  <View style={[s.convBadge, { backgroundColor: colors.primary + "0f", borderColor: colors.primary + "35" }]}>
+                    <Ionicons name="swap-horizontal-outline" size={15} color={colors.primary} />
+                    <Text style={[s.convBadgeText, { color: colors.primary }]}>
+                      {selectedBuy} BP = <Text style={{ fontWeight: "800" }}>{selectedBuy} TMT</Text>
+                    </Text>
+                  </View>
+                ) : (
+                  <Text style={[s.convHint, { color: colors.mutedForeground }]}>
+                    1 BP = 1 TMT · Islendik mukdar girizmek bolar
+                  </Text>
+                )}
+
+                {/* Quick-fill chips */}
+                <View style={s.quickChipRow}>
                   {BP_AMOUNTS.map(a => (
-                    <Pressable key={a} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSelectedBuy(a); }}
-                      style={[s.amountCard, {
-                        width: OP_CARD_W,
+                    <Pressable
+                      key={a}
+                      onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setBuyAmountText(String(a)); setSelectedBuy(a); }}
+                      style={[s.quickChip, {
                         backgroundColor: selectedBuy === a ? colors.primary : colors.card,
                         borderColor: selectedBuy === a ? colors.primary : colors.border,
-                        borderWidth: selectedBuy === a ? 0 : 1,
-                      }]}>
-                      <View style={[s.amountIconBg, { backgroundColor: selectedBuy === a ? "rgba(255,255,255,0.2)" : colors.primary + "15" }]}>
-                        <MaterialCommunityIcons name="cash" size={18} color={selectedBuy === a ? "#fff" : colors.primary} />
-                      </View>
-                      <Text style={[s.amountVal, { color: selectedBuy === a ? "#fff" : colors.foreground }]}>{a}</Text>
-                      <Text style={[s.amountLabel, { color: selectedBuy === a ? "rgba(255,255,255,0.75)" : colors.mutedForeground }]}>BP = {a} TMT</Text>
+                      }]}
+                    >
+                      <Text style={[s.quickChipText, { color: selectedBuy === a ? "#fff" : colors.foreground }]}>{a} BP</Text>
                     </Pressable>
                   ))}
                 </View>
-                <Pressable onPress={() => { if (!selectedBuy) { Alert.alert("Saýlaň", "Mukdary saýlaň!"); return; } setShowPayment(true); }}
-                  style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1, marginTop: 20 }]}>
-                  <Ionicons name="arrow-forward-circle-outline" size={18} color="#fff" />
-                  <Text style={s.primaryBtnText}>Dowam etmek</Text>
+
+                <Pressable
+                  onPress={() => { if (!selectedBuy) { Alert.alert("Mukdar", "Mukdary giriziň!"); return; } setShowPayment(true); }}
+                  style={({ pressed }) => [s.primaryBtn, {
+                    backgroundColor: selectedBuy ? colors.primary : colors.muted,
+                    borderColor: selectedBuy ? "transparent" : colors.border,
+                    borderWidth: selectedBuy ? 0 : 1,
+                    opacity: pressed ? 0.85 : 1, marginTop: 8,
+                  }]}
+                >
+                  <Ionicons name="arrow-forward-circle-outline" size={18} color={selectedBuy ? "#fff" : colors.mutedForeground} />
+                  <Text style={[s.primaryBtnText, { color: selectedBuy ? "#fff" : colors.mutedForeground }]}>Dowam etmek</Text>
                 </Pressable>
               </>
             ) : buyPayMethod === "" ? (
@@ -1076,188 +1121,196 @@ function SimSection({ colors }: { colors: ReturnType<typeof useColors> }) {
   const { balance, deviceId } = useBonusPul();
   const [operator, setOperator] = useState<string | null>(null);
   const [simPhone, setSimPhone] = useState("");
-  const [selected, setSelected] = useState<number | null>(null);
-  const [showPayment, setShowPayment] = useState(false);
+  const [simAmountText, setSimAmountText] = useState("");
   const [showSimTopUp, setShowSimTopUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
-  const tmt = selected ? parseFloat((selected * UZS_RATE).toFixed(1)) : 0;
+  const simAmountNum = parseFloat(simAmountText) || 0;
+  const tmt = parseFloat((simAmountNum * UZS_RATE).toFixed(1));
+  const opInfo = UZ_OPERATORS.find(o => o.id === operator);
+  const opColor = opInfo?.color ?? colors.primary;
+
+  const canSubmit = !!operator && simPhone.trim().length >= 9 && simAmountNum > 0;
 
   async function handlePay() {
-    if (!simPhone || !selected || !operator) { Alert.alert("Ýalňyşlyk", "Ähli meýdançalary dolduryň!"); return; }
+    if (!canSubmit) { Alert.alert("Ýalňyşlyk", "Ähli meýdançalary dolduryň!"); return; }
     if (balance < tmt) { setShowSimTopUp(true); return; }
     setLoading(true);
     try {
       const result = await deductBalanceAtomic(deviceId, tmt);
       if (!result.success) { setShowSimTopUp(true); setLoading(false); return; }
-      await saveOrder("sim-topup-orders", { operator, simPhone, amount: selected, tmtAmount: tmt, payMethod: "bonus", deviceId, status: "pending" });
-      await addToHistory({ type: "sim", title: "SIM Kart töleg", details: `${UZ_OPERATORS.find(o => o.id === operator)?.name} · ${simPhone} · ${selected} UZS`, amount: selected, amountLabel: `-${tmt} BP`, simPhone, operator });
+      await saveOrder("sim-topup-orders", { operator, simPhone, amount: simAmountNum, tmtAmount: tmt, payMethod: "bonus", deviceId, status: "pending" });
+      await addToHistory({ type: "sim", title: "SIM Kart töleg", details: `${opInfo?.name} · ${simPhone} · ${simAmountNum} UZS`, amount: simAmountNum, amountLabel: `-${tmt} BP`, simPhone, operator });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setDone(true);
     } catch { Alert.alert("Ýalňyşlyk", "Bilinmeýän ýalňyşlyk"); }
     finally { setLoading(false); }
   }
 
+  function reset() { setDone(false); setOperator(null); setSimPhone(""); setSimAmountText(""); }
+
   if (done) return (
     <View style={s.successBox}>
-      <View style={[s.successIcon, { backgroundColor: "#d1fae5" }]}>
-        <Ionicons name="phone-portrait" size={40} color="#059669" />
+      <View style={[s.successIcon, { backgroundColor: "#ede9fe" }]}>
+        <Ionicons name="phone-portrait" size={40} color="#7c3aed" />
       </View>
       <Text style={[s.successTitle, { color: colors.foreground }]}>Üstünlikli!</Text>
-      <Text style={[s.successDesc, { color: colors.mutedForeground }]}>SIM kart töleg haýyşnamaňyz kabul edildi. Iň gysga wagtda işleniler.</Text>
-      <Pressable onPress={() => { setDone(false); setOperator(null); setSelected(null); setShowPayment(false); }}
-        style={[s.primaryBtn, { backgroundColor: colors.primary }]}>
+      <Text style={[s.successDesc, { color: colors.mutedForeground }]}>
+        SIM kart töleg haýyşnamaňyz kabul edildi.{"\n"}Iň gysga wagtda işleniler.
+      </Text>
+      <Pressable onPress={reset} style={[s.primaryBtn, { backgroundColor: "#7c3aed", paddingHorizontal: 32 }]}>
+        <Ionicons name="refresh-outline" size={18} color="#fff" />
         <Text style={s.primaryBtnText}>Täzeden</Text>
       </Pressable>
     </View>
   );
 
-  if (!operator) return (
-    <>
-      <View style={[s.ratePill, { backgroundColor: "#f0f9ff", borderColor: "#bae6fd" }]}>
-        <Ionicons name="cellular-outline" size={15} color="#0284c7" />
-        <Text style={[s.rateText, { color: "#0284c7" }]}>Özbegistanyň ähli operatorlary</Text>
-      </View>
-      <Text style={[s.subTitle, { color: colors.mutedForeground }]}>Operatoryňyzy saýlaň:</Text>
-      <View style={s.operatorGrid}>
-        {UZ_OPERATORS.map(op => (
-          <Pressable key={op.id} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setOperator(op.id); }}
-            style={({ pressed }) => [s.operatorCard, { width: OP_CARD_W, backgroundColor: colors.card, borderColor: op.color + "60", borderWidth: 1.5, opacity: pressed ? 0.85 : 1 }]}>
-            <View style={[s.opIcon, { backgroundColor: op.color }]}>
-              <Ionicons name="cellular-outline" size={22} color="#fff" />
-            </View>
-            <Text style={[{ fontWeight: "800", fontSize: 13, color: colors.foreground, textAlign: "center" }]}>{op.name}</Text>
-          </Pressable>
-        ))}
-      </View>
-    </>
-  );
-
-  const opColor = UZ_OPERATORS.find(o => o.id === operator)?.color || colors.primary;
-
-  if (!showPayment) return (
-    <>
-      <Pressable onPress={() => setOperator(null)} style={s.backRow}>
-        <Feather name="arrow-left" size={16} color={colors.primary} />
-        <Text style={[{ color: colors.primary, fontWeight: "600" }]}>Operator saýlamak</Text>
-      </Pressable>
-      <View style={[{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, backgroundColor: opColor + "15", borderRadius: 14, marginBottom: 16, borderWidth: 1, borderColor: opColor + "40" }]}>
-        <View style={[s.opIcon, { backgroundColor: opColor }]}>
-          <Ionicons name="cellular-outline" size={20} color="#fff" />
-        </View>
-        <Text style={[{ fontWeight: "700", fontSize: 15, color: colors.foreground }]}>{UZ_OPERATORS.find(o => o.id === operator)?.name}</Text>
-      </View>
-      <View style={{ marginBottom: 14 }}>
-        <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Özbegistan telefon nomeri</Text>
-        <TextInput value={simPhone} onChangeText={setSimPhone} placeholder="+998 XX XXX XX XX"
-          placeholderTextColor={colors.mutedForeground} keyboardType="phone-pad"
-          style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
-        />
-      </View>
-      <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Mukdary saýlaň (UZS)</Text>
-      <View style={s.amountGrid}>
-        {UZS_AMOUNTS.map(a => (
-          <Pressable key={a} onPress={() => setSelected(a)}
-            style={[s.amountCard, {
-              width: OP_CARD_W,
-              backgroundColor: selected === a ? opColor : colors.card,
-              borderColor: selected === a ? opColor : colors.border,
-              borderWidth: selected === a ? 0 : 1,
-            }]}>
-            <View style={[s.amountIconBg, { backgroundColor: selected === a ? "rgba(255,255,255,0.2)" : opColor + "15" }]}>
-              <Ionicons name="phone-portrait-outline" size={16} color={selected === a ? "#fff" : opColor} />
-            </View>
-            <Text style={[s.amountVal, { color: selected === a ? "#fff" : colors.foreground, fontSize: 16 }]}>
-              {a >= 1000 ? (a / 1000) + "K" : a}
-            </Text>
-            <Text style={[s.amountLabel, { color: selected === a ? "rgba(255,255,255,0.75)" : colors.mutedForeground }]}>UZS ≈ {(a * UZS_RATE).toFixed(1)} TMT</Text>
-          </Pressable>
-        ))}
-      </View>
-      {selected && (
-        <View style={[s.totalBox, { backgroundColor: opColor + "10", borderColor: opColor + "40", marginTop: 14 }]}>
-          <Text style={[s.totalLabel, { color: colors.mutedForeground }]}>Tölenjek mukdar</Text>
-          <Text style={[s.totalVal, { color: opColor }]}>{tmt} TMT</Text>
-        </View>
-      )}
-      <Pressable onPress={() => { if (!simPhone || !selected) { Alert.alert("Ýalňyşlyk", "Ähli meýdançalary dolduryň!"); return; } setShowPayment(true); }}
-        style={({ pressed }) => [s.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1, marginTop: 16 }]}>
-        <Ionicons name="wallet-outline" size={18} color="#fff" />
-        <Text style={s.primaryBtnText}>Töleg sahypasyna geç</Text>
-      </Pressable>
-    </>
-  );
-
   return (
     <>
-      <Pressable onPress={() => setShowPayment(false)} style={s.backRow}>
-        <Feather name="arrow-left" size={16} color={colors.primary} />
-        <Text style={[{ color: colors.primary, fontWeight: "600" }]}>Yza</Text>
-      </Pressable>
-
-      {/* BP payment card */}
-      <View style={{ borderRadius: 18, backgroundColor: colors.primary, padding: 18, marginBottom: 14 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10 }}>
-          <View style={{ width: 44, height: 44, borderRadius: 13, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center" }}>
-            <Ionicons name="phone-portrait-outline" size={22} color="#fff" />
-          </View>
-          <View>
-            <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 11 }}>SIM kart töleg</Text>
-            <Text style={{ color: "#fff", fontWeight: "800", fontSize: 16 }}>{UZ_OPERATORS.find(o => o.id === operator)?.name ?? operator}</Text>
-          </View>
+      {/* Rate banner */}
+      <View style={[s.simRateBanner, { backgroundColor: "#7c3aed12", borderColor: "#7c3aed30" }]}>
+        <View style={[s.simRateIcon, { backgroundColor: "#7c3aed20" }]}>
+          <Ionicons name="cellular-outline" size={16} color="#7c3aed" />
         </View>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 10, padding: 12 }}>
-          <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}>Töleg mukdary</Text>
-          <Text style={{ color: "#fff", fontWeight: "800", fontSize: 18 }}>{tmt} BP</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={[s.simRateTitle, { color: colors.foreground }]}>Özbegistan SIM Kart</Text>
+          <Text style={[s.simRateSub, { color: colors.mutedForeground }]}>1 UZS ≈ {UZS_RATE} TMT · Islendik mukdar</Text>
         </View>
       </View>
 
-      {/* Balance status */}
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 14, borderWidth: 1, marginBottom: 12,
-        backgroundColor: balance >= tmt ? "#f0fdf4" : "#fff7ed",
-        borderColor: balance >= tmt ? "#86efac" : "#fed7aa" }}>
-        <Ionicons name="wallet-outline" size={20} color={balance >= tmt ? "#059669" : "#d97706"} />
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontWeight: "700", fontSize: 13, color: balance >= tmt ? "#059669" : "#d97706" }}>
-            Siziň balansynyz: {balance.toFixed(2)} BP
-          </Text>
-          {balance < tmt && (
-            <Text style={{ fontSize: 12, color: "#d97706", marginTop: 2 }}>
-              Ýetmezçilik: {(tmt - balance).toFixed(2)} BP • Düwme balansy doldurýar
-            </Text>
+      {/* ── Operator chips ── */}
+      <Text style={[s.simFieldLabel, { color: colors.mutedForeground }]}>OPERATOR</Text>
+      <View style={s.simOpRow}>
+        {UZ_OPERATORS.map(op => {
+          const active = operator === op.id;
+          return (
+            <Pressable
+              key={op.id}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setOperator(active ? null : op.id); }}
+              style={[s.simOpChip, {
+                backgroundColor: active ? op.color : colors.card,
+                borderColor: active ? op.color : colors.border,
+                shadowColor: active ? op.color : "transparent",
+                shadowOpacity: active ? 0.35 : 0,
+                shadowRadius: 6,
+                shadowOffset: { width: 0, height: 2 },
+                elevation: active ? 4 : 0,
+              }]}
+            >
+              <View style={[s.simOpDot, { backgroundColor: active ? "rgba(255,255,255,0.3)" : op.color + "25" }]}>
+                <Ionicons name="cellular-outline" size={13} color={active ? "#fff" : op.color} />
+              </View>
+              <Text style={[s.simOpChipText, { color: active ? "#fff" : colors.foreground }]}>{op.name}</Text>
+              {active && <Ionicons name="checkmark-circle" size={15} color="#fff" />}
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {/* ── Phone number input ── */}
+      <Text style={[s.simFieldLabel, { color: colors.mutedForeground }]}>TELEFON BELGI</Text>
+      <View style={[s.simInputWrap, {
+        backgroundColor: colors.card,
+        borderColor: simPhone.length >= 9 ? opColor : colors.border,
+      }]}>
+        <View style={[s.simInputIcon, { backgroundColor: opColor + "15" }]}>
+          <Ionicons name="call-outline" size={17} color={opColor} />
+        </View>
+        <TextInput
+          value={simPhone}
+          onChangeText={setSimPhone}
+          placeholder="+998 XX XXX XX XX"
+          placeholderTextColor={colors.mutedForeground + "90"}
+          keyboardType="phone-pad"
+          style={[s.simInputField, { color: colors.foreground }]}
+        />
+        {simPhone.length >= 9 && (
+          <Ionicons name="checkmark-circle" size={18} color={opColor} />
+        )}
+      </View>
+
+      {/* ── Amount input ── */}
+      <Text style={[s.simFieldLabel, { color: colors.mutedForeground }]}>TÖLEG MUKDARY</Text>
+      <View style={[s.simInputWrap, {
+        backgroundColor: colors.card,
+        borderColor: simAmountNum > 0 ? opColor : colors.border,
+      }]}>
+        <View style={[s.simInputIcon, { backgroundColor: opColor + "15" }]}>
+          <Ionicons name="phone-portrait-outline" size={17} color={opColor} />
+        </View>
+        <TextInput
+          value={simAmountText}
+          onChangeText={t => setSimAmountText(t.replace(/[^0-9]/g, ""))}
+          placeholder="0"
+          placeholderTextColor={colors.mutedForeground + "90"}
+          keyboardType="number-pad"
+          style={[s.simInputField, { color: colors.foreground }]}
+        />
+        <Text style={[s.simInputSuffix, { color: colors.mutedForeground }]}>UZS</Text>
+      </View>
+
+      {/* ── Real-time calculation ── */}
+      {simAmountNum > 0 ? (
+        <View style={[s.simCalcCard, { backgroundColor: opColor + "0d", borderColor: opColor + "30" }]}>
+          <View style={s.simCalcRow}>
+            <Text style={[s.simCalcLabel, { color: colors.mutedForeground }]}>Kirgiziladigan UZS</Text>
+            <Text style={[s.simCalcVal, { color: colors.foreground }]}>{simAmountNum.toLocaleString()} UZS</Text>
+          </View>
+          <View style={[s.simCalcDivider, { backgroundColor: opColor + "20" }]} />
+          <View style={s.simCalcRow}>
+            <Text style={[s.simCalcLabel, { color: colors.mutedForeground }]}>Kurs</Text>
+            <Text style={[s.simCalcVal, { color: colors.foreground }]}>1 UZS = {UZS_RATE} TMT</Text>
+          </View>
+          <View style={[s.simCalcDivider, { backgroundColor: opColor + "20" }]} />
+          <View style={s.simCalcRow}>
+            <Text style={[{ fontSize: 13, fontWeight: "700", color: colors.foreground }]}>Tölenjek BP</Text>
+            <Text style={[{ fontSize: 20, fontWeight: "900", color: opColor }]}>{tmt} BP</Text>
+          </View>
+          {balance > 0 && (
+            <View style={[s.simBalRow, { borderTopColor: opColor + "20" }]}>
+              <Ionicons
+                name={balance >= tmt ? "checkmark-circle" : "alert-circle"}
+                size={14}
+                color={balance >= tmt ? "#059669" : "#f59e0b"}
+              />
+              <Text style={[s.simBalText, { color: balance >= tmt ? "#059669" : "#f59e0b" }]}>
+                {balance >= tmt ? `Balans ýeterlik (${balance.toFixed(1)} BP)` : `Ýetmezçilik: ${(tmt - balance).toFixed(1)} BP`}
+              </Text>
+            </View>
           )}
         </View>
-        {balance >= tmt
-          ? <Ionicons name="checkmark-circle" size={20} color="#059669" />
-          : <Ionicons name="alert-circle" size={20} color="#d97706" />
-        }
-      </View>
+      ) : (
+        <Text style={[s.simCalcHint, { color: colors.mutedForeground }]}>
+          UZS mukdary girizeniňizde töleg BP awtomatik hasaplanar
+        </Text>
+      )}
 
-      <View style={{ marginTop: 4 }}>
+      {/* ── Pay button ── */}
+      <View style={{ marginTop: 12 }}>
         <PessimisticButton
-          label={balance >= tmt ? `${tmt} BP bilen tölenmek` : "Balans doldur we tölenmek"}
+          label={canSubmit ? (balance >= tmt ? `${tmt} BP tölemek` : "Balans doldur we tölenmek") : "Maglumatlary dolduryň"}
           loadingLabel="Işlenýär..."
           loading={loading}
-          disabled={loading}
+          disabled={loading || !canSubmit}
           onPress={handlePay}
-          color={colors.primary}
+          color={canSubmit ? (operator ? opColor : colors.primary) : colors.muted}
           size="lg"
-          icon={<Ionicons name="wallet-outline" size={18} color="#fff" />}
+          icon={<Ionicons name="phone-portrait-outline" size={18} color={canSubmit ? "#fff" : colors.mutedForeground} />}
         />
       </View>
 
       <BPCheckoutModal
         visible={showSimTopUp}
         onClose={() => setShowSimTopUp(false)}
-        serviceName={`SIM Kart · ${UZ_OPERATORS.find(o => o.id === operator)?.name ?? operator} · ${simPhone}`}
+        serviceName={`SIM Kart · ${opInfo?.name ?? operator} · ${simPhone}`}
         serviceAmount={tmt}
         currentBalance={balance}
         deviceId={deviceId}
         onPaymentComplete={() => {
           setShowSimTopUp(false);
-          saveOrder("sim-topup-orders", { operator, simPhone, amount: selected, tmtAmount: tmt, payMethod: "bonus", deviceId, status: "pending" })
-            .then(() => addToHistory({ type: "sim", title: "SIM Kart töleg", details: `${UZ_OPERATORS.find(o => o.id === operator)?.name} · ${simPhone} · ${selected} UZS`, amount: selected ?? 0, amountLabel: `-${tmt} BP`, simPhone, operator }))
+          saveOrder("sim-topup-orders", { operator, simPhone, amount: simAmountNum, tmtAmount: tmt, payMethod: "bonus", deviceId, status: "pending" })
+            .then(() => addToHistory({ type: "sim", title: "SIM Kart töleg", details: `${opInfo?.name} · ${simPhone} · ${simAmountNum} UZS`, amount: simAmountNum, amountLabel: `-${tmt} BP`, simPhone, operator: operator ?? undefined }))
             .then(() => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); setDone(true); })
             .catch(() => Alert.alert("Ýalňyşlyk", "Sargyt saklanyp bilinmedi."));
         }}
@@ -1495,4 +1548,62 @@ const s = StyleSheet.create({
   successIcon: { width: 80, height: 80, borderRadius: 24, alignItems: "center", justifyContent: "center" },
   successTitle: { fontSize: 20, fontWeight: "800" },
   successDesc: { fontSize: 13, textAlign: "center", lineHeight: 20 },
+
+  // ── Bonus Pul "Almak" big amount input ──────────────────────────
+  bigInputCard: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    borderWidth: 2, borderRadius: 18, padding: 16, marginBottom: 10,
+    shadowOffset: { width: 0, height: 3 }, shadowRadius: 8, elevation: 3,
+  },
+  bigInputIconWrap: { width: 44, height: 44, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  bigInputField: { flex: 1, fontSize: 32, fontWeight: "900", letterSpacing: -0.5 },
+  bigInputSuffix: { fontSize: 16, fontWeight: "700" },
+  convBadge: {
+    flexDirection: "row", alignItems: "center", gap: 7,
+    borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8,
+    alignSelf: "flex-start", marginBottom: 14,
+  },
+  convBadgeText: { fontSize: 13, fontWeight: "700" },
+  convHint: { fontSize: 12, marginBottom: 14, lineHeight: 18 },
+  quickChipRow: { flexDirection: "row", gap: 8, flexWrap: "wrap", marginBottom: 16 },
+  quickChip: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8 },
+  quickChipText: { fontSize: 13, fontWeight: "700" },
+
+  // ── SIM Kart single-screen styles ───────────────────────────────
+  simRateBanner: {
+    flexDirection: "row", alignItems: "center", gap: 10,
+    borderWidth: 1, borderRadius: 16, padding: 12, marginBottom: 18,
+  },
+  simRateIcon: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  simRateTitle: { fontSize: 13, fontWeight: "800" },
+  simRateSub: { fontSize: 11, marginTop: 1 },
+  simFieldLabel: { fontSize: 10, fontWeight: "700", letterSpacing: 0.8, marginBottom: 8 },
+  simOpRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 18 },
+  simOpChip: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    borderWidth: 1.5, borderRadius: 12,
+    paddingHorizontal: 12, paddingVertical: 9,
+  },
+  simOpDot: { width: 26, height: 26, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  simOpChipText: { fontSize: 13, fontWeight: "700" },
+  simInputWrap: {
+    flexDirection: "row", alignItems: "center", gap: 10,
+    borderWidth: 1.5, borderRadius: 14, padding: 13, marginBottom: 14,
+  },
+  simInputIcon: { width: 34, height: 34, borderRadius: 9, alignItems: "center", justifyContent: "center" },
+  simInputField: { flex: 1, fontSize: 16, fontWeight: "600" },
+  simInputSuffix: { fontSize: 13, fontWeight: "700" },
+  simCalcCard: {
+    borderWidth: 1, borderRadius: 16, padding: 14, marginBottom: 4, gap: 10,
+  },
+  simCalcRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  simCalcDivider: { height: 1 },
+  simCalcLabel: { fontSize: 12, fontWeight: "600" },
+  simCalcVal: { fontSize: 13, fontWeight: "700" },
+  simBalRow: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    paddingTop: 10, borderTopWidth: 1,
+  },
+  simBalText: { fontSize: 12, fontWeight: "600", flex: 1 },
+  simCalcHint: { fontSize: 12, marginBottom: 4, lineHeight: 18, fontStyle: "italic" },
 });
