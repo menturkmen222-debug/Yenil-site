@@ -83,12 +83,12 @@ export function DailyGiftModal({
     if (!visible) return;
     setPhase("loading");
 
-    // Animate sheet in
+    // Animate sheet in (useNativeDriver: false for web compat with translateY)
     sheetAnim.setValue(600);
     sheetOpacity.setValue(0);
     Animated.parallel([
-      Animated.spring(sheetAnim, { toValue: 0, useNativeDriver: true, damping: 24, stiffness: 200 }),
-      Animated.timing(sheetOpacity, { toValue: 1, duration: 220, useNativeDriver: true }),
+      Animated.spring(sheetAnim, { toValue: 0, useNativeDriver: false, damping: 24, stiffness: 200 }),
+      Animated.timing(sheetOpacity, { toValue: 1, duration: 220, useNativeDriver: false }),
     ]).start();
 
     // Reset all animations
@@ -99,15 +99,20 @@ export function DailyGiftModal({
     rewardOpacity.setValue(0);
     confetti.forEach(p => { p.pos.setValue({ x: 0, y: 0 }); p.opacity.setValue(0); p.scale.setValue(0); });
 
-    getDeviceIdAsync().then(async (deviceId) => {
-      const claimed = await checkDailyGiftClaimed(deviceId);
-      if (claimed) {
-        setPhase("already_claimed");
-      } else {
+    getDeviceIdAsync()
+      .then(async (deviceId) => {
+        const claimed = await checkDailyGiftClaimed(deviceId);
+        if (claimed) {
+          setPhase("already_claimed");
+        } else {
+          setPhase("available");
+          startPulse();
+        }
+      })
+      .catch(() => {
         setPhase("available");
         startPulse();
-      }
-    });
+      });
   }, [visible]);
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -230,8 +235,8 @@ export function DailyGiftModal({
   // ─────────────────────────────────────────────────────────────────────────
   const handleClose = () => {
     Animated.parallel([
-      Animated.timing(sheetAnim, { toValue: 600, duration: 260, useNativeDriver: true }),
-      Animated.timing(sheetOpacity, { toValue: 0, duration: 220, useNativeDriver: true }),
+      Animated.timing(sheetAnim, { toValue: 600, duration: 260, useNativeDriver: false }),
+      Animated.timing(sheetOpacity, { toValue: 0, duration: 220, useNativeDriver: false }),
     ]).start(onClose);
   };
 

@@ -8,7 +8,7 @@ import { COMMISSION_RATES, MIN_CASHOUT_BP } from "@/lib/payments";
 const firebaseConfig = {
   apiKey: "AIzaSyBGu5beomNMKW12amssM8GLiEK-8M0Y-iU",
   authDomain: "yenil-f8c12.firebaseapp.com",
-  databaseURL: "https://yenil-f8c12-default-rtdb.firebaseio.com",
+  databaseURL: "https://yenil-f8c12-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "yenil-f8c12",
   storageBucket: "yenil-f8c12.firebasestorage.app",
   messagingSenderId: "405972999183",

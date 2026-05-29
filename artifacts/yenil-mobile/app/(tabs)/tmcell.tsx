@@ -259,28 +259,81 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
             ) : buyPayMethod === "" ? (
               /* ── Payment method selector ── */
               <>
-                <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginBottom: 12, marginTop: 4 }]}>
+                <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginBottom: 4, marginTop: 4 }]}>
                   Töleg usulyny saýlaň
                 </Text>
-                {([
-                  { id: "terminal" as const, label: "TMCELL Terminal", desc: "Görkezilen nomerlere pul geçiriň", icon: "phone-portrait-outline" as const, color: colors.primary },
-                  { id: "card" as const, label: "Kartdan töle", desc: "Bank karty arkaly töleg", icon: "card-outline" as const, color: "#6366f1" },
-                ]).map((pm) => (
-                  <Pressable
-                    key={pm.id}
-                    onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setBuyPayMethod(pm.id); }}
-                    style={[s.payMethodCard, { backgroundColor: colors.card, borderColor: pm.color + "60" }]}
-                  >
-                    <View style={[s.payMethodIcon, { backgroundColor: pm.color + "20" }]}>
-                      <Ionicons name={pm.icon} size={22} color={pm.color} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={[s.payMethodLabel, { color: colors.foreground }]}>{pm.label}</Text>
-                      <Text style={[s.payMethodDesc, { color: colors.mutedForeground }]}>{pm.desc}</Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={18} color={pm.color} />
-                  </Pressable>
-                ))}
+
+                {/* Summary info row */}
+                {selectedBuy ? (
+                  <View style={[s.pmSummaryRow, { backgroundColor: colors.primary + "0f", borderColor: colors.primary + "30" }]}>
+                    <MaterialCommunityIcons name="information-outline" size={13} color={colors.primary} />
+                    <Text style={[s.pmSummaryText, { color: colors.primary }]}>
+                      {selectedBuy} BP satyn almak · usuly saýlaň
+                    </Text>
+                  </View>
+                ) : null}
+
+                <View style={{ gap: 10, marginTop: 10 }}>
+                  {([
+                    {
+                      id: "terminal" as const,
+                      label: "TMCell Terminal",
+                      desc: "Görkezilen nomerlere pul geçiriň",
+                      icon: "phone-portrait-outline" as const,
+                      color: colors.primary,
+                      commission: COMMISSION_RATES.tmcell_topup,
+                      commissionLabel: `+${(COMMISSION_RATES.tmcell_topup * 100).toFixed(0)}% komissiýa`,
+                    },
+                    {
+                      id: "card" as const,
+                      label: "Bank kartasy",
+                      desc: "Bank karty arkaly töleg",
+                      icon: "card-outline" as const,
+                      color: "#6366f1",
+                      commission: COMMISSION_RATES.bank_topup,
+                      commissionLabel: `+${(COMMISSION_RATES.bank_topup * 100).toFixed(0)}% komissiýa`,
+                    },
+                  ]).map((pm) => {
+                    const totalTmt = selectedBuy
+                      ? Math.ceil(selectedBuy * (1 + pm.commission))
+                      : null;
+                    return (
+                      <Pressable
+                        key={pm.id}
+                        onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setBuyPayMethod(pm.id); }}
+                        style={({ pressed }) => [
+                          s.payMethodCard,
+                          {
+                            backgroundColor: colors.card,
+                            borderColor: pm.color + "60",
+                            opacity: pressed ? 0.88 : 1,
+                          },
+                        ]}
+                      >
+                        <View style={[s.payMethodIcon, { backgroundColor: pm.color + "18" }]}>
+                          <Ionicons name={pm.icon} size={22} color={pm.color} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={[s.payMethodLabel, { color: colors.foreground }]}>{pm.label}</Text>
+                          <Text style={[s.pmCommissionText, { color: pm.color }]}>{pm.commissionLabel}</Text>
+                          <Text style={[s.payMethodDesc, { color: colors.mutedForeground }]}>{pm.desc}</Text>
+                        </View>
+                        {totalTmt !== null ? (
+                          <View style={s.pmAmountCol}>
+                            <Text style={[s.pmAmountTmt, { color: colors.foreground }]}>{totalTmt} TMT</Text>
+                            <View style={[s.pmPercentBadge, { backgroundColor: pm.color + "18" }]}>
+                              <Text style={[s.pmPercentText, { color: pm.color }]}>
+                                {(pm.commission * 100).toFixed(0)}%
+                              </Text>
+                            </View>
+                          </View>
+                        ) : (
+                          <Ionicons name="chevron-forward" size={18} color={pm.color} />
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </View>
                 <Pressable onPress={() => setShowPayment(false)} style={s.backRow}>
                   <Feather name="arrow-left" size={16} color={colors.mutedForeground} />
                   <Text style={[{ color: colors.mutedForeground, fontWeight: "600" }]}>Yza</Text>
@@ -1498,10 +1551,17 @@ const s = StyleSheet.create({
   backRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 16 },
 
   // Payment method selector cards
-  payMethodCard: { flexDirection: "row", alignItems: "center", gap: 14, borderRadius: 18, borderWidth: 1.5, padding: 16, marginBottom: 12 },
+  payMethodCard: { flexDirection: "row", alignItems: "center", gap: 14, borderRadius: 18, borderWidth: 1.5, padding: 16 },
   payMethodIcon: { width: 46, height: 46, borderRadius: 14, alignItems: "center", justifyContent: "center" },
-  payMethodLabel: { fontSize: 15, fontWeight: "700", marginBottom: 2 },
-  payMethodDesc: { fontSize: 12 },
+  payMethodLabel: { fontSize: 15, fontWeight: "700", marginBottom: 1 },
+  pmCommissionText: { fontSize: 12, fontWeight: "700", marginBottom: 2 },
+  payMethodDesc: { fontSize: 11.5, lineHeight: 16 },
+  pmSummaryRow: { flexDirection: "row", alignItems: "center", gap: 6, borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 7, marginTop: 6 },
+  pmSummaryText: { fontSize: 12, fontWeight: "600" },
+  pmAmountCol: { alignItems: "flex-end", gap: 4 },
+  pmAmountTmt: { fontSize: 15, fontWeight: "800", letterSpacing: -0.3 },
+  pmPercentBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  pmPercentText: { fontSize: 11, fontWeight: "800" },
 
   // Merchant card (card payment)
   merchantCardBox: { borderRadius: 18, padding: 18, marginBottom: 14 },
