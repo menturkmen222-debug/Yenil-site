@@ -167,230 +167,357 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
 
       {mode === "buy" ? (
         buyDone ? (
+          /* ── Success screen ── */
           <View style={s.successBox}>
-            <View style={[s.successIcon, { backgroundColor: "#d1fae5" }]}>
-              <Ionicons name="checkmark-circle" size={40} color="#059669" />
+            <View style={[s.buySuccessCircle, { backgroundColor: colors.primary + "18" }]}>
+              <Ionicons name="checkmark-circle" size={52} color={colors.primary} />
             </View>
-            <Text style={[s.successTitle, { color: colors.foreground }]}>Üstünlikli!</Text>
-            <Text style={[s.successDesc, { color: colors.mutedForeground }]}>Bonus pul haýyşnamaňyz kabul edildi. Iň gysga wagtda hasabyňyza goşular.</Text>
-            <Pressable onPress={resetBuy} style={[s.primaryBtn, { backgroundColor: colors.primary }]}>
-              <Text style={s.primaryBtnText}>Täzeden</Text>
+            <Text style={[s.successTitle, { color: colors.foreground }]}>Haýyşnama kabul edildi!</Text>
+            <Text style={[s.successDesc, { color: colors.mutedForeground }]}>
+              Ýakyn wagtda {selectedBuy} BP hasabyňyza goşular.{"\n"}
+              Sorag üçin: +993 71 789091
+            </Text>
+            <Pressable onPress={resetBuy} style={[s.primaryBtn, { backgroundColor: colors.primary, marginTop: 4 }]}>
+              <Ionicons name="refresh-outline" size={17} color="#fff" />
+              <Text style={s.primaryBtnText}>Täzeden almak</Text>
             </Pressable>
           </View>
-        ) : (
+        ) : !showPayment ? (
+          /* ══════════════════════════════════════════════
+             STEP 1 — Mukdar saýla + töleg usulyny saýla
+             ══════════════════════════════════════════════ */
           <>
-            {/* Info pill */}
-            <View style={[s.ratePill, { backgroundColor: colors.primary + "12", borderColor: colors.primary + "30" }]}>
-              <MaterialCommunityIcons name="cash-multiple" size={16} color={colors.primary} />
-              <Text style={[s.rateText, { color: colors.primary }]}>1 BP = 1 TMT</Text>
+            {/* ── Amount input card ── */}
+            <View style={[s.buyAmountCard, {
+              backgroundColor: colors.card,
+              borderColor: selectedBuy ? colors.primary : colors.border,
+            }]}>
+              <View style={s.buyAmountTop}>
+                <View style={[s.buyAmountIconWrap, { backgroundColor: colors.primary + "15" }]}>
+                  <MaterialCommunityIcons name="wallet-outline" size={20} color={colors.primary} />
+                </View>
+                <Text style={[s.buyAmountCardLabel, { color: colors.mutedForeground }]}>Almak isleýän mukdaryňyz</Text>
+              </View>
+              <View style={s.buyAmountInputRow}>
+                <TextInput
+                  value={buyAmountText}
+                  onChangeText={t => {
+                    const clean = t.replace(/[^0-9]/g, "");
+                    setBuyAmountText(clean);
+                    setSelectedBuy(clean ? parseInt(clean, 10) : null);
+                  }}
+                  placeholder="0"
+                  placeholderTextColor={colors.mutedForeground + "60"}
+                  keyboardType="number-pad"
+                  style={[s.buyAmountInput, { color: selectedBuy ? colors.primary : colors.foreground }]}
+                />
+                <View style={[s.buyAmountUnit, { backgroundColor: colors.primary + "12" }]}>
+                  <Text style={[s.buyAmountUnitText, { color: colors.primary }]}>BP</Text>
+                </View>
+              </View>
+              {/* Quick chips */}
+              <View style={s.buyChipRow}>
+                {BP_AMOUNTS.map(a => (
+                  <Pressable
+                    key={a}
+                    onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setBuyAmountText(String(a)); setSelectedBuy(a); }}
+                    style={[s.buyChip, {
+                      backgroundColor: selectedBuy === a ? colors.primary : colors.muted,
+                      borderColor: selectedBuy === a ? colors.primary : colors.border,
+                    }]}
+                  >
+                    <Text style={[s.buyChipText, { color: selectedBuy === a ? "#fff" : colors.mutedForeground }]}>{a} BP</Text>
+                  </Pressable>
+                ))}
+              </View>
             </View>
-            <Text style={[s.subTitle, { color: colors.mutedForeground }]}>
-              Mukdary saýlap, görkezilen nomerlere pul geçiriň.
-            </Text>
-            {!showPayment ? (
-              <>
-                {/* Big amount input */}
-                <View style={[s.bigInputCard, {
-                  backgroundColor: colors.card,
-                  borderColor: selectedBuy ? colors.primary : colors.border,
-                  shadowColor: selectedBuy ? colors.primary : "transparent",
-                }]}>
-                  <View style={[s.bigInputIconWrap, { backgroundColor: colors.primary + "15" }]}>
-                    <MaterialCommunityIcons name="cash-multiple" size={24} color={colors.primary} />
+
+            {/* ── Rate note ── */}
+            <View style={[s.buyRateNote, { backgroundColor: colors.primary + "0a", borderColor: colors.primary + "25" }]}>
+              <MaterialCommunityIcons name="information-outline" size={13} color={colors.primary} />
+              <Text style={[s.buyRateNoteText, { color: colors.primary }]}>
+                1 BP = 1 TMT • Töleg usulyna görä komissiýa goşulýar
+              </Text>
+            </View>
+
+            {/* ── Divider ── */}
+            <View style={s.buyDivider}>
+              <View style={[s.buyDividerLine, { backgroundColor: colors.border }]} />
+              <Text style={[s.buyDividerText, { color: colors.mutedForeground }]}>Töleg usulyny saýlaň</Text>
+              <View style={[s.buyDividerLine, { backgroundColor: colors.border }]} />
+            </View>
+
+            {/* ── Payment method cards ── */}
+            {([
+              {
+                id: "terminal" as const,
+                label: "TMCell Terminal",
+                desc: "Görkezilen nomerlere pul geçiriň",
+                icon: "phone-portrait-outline" as const,
+                color: colors.primary,
+                commissionRate: COMMISSION_RATES.tmcell_topup,
+              },
+              {
+                id: "card" as const,
+                label: "Bank kartasy",
+                desc: "Karta arkaly töleg (Visa / MC / Altyn)",
+                icon: "card-outline" as const,
+                color: "#6366f1",
+                commissionRate: COMMISSION_RATES.bank_topup,
+              },
+            ]).map((pm) => {
+              const bp = selectedBuy ?? 0;
+              const commAmt = Math.ceil(bp * pm.commissionRate);
+              const totalTmt = bp + commAmt;
+              const pct = Math.round(pm.commissionRate * 100);
+
+              return (
+                <Pressable
+                  key={pm.id}
+                  onPress={() => {
+                    if (!selectedBuy || selectedBuy <= 0) {
+                      Alert.alert("Mukdar", "Ilki mukdar giriziň!");
+                      return;
+                    }
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    setBuyPayMethod(pm.id);
+                    setShowPayment(true);
+                  }}
+                  style={({ pressed }) => [
+                    s.buyMethodCard,
+                    {
+                      backgroundColor: colors.card,
+                      borderColor: pm.color + "55",
+                      opacity: pressed ? 0.88 : 1,
+                    },
+                  ]}
+                >
+                  {/* Left: icon */}
+                  <View style={[s.buyMethodIconWrap, { backgroundColor: pm.color + "15" }]}>
+                    <Ionicons name={pm.icon} size={22} color={pm.color} />
                   </View>
-                  <TextInput
-                    value={buyAmountText}
-                    onChangeText={t => {
-                      const clean = t.replace(/[^0-9]/g, "");
-                      setBuyAmountText(clean);
-                      setSelectedBuy(clean ? parseInt(clean, 10) : null);
-                    }}
-                    placeholder="0"
-                    placeholderTextColor={colors.mutedForeground + "80"}
-                    keyboardType="number-pad"
-                    style={[s.bigInputField, { color: selectedBuy ? colors.primary : colors.foreground }]}
-                  />
-                  <Text style={[s.bigInputSuffix, { color: colors.mutedForeground }]}>BP</Text>
+
+                  {/* Center: name + commission + desc */}
+                  <View style={{ flex: 1 }}>
+                    <View style={s.buyMethodNameRow}>
+                      <Text style={[s.buyMethodName, { color: colors.foreground }]}>{pm.label}</Text>
+                      <View style={[s.buyMethodPctBadge, { backgroundColor: pm.color + "18" }]}>
+                        <Text style={[s.buyMethodPctText, { color: pm.color }]}>+{pct}%</Text>
+                      </View>
+                    </View>
+                    <Text style={[s.buyMethodDesc, { color: colors.mutedForeground }]}>{pm.desc}</Text>
+                  </View>
+
+                  {/* Right: total cost block */}
+                  {bp > 0 ? (
+                    <View style={[s.buyMethodCostBlock, { borderColor: pm.color + "30", backgroundColor: pm.color + "08" }]}>
+                      <Text style={[s.buyMethodCostTmt, { color: pm.color }]}>{totalTmt}</Text>
+                      <Text style={[s.buyMethodCostUnit, { color: pm.color + "99" }]}>TMT</Text>
+                    </View>
+                  ) : (
+                    <Ionicons name="chevron-forward" size={18} color={pm.color + "80"} />
+                  )}
+                </Pressable>
+              );
+            })}
+
+            {/* ── Commission explainer ── */}
+            {selectedBuy ? (
+              <View style={[s.buyExplainer, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+                <View style={s.buyExplainerRow}>
+                  <Text style={[s.buyExplainerKey, { color: colors.mutedForeground }]}>Satyn alynýan mukdar</Text>
+                  <Text style={[s.buyExplainerVal, { color: colors.foreground }]}>{selectedBuy} BP</Text>
+                </View>
+                <View style={[s.buyExplainerDivider, { backgroundColor: colors.border }]} />
+                <View style={s.buyExplainerRow}>
+                  <Text style={[s.buyExplainerKey, { color: colors.mutedForeground }]}>TMCell Terminal (+30%)</Text>
+                  <Text style={[s.buyExplainerVal, { color: colors.primary, fontWeight: "800" }]}>
+                    {Math.ceil(selectedBuy * (1 + COMMISSION_RATES.tmcell_topup))} TMT töleýärsiňiz
+                  </Text>
+                </View>
+                <View style={s.buyExplainerRow}>
+                  <Text style={[s.buyExplainerKey, { color: colors.mutedForeground }]}>Bank kartasy (+15%)</Text>
+                  <Text style={[s.buyExplainerVal, { color: "#6366f1", fontWeight: "800" }]}>
+                    {Math.ceil(selectedBuy * (1 + COMMISSION_RATES.bank_topup))} TMT töleýärsiňiz
+                  </Text>
+                </View>
+              </View>
+            ) : (
+              <View style={[s.buyExplainer, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+                <Text style={[s.buyExplainerHint, { color: colors.mutedForeground }]}>
+                  ↑ Mukdary giriziň — her usul üçin tölenýän TMT awtomatik hasaplanar
+                </Text>
+              </View>
+            )}
+          </>
+        ) : buyPayMethod === "terminal" ? (
+          /* ══════════════════════════════════════════════
+             STEP 2a — TMCell Terminal töleg görkezmeleri
+             ══════════════════════════════════════════════ */
+          (() => {
+            const bp = selectedBuy ?? 0;
+            const commAmt = Math.ceil(bp * COMMISSION_RATES.tmcell_topup);
+            const totalTmt = bp + commAmt;
+            return (
+              <>
+                {/* Back */}
+                <Pressable onPress={() => { setBuyPayMethod(""); setShowPayment(false); }} style={s.buyBackRow}>
+                  <Feather name="arrow-left" size={15} color={colors.mutedForeground} />
+                  <Text style={[s.buyBackText, { color: colors.mutedForeground }]}>Yza dön</Text>
+                </Pressable>
+
+                {/* Method badge */}
+                <View style={s.buyStepHeader}>
+                  <View style={[s.buyStepIconWrap, { backgroundColor: colors.primary + "15" }]}>
+                    <Ionicons name="phone-portrait-outline" size={20} color={colors.primary} />
+                  </View>
+                  <View>
+                    <Text style={[s.buyStepTitle, { color: colors.foreground }]}>TMCell Terminal</Text>
+                    <Text style={[s.buyStepSub, { color: colors.mutedForeground }]}>Aşakdaky nomerlere pul geçiriň</Text>
+                  </View>
                 </View>
 
-                {/* Real-time conversion */}
-                {selectedBuy ? (
-                  <View style={[s.convBadge, { backgroundColor: colors.primary + "0f", borderColor: colors.primary + "35" }]}>
-                    <Ionicons name="swap-horizontal-outline" size={15} color={colors.primary} />
-                    <Text style={[s.convBadgeText, { color: colors.primary }]}>
-                      {selectedBuy} BP = <Text style={{ fontWeight: "800" }}>{selectedBuy} TMT</Text>
-                    </Text>
+                {/* Big total card */}
+                <View style={[s.buyTotalCard, { backgroundColor: colors.primary + "0d", borderColor: colors.primary + "40" }]}>
+                  <Text style={[s.buyTotalCardLabel, { color: colors.mutedForeground }]}>GEÇIRMELI MUKDAR</Text>
+                  <Text style={[s.buyTotalCardAmount, { color: colors.primary }]}>{totalTmt} TMT</Text>
+                  {/* Breakdown */}
+                  <View style={[s.buyTotalBreakRow, { borderTopColor: colors.primary + "25" }]}>
+                    <View style={s.buyBreakItem}>
+                      <Text style={[s.buyBreakKey, { color: colors.mutedForeground }]}>Almak</Text>
+                      <Text style={[s.buyBreakVal, { color: colors.foreground }]}>{bp} BP</Text>
+                    </View>
+                    <Ionicons name="add" size={14} color={colors.mutedForeground} />
+                    <View style={s.buyBreakItem}>
+                      <Text style={[s.buyBreakKey, { color: colors.mutedForeground }]}>Komissiýa (+30%)</Text>
+                      <Text style={[s.buyBreakVal, { color: colors.foreground }]}>{commAmt} TMT</Text>
+                    </View>
+                    <Ionicons name="remove" size={14} color={colors.mutedForeground} style={{ opacity: 0 }} />
+                    <View style={s.buyBreakItem}>
+                      <Text style={[s.buyBreakKey, { color: colors.primary }]}>Jemi</Text>
+                      <Text style={[s.buyBreakVal, { color: colors.primary, fontWeight: "900" }]}>{totalTmt} TMT</Text>
+                    </View>
                   </View>
-                ) : (
-                  <Text style={[s.convHint, { color: colors.mutedForeground }]}>
-                    1 BP = 1 TMT · Islendik mukdar girizmek bolar
-                  </Text>
-                )}
+                </View>
 
-                {/* Quick-fill chips */}
-                <View style={s.quickChipRow}>
-                  {BP_AMOUNTS.map(a => (
-                    <Pressable
-                      key={a}
-                      onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setBuyAmountText(String(a)); setSelectedBuy(a); }}
-                      style={[s.quickChip, {
-                        backgroundColor: selectedBuy === a ? colors.primary : colors.card,
-                        borderColor: selectedBuy === a ? colors.primary : colors.border,
-                      }]}
-                    >
-                      <Text style={[s.quickChipText, { color: selectedBuy === a ? "#fff" : colors.foreground }]}>{a} BP</Text>
-                    </Pressable>
+                {/* Phone numbers */}
+                <View style={[s.buyPhonesCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  <View style={s.buyPhonesHeader}>
+                    <Ionicons name="call-outline" size={15} color={colors.primary} />
+                    <Text style={[s.buyPhonesTitle, { color: colors.foreground }]}>Şu nomerleriň BIRINE geçiriň</Text>
+                  </View>
+                  {PAYMENT_PHONES.map((p, i) => (
+                    <View key={i} style={[s.buyPhoneRow, i < PAYMENT_PHONES.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
+                      <View style={[s.buyPhoneDot, { backgroundColor: colors.primary + "20" }]}>
+                        <Text style={[{ fontSize: 10, fontWeight: "800", color: colors.primary }]}>{i + 1}</Text>
+                      </View>
+                      <Text style={[s.buyPhoneNum, { color: colors.primary }]}>{p}</Text>
+                    </View>
                   ))}
                 </View>
 
-                <Pressable
-                  onPress={() => { if (!selectedBuy) { Alert.alert("Mukdar", "Mukdary giriziň!"); return; } setShowPayment(true); }}
-                  style={({ pressed }) => [s.primaryBtn, {
-                    backgroundColor: selectedBuy ? colors.primary : colors.muted,
-                    borderColor: selectedBuy ? "transparent" : colors.border,
-                    borderWidth: selectedBuy ? 0 : 1,
-                    opacity: pressed ? 0.85 : 1, marginTop: 8,
-                  }]}
-                >
-                  <Ionicons name="arrow-forward-circle-outline" size={18} color={selectedBuy ? "#fff" : colors.mutedForeground} />
-                  <Text style={[s.primaryBtnText, { color: selectedBuy ? "#fff" : colors.mutedForeground }]}>Dowam etmek</Text>
-                </Pressable>
-              </>
-            ) : buyPayMethod === "" ? (
-              /* ── Payment method selector ── */
-              <>
-                <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginBottom: 4, marginTop: 4 }]}>
-                  Töleg usulyny saýlaň
-                </Text>
-
-                {/* Summary info row */}
-                {selectedBuy ? (
-                  <View style={[s.pmSummaryRow, { backgroundColor: colors.primary + "0f", borderColor: colors.primary + "30" }]}>
-                    <MaterialCommunityIcons name="information-outline" size={13} color={colors.primary} />
-                    <Text style={[s.pmSummaryText, { color: colors.primary }]}>
-                      {selectedBuy} BP satyn almak · usuly saýlaň
-                    </Text>
-                  </View>
-                ) : null}
-
-                <View style={{ gap: 10, marginTop: 10 }}>
-                  {([
-                    {
-                      id: "terminal" as const,
-                      label: "TMCell Terminal",
-                      desc: "Görkezilen nomerlere pul geçiriň",
-                      icon: "phone-portrait-outline" as const,
-                      color: colors.primary,
-                      commission: COMMISSION_RATES.tmcell_topup,
-                      commissionLabel: `+${(COMMISSION_RATES.tmcell_topup * 100).toFixed(0)}% komissiýa`,
-                    },
-                    {
-                      id: "card" as const,
-                      label: "Bank kartasy",
-                      desc: "Bank karty arkaly töleg",
-                      icon: "card-outline" as const,
-                      color: "#6366f1",
-                      commission: COMMISSION_RATES.bank_topup,
-                      commissionLabel: `+${(COMMISSION_RATES.bank_topup * 100).toFixed(0)}% komissiýa`,
-                    },
-                  ]).map((pm) => {
-                    const totalTmt = selectedBuy
-                      ? Math.ceil(selectedBuy * (1 + pm.commission))
-                      : null;
-                    return (
-                      <Pressable
-                        key={pm.id}
-                        onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setBuyPayMethod(pm.id); }}
-                        style={({ pressed }) => [
-                          s.payMethodCard,
-                          {
-                            backgroundColor: colors.card,
-                            borderColor: pm.color + "60",
-                            opacity: pressed ? 0.88 : 1,
-                          },
-                        ]}
-                      >
-                        <View style={[s.payMethodIcon, { backgroundColor: pm.color + "18" }]}>
-                          <Ionicons name={pm.icon} size={22} color={pm.color} />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={[s.payMethodLabel, { color: colors.foreground }]}>{pm.label}</Text>
-                          <Text style={[s.pmCommissionText, { color: pm.color }]}>{pm.commissionLabel}</Text>
-                          <Text style={[s.payMethodDesc, { color: colors.mutedForeground }]}>{pm.desc}</Text>
-                        </View>
-                        {totalTmt !== null ? (
-                          <View style={s.pmAmountCol}>
-                            <Text style={[s.pmAmountTmt, { color: colors.foreground }]}>{totalTmt} TMT</Text>
-                            <View style={[s.pmPercentBadge, { backgroundColor: pm.color + "18" }]}>
-                              <Text style={[s.pmPercentText, { color: pm.color }]}>
-                                {(pm.commission * 100).toFixed(0)}%
-                              </Text>
-                            </View>
-                          </View>
-                        ) : (
-                          <Ionicons name="chevron-forward" size={18} color={pm.color} />
-                        )}
-                      </Pressable>
-                    );
-                  })}
-                </View>
-                <Pressable onPress={() => setShowPayment(false)} style={s.backRow}>
-                  <Feather name="arrow-left" size={16} color={colors.mutedForeground} />
-                  <Text style={[{ color: colors.mutedForeground, fontWeight: "600" }]}>Yza</Text>
-                </Pressable>
-              </>
-            ) : buyPayMethod === "terminal" ? (
-              /* ── Terminal flow ── */
-              <>
-                <View style={[s.iosCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                  <View style={[s.iosCardIcon, { backgroundColor: colors.primary + "15" }]}>
-                    <Ionicons name="call-outline" size={20} color={colors.primary} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[s.iosCardTitle, { color: colors.foreground }]}>Şu nomerleriň birine {selectedBuy} TMT geçiriň</Text>
-                    {PAYMENT_PHONES.map((p, i) => (
-                      <Text key={i} style={[s.phoneNum, { color: colors.primary }]}>{p}</Text>
-                    ))}
-                  </View>
-                </View>
+                {/* User phone input */}
                 <View style={{ marginTop: 14 }}>
-                  <Text style={[s.fieldLabel, { color: colors.mutedForeground }]}>Siziň nomeriňiz (tassyklama üçin)</Text>
-                  <TextInput value={buyPhone} onChangeText={setBuyPhone} placeholder="+993 XX XXXXXX"
-                    placeholderTextColor={colors.mutedForeground} keyboardType="phone-pad"
-                    style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
+                  <Text style={[s.buyFieldLabel, { color: colors.mutedForeground }]}>Siziň TMCell nomeriňiz (tassyklama üçin)</Text>
+                  <TextInput
+                    value={buyPhone}
+                    onChangeText={setBuyPhone}
+                    placeholder="+993 XX XXXXXX"
+                    placeholderTextColor={colors.mutedForeground + "80"}
+                    keyboardType="phone-pad"
+                    style={[s.buyInput, {
+                      backgroundColor: colors.card,
+                      borderColor: buyPhone.length >= 8 ? colors.primary : colors.border,
+                      color: colors.foreground,
+                    }]}
                   />
                 </View>
-                <View style={{ marginTop: 16 }}>
+
+                <View style={{ marginTop: 14 }}>
                   <PessimisticButton
-                    label="Töleg geçirdim"
+                    label={`Töleg geçirdim — ${totalTmt} TMT`}
                     loadingLabel="Barlanýar..."
                     loading={buyLoading}
-                    disabled={buyLoading}
+                    disabled={buyLoading || !buyPhone.trim()}
                     onPress={handleBuy}
                     color={colors.primary}
                     size="lg"
                     icon={<Ionicons name="checkmark-circle-outline" size={18} color="#fff" />}
                   />
                 </View>
-                <Pressable onPress={() => setBuyPayMethod("")} style={s.backRow}>
-                  <Feather name="arrow-left" size={16} color={colors.mutedForeground} />
-                  <Text style={[{ color: colors.mutedForeground, fontWeight: "600" }]}>Yza</Text>
-                </Pressable>
+                <Text style={[s.buyHint, { color: colors.mutedForeground }]}>
+                  Töleg geçirenden soň tassykla düwmesine basyň. Operator tassyklandan soň BP hasabyňyza goşular.
+                </Text>
               </>
-            ) : (
-              /* ── Card payment flow ── */
+            );
+          })()
+        ) : (
+          /* ══════════════════════════════════════════════
+             STEP 2b — Bank kartasy töleg görkezmeleri
+             ══════════════════════════════════════════════ */
+          (() => {
+            const bp = selectedBuy ?? 0;
+            const commAmt = Math.ceil(bp * COMMISSION_RATES.bank_topup);
+            const totalTmt = bp + commAmt;
+            return (
               <>
-                <View style={[s.merchantCardBox, { backgroundColor: "#6366f1" }]}>
-                  <Text style={s.merchantCardLabel2}>Töleg kart belgisi</Text>
-                  <Text style={s.merchantCardNum2}>{MERCHANT_CARD}</Text>
-                  <Text style={s.merchantCardBank2}>Halkbank · Türkmenistan</Text>
-                  <View style={s.merchantAmtRow}>
-                    <Ionicons name="cash-outline" size={14} color="rgba(255,255,255,0.8)" />
-                    <Text style={s.merchantAmtText}>Geçirilmeli: {selectedBuy} TMT</Text>
+                {/* Back */}
+                <Pressable onPress={() => { setBuyPayMethod(""); setShowPayment(false); }} style={s.buyBackRow}>
+                  <Feather name="arrow-left" size={15} color={colors.mutedForeground} />
+                  <Text style={[s.buyBackText, { color: colors.mutedForeground }]}>Yza dön</Text>
+                </Pressable>
+
+                {/* Method badge */}
+                <View style={s.buyStepHeader}>
+                  <View style={[s.buyStepIconWrap, { backgroundColor: "#6366f115" }]}>
+                    <Ionicons name="card-outline" size={20} color="#6366f1" />
+                  </View>
+                  <View>
+                    <Text style={[s.buyStepTitle, { color: colors.foreground }]}>Bank kartasy</Text>
+                    <Text style={[s.buyStepSub, { color: colors.mutedForeground }]}>Aşakdaky karta pul geçiriň</Text>
                   </View>
                 </View>
 
-                <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 16, marginBottom: 8 }]}>Siziň bankyňyz</Text>
+                {/* Merchant card visual */}
+                <View style={[s.buyMerchantCard, { backgroundColor: "#6366f1" }]}>
+                  <View style={s.buyMerchantTop}>
+                    <Text style={s.buyMerchantBankLabel}>TÖLEG KART</Text>
+                    <Ionicons name="card" size={20} color="rgba(255,255,255,0.6)" />
+                  </View>
+                  <Text style={s.buyMerchantNum}>{MERCHANT_CARD}</Text>
+                  <View style={s.buyMerchantBottom}>
+                    <Text style={s.buyMerchantBank}>Halkbank · Türkmenistan</Text>
+                    <View style={s.buyMerchantAmtWrap}>
+                      <Text style={s.buyMerchantAmtLabel}>Geçirilmeli</Text>
+                      <Text style={s.buyMerchantAmt}>{totalTmt} TMT</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Breakdown */}
+                <View style={[s.buyTotalCard, { backgroundColor: "#6366f10d", borderColor: "#6366f140" }]}>
+                  <Text style={[s.buyTotalCardLabel, { color: colors.mutedForeground }]}>TÖLEG HASAPLAMASY</Text>
+                  <Text style={[s.buyTotalCardAmount, { color: "#6366f1" }]}>{totalTmt} TMT</Text>
+                  <View style={[s.buyTotalBreakRow, { borderTopColor: "#6366f125" }]}>
+                    <View style={s.buyBreakItem}>
+                      <Text style={[s.buyBreakKey, { color: colors.mutedForeground }]}>Almak</Text>
+                      <Text style={[s.buyBreakVal, { color: colors.foreground }]}>{bp} BP</Text>
+                    </View>
+                    <Ionicons name="add" size={14} color={colors.mutedForeground} />
+                    <View style={s.buyBreakItem}>
+                      <Text style={[s.buyBreakKey, { color: colors.mutedForeground }]}>Komissiýa (+15%)</Text>
+                      <Text style={[s.buyBreakVal, { color: colors.foreground }]}>{commAmt} TMT</Text>
+                    </View>
+                    <Ionicons name="remove" size={14} color={colors.mutedForeground} style={{ opacity: 0 }} />
+                    <View style={s.buyBreakItem}>
+                      <Text style={[s.buyBreakKey, { color: "#6366f1" }]}>Jemi</Text>
+                      <Text style={[s.buyBreakVal, { color: "#6366f1", fontWeight: "900" }]}>{totalTmt} TMT</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Bank selection */}
+                <Text style={[s.buyFieldLabel, { color: colors.mutedForeground, marginTop: 14 }]}>Siziň bankyňyz</Text>
                 <View style={s.bankChipRow}>
                   {TM_BANKS.map((b) => (
                     <Pressable
@@ -406,7 +533,8 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
                   ))}
                 </View>
 
-                <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 8 }]}>Kart görnüşi</Text>
+                {/* Card type */}
+                <Text style={[s.buyFieldLabel, { color: colors.mutedForeground, marginTop: 14 }]}>Kart görnüşi</Text>
                 <View style={s.bankChipRow}>
                   {TM_CARD_TYPES.map((ct) => (
                     <Pressable
@@ -422,42 +550,55 @@ function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
                   ))}
                 </View>
 
-                <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14, marginBottom: 8 }]}>Kartyňyzyň soňky 4 sany</Text>
+                {/* Last 4 */}
+                <Text style={[s.buyFieldLabel, { color: colors.mutedForeground, marginTop: 14 }]}>Kartyňyzyň soňky 4 sany</Text>
                 <TextInput
                   value={buyCardLast4}
                   onChangeText={(t) => setBuyCardLast4(t.replace(/\D/g, "").slice(0, 4))}
-                  placeholder="XXXX"
-                  placeholderTextColor={colors.mutedForeground}
+                  placeholder="• • • •"
+                  placeholderTextColor={colors.mutedForeground + "80"}
                   keyboardType="number-pad"
                   maxLength={4}
-                  style={[s.input, { backgroundColor: colors.card, borderColor: buyCardLast4.length === 4 ? "#6366f1" : colors.border, color: colors.foreground, fontSize: 22, fontWeight: "800", letterSpacing: 8, textAlign: "center" }]}
+                  style={[s.buyInput, s.buyInputLarge, {
+                    backgroundColor: colors.card,
+                    borderColor: buyCardLast4.length === 4 ? "#6366f1" : colors.border,
+                    color: colors.foreground,
+                  }]}
                 />
 
-                <Text style={[s.fieldLabel, { color: colors.mutedForeground, marginTop: 14 }]}>Telefon nomeriňiz (tassyklama üçin)</Text>
-                <TextInput value={buyPhone} onChangeText={setBuyPhone} placeholder="+993 XX XXXXXX"
-                  placeholderTextColor={colors.mutedForeground} keyboardType="phone-pad"
-                  style={[s.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
+                {/* Phone */}
+                <Text style={[s.buyFieldLabel, { color: colors.mutedForeground, marginTop: 14 }]}>Siziň telefon nomeriňiz</Text>
+                <TextInput
+                  value={buyPhone}
+                  onChangeText={setBuyPhone}
+                  placeholder="+993 XX XXXXXX"
+                  placeholderTextColor={colors.mutedForeground + "80"}
+                  keyboardType="phone-pad"
+                  style={[s.buyInput, {
+                    backgroundColor: colors.card,
+                    borderColor: buyPhone.length >= 8 ? "#6366f1" : colors.border,
+                    color: colors.foreground,
+                  }]}
                 />
 
-                <View style={{ marginTop: 16 }}>
+                <View style={{ marginTop: 14 }}>
                   <PessimisticButton
-                    label="Töleg geçirdim"
+                    label={`Töleg geçirdim — ${totalTmt} TMT`}
                     loadingLabel="Barlanýar..."
                     loading={buyLoading}
-                    disabled={buyLoading}
+                    disabled={buyLoading || !buyPhone.trim() || !buyCardBank || !buyCardType || buyCardLast4.length < 4}
                     onPress={handleBuy}
                     color="#6366f1"
                     size="lg"
                     icon={<Ionicons name="card-outline" size={18} color="#fff" />}
                   />
                 </View>
-                <Pressable onPress={() => setBuyPayMethod("")} style={s.backRow}>
-                  <Feather name="arrow-left" size={16} color={colors.mutedForeground} />
-                  <Text style={[{ color: colors.mutedForeground, fontWeight: "600" }]}>Yza</Text>
-                </Pressable>
+                <Text style={[s.buyHint, { color: colors.mutedForeground }]}>
+                  Töleg geçirenden soň tassykla düwmesine basyň. Operator tassyklandan soň BP hasabyňyza goşular.
+                </Text>
               </>
-            )}
-          </>
+            );
+          })()
         )
       ) : mode === "sell" ? (
         sellDone ? (
@@ -1666,4 +1807,119 @@ const s = StyleSheet.create({
   },
   simBalText: { fontSize: 12, fontWeight: "600", flex: 1 },
   simCalcHint: { fontSize: 12, marginBottom: 4, lineHeight: 18, fontStyle: "italic" },
+
+  // ── Bonus Pul "Almak" redesign styles ──────────────────────────────
+  // Amount input card
+  buyAmountCard: {
+    borderWidth: 1.5, borderRadius: 20, padding: 16, marginBottom: 12,
+  },
+  buyAmountTop: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 14 },
+  buyAmountIconWrap: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  buyAmountCardLabel: { fontSize: 12, fontWeight: "600" },
+  buyAmountInputRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 14 },
+  buyAmountInput: { flex: 1, fontSize: 38, fontWeight: "900", letterSpacing: -1 },
+  buyAmountUnit: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 },
+  buyAmountUnitText: { fontSize: 16, fontWeight: "800" },
+  buyChipRow: { flexDirection: "row", gap: 8 },
+  buyChip: { flex: 1, alignItems: "center", paddingVertical: 8, borderRadius: 10, borderWidth: 1 },
+  buyChipText: { fontSize: 12, fontWeight: "700" },
+
+  // Rate note
+  buyRateNote: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8,
+    marginBottom: 16,
+  },
+  buyRateNoteText: { fontSize: 11.5, fontWeight: "600", flex: 1, lineHeight: 17 },
+
+  // Divider
+  buyDivider: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 },
+  buyDividerLine: { flex: 1, height: 1 },
+  buyDividerText: { fontSize: 11, fontWeight: "700", letterSpacing: 0.3 },
+
+  // Payment method cards (step 1)
+  buyMethodCard: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    borderWidth: 1.5, borderRadius: 18, padding: 14, marginBottom: 10,
+  },
+  buyMethodIconWrap: { width: 44, height: 44, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  buyMethodNameRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 3 },
+  buyMethodName: { fontSize: 14, fontWeight: "700" },
+  buyMethodPctBadge: { borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2 },
+  buyMethodPctText: { fontSize: 10, fontWeight: "800" },
+  buyMethodDesc: { fontSize: 11.5, lineHeight: 16 },
+  buyMethodCostBlock: {
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 8, minWidth: 68,
+  },
+  buyMethodCostTmt: { fontSize: 18, fontWeight: "900", letterSpacing: -0.5 },
+  buyMethodCostUnit: { fontSize: 10, fontWeight: "700", marginTop: 1 },
+
+  // Commission explainer box
+  buyExplainer: {
+    borderWidth: 1, borderRadius: 14, padding: 12, marginTop: 4, gap: 8,
+  },
+  buyExplainerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  buyExplainerKey: { fontSize: 11.5, fontWeight: "600" },
+  buyExplainerVal: { fontSize: 12, fontWeight: "700" },
+  buyExplainerDivider: { height: 1 },
+  buyExplainerHint: { fontSize: 12, lineHeight: 18, textAlign: "center", fontStyle: "italic" },
+
+  // Step 2 — shared
+  buyBackRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 14 },
+  buyBackText: { fontSize: 13, fontWeight: "600" },
+  buyStepHeader: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 16 },
+  buyStepIconWrap: { width: 44, height: 44, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  buyStepTitle: { fontSize: 16, fontWeight: "800" },
+  buyStepSub: { fontSize: 11.5, marginTop: 1 },
+
+  // Big total card
+  buyTotalCard: {
+    borderWidth: 1.5, borderRadius: 20, padding: 18, marginBottom: 14, alignItems: "center",
+  },
+  buyTotalCardLabel: { fontSize: 10, fontWeight: "800", letterSpacing: 1, marginBottom: 6 },
+  buyTotalCardAmount: { fontSize: 42, fontWeight: "900", letterSpacing: -1.5, marginBottom: 14 },
+  buyTotalBreakRow: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    borderTopWidth: 1, paddingTop: 12, width: "100%", justifyContent: "center",
+  },
+  buyBreakItem: { alignItems: "center", flex: 1 },
+  buyBreakKey: { fontSize: 10, fontWeight: "600", marginBottom: 3 },
+  buyBreakVal: { fontSize: 13, fontWeight: "700" },
+
+  // Phone numbers card (terminal)
+  buyPhonesCard: {
+    borderWidth: 1, borderRadius: 16, overflow: "hidden", marginBottom: 14,
+  },
+  buyPhonesHeader: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    paddingHorizontal: 14, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "transparent",
+  },
+  buyPhonesTitle: { fontSize: 12, fontWeight: "700" },
+  buyPhoneRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 14, paddingVertical: 12 },
+  buyPhoneDot: { width: 22, height: 22, borderRadius: 7, alignItems: "center", justifyContent: "center" },
+  buyPhoneNum: { fontSize: 15, fontWeight: "800", letterSpacing: 0.3 },
+
+  // Merchant card (card payment)
+  buyMerchantCard: {
+    borderRadius: 20, padding: 20, marginBottom: 14,
+    shadowColor: "#6366f1", shadowOpacity: 0.3, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 6,
+  },
+  buyMerchantTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 },
+  buyMerchantBankLabel: { color: "rgba(255,255,255,0.7)", fontSize: 10, fontWeight: "800", letterSpacing: 1.2 },
+  buyMerchantNum: { color: "#fff", fontSize: 19, fontWeight: "800", letterSpacing: 4, marginBottom: 18 },
+  buyMerchantBottom: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" },
+  buyMerchantBank: { color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: "600" },
+  buyMerchantAmtWrap: { alignItems: "flex-end" },
+  buyMerchantAmtLabel: { color: "rgba(255,255,255,0.6)", fontSize: 9, fontWeight: "700", letterSpacing: 0.5 },
+  buyMerchantAmt: { color: "#fff", fontSize: 18, fontWeight: "900" },
+
+  // Inputs (step 2)
+  buyFieldLabel: { fontSize: 11, fontWeight: "700", letterSpacing: 0.3, marginBottom: 8 },
+  buyInput: { borderWidth: 1.5, borderRadius: 13, paddingHorizontal: 14, paddingVertical: 13, fontSize: 15 },
+  buyInputLarge: { fontSize: 24, fontWeight: "900", letterSpacing: 10, textAlign: "center" },
+  buyHint: { fontSize: 11, lineHeight: 17, textAlign: "center", marginTop: 10, paddingHorizontal: 8 },
+
+  // Success screen
+  buySuccessCircle: { width: 88, height: 88, borderRadius: 28, alignItems: "center", justifyContent: "center" },
 });
