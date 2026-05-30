@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
-  Platform, Alert,
+  Platform, Alert, Image,
 } from "react-native";
+import Animated, {
+  useSharedValue, useAnimatedStyle, withSpring, withTiming,
+  withSequence, FadeIn, FadeInDown, FadeInUp,
+  ZoomIn, interpolate, Extrapolation,
+} from "react-native-reanimated";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
+import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import {
@@ -18,29 +24,115 @@ import {
 } from "@/lib/firebase";
 import { formatRelativeTime } from "@/lib/reputation";
 import { PessimisticButton } from "@/components/PessimisticButton";
+import { uploadImage } from "@/lib/upload";
 
 const MIN_TMT = 50;
 const STATUS_MAP: Record<AgentDeposit["status"], { label: string; color: string; icon: string }> = {
-  pending: { label: "Garaşylýar", color: "#f59e0b", icon: "time-outline" },
+  pending:   { label: "Garaşylýar", color: "#f59e0b", icon: "time-outline" },
   confirmed: { label: "Tassyklandy", color: "#059669", icon: "checkmark-circle-outline" },
-  rejected: { label: "Ret edildi", color: "#ef4444", icon: "close-circle-outline" },
+  rejected:  { label: "Ret edildi",  color: "#ef4444", icon: "close-circle-outline" },
 };
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+function StepBadge({ num, color, delay = 0 }: { num: string; color: string; delay?: number }) {
+  return (
+    <Animated.View
+      entering={ZoomIn.delay(delay).springify().damping(12)}
+      style={[ss.stepNum, { backgroundColor: color }]}
+    >
+      <Text style={ss.stepNumText}>{num}</Text>
+    </Animated.View>
+  );
+}
+
+function ReceiptUploader({
+  receiptUri, onPick, onRemove, colors,
+}: {
+  receiptUri: string | null;
+  onPick: () => void;
+  onRemove: () => void;
+  colors: ReturnType<typeof useColors>;
+}) {
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
+  function handlePress() {
+    scale.value = withSequence(withTiming(0.95, { duration: 80 }), withSpring(1, { damping: 10 }));
+    onPick();
+  }
+
+  if (receiptUri) {
+    return (
+      <Animated.View entering={ZoomIn.springify().damping(14)} style={ss.receiptPreviewWrap}>
+        <Image source={{ uri: receiptUri }} style={ss.receiptPreview} resizeMode="cover" />
+        <LinearGradient
+          colors={["transparent", "rgba(0,0,0,0.55)"]}
+          style={StyleSheet.absoluteFillObject}
+        />
+        <View style={ss.receiptOverlay}>
+          <View style={ss.receiptOkBadge}>
+            <Ionicons name="checkmark-circle" size={16} color="#fff" />
+            <Text style={ss.receiptOkText}>Çek ýüklendi</Text>
+          </View>
+          <Pressable onPress={onRemove} style={ss.receiptRemoveBtn}>
+            <Ionicons name="close" size={15} color="#fff" />
+          </Pressable>
+        </View>
+      </Animated.View>
+    );
+  }
+
+  return (
+    <AnimatedPressable onPress={handlePress} style={animStyle}>
+      <View style={[ss.receiptPlaceholder, { borderColor: colors.border, backgroundColor: colors.card }]}>
+        <LinearGradient
+          colors={["#059669" + "08", "#059669" + "18"]}
+          style={StyleSheet.absoluteFillObject}
+        />
+        <View style={[ss.receiptIconCircle, { backgroundColor: "#059669" + "20" }]}>
+          <Ionicons name="camera-outline" size={26} color="#059669" />
+        </View>
+        <Text style={[ss.receiptPlaceholderTitle, { color: colors.foreground }]}>Çek / Kvitansiýa ýükle</Text>
+        <Text style={[ss.receiptPlaceholderSub, { color: colors.mutedForeground }]}>
+          Bank geçirmesiniň skrinşotyny goş
+        </Text>
+        <View style={[ss.receiptPillBtn, { backgroundColor: "#059669" }]}>
+          <Ionicons name="image-outline" size={14} color="#fff" />
+          <Text style={ss.receiptPillBtnText}>Surat saýla</Text>
+        </View>
+      </View>
+    </AnimatedPressable>
+  );
+}
 
 export default function AgentTopupScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { deviceId, balance, refreshBalance } = useBonusPul();
+  const { deviceId, refreshBalance } = useBonusPul();
   const isWeb = Platform.OS === "web";
 
-  const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [deposits, setDeposits] = useState<AgentDeposit[]>([]);
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [amount, setAmount]         = useState("");
+  const [loading, setLoading]       = useState(false);
+  const [uploading, setUploading]   = useState(false);
+  const [copied, setCopied]         = useState(false);
+  const [deposits, setDeposits]     = useState<AgentDeposit[]>([]);
+  const [step, setStep]             = useState<1 | 2 | 3>(1);
+  const [receiptUri, setReceiptUri] = useState<string | null>(null);
 
-  const tmt = parseFloat(amount) || 0;
-  const bpEarned = Math.round(tmt * (1 + BP_BONUS_PERCENT / 100) * 100) / 100;
+  const tmt         = parseFloat(amount) || 0;
+  const bpEarned    = Math.round(tmt * (1 + BP_BONUS_PERCENT / 100) * 100) / 100;
   const bonusAmount = Math.round(tmt * (BP_BONUS_PERCENT / 100) * 100) / 100;
+  const canSubmit   = tmt >= MIN_TMT;
+
+  const successScale   = useSharedValue(0);
+  const successOpacity = useSharedValue(0);
+  const cardTilt       = useSharedValue(0);
+
+  const successStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: successScale.value }],
+    opacity: successOpacity.value,
+  }));
 
   useEffect(() => {
     if (!deviceId) return;
@@ -48,21 +140,67 @@ export default function AgentTopupScreen() {
     return () => unsub();
   }, [deviceId]);
 
+  useEffect(() => {
+    if (step === 3) {
+      successScale.value   = withSpring(1, { damping: 11, stiffness: 160 });
+      successOpacity.value = withTiming(1, { duration: 280 });
+    }
+  }, [step]);
+
   async function handleCopyCard() {
     await Clipboard.setStringAsync(ADMIN_CARD_NUMBER.replace(/\s/g, ""));
     setCopied(true);
+    cardTilt.value = withSequence(
+      withTiming(1, { duration: 60 }),
+      withSpring(0, { damping: 8 }),
+    );
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setTimeout(() => setCopied(false), 2500);
   }
 
+  async function handlePickReceipt() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Rugsat gerek", "Galerýa rugsat berilmedi.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      quality: 0.7,
+      allowsEditing: false,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setReceiptUri(result.assets[0].uri);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  }
+
   async function handleSubmit() {
-    if (tmt < MIN_TMT) {
+    if (!canSubmit) {
       Alert.alert("Ýalňyşlyk", `Minimum ${MIN_TMT} TMT geçirip bolýar`);
+      return;
+    }
+    if (!receiptUri) {
+      Alert.alert(
+        "Çek gerek",
+        "Göçürme tassyklamak üçin bank çekini (skrinşot) ýükläň.",
+        [{ text: "Düşündim", style: "default" }]
+      );
       return;
     }
     setLoading(true);
     try {
-      await createAgentDeposit(deviceId, tmt);
+      setUploading(true);
+      let screenshotUrl: string | undefined;
+      try {
+        const uploaded = await uploadImage(receiptUri, `agent-receipt-${Date.now()}.jpg`);
+        screenshotUrl = uploaded ?? undefined;
+      } catch {
+      } finally {
+        setUploading(false);
+      }
+
+      await createAgentDeposit(deviceId, tmt, screenshotUrl);
       await saveReputationEntry(deviceId, {
         type: "positive",
         reason: "Agent deposit sargyt iberildi",
@@ -73,6 +211,7 @@ export default function AgentTopupScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setStep(3);
       setAmount("");
+      setReceiptUri(null);
     } catch {
       Alert.alert("Ýalňyşlyk", "Sargyt döredilmedi. Täzeden synanyşyň.");
     } finally {
@@ -80,181 +219,287 @@ export default function AgentTopupScreen() {
     }
   }
 
+  const cardAnimStyle = useAnimatedStyle(() => ({
+    transform: [
+      { rotate: `${interpolate(cardTilt.value, [0, 1], [0, 1.5], Extrapolation.CLAMP)}deg` },
+    ],
+  }));
+
   return (
-    <View style={[s.root, { backgroundColor: colors.background }]}>
-      <LinearGradient
-        colors={["#064e3b", "#059669"]}
-        style={[s.header, { paddingTop: (isWeb ? 0 : insets.top) + 14 }]}
-      >
-        <Pressable onPress={() => router.back()} style={s.backBtn}>
+    <View style={[ss.root, { backgroundColor: colors.background }]}>
+      {/* ── Header ── */}
+      <LinearGradient colors={["#064e3b", "#059669"]} style={[ss.header, { paddingTop: (isWeb ? 0 : insets.top) + 14 }]}>
+        <Pressable onPress={() => router.back()} style={ss.backBtn}>
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </Pressable>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={s.headerTitle}>Agent — TMT → BP</Text>
-          <Text style={s.headerSub}>Admin kartasyna TMT geçiriň, +15% bonus BP alyň</Text>
+          <Text style={ss.headerTitle}>Agent — TMT → BP</Text>
+          <Text style={ss.headerSub}>Admin kartasyna TMT geçiriň, +{BP_BONUS_PERCENT}% bonus BP alyň</Text>
+        </View>
+        <View style={ss.headerBadge}>
+          <Text style={ss.headerBadgeText}>+{BP_BONUS_PERCENT}%</Text>
         </View>
       </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
-
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 72 }}
+        keyboardShouldPersistTaps="handled"
+      >
         {step === 3 ? (
-          <View style={s.successWrap}>
-            <View style={[s.successCircle, { backgroundColor: "#059669" + "18" }]}>
-              <Ionicons name="checkmark-circle" size={64} color="#059669" />
-            </View>
-            <Text style={[s.successTitle, { color: colors.foreground }]}>Sargyt iberildi!</Text>
-            <Text style={[s.successDesc, { color: colors.mutedForeground }]}>
-              Admin tassyklansoň, BP hasabyňyza otomatik geçirilýär. Adatda 5–30 minut içinde.
-            </Text>
-            <Pressable
-              onPress={() => setStep(1)}
-              style={[s.btnPrimary, { backgroundColor: "#059669", marginTop: 24 }]}
-            >
-              <Ionicons name="add-circle-outline" size={18} color="#fff" />
-              <Text style={s.btnPrimaryText}>Täze sargyt</Text>
-            </Pressable>
-          </View>
+          /* ── Success ── */
+          <Animated.View style={[ss.successWrap, successStyle]}>
+            <LinearGradient
+              colors={["#059669" + "14", "#059669" + "04"]}
+              style={ss.successGradientBg}
+            />
+            <Animated.View entering={ZoomIn.springify().damping(10)}>
+              <View style={[ss.successCircle, { backgroundColor: "#059669" + "18" }]}>
+                <Ionicons name="checkmark-circle" size={72} color="#059669" />
+              </View>
+            </Animated.View>
+            <Animated.Text entering={FadeInDown.delay(160)} style={[ss.successTitle, { color: colors.foreground }]}>
+              Sargyt iberildi!
+            </Animated.Text>
+            <Animated.Text entering={FadeInDown.delay(220)} style={[ss.successDesc, { color: colors.mutedForeground }]}>
+              Admin çekiňizi barlansoň, BP hasabyňyza otomatik geçirilýär. Adatda 5–30 minut içinde.
+            </Animated.Text>
+            <Animated.View entering={FadeInUp.delay(300).springify()} style={{ width: "100%", gap: 10 }}>
+              <Pressable
+                onPress={() => setStep(1)}
+                style={[ss.btnPrimary, { backgroundColor: "#059669" }]}
+              >
+                <Ionicons name="add-circle-outline" size={18} color="#fff" />
+                <Text style={ss.btnPrimaryText}>Täze sargyt</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => router.back()}
+                style={[ss.btnOutline, { borderColor: colors.border }]}
+              >
+                <Text style={[ss.btnOutlineText, { color: colors.foreground }]}>Yza dön</Text>
+              </Pressable>
+            </Animated.View>
+          </Animated.View>
         ) : (
           <>
             {/* ── How it works ── */}
-            <View style={[s.howCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={[s.howTitle, { color: colors.foreground }]}>Nähili işleýär?</Text>
+            <Animated.View
+              entering={FadeInDown.delay(60).springify()}
+              style={[ss.howCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+            >
+              <Text style={[ss.howTitle, { color: colors.foreground }]}>Nähili işleýär?</Text>
               {[
-                { num: "1", text: `Aşakdaky admin kartasyna TMT geçiriň`, color: "#059669" },
-                { num: "2", text: "Sargyt ibereniňizde admin tassyklar", color: "#6366f1" },
-                { num: "3", text: `${BP_BONUS_PERCENT}% goşmaça bonus bilen BP alýarsyňyz`, color: "#f59e0b" },
+                { num: "1", text: "Admin kartasyna TMT geçiriň", color: "#059669", delay: 80 },
+                { num: "2", text: "Bank çekini (skrinşot) ýükläň", color: "#6366f1", delay: 140 },
+                { num: "3", text: "Sargyt iberiň — admin tassyklar", color: "#f59e0b", delay: 200 },
+                { num: "4", text: `${BP_BONUS_PERCENT}% bonus bilen BP alýarsyňyz`, color: "#ec4899", delay: 260 },
               ].map(item => (
-                <View key={item.num} style={s.stepRow}>
-                  <View style={[s.stepNum, { backgroundColor: item.color }]}>
-                    <Text style={s.stepNumText}>{item.num}</Text>
-                  </View>
-                  <Text style={[s.stepText, { color: colors.foreground }]}>{item.text}</Text>
+                <View key={item.num} style={ss.stepRow}>
+                  <StepBadge num={item.num} color={item.color} delay={item.delay} />
+                  <Text style={[ss.stepText, { color: colors.foreground }]}>{item.text}</Text>
                 </View>
               ))}
-            </View>
+            </Animated.View>
 
             {/* ── Admin Card ── */}
-            <Text style={[s.sectionLabel, { color: colors.mutedForeground }]}>ADMIN KARTAS</Text>
-            <Pressable
-              onPress={handleCopyCard}
-              style={({ pressed }) => [
-                s.cardDisplay,
-                { backgroundColor: "#059669", opacity: pressed ? 0.9 : 1 },
-              ]}
+            <Animated.Text
+              entering={FadeIn.delay(100)}
+              style={[ss.sectionLabel, { color: colors.mutedForeground }]}
             >
-              <LinearGradient
-                colors={["#064e3b", "#059669"]}
-                style={StyleSheet.absoluteFillObject}
-                start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-              />
-              <View style={s.cardChip}>
-                <Ionicons name="card-outline" size={22} color="rgba(255,255,255,0.6)" />
-              </View>
-              <Text style={s.cardNumber}>{ADMIN_CARD_NUMBER}</Text>
-              <View style={s.cardBottom}>
-                <View>
-                  <Text style={s.cardLabel}>KART EÝESI</Text>
-                  <Text style={s.cardHolder}>{ADMIN_CARD_HOLDER}</Text>
-                </View>
-                <View style={[s.copyBtn, { backgroundColor: copied ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.2)" }]}>
-                  <Ionicons name={copied ? "checkmark" : "copy-outline"} size={14} color="#fff" />
-                  <Text style={s.copyBtnText}>{copied ? "Gopçiklendy!" : "Kopirlä"}</Text>
-                </View>
-              </View>
-            </Pressable>
+              ADMIN KARTAS
+            </Animated.Text>
+
+            <Animated.View entering={FadeInDown.delay(120).springify()} style={cardAnimStyle}>
+              <Pressable onPress={handleCopyCard}>
+                {({ pressed }) => (
+                  <Animated.View style={[ss.cardDisplay, { opacity: pressed ? 0.9 : 1 }]}>
+                    <LinearGradient
+                      colors={["#064e3b", "#059669", "#34d399"]}
+                      style={StyleSheet.absoluteFillObject}
+                      start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                    />
+                    {/* shimmer strip */}
+                    <View style={ss.cardShimmer} />
+                    <View style={ss.cardChipRow}>
+                      <Ionicons name="card-outline" size={24} color="rgba(255,255,255,0.65)" />
+                      <Text style={ss.cardNetworkText}>Altyn Asyr</Text>
+                    </View>
+                    <Text style={ss.cardNumber}>{ADMIN_CARD_NUMBER}</Text>
+                    <View style={ss.cardBottom}>
+                      <View>
+                        <Text style={ss.cardLabel}>KART EÝESI</Text>
+                        <Text style={ss.cardHolder}>{ADMIN_CARD_HOLDER}</Text>
+                      </View>
+                      <View style={[ss.copyBtn, { backgroundColor: copied ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.18)" }]}>
+                        <Ionicons name={copied ? "checkmark" : "copy-outline"} size={14} color="#fff" />
+                        <Text style={ss.copyBtnText}>{copied ? "Gopçiklendy!" : "Kopirlä"}</Text>
+                      </View>
+                    </View>
+                  </Animated.View>
+                )}
+              </Pressable>
+            </Animated.View>
 
             {/* ── Amount Input ── */}
-            <Text style={[s.sectionLabel, { color: colors.mutedForeground }]}>GEÇIRJEK MUKDARYŇYZ</Text>
-            <View style={[s.inputCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <View style={s.inputRow}>
+            <Animated.Text
+              entering={FadeIn.delay(180)}
+              style={[ss.sectionLabel, { color: colors.mutedForeground }]}
+            >
+              GEÇIRJEK MUKDARYŇYZ
+            </Animated.Text>
+
+            <Animated.View
+              entering={FadeInDown.delay(200).springify()}
+              style={[ss.inputCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+            >
+              <View style={ss.inputRow}>
                 <TextInput
-                  style={[s.amountInput, { color: colors.foreground, borderColor: colors.border }]}
+                  style={[ss.amountInput, { color: colors.foreground, borderColor: canSubmit ? "#059669" : colors.border }]}
                   value={amount}
                   onChangeText={setAmount}
                   keyboardType="numeric"
                   placeholder={`Min: ${MIN_TMT} TMT`}
                   placeholderTextColor={colors.mutedForeground}
                 />
-                <View style={[s.currencyBadge, { backgroundColor: "#059669" + "18" }]}>
-                  <Text style={[s.currencyText, { color: "#059669" }]}>TMT</Text>
+                <View style={[ss.currencyBadge, { backgroundColor: "#059669" + "18" }]}>
+                  <Text style={[ss.currencyText, { color: "#059669" }]}>TMT</Text>
                 </View>
               </View>
 
-              {tmt >= MIN_TMT && (
-                <View style={[s.calcBox, { backgroundColor: "#059669" + "08", borderColor: "#059669" + "20" }]}>
-                  <View style={s.calcRow}>
-                    <Text style={[s.calcLabel, { color: colors.mutedForeground }]}>Esasy TMT:</Text>
-                    <Text style={[s.calcValue, { color: colors.foreground }]}>{tmt} TMT</Text>
+              {canSubmit && (
+                <Animated.View
+                  entering={FadeInDown.springify()}
+                  style={[ss.calcBox, { backgroundColor: "#059669" + "08", borderColor: "#059669" + "25" }]}
+                >
+                  <View style={ss.calcRow}>
+                    <Text style={[ss.calcLabel, { color: colors.mutedForeground }]}>Geçirilen TMT:</Text>
+                    <Text style={[ss.calcValue, { color: colors.foreground }]}>{tmt} TMT</Text>
                   </View>
-                  <View style={s.calcRow}>
-                    <Text style={[s.calcLabel, { color: colors.mutedForeground }]}>{BP_BONUS_PERCENT}% bonus:</Text>
-                    <Text style={[s.calcValue, { color: "#059669" }]}>+{bonusAmount} BP</Text>
+                  <View style={ss.calcRow}>
+                    <Text style={[ss.calcLabel, { color: colors.mutedForeground }]}>{BP_BONUS_PERCENT}% bonus:</Text>
+                    <Text style={[ss.calcValue, { color: "#059669" }]}>+{bonusAmount} BP</Text>
                   </View>
-                  <View style={[s.calcDivider, { backgroundColor: "#059669" + "20" }]} />
-                  <View style={s.calcRow}>
-                    <Text style={[s.calcLabelBig, { color: colors.foreground }]}>Jemi BP:</Text>
-                    <Text style={[s.calcValueBig, { color: "#059669" }]}>{bpEarned} BP</Text>
+                  <View style={[ss.calcDivider, { backgroundColor: "#059669" + "22" }]} />
+                  <View style={ss.calcRow}>
+                    <Text style={[ss.calcLabelBig, { color: colors.foreground }]}>Jemi alýarsyňyz:</Text>
+                    <Text style={[ss.calcValueBig, { color: "#059669" }]}>{bpEarned} BP</Text>
                   </View>
-                </View>
+                </Animated.View>
               )}
+            </Animated.View>
 
-              <Text style={[s.warningText, { color: colors.mutedForeground }]}>
+            {/* ── Receipt Upload ── */}
+            <Animated.Text
+              entering={FadeIn.delay(240)}
+              style={[ss.sectionLabel, { color: colors.mutedForeground }]}
+            >
+              TÖLEG ISBOTY (ÇEK)
+            </Animated.Text>
+
+            <Animated.View entering={FadeInDown.delay(260).springify()} style={{ paddingHorizontal: 16 }}>
+              <ReceiptUploader
+                receiptUri={receiptUri}
+                onPick={handlePickReceipt}
+                onRemove={() => setReceiptUri(null)}
+                colors={colors}
+              />
+              <View style={[ss.receiptInfoBanner, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Ionicons name="information-circle-outline" size={16} color={colors.mutedForeground} />
+                <Text style={[ss.receiptInfoText, { color: colors.mutedForeground }]}>
+                  Çek bolmasa admin geçirmäni tapyp bilmez — bu maglumaty goraýar.
+                </Text>
+              </View>
+            </Animated.View>
+
+            {/* ── Submit ── */}
+            <Animated.View
+              entering={FadeInUp.delay(300).springify()}
+              style={[ss.submitSection, { borderColor: colors.border }]}
+            >
+              <Text style={[ss.warningText, { color: colors.mutedForeground }]}>
                 Pul geçireniňizden SOŇRA sargyt iberiň. Tassyklanmaz öň BP berilmez.
               </Text>
 
-              <View style={{ marginTop: 6 }}>
-                <PessimisticButton
-                  label="Sargyt iber"
-                  loadingLabel="Iberilýär..."
-                  loading={loading}
-                  disabled={loading || tmt < MIN_TMT}
-                  onPress={handleSubmit}
-                  color="#059669"
-                  size="lg"
-                  icon={<Ionicons name="send-outline" size={18} color="#fff" />}
-                />
-              </View>
-            </View>
+              {uploading && (
+                <Animated.View entering={FadeIn} style={ss.uploadingRow}>
+                  <Ionicons name="cloud-upload-outline" size={16} color="#059669" />
+                  <Text style={[ss.uploadingText, { color: "#059669" }]}>Çek ýüklenýär...</Text>
+                </Animated.View>
+              )}
+
+              <PessimisticButton
+                label={receiptUri ? "Sargyt iber" : "Çek ýükläň (hökmany)"}
+                loadingLabel="Iberilýär..."
+                loading={loading}
+                disabled={loading || !canSubmit}
+                onPress={handleSubmit}
+                color={receiptUri && canSubmit ? "#059669" : "#94a3b8"}
+                size="lg"
+                icon={<Ionicons name="send-outline" size={18} color="#fff" />}
+              />
+            </Animated.View>
           </>
         )}
 
         {/* ── Deposit History ── */}
         {deposits.length > 0 && (
-          <>
-            <Text style={[s.sectionLabel, { color: colors.mutedForeground }]}>SARGYT TARYHY</Text>
-            <View style={{ paddingHorizontal: 16, gap: 8 }}>
-              {deposits.slice(0, 10).map(dep => {
+          <Animated.View entering={FadeInDown.delay(80)}>
+            <Text style={[ss.sectionLabel, { color: colors.mutedForeground }]}>SARGYT TARYHY</Text>
+            <View style={{ paddingHorizontal: 16, gap: 10 }}>
+              {deposits.slice(0, 10).map((dep, i) => {
                 const st = STATUS_MAP[dep.status];
                 return (
-                  <View key={dep.id} style={[s.historyItem, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                    <View style={[s.historyIconWrap, { backgroundColor: st.color + "18" }]}>
+                  <Animated.View
+                    key={dep.id}
+                    entering={FadeInDown.delay(i * 50).springify()}
+                    style={[ss.historyItem, { backgroundColor: colors.card, borderColor: colors.border }]}
+                  >
+                    <View style={[ss.historyIconWrap, { backgroundColor: st.color + "18" }]}>
                       <Ionicons name={st.icon as any} size={20} color={st.color} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                        <Text style={[s.historyAmount, { color: colors.foreground }]}>{dep.tmtAmount} TMT → {dep.bpAmount} BP</Text>
-                        <View style={[s.statusBadge, { backgroundColor: st.color + "15" }]}>
-                          <Text style={[s.statusText, { color: st.color }]}>{st.label}</Text>
+                      <View style={ss.historyTopRow}>
+                        <Text style={[ss.historyAmount, { color: colors.foreground }]}>
+                          {dep.tmtAmount} TMT → {dep.bpAmount} BP
+                        </Text>
+                        <View style={[ss.statusBadge, { backgroundColor: st.color + "15" }]}>
+                          <Text style={[ss.statusText, { color: st.color }]}>{st.label}</Text>
                         </View>
                       </View>
-                      <Text style={[s.historyTime, { color: colors.mutedForeground }]}>{formatRelativeTime(dep.createdAt)}</Text>
+                      <View style={ss.historyBottomRow}>
+                        <Text style={[ss.historyTime, { color: colors.mutedForeground }]}>
+                          {formatRelativeTime(dep.createdAt)}
+                        </Text>
+                        {dep.screenshotUrl ? (
+                          <View style={ss.receiptAttachedBadge}>
+                            <Ionicons name="image-outline" size={11} color="#059669" />
+                            <Text style={ss.receiptAttachedText}>Çek bar</Text>
+                          </View>
+                        ) : (
+                          <View style={ss.noReceiptBadge}>
+                            <Ionicons name="image-outline" size={11} color="#94a3b8" />
+                            <Text style={ss.noReceiptText}>Çeksiz</Text>
+                          </View>
+                        )}
+                      </View>
                     </View>
-                  </View>
+                  </Animated.View>
                 );
               })}
             </View>
-          </>
+          </Animated.View>
         )}
       </ScrollView>
     </View>
   );
 }
 
-const s = StyleSheet.create({
+const ss = StyleSheet.create({
   root: { flex: 1 },
+
   header: {
     flexDirection: "row", alignItems: "center",
-    paddingHorizontal: 16, paddingBottom: 18,
+    paddingHorizontal: 16, paddingBottom: 20,
   },
   backBtn: {
     width: 38, height: 38, borderRadius: 19,
@@ -262,79 +507,170 @@ const s = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
   headerTitle: { color: "#fff", fontSize: 18, fontWeight: "800" },
-  headerSub: { color: "rgba(255,255,255,0.72)", fontSize: 11, marginTop: 2 },
+  headerSub:   { color: "rgba(255,255,255,0.72)", fontSize: 11, marginTop: 2 },
+  headerBadge: {
+    backgroundColor: "rgba(255,255,255,0.22)", borderRadius: 10,
+    paddingHorizontal: 10, paddingVertical: 5, marginLeft: 8,
+  },
+  headerBadgeText: { color: "#fff", fontSize: 13, fontWeight: "800" },
 
   sectionLabel: {
-    fontSize: 11, fontWeight: "700", letterSpacing: 0.8,
-    marginLeft: 20, marginTop: 20, marginBottom: 8,
+    fontSize: 11, fontWeight: "700", letterSpacing: 0.9,
+    marginLeft: 20, marginTop: 22, marginBottom: 10,
   },
 
   howCard: {
-    marginHorizontal: 16, marginTop: 16, borderRadius: 16,
-    borderWidth: 1, padding: 16, gap: 12,
+    marginHorizontal: 16, marginTop: 18, borderRadius: 18,
+    borderWidth: 1, padding: 18, gap: 14,
   },
-  howTitle: { fontSize: 14, fontWeight: "700", marginBottom: 4 },
-  stepRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  stepNum: { width: 26, height: 26, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  howTitle:    { fontSize: 14, fontWeight: "700", marginBottom: 2 },
+  stepRow:     { flexDirection: "row", alignItems: "center", gap: 12 },
+  stepNum:     { width: 28, height: 28, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   stepNumText: { color: "#fff", fontSize: 12, fontWeight: "800" },
-  stepText: { flex: 1, fontSize: 13, lineHeight: 19 },
+  stepText:    { flex: 1, fontSize: 13, lineHeight: 20 },
 
   cardDisplay: {
-    marginHorizontal: 16, borderRadius: 20, padding: 22,
-    overflow: "hidden",
-    shadowColor: "#059669", shadowOpacity: 0.3, shadowRadius: 16,
-    shadowOffset: { width: 0, height: 6 }, elevation: 8,
+    marginHorizontal: 16, borderRadius: 22, padding: 22,
+    overflow: "hidden", minHeight: 150,
+    shadowColor: "#059669", shadowOpacity: 0.35, shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 }, elevation: 10,
   },
-  cardChip: { marginBottom: 20 },
-  cardNumber: { color: "#fff", fontSize: 22, fontWeight: "700", letterSpacing: 3, marginBottom: 20 },
-  cardBottom: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" },
-  cardLabel: { color: "rgba(255,255,255,0.6)", fontSize: 9, letterSpacing: 1, fontWeight: "700" },
-  cardHolder: { color: "#fff", fontSize: 13, fontWeight: "700", marginTop: 2 },
-  copyBtn: { flexDirection: "row", alignItems: "center", gap: 5, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 7 },
+  cardShimmer: {
+    position: "absolute", top: 0, right: -40,
+    width: 90, height: "100%",
+    backgroundColor: "rgba(255,255,255,0.07)",
+    transform: [{ skewX: "-20deg" }],
+  },
+  cardChipRow:     { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 22 },
+  cardNetworkText: { color: "rgba(255,255,255,0.55)", fontSize: 12, fontWeight: "700", letterSpacing: 1 },
+  cardNumber:      { color: "#fff", fontSize: 22, fontWeight: "700", letterSpacing: 4, marginBottom: 22 },
+  cardBottom:      { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" },
+  cardLabel:       { color: "rgba(255,255,255,0.55)", fontSize: 9, letterSpacing: 1.2, fontWeight: "700" },
+  cardHolder:      { color: "#fff", fontSize: 13, fontWeight: "700", marginTop: 3 },
+  copyBtn: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    borderRadius: 10, paddingHorizontal: 12, paddingVertical: 7,
+  },
   copyBtnText: { color: "#fff", fontSize: 12, fontWeight: "700" },
 
   inputCard: {
-    marginHorizontal: 16, borderRadius: 16, borderWidth: 1, padding: 16, gap: 14,
+    marginHorizontal: 16, borderRadius: 18, borderWidth: 1, padding: 16, gap: 14,
   },
-  inputRow: { flexDirection: "row", gap: 10, alignItems: "center" },
+  inputRow:    { flexDirection: "row", gap: 10, alignItems: "center" },
   amountInput: {
-    flex: 1, borderWidth: 1.5, borderRadius: 12,
+    flex: 1, borderWidth: 2, borderRadius: 14,
     paddingHorizontal: 16, paddingVertical: 14,
-    fontSize: 22, fontWeight: "700",
+    fontSize: 24, fontWeight: "800",
   },
-  currencyBadge: { borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10 },
-  currencyText: { fontSize: 14, fontWeight: "800" },
+  currencyBadge: { borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10 },
+  currencyText:  { fontSize: 14, fontWeight: "800" },
 
-  calcBox: {
-    borderRadius: 12, borderWidth: 1, padding: 14, gap: 8,
+  calcBox:      { borderRadius: 14, borderWidth: 1, padding: 14, gap: 9 },
+  calcRow:      { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  calcLabel:    { fontSize: 13 },
+  calcValue:    { fontSize: 13, fontWeight: "700" },
+  calcDivider:  { height: 1, marginVertical: 2 },
+  calcLabelBig: { fontSize: 14, fontWeight: "700" },
+  calcValueBig: { fontSize: 22, fontWeight: "800" },
+
+  receiptPreviewWrap: {
+    borderRadius: 18, overflow: "hidden", height: 180,
+    shadowColor: "#000", shadowOpacity: 0.12, shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 }, elevation: 5,
   },
-  calcRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  calcLabel: { fontSize: 13 },
-  calcValue: { fontSize: 13, fontWeight: "700" },
-  calcDivider: { height: 1, marginVertical: 2 },
-  calcLabelBig: { fontSize: 15, fontWeight: "700" },
-  calcValueBig: { fontSize: 20, fontWeight: "800" },
+  receiptPreview: { width: "100%", height: "100%" },
+  receiptOverlay: {
+    position: "absolute", bottom: 0, left: 0, right: 0,
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    paddingHorizontal: 14, paddingVertical: 10,
+  },
+  receiptOkBadge: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    backgroundColor: "rgba(5,150,105,0.85)", borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 5,
+  },
+  receiptOkText:   { color: "#fff", fontSize: 12, fontWeight: "700" },
+  receiptRemoveBtn: {
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center", justifyContent: "center",
+  },
+  receiptPlaceholder: {
+    borderRadius: 18, borderWidth: 2, borderStyle: "dashed",
+    padding: 28, alignItems: "center", gap: 10, overflow: "hidden",
+  },
+  receiptIconCircle: {
+    width: 56, height: 56, borderRadius: 28,
+    alignItems: "center", justifyContent: "center", marginBottom: 4,
+  },
+  receiptPlaceholderTitle: { fontSize: 15, fontWeight: "700" },
+  receiptPlaceholderSub:   { fontSize: 12, textAlign: "center", lineHeight: 18 },
+  receiptPillBtn: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    borderRadius: 12, paddingHorizontal: 18, paddingVertical: 9, marginTop: 6,
+  },
+  receiptPillBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
+  receiptInfoBanner: {
+    flexDirection: "row", alignItems: "flex-start", gap: 8,
+    marginTop: 10, borderRadius: 12, borderWidth: 1, padding: 12,
+  },
+  receiptInfoText: { flex: 1, fontSize: 12, lineHeight: 18 },
 
-  warningText: { fontSize: 12, lineHeight: 18 },
+  submitSection: {
+    marginHorizontal: 16, marginTop: 20, borderTopWidth: 1,
+    paddingTop: 18, gap: 12,
+  },
+  warningText:   { fontSize: 12, lineHeight: 18 },
+  uploadingRow:  { flexDirection: "row", alignItems: "center", gap: 7 },
+  uploadingText: { fontSize: 13, fontWeight: "600" },
 
   btnPrimary: {
     flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 8, borderRadius: 14, paddingVertical: 15,
+    gap: 8, borderRadius: 16, paddingVertical: 16,
   },
   btnPrimaryText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  btnOutline: {
+    borderRadius: 16, borderWidth: 1.5, paddingVertical: 14,
+    alignItems: "center", justifyContent: "center",
+  },
+  btnOutlineText: { fontSize: 15, fontWeight: "600" },
 
   historyItem: {
     flexDirection: "row", alignItems: "center", gap: 12,
-    borderRadius: 14, borderWidth: 1, padding: 14,
+    borderRadius: 16, borderWidth: 1, padding: 14,
   },
-  historyIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
-  historyAmount: { fontSize: 13, fontWeight: "700" },
-  historyTime: { fontSize: 11, marginTop: 2 },
-  statusBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
-  statusText: { fontSize: 10, fontWeight: "700" },
+  historyIconWrap: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  historyTopRow:    { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  historyBottomRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 },
+  historyAmount:    { fontSize: 13, fontWeight: "700" },
+  historyTime:      { fontSize: 11 },
+  statusBadge:      { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  statusText:       { fontSize: 10, fontWeight: "700" },
 
-  successWrap: { alignItems: "center", paddingHorizontal: 32, paddingTop: 48, gap: 12 },
-  successCircle: { width: 110, height: 110, borderRadius: 55, alignItems: "center", justifyContent: "center", marginBottom: 8 },
-  successTitle: { fontSize: 24, fontWeight: "800", textAlign: "center" },
-  successDesc: { fontSize: 14, textAlign: "center", lineHeight: 22 },
+  receiptAttachedBadge: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    backgroundColor: "#059669" + "15", borderRadius: 6,
+    paddingHorizontal: 7, paddingVertical: 3,
+  },
+  receiptAttachedText: { fontSize: 10, fontWeight: "700", color: "#059669" },
+  noReceiptBadge: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    backgroundColor: "#94a3b8" + "15", borderRadius: 6,
+    paddingHorizontal: 7, paddingVertical: 3,
+  },
+  noReceiptText: { fontSize: 10, fontWeight: "700", color: "#94a3b8" },
+
+  successWrap: {
+    alignItems: "center", paddingHorizontal: 28, paddingTop: 56,
+    gap: 14, overflow: "hidden",
+  },
+  successGradientBg: {
+    position: "absolute", top: 0, left: 0, right: 0, height: 260,
+  },
+  successCircle: {
+    width: 120, height: 120, borderRadius: 60,
+    alignItems: "center", justifyContent: "center", marginBottom: 8,
+  },
+  successTitle: { fontSize: 26, fontWeight: "800", textAlign: "center" },
+  successDesc:  { fontSize: 14, textAlign: "center", lineHeight: 22, marginBottom: 8 },
 });

@@ -504,9 +504,14 @@ export interface AgentDeposit {
   createdAt: string;
   confirmedAt?: string;
   note?: string;
+  screenshotUrl?: string;
 }
 
-export async function createAgentDeposit(deviceId: string, tmtAmount: number): Promise<string> {
+export async function createAgentDeposit(
+  deviceId: string,
+  tmtAmount: number,
+  screenshotUrl?: string,
+): Promise<string> {
   const bpAmount = tmtAmount * (1 + BP_BONUS_PERCENT / 100);
   const r = push(ref(db, "agent-deposits"));
   await set(r, {
@@ -515,6 +520,7 @@ export async function createAgentDeposit(deviceId: string, tmtAmount: number): P
     bpAmount: Math.round(bpAmount * 100) / 100,
     status: "pending",
     createdAt: new Date().toISOString(),
+    ...(screenshotUrl ? { screenshotUrl } : {}),
   });
   return r.key || "";
 }
