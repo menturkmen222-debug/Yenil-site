@@ -16,10 +16,10 @@ export const METHODS = [
     title: "E-Bilim — Öwren we Gazan",
     desc: "AI, Frilanser, Kripto. Synag geç we BP gazan",
     icon: "book-outline" as const,
-    badge: "0.05–0.3 BP",
+    badge: "abraý/Ynam gazanyň",
     badgeColor: "#6366f1",
     gradient: ["#1e1b4b", "#6366f1"] as [string, string],
-    earn: "0.3 BP/sapak",
+    earn: "abraý/Ynam gazanyň",
     route: "/e-bilim",
     hot: true,
   },
@@ -103,7 +103,7 @@ export default function PulGazanScreen() {
         <View style={[s.balanceHero, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <View style={s.balanceLeft}>
             <Text style={[s.balanceLabel, { color: colors.mutedForeground }]}>Häzirki balansynyz</Text>
-            <Text style={[s.balanceNum, { color: "#059669" }]}>{balance.toFixed(2)} BP</Text>
+            <Text style={[s.balanceNum, { color: "#059669" }]}>{balance.toFixed(1)} BP</Text>
             <Text style={[s.balanceSub, { color: colors.mutedForeground }]}>1 BP ≈ 1 TMT</Text>
           </View>
           <View style={s.balanceRight}>

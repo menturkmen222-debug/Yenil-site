@@ -1551,7 +1551,7 @@ export default function YenilPayScreen() {
         </View>
         <View style={s.balanceBadge}>
           <Ionicons name="wallet-outline" size={14} color="#fff" />
-          <Text style={s.balanceText}>{balance.toFixed(2)} BP</Text>
+          <Text style={s.balanceText}>{balance.toFixed(1)} BP</Text>
         </View>
       </View>
 

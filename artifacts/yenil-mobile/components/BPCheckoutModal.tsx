@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Platform,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -70,8 +71,8 @@ export function BPCheckoutModal({
   const missingBP = checkInsufficientAmount(amount);
   const isSufficient = missingBP === 0;
 
-  const cardTotal    = Math.ceil(missingBP * (1 + rates.bank_topup) * 10) / 10;
-  const tmcellTotal  = Math.ceil(missingBP * (1 + rates.tmcell_topup) * 10) / 10;
+  const cardTotal    = missingBP + Math.ceil(missingBP * rates.bank_topup);
+  const tmcellTotal  = missingBP + Math.ceil(missingBP * rates.tmcell_topup);
 
   const handleClose = useCallback(() => {
     if (paymentLocked) return;
@@ -219,12 +220,12 @@ export function BPCheckoutModal({
                   },
                   {
                     label: "Häzirki balans",
-                    value: `${balance.toFixed(2)} BP`,
+                    value: `${balance.toFixed(1)} BP`,
                     color: colors.success,
                   },
                   {
                     label: "Tölegden soňky balans",
-                    value: `${Math.max(0, balance - amount).toFixed(2)} BP`,
+                    value: `${Math.max(0, balance - amount).toFixed(1)} BP`,
                     color: colors.primary,
                   },
                 ].map((row, i) => (
@@ -347,7 +348,7 @@ export function BPCheckoutModal({
                 {[
                   {
                     label: "Häzirki balans",
-                    value: `${balance.toFixed(2)} BP`,
+                    value: `${balance.toFixed(1)} BP`,
                     color: colors.foreground,
                   },
                   {
@@ -455,7 +456,7 @@ export function BPCheckoutModal({
                           },
                         ]}
                       >
-                        {m.total.toFixed(1)} TMT
+                        {m.total} TMT
                       </Text>
                       <View
                         style={[
@@ -492,16 +493,6 @@ export function BPCheckoutModal({
                   </Pressable>
                 );
               })}
-
-              {/* Commission explanation */}
-              {selectedMethodData && (
-                <View style={[st.commNote, { backgroundColor: colors.muted, borderColor: colors.border }]}>
-                  <Ionicons name="information-circle-outline" size={14} color={colors.mutedForeground} />
-                  <Text style={[st.commNoteText, { color: colors.mutedForeground }]}>
-                    {selectedMethodData.commissionNote}
-                  </Text>
-                </View>
-              )}
 
               {error ? (
                 <View style={st.errBox}>
