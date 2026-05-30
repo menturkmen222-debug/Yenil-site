@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
   Alert, ActivityIndicator, Platform, Image, Dimensions,
@@ -6,6 +6,7 @@ import {
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
+import { useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
@@ -35,18 +36,24 @@ const UZ_OPERATORS = [
 type Tab = "bonus" | "currency" | "sim";
 
 // ── Merged Bonus Pul Section (buy + sell + transfer) ───────────────
-function BonusPulSection({ colors }: { colors: ReturnType<typeof useColors> }) {
+interface BonusPulSectionProps {
+  colors: ReturnType<typeof useColors>;
+  autoAmount?: number;
+  autoMethod?: "terminal" | "card";
+}
+
+function BonusPulSection({ colors, autoAmount, autoMethod }: BonusPulSectionProps) {
   const [mode, setMode] = useState<"buy" | "sell" | "transfer">("buy");
   const { balance, deviceId, sendBP } = useBonusPul();
 
   // buy state
-  const [selectedBuy, setSelectedBuy] = useState<number | null>(null);
-  const [buyAmountText, setBuyAmountText] = useState("");
+  const [selectedBuy, setSelectedBuy] = useState<number | null>(autoAmount ?? null);
+  const [buyAmountText, setBuyAmountText] = useState(autoAmount ? String(autoAmount) : "");
   const [buyPhone, setBuyPhone] = useState("");
   const [buyLoading, setBuyLoading] = useState(false);
   const [buyDone, setBuyDone] = useState(false);
-  const [showPayment, setShowPayment] = useState(false);
-  const [buyPayMethod, setBuyPayMethod] = useState<"" | "terminal" | "card">("");
+  const [showPayment, setShowPayment] = useState(!!autoMethod);
+  const [buyPayMethod, setBuyPayMethod] = useState<"" | "terminal" | "card">(autoMethod ?? "");
   const [buyCardBank, setBuyCardBank] = useState("");
   const [buyCardType, setBuyCardType] = useState("");
   const [buyCardLast4, setBuyCardLast4] = useState("");
@@ -1526,7 +1533,11 @@ export default function YenilPayScreen() {
   const insets = useSafeAreaInsets();
   const isWeb = Platform.OS === "web";
   const { balance } = useBonusPul();
-  const [tab, setTab] = useState<Tab>("bonus");
+  const params = useLocalSearchParams<{ autoBonus?: string; amount?: string; method?: string }>();
+  const autoBonus = params.autoBonus === "1";
+  const autoAmount = autoBonus && params.amount ? parseInt(params.amount, 10) : undefined;
+  const autoMethod = autoBonus && params.method === "card" ? "card" as const : autoBonus && params.method === "terminal" ? "terminal" as const : undefined;
+  const [tab, setTab] = useState<Tab>(autoBonus ? "bonus" : "bonus");
 
   const activeTabDef = TAB_DEFS.find(t => t.id === tab)!;
 
@@ -1580,7 +1591,7 @@ export default function YenilPayScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {tab === "bonus" && <BonusPulSection colors={colors} />}
+        {tab === "bonus" && <BonusPulSection colors={colors} autoAmount={autoAmount} autoMethod={autoMethod} />}
         {tab === "currency" && <CurrencySection colors={colors} />}
         {tab === "sim" && <SimSection colors={colors} />}
       </ScrollView>

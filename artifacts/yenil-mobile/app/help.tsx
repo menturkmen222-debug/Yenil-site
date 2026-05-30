@@ -329,41 +329,6 @@ export default function HelpScreen() {
           </View>
         </Animated.View>
 
-        {/* ── Contact info ─────────────────────────────── */}
-        <Animated.View entering={FadeInDown.duration(350).delay(240)}>
-          <View style={[s.contactInfoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[s.contactInfoTitle, { color: colors.foreground }]}>Habarlaşmak üçin</Text>
-            <View style={s.contactInfoRow}>
-              <View style={[s.contactInfoIcon, { backgroundColor: colors.primary + "15" }]}>
-                <Ionicons name="call-outline" size={15} color={colors.primary} />
-              </View>
-              <View>
-                <Text style={[s.contactInfoLabel, { color: colors.mutedForeground }]}>Telefon</Text>
-                <Text style={[s.contactInfoVal, { color: colors.foreground }]}>+993 71 789091</Text>
-              </View>
-            </View>
-            <View style={[s.contactInfoDivider, { backgroundColor: colors.border }]} />
-            <View style={s.contactInfoRow}>
-              <View style={[s.contactInfoIcon, { backgroundColor: "#2563eb15" }]}>
-                <Ionicons name="chatbubble-ellipses-outline" size={15} color="#2563eb" />
-              </View>
-              <View>
-                <Text style={[s.contactInfoLabel, { color: colors.mutedForeground }]}>Ýene bir nomer</Text>
-                <Text style={[s.contactInfoVal, { color: colors.foreground }]}>+993 64 629487</Text>
-              </View>
-            </View>
-            <View style={[s.contactInfoDivider, { backgroundColor: colors.border }]} />
-            <View style={s.contactInfoRow}>
-              <View style={[s.contactInfoIcon, { backgroundColor: "#05966915" }]}>
-                <Ionicons name="time-outline" size={15} color="#059669" />
-              </View>
-              <View>
-                <Text style={[s.contactInfoLabel, { color: colors.mutedForeground }]}>Iş wagty</Text>
-                <Text style={[s.contactInfoVal, { color: colors.foreground }]}>Her gün 08:00 – 00:00</Text>
-              </View>
-            </View>
-          </View>
-        </Animated.View>
 
       </ScrollView>
     </View>

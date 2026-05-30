@@ -94,16 +94,6 @@ export default function AboutScreen() {
           ))}
         </View>
 
-        {/* Contact */}
-        <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Habarlaşmak</Text>
-        <View style={[styles.contactCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          {["+993 71 789091", "+993 64 629487", "+993 71 788546"].map((p, i) => (
-            <Pressable key={i} onPress={() => Linking.openURL(`tel:${p.replace(/\s/g, "")}`)}>
-              <Text style={[styles.phone, { color: colors.primary }]}>{p}</Text>
-            </Pressable>
-          ))}
-        </View>
-
         {/* Social */}
         <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Biziň sahypalarymyz</Text>
         <View style={styles.socialRow}>

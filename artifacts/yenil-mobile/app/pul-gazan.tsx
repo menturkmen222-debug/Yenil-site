@@ -14,7 +14,7 @@ export const METHODS = [
   {
     id: "e-bilim",
     title: "E-Bilim — Öwren we Gazan",
-    desc: "25+ sapak: AI, Frilanser, Kripto. Synag geç we BP gazan",
+    desc: "AI, Frilanser, Kripto. Synag geç we BP gazan",
     icon: "book-outline" as const,
     badge: "0.05–0.3 BP",
     badgeColor: "#6366f1",
@@ -45,18 +45,6 @@ export const METHODS = [
     gradient: ["#312e81", "#6366f1"] as [string, string],
     earn: "∞ BP",
     route: "/referal",
-    hot: false,
-  },
-  {
-    id: "informator",
-    title: "Informator — Ýol Habarlary",
-    desc: "GAI, probka, ýol böwet habar beriň. 3 tassyklansa 1 BP alyň",
-    icon: "warning-outline" as const,
-    badge: "1 BP / habar",
-    badgeColor: "#f59e0b",
-    gradient: ["#78350f", "#f59e0b"] as [string, string],
-    earn: "1 BP",
-    route: "/informator",
     hot: false,
   },
   {
@@ -146,22 +134,20 @@ export default function PulGazanScreen() {
 
             <View style={[s.methodBody, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={s.methodTop}>
-                <View style={{ flex: 1, gap: 3 }}>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                    <Text style={[s.methodTitle, { color: colors.foreground }]}>{m.title}</Text>
-                    {m.hot && (
-                      <View style={s.hotChip}>
-                        <Ionicons name="flame" size={9} color="#fff" />
-                        <Text style={s.hotChipText}>HOT</Text>
-                      </View>
-                    )}
-                  </View>
+                <View style={{ flex: 1, gap: 3, minWidth: 0 }}>
+                  <Text style={[s.methodTitle, { color: colors.foreground }]} numberOfLines={2}>{m.title}</Text>
                   <Text style={[s.methodDesc, { color: colors.mutedForeground }]} numberOfLines={2}>{m.desc}</Text>
                 </View>
                 <View style={s.methodRight}>
                   <View style={[s.earnBadge, { backgroundColor: m.badgeColor + "18", borderColor: m.badgeColor + "40" }]}>
                     <Text style={[s.earnText, { color: m.badgeColor }]}>{m.earn}</Text>
                   </View>
+                  {m.hot && (
+                    <View style={[s.hotChip, { marginTop: 4 }]}>
+                      <Ionicons name="flame" size={9} color="#fff" />
+                      <Text style={s.hotChipText}>HOT</Text>
+                    </View>
+                  )}
                   <Ionicons name="chevron-forward" size={16} color={colors.mutedForeground + "80"} style={{ marginTop: 4 }} />
                 </View>
               </View>

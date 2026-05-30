@@ -7,14 +7,13 @@ import {
   ActivityIndicator,
   StyleSheet,
   Platform,
-  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { useRates } from "@/contexts/RatesContext";
-import { addBalance, saveOrder } from "@/lib/firebase";
 import { COMMISSION_RATES } from "@/lib/payments";
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>["name"];
@@ -64,7 +63,6 @@ export function BPCheckoutModal({
     useBonusPul();
 
   const [selectedMethod, setSelectedMethod] = useState<TopUpMethod | null>(null);
-  const [topUpLoading, setTopUpLoading] = useState(false);
   const [error, setError] = useState("");
   const [paid, setPaid] = useState(false);
 
@@ -72,16 +70,16 @@ export function BPCheckoutModal({
   const missingBP = checkInsufficientAmount(amount);
   const isSufficient = missingBP === 0;
 
-  const cardTotal    = parseFloat((missingBP * (1 + rates.bank_topup)).toFixed(2));
-  const tmcellTotal  = parseFloat((missingBP * (1 + rates.tmcell_topup)).toFixed(2));
+  const cardTotal    = Math.ceil(missingBP * (1 + rates.bank_topup) * 10) / 10;
+  const tmcellTotal  = Math.ceil(missingBP * (1 + rates.tmcell_topup) * 10) / 10;
 
   const handleClose = useCallback(() => {
-    if (paymentLocked || topUpLoading) return;
+    if (paymentLocked) return;
     setSelectedMethod(null);
     setError("");
     setPaid(false);
     resolvedOnCancel();
-  }, [paymentLocked, topUpLoading, resolvedOnCancel]);
+  }, [paymentLocked, resolvedOnCancel]);
 
   const doDirectPay = useCallback(async () => {
     if (paymentLocked) return;
@@ -112,80 +110,15 @@ export function BPCheckoutModal({
     );
   }, [amount, doDirectPay]);
 
-  const doTopUpAndPay = useCallback(async () => {
-    if (!selectedMethod || topUpLoading || paymentLocked) return;
-    setTopUpLoading(true);
-    setError("");
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-    try {
-      const tmtPaid = selectedMethod === "card" ? cardTotal : tmcellTotal;
-
-      await addBalance(deviceId, missingBP);
-      await saveOrder("inline-topup-orders", {
-        deviceId,
-        missingBP,
-        method: selectedMethod,
-        tmtAmount: tmtPaid,
-        commissionRate:
-          selectedMethod === "card"
-            ? rates.bank_topup
-            : rates.tmcell_topup,
-        serviceName,
-        serviceCost: amount,
-        status: "pending",
-        createdAt: Date.now(),
-      });
-
-      const result = await payWithBP(amount, serviceId, description);
-
-      if (result.success) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setSelectedMethod(null);
-        setError("");
-        setPaid(true);
-      } else {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        setError(result.message);
-      }
-    } catch {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      setError("Ulgam ýalňyşlygy. Gaýtadan synanyşyň.");
-    } finally {
-      setTopUpLoading(false);
-    }
-  }, [
-    selectedMethod,
-    topUpLoading,
-    paymentLocked,
-    cardTotal,
-    tmcellTotal,
-    deviceId,
-    missingBP,
-    serviceName,
-    amount,
-    serviceId,
-    description,
-    payWithBP,
-  ]);
-
   const handleTopUpAndPay = useCallback(() => {
     if (!selectedMethod) return;
-    const tmtPaid = selectedMethod === "card" ? cardTotal : tmcellTotal;
-    const commPct = selectedMethod === "card"
-      ? (COMMISSION_RATES.bank_topup * 100).toFixed(0)
-      : (COMMISSION_RATES.tmcell_topup * 100).toFixed(0);
-    Alert.alert(
-      "Tölegi tassykla",
-      `${tmtPaid} TMT töleg geçiriler (+${commPct}% komissiýa) we ${missingBP} BP hasabyňyza goşular. Dowam etmekmi?`,
-      [
-        { text: "Ýatyr", style: "cancel" },
-        { text: "Tassykla", onPress: doTopUpAndPay },
-      ]
-    );
-  }, [selectedMethod, cardTotal, tmcellTotal, missingBP, doTopUpAndPay]);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const method = selectedMethod === "card" ? "card" : "terminal";
+    resolvedOnCancel();
+    router.push(`/(tabs)/tmcell?autoBonus=1&amount=${missingBP}&method=${method}` as any);
+  }, [selectedMethod, missingBP, resolvedOnCancel]);
 
-  const isProcessing = paymentLocked || topUpLoading;
+  const isProcessing = paymentLocked;
 
   const topUpMethods = [
     {
@@ -522,7 +455,7 @@ export function BPCheckoutModal({
                           },
                         ]}
                       >
-                        {m.total} TMT
+                        {m.total.toFixed(1)} TMT
                       </Text>
                       <View
                         style={[
