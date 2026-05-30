@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, StyleSheet, Pressable, Platform,
   Modal, Alert, Linking,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -12,6 +13,7 @@ import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { PessimisticButton } from "@/components/PessimisticButton";
 import { CATEGORIES, LESSONS, type Lesson, type EBilimCategory } from "@/lib/ebilimData";
+import { QUIZ_REWARDS } from "@/lib/payments";
 import {
   watchCompletedLessons,
   watchUnlockedLessons,
@@ -155,6 +157,18 @@ export default function EBilimScreen() {
   const [alreadyClaimed, setAlreadyClaimed] = useState<boolean>(false);
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
   const [unlockLoading, setUnlockLoading] = useState<boolean>(false);
+  const [onboardingSeen, setOnboardingSeen] = useState<boolean>(true);
+
+  useEffect(() => {
+    AsyncStorage.getItem("ebilim_seen").then(val => {
+      if (!val) setOnboardingSeen(false);
+    }).catch(() => {});
+  }, []);
+
+  const dismissOnboarding = useCallback(async () => {
+    setOnboardingSeen(true);
+    await AsyncStorage.setItem("ebilim_seen", "1").catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!deviceId) return;
@@ -287,6 +301,52 @@ export default function EBilimScreen() {
       </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
+
+        {/* ── Onboarding Banner (shown once) ── */}
+        {!onboardingSeen && (
+          <Pressable
+            onPress={dismissOnboarding}
+            style={[{
+              marginHorizontal: 16, marginTop: 16, borderRadius: 18, borderWidth: 1,
+              padding: 18, gap: 12, overflow: "hidden",
+              backgroundColor: "#6366f1" + "0a", borderColor: "#6366f1" + "28",
+            }]}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <View style={[{ width: 48, height: 48, borderRadius: 24,
+                alignItems: "center", justifyContent: "center", backgroundColor: "#6366f1" + "18" }]}>
+                <Ionicons name="school-outline" size={24} color="#6366f1" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15, fontWeight: "800", color: colors.foreground }}>
+                  E-Bilim'e hoş geldiňiz!
+                </Text>
+                <Text style={{ fontSize: 12, color: colors.mutedForeground, marginTop: 2 }}>
+                  Sapaklary okap, test beriň — Abraý gazanyň
+                </Text>
+              </View>
+              <Ionicons name="close-circle" size={22} color={colors.mutedForeground} />
+            </View>
+            <View style={{ gap: 7 }}>
+              {[
+                { icon: "book-outline", text: "Her sapagy okap, quiz ber" },
+                { icon: "trophy-outline", text: `Geçen her testden Abraý gazanyrsyň` },
+                { icon: "lock-open-outline", text: "Premium sapaklar BP bilen açylýar" },
+              ].map((item, i) => (
+                <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Ionicons name={item.icon as any} size={14} color="#6366f1" />
+                  <Text style={{ fontSize: 12, color: colors.mutedForeground, lineHeight: 18 }}>
+                    {item.text}
+                  </Text>
+                </View>
+              ))}
+            </View>
+            <View style={[{ borderRadius: 10, paddingVertical: 8, alignItems: "center",
+              backgroundColor: "#6366f1" }]}>
+              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }}>Başlaly!</Text>
+            </View>
+          </Pressable>
+        )}
 
         {/* ── Category scroll ── */}
         <ScrollView

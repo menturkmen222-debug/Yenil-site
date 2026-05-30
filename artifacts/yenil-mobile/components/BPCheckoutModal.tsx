@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Platform,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -14,7 +15,7 @@ import { useColors } from "@/hooks/useColors";
 import { useBonusPul } from "@/contexts/BonusPulContext";
 import { useRates } from "@/contexts/RatesContext";
 import { addBalance, saveOrder } from "@/lib/firebase";
-import { calcMissingBP } from "@/lib/payments";
+import { COMMISSION_RATES } from "@/lib/payments";
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>["name"];
 type TopUpMethod = "card" | "tmcell";
@@ -65,6 +66,7 @@ export function BPCheckoutModal({
   const [selectedMethod, setSelectedMethod] = useState<TopUpMethod | null>(null);
   const [topUpLoading, setTopUpLoading] = useState(false);
   const [error, setError] = useState("");
+  const [paid, setPaid] = useState(false);
 
   const rates = useRates();
   const missingBP = checkInsufficientAmount(amount);
@@ -77,10 +79,11 @@ export function BPCheckoutModal({
     if (paymentLocked || topUpLoading) return;
     setSelectedMethod(null);
     setError("");
+    setPaid(false);
     resolvedOnCancel();
   }, [paymentLocked, topUpLoading, resolvedOnCancel]);
 
-  const handleDirectPay = useCallback(async () => {
+  const doDirectPay = useCallback(async () => {
     if (paymentLocked) return;
     setError("");
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -91,14 +94,25 @@ export function BPCheckoutModal({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setSelectedMethod(null);
       setError("");
-      resolvedOnSuccess();
+      setPaid(true);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setError(result.message);
     }
-  }, [paymentLocked, amount, serviceId, description, payWithBP, resolvedOnSuccess]);
+  }, [paymentLocked, amount, serviceId, description, payWithBP]);
 
-  const handleTopUpAndPay = useCallback(async () => {
+  const handleDirectPay = useCallback(() => {
+    Alert.alert(
+      "Tölegi tassykla",
+      `Balansyňyzdan ${amount} BP aýrylar. Dowam etmekmi?`,
+      [
+        { text: "Ýatyr", style: "cancel" },
+        { text: "Tassykla", onPress: doDirectPay },
+      ]
+    );
+  }, [amount, doDirectPay]);
+
+  const doTopUpAndPay = useCallback(async () => {
     if (!selectedMethod || topUpLoading || paymentLocked) return;
     setTopUpLoading(true);
     setError("");
@@ -129,7 +143,7 @@ export function BPCheckoutModal({
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setSelectedMethod(null);
         setError("");
-        resolvedOnSuccess();
+        setPaid(true);
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setError(result.message);
@@ -153,8 +167,23 @@ export function BPCheckoutModal({
     serviceId,
     description,
     payWithBP,
-    resolvedOnSuccess,
   ]);
+
+  const handleTopUpAndPay = useCallback(() => {
+    if (!selectedMethod) return;
+    const tmtPaid = selectedMethod === "card" ? cardTotal : tmcellTotal;
+    const commPct = selectedMethod === "card"
+      ? (COMMISSION_RATES.bank_topup * 100).toFixed(0)
+      : (COMMISSION_RATES.tmcell_topup * 100).toFixed(0);
+    Alert.alert(
+      "Tölegi tassykla",
+      `${tmtPaid} TMT töleg geçiriler (+${commPct}% komissiýa) we ${missingBP} BP hasabyňyza goşular. Dowam etmekmi?`,
+      [
+        { text: "Ýatyr", style: "cancel" },
+        { text: "Tassykla", onPress: doTopUpAndPay },
+      ]
+    );
+  }, [selectedMethod, cardTotal, tmcellTotal, missingBP, doTopUpAndPay]);
 
   const isProcessing = paymentLocked || topUpLoading;
 
@@ -166,6 +195,7 @@ export function BPCheckoutModal({
       iconColor: "#6366f1",
       label: "Bank kartasy",
       sublabel: `+${(rates.bank_topup * 100).toFixed(0)}% komissiýa`,
+      commissionNote: `Bank kartasy arkaly tölemekde ${(rates.bank_topup * 100).toFixed(0)}% hyzmat komissiýasy alynýar.`,
       total: cardTotal,
       badge: `${(rates.bank_topup * 100).toFixed(0)}%`,
     },
@@ -176,10 +206,13 @@ export function BPCheckoutModal({
       iconColor: "#059669",
       label: "TMCell balans",
       sublabel: `+${(rates.tmcell_topup * 100).toFixed(0)}% komissiýa`,
+      commissionNote: `TMCell balans arkaly tölemekde ${(rates.tmcell_topup * 100).toFixed(0)}% hyzmat komissiýasy alynýar.`,
       total: tmcellTotal,
       badge: `${(rates.tmcell_topup * 100).toFixed(0)}%`,
     },
   ] as const;
+
+  const selectedMethodData = topUpMethods.find(m => m.id === selectedMethod);
 
   return (
     <Modal
@@ -196,7 +229,27 @@ export function BPCheckoutModal({
         >
           <View style={[st.handle, { backgroundColor: colors.border }]} />
 
-          {isSufficient ? (
+          {/* ── Inline Success State ── */}
+          {paid ? (
+            <View style={st.successWrap}>
+              <View style={[st.successCircle, { backgroundColor: colors.success + "18" }]}>
+                <Ionicons name="checkmark-circle" size={56} color={colors.success} />
+              </View>
+              <Text style={[st.successTitle, { color: colors.foreground }]}>
+                Töleg üstünlikli!
+              </Text>
+              <Text style={[st.successDesc, { color: colors.mutedForeground }]}>
+                Balansyňyz täzelendi. Hyzmatyňyz işlenilýär.
+              </Text>
+              <Pressable
+                onPress={() => { setPaid(false); resolvedOnSuccess(); }}
+                style={[st.confirmBtn, { backgroundColor: colors.success, flex: 0, paddingHorizontal: 32, marginTop: 8 }]}
+              >
+                <Ionicons name="arrow-forward-circle-outline" size={18} color="#fff" />
+                <Text style={st.confirmTxt}>Dowam et</Text>
+              </Pressable>
+            </View>
+          ) : isSufficient ? (
             <>
               <View style={st.iconRow}>
                 <View
@@ -507,6 +560,16 @@ export function BPCheckoutModal({
                 );
               })}
 
+              {/* Commission explanation */}
+              {selectedMethodData && (
+                <View style={[st.commNote, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+                  <Ionicons name="information-circle-outline" size={14} color={colors.mutedForeground} />
+                  <Text style={[st.commNoteText, { color: colors.mutedForeground }]}>
+                    {selectedMethodData.commissionNote}
+                  </Text>
+                </View>
+              )}
+
               {error ? (
                 <View style={st.errBox}>
                   <Ionicons
@@ -685,6 +748,16 @@ const st = StyleSheet.create({
     top: 10,
     right: 10,
   },
+  commNote: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 7,
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: 10,
+    marginBottom: 10,
+  },
+  commNoteText: { fontSize: 11, flex: 1, lineHeight: 16 },
   errBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -723,5 +796,30 @@ const st = StyleSheet.create({
     fontSize: 11,
     textAlign: "center",
     lineHeight: 16,
+  },
+  // Success state
+  successWrap: {
+    alignItems: "center",
+    paddingVertical: 24,
+    gap: 12,
+  },
+  successCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  successTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  successDesc: {
+    fontSize: 13,
+    textAlign: "center",
+    lineHeight: 19,
+    paddingHorizontal: 16,
   },
 });

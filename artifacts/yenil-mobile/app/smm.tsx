@@ -386,6 +386,7 @@ export default function SmmScreen() {
   const [step, setStep] = useState<Step>("landing");
   const [activeRole, setActiveRole] = useState<Role>("buyer");
   const [selectedService, setSelectedService] = useState<typeof SERVICES[0] | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
 
   const topPad = (isWeb ? 0 : insets.top) + 14;
 
@@ -454,6 +455,7 @@ export default function SmmScreen() {
 
       {step === "landing" && (
         <ScrollView
+          ref={scrollRef}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100 }}
         >
@@ -623,6 +625,38 @@ export default function SmmScreen() {
               </View>
             ))}
           </Animated.View>
+
+          {/* ── Empty Orders Nudge ── */}
+          {activeRole === "buyer" && (
+            <Animated.View style={{ paddingHorizontal: 16, marginTop: 8, marginBottom: 16 }}>
+              <View style={[{ borderRadius: 16, borderWidth: 1, padding: 18, alignItems: "center", gap: 10,
+                backgroundColor: "#7c3aed" + "08", borderColor: "#7c3aed" + "22" }]}>
+                <View style={[{ width: 52, height: 52, borderRadius: 26,
+                  alignItems: "center", justifyContent: "center", backgroundColor: "#7c3aed" + "18" }]}>
+                  <Ionicons name="cart-outline" size={26} color="#7c3aed" />
+                </View>
+                <Text style={[{ fontSize: 15, fontWeight: "700", textAlign: "center", color: colors.foreground }]}>
+                  Sargyt bermediňiz
+                </Text>
+                <Text style={[{ fontSize: 12, textAlign: "center", lineHeight: 18, color: colors.mutedForeground }]}>
+                  Ýokarda hyzmat saýlap, ilkinji SMM sargytyňyzy iberiň. Hünärmen 24 sagat içinde habarlaşar.
+                </Text>
+                <Pressable
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    scrollRef.current?.scrollTo({ y: 0, animated: true });
+                  }}
+                  style={({ pressed }) => [{ backgroundColor: "#7c3aed", borderRadius: 12,
+                    paddingVertical: 11, paddingHorizontal: 20,
+                    flexDirection: "row", alignItems: "center", gap: 7,
+                    opacity: pressed ? 0.85 : 1 }]}
+                >
+                  <Ionicons name="arrow-up-outline" size={15} color="#fff" />
+                  <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }}>Hyzmat saýla</Text>
+                </Pressable>
+              </View>
+            </Animated.View>
+          )}
         </ScrollView>
       )}
 

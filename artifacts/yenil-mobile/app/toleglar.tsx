@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable,
-  Platform, StatusBar,
+  Platform, StatusBar, Alert,
 } from "react-native";
 import { router, type Href } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -56,6 +56,15 @@ function ServiceItem({ service }: { service: PaymentService }) {
   const isIOS = Platform.OS === "ios";
 
   const handlePress = () => {
+    if (service.status === "coming_soon") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Alert.alert(
+        "Ýakynda",
+        `"${service.title}" hyzmaty ýakyn wagtda elýeter bolar. Täzelikleri yzarlaň!`,
+        [{ text: "Bolýar" }]
+      );
+      return;
+    }
     if (!isActive || !service.route) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push(service.route as Href);
@@ -343,6 +352,14 @@ export default function ToleglarScreen() {
             Kommunal, döwlet we sanly tölegler — hemmesi bir ýerde, çalt we ygtybarly
           </Text>
 
+          {/* BP info banner */}
+          <View style={heroStyles.bpBanner}>
+            <Ionicons name="wallet-outline" size={14} color="rgba(255,255,255,0.92)" />
+            <Text style={heroStyles.bpBannerText}>
+              Tölegler BonusPul (BP) bilen amala aşyrylýar. Balans ýetmese doldursa bolýar.
+            </Text>
+          </View>
+
           {/* Stats row */}
           <View style={heroStyles.statsRow}>
             <GlassStatCard num={String(categoryCount)} label="Kategoriýa" />
@@ -440,7 +457,18 @@ const heroStyles = StyleSheet.create({
   },
   subtitle: {
     color: "rgba(255,255,255,0.76)", fontSize: 13,
-    lineHeight: 19, marginBottom: 22,
+    lineHeight: 19, marginBottom: 12,
+  },
+  bpBanner: {
+    flexDirection: "row", alignItems: "center", gap: 7,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderRadius: 10, paddingHorizontal: 11, paddingVertical: 8,
+    marginBottom: 16,
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.18)",
+  },
+  bpBannerText: {
+    color: "rgba(255,255,255,0.88)", fontSize: 12,
+    lineHeight: 17, flex: 1,
   },
   statsRow: { flexDirection: "row", gap: 9, marginBottom: 14 },
   pillsRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },

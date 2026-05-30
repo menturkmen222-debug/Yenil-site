@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View, Text, StyleSheet, Pressable, FlatList, Modal,
   Alert, Platform, ScrollView, RefreshControl, TextInput,
-  Animated, Share,
+  Animated, Share, ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -151,9 +151,16 @@ function TxRow({
       </View>
 
       <View style={{ alignItems: "flex-end", gap: 4 }}>
-        <Text style={[s.txAmount, { color: income ? "#10b981" : "#ef4444" }]}>
-          {item.amountLabel}
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+          <Ionicons
+            name={income ? "arrow-down-circle-outline" : "arrow-up-circle-outline"}
+            size={14}
+            color={income ? "#10b981" : "#ef4444"}
+          />
+          <Text style={[s.txAmount, { color: income ? "#10b981" : "#ef4444" }]}>
+            {item.amountLabel}
+          </Text>
+        </View>
         <View style={[s.txBadge, { backgroundColor: cfg.color + "15" }]}>
           <Ionicons name={cfg.icon as any} size={9} color={cfg.color} />
           <Text style={[s.txBadgeText, { color: cfg.color }]}>{cfg.label}</Text>
@@ -572,6 +579,7 @@ export default function AmallarScreen() {
   const isWeb = Platform.OS === "web";
 
   const [history, setHistory] = useState<OrderHistoryItem[]>([]);
+  const [isLoading, setIsLoading]       = useState(true);
   const [filter, setFilter]             = useState<FilterKey>("all");
   const [sort, setSort]                 = useState<SortKey>("newest");
   const [dateRange, setDateRange]       = useState<DateRangeKey>("all");
@@ -585,8 +593,10 @@ export default function AmallarScreen() {
   const searchAnim = useRef(new Animated.Value(0)).current;
 
   const loadHistory = useCallback(async () => {
+    setIsLoading(true);
     const data = await getHistory();
     setHistory(data);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => { loadHistory(); }, [loadHistory]);
@@ -838,7 +848,12 @@ export default function AmallarScreen() {
       )}
 
       {/* ── Content ── */}
-      {viewMode === "analytics" ? (
+      {isLoading && history.length === 0 ? (
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 12 }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={{ color: colors.mutedForeground, fontSize: 14 }}>Ýüklenýär...</Text>
+        </View>
+      ) : viewMode === "analytics" ? (
         <AnalyticsView history={history} colors={colors} />
       ) : sorted.length === 0 ? (
         <EmptyState colors={colors} filter={filter} />

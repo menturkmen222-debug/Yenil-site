@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import {
   View, Text, ScrollView, StyleSheet, Pressable, TextInput,
-  Platform,
+  Platform, Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons, Feather } from "@expo/vector-icons";
@@ -23,6 +23,7 @@ interface AppService {
   plans: Array<{ label: string; amount: number }>;
   inputLabel: string;
   firebaseKey: string;
+  status?: "active" | "coming_soon";
 }
 
 const APPS: AppService[] = [
@@ -265,9 +266,22 @@ export default function UlgamlarScreen() {
               {APPS.map(app => (
                 <Pressable
                   key={app.id}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setActiveApp(app); }}
+                  onPress={() => {
+                    if (app.status === "coming_soon") {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      Alert.alert("Ýakynda", `"${app.name}" hyzmaty ýakyn wagtda elýeter bolar!`, [{ text: "Bolýar" }]);
+                      return;
+                    }
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    setActiveApp(app);
+                  }}
                   style={({ pressed }) => [styles.appCard, { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.85 : 1 }]}
                 >
+                  {app.status === "coming_soon" && (
+                    <View style={styles.soonBadge}>
+                      <Text style={styles.soonBadgeText}>Ýakynda</Text>
+                    </View>
+                  )}
                   <View style={[styles.appCardIcon, { backgroundColor: app.color }]}>
                     <Ionicons name="star-outline" size={24} color="#fff" />
                   </View>
@@ -303,7 +317,13 @@ const styles = StyleSheet.create({
   headerTitle: { color: "#fff", fontSize: 20, fontWeight: "800" },
   infoBar: { flexDirection: "row", gap: 10, padding: 14, borderRadius: 12, borderWidth: 1, marginBottom: 16, alignItems: "flex-start" },
   appsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 14 },
-  appCard: { width: "47%", borderRadius: 16, borderWidth: 1, padding: 16, alignItems: "center", gap: 8 },
+  appCard: { width: "47%", borderRadius: 16, borderWidth: 1, padding: 16, alignItems: "center", gap: 8, position: "relative" },
+  soonBadge: {
+    position: "absolute", top: 8, right: 8,
+    backgroundColor: "#f59e0b", borderRadius: 7,
+    paddingHorizontal: 6, paddingVertical: 2,
+  },
+  soonBadgeText: { color: "#fff", fontSize: 9, fontWeight: "800" },
   appCardIcon: { width: 52, height: 52, borderRadius: 16, alignItems: "center", justifyContent: "center" },
   appCardName: { fontSize: 15, fontWeight: "700", textAlign: "center" },
   appCardType: { fontSize: 11, textAlign: "center" },

@@ -352,9 +352,18 @@ export default function ProfileScreen() {
             </>
           ) : (
             <View style={[s.noProfileBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Ionicons name="person-add-outline" size={36} color={colors.mutedForeground} />
+              <View style={[s.noProfileIconWrap, { backgroundColor: colors.primary + "18" }]}>
+                <Ionicons name="person-add-outline" size={32} color={colors.primary} />
+              </View>
               <Text style={[s.noProfileTitle, { color: colors.foreground }]}>{t("profile_not_filled")}</Text>
               <Text style={[s.noProfileDesc, { color: colors.mutedForeground }]}>{t("profile_not_filled_desc")}</Text>
+              <Pressable
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push("/edit-profile" as any); }}
+                style={({ pressed }) => [s.noProfileBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}
+              >
+                <Ionicons name="create-outline" size={16} color="#fff" />
+                <Text style={s.noProfileBtnText}>Profili doldur</Text>
+              </Pressable>
             </View>
           )}
 
@@ -552,8 +561,17 @@ const s = StyleSheet.create({
     borderRadius: 16, borderWidth: StyleSheet.hairlineWidth,
     padding: 28, alignItems: "center", gap: 10, marginBottom: 20,
   },
-  noProfileTitle: { fontSize: 16, fontWeight: "700" },
+  noProfileIconWrap: {
+    width: 68, height: 68, borderRadius: 34,
+    alignItems: "center", justifyContent: "center", marginBottom: 4,
+  },
+  noProfileTitle: { fontSize: 17, fontWeight: "700" },
   noProfileDesc: { fontSize: 13, textAlign: "center", lineHeight: 19 },
+  noProfileBtn: {
+    flexDirection: "row", alignItems: "center", gap: 7,
+    borderRadius: 12, paddingHorizontal: 20, paddingVertical: 12, marginTop: 4,
+  },
+  noProfileBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
 
   logoutBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center",

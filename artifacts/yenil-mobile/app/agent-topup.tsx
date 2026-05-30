@@ -120,6 +120,9 @@ export default function AgentTopupScreen() {
   const [step, setStep]             = useState<1 | 2 | 3>(1);
   const [receiptUri, setReceiptUri] = useState<string | null>(null);
 
+  // Track previous deposit statuses to detect rejection transitions
+  const prevStatusesRef = useRef<Record<string, AgentDeposit["status"]>>({});
+
   const tmt         = parseFloat(amount) || 0;
   const bpEarned    = Math.round(tmt * (1 + BP_BONUS_PERCENT / 100) * 100) / 100;
   const bonusAmount = Math.round(tmt * (BP_BONUS_PERCENT / 100) * 100) / 100;
@@ -136,7 +139,28 @@ export default function AgentTopupScreen() {
 
   useEffect(() => {
     if (!deviceId) return;
-    const unsub = watchAgentDeposits(deviceId, setDeposits);
+    const unsub = watchAgentDeposits(deviceId, (newDeposits) => {
+      setDeposits(newDeposits);
+
+      // Detect transitions to "rejected" and reverse the reputation point
+      newDeposits.forEach(async (dep) => {
+        const prevStatus = prevStatusesRef.current[dep.id];
+        if (prevStatus && prevStatus !== "rejected" && dep.status === "rejected") {
+          try {
+            await saveReputationEntry(deviceId, {
+              type: "negative",
+              reason: "Ret edilen agent depozit — Abraý gaýtaryldy",
+              delta: -1,
+              timestamp: new Date().toISOString(),
+              isPublic: false,
+            });
+          } catch {
+            // silently ignore
+          }
+        }
+        prevStatusesRef.current[dep.id] = dep.status;
+      });
+    });
     return () => unsub();
   }, [deviceId]);
 
@@ -470,6 +494,12 @@ export default function AgentTopupScreen() {
                         <Text style={[ss.historyTime, { color: colors.mutedForeground }]}>
                           {formatRelativeTime(dep.createdAt)}
                         </Text>
+                        {dep.status === "rejected" && (
+                          <View style={ss.rejectedNote}>
+                            <Ionicons name="arrow-undo-outline" size={11} color="#ef4444" />
+                            <Text style={ss.rejectedNoteText}>Abraý gaýtaryldy</Text>
+                          </View>
+                        )}
                         {dep.screenshotUrl ? (
                           <View style={ss.receiptAttachedBadge}>
                             <Ionicons name="image-outline" size={11} color="#059669" />
@@ -545,132 +575,120 @@ const ss = StyleSheet.create({
   cardNetworkText: { color: "rgba(255,255,255,0.55)", fontSize: 12, fontWeight: "700", letterSpacing: 1 },
   cardNumber:      { color: "#fff", fontSize: 22, fontWeight: "700", letterSpacing: 4, marginBottom: 22 },
   cardBottom:      { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" },
-  cardLabel:       { color: "rgba(255,255,255,0.55)", fontSize: 9, letterSpacing: 1.2, fontWeight: "700" },
-  cardHolder:      { color: "#fff", fontSize: 13, fontWeight: "700", marginTop: 3 },
-  copyBtn: {
-    flexDirection: "row", alignItems: "center", gap: 5,
-    borderRadius: 10, paddingHorizontal: 12, paddingVertical: 7,
-  },
-  copyBtnText: { color: "#fff", fontSize: 12, fontWeight: "700" },
+  cardLabel:       { color: "rgba(255,255,255,0.5)", fontSize: 8, letterSpacing: 1.5, fontWeight: "700" },
+  cardHolder:      { color: "#fff", fontSize: 14, fontWeight: "700", marginTop: 3 },
+  copyBtn:         { flexDirection: "row", alignItems: "center", gap: 5, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6 },
+  copyBtnText:     { color: "#fff", fontSize: 11, fontWeight: "700" },
 
   inputCard: {
-    marginHorizontal: 16, borderRadius: 18, borderWidth: 1, padding: 16, gap: 14,
+    marginHorizontal: 16, borderRadius: 18, borderWidth: 1, padding: 16, gap: 12,
   },
-  inputRow:    { flexDirection: "row", gap: 10, alignItems: "center" },
+  inputRow: { flexDirection: "row", gap: 10, alignItems: "center" },
   amountInput: {
-    flex: 1, borderWidth: 2, borderRadius: 14,
-    paddingHorizontal: 16, paddingVertical: 14,
-    fontSize: 24, fontWeight: "800",
+    flex: 1, fontSize: 28, fontWeight: "800",
+    borderWidth: 2, borderRadius: 14,
+    paddingHorizontal: 16, paddingVertical: 12,
   },
   currencyBadge: { borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10 },
-  currencyText:  { fontSize: 14, fontWeight: "800" },
-
-  calcBox:      { borderRadius: 14, borderWidth: 1, padding: 14, gap: 9 },
-  calcRow:      { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  calcLabel:    { fontSize: 13 },
-  calcValue:    { fontSize: 13, fontWeight: "700" },
-  calcDivider:  { height: 1, marginVertical: 2 },
-  calcLabelBig: { fontSize: 14, fontWeight: "700" },
-  calcValueBig: { fontSize: 22, fontWeight: "800" },
+  currencyText:  { fontSize: 16, fontWeight: "800" },
+  calcBox:       { borderRadius: 14, borderWidth: 1, padding: 14, gap: 8 },
+  calcRow:       { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  calcLabel:     { fontSize: 12 },
+  calcValue:     { fontSize: 13, fontWeight: "700" },
+  calcDivider:   { height: 1 },
+  calcLabelBig:  { fontSize: 14, fontWeight: "700" },
+  calcValueBig:  { fontSize: 20, fontWeight: "900" },
 
   receiptPreviewWrap: {
-    borderRadius: 18, overflow: "hidden", height: 180,
-    shadowColor: "#000", shadowOpacity: 0.12, shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 }, elevation: 5,
+    borderRadius: 16, overflow: "hidden", height: 180, marginBottom: 10, position: "relative",
   },
   receiptPreview: { width: "100%", height: "100%" },
   receiptOverlay: {
-    position: "absolute", bottom: 0, left: 0, right: 0,
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-    paddingHorizontal: 14, paddingVertical: 10,
+    position: "absolute", bottom: 10, left: 10, right: 10,
+    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
   },
   receiptOkBadge: {
     flexDirection: "row", alignItems: "center", gap: 5,
-    backgroundColor: "rgba(5,150,105,0.85)", borderRadius: 8,
+    backgroundColor: "rgba(5,150,105,0.85)", borderRadius: 10,
     paddingHorizontal: 10, paddingVertical: 5,
   },
-  receiptOkText:   { color: "#fff", fontSize: 12, fontWeight: "700" },
+  receiptOkText:    { color: "#fff", fontSize: 12, fontWeight: "700" },
   receiptRemoveBtn: {
     width: 28, height: 28, borderRadius: 14,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    alignItems: "center", justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.5)", alignItems: "center", justifyContent: "center",
   },
+
   receiptPlaceholder: {
-    borderRadius: 18, borderWidth: 2, borderStyle: "dashed",
-    padding: 28, alignItems: "center", gap: 10, overflow: "hidden",
+    borderRadius: 16, borderWidth: 2, borderStyle: "dashed",
+    padding: 24, alignItems: "center", gap: 10, marginBottom: 10,
+    overflow: "hidden",
   },
-  receiptIconCircle: {
-    width: 56, height: 56, borderRadius: 28,
-    alignItems: "center", justifyContent: "center", marginBottom: 4,
-  },
+  receiptIconCircle: { width: 52, height: 52, borderRadius: 26, alignItems: "center", justifyContent: "center" },
   receiptPlaceholderTitle: { fontSize: 15, fontWeight: "700" },
-  receiptPlaceholderSub:   { fontSize: 12, textAlign: "center", lineHeight: 18 },
+  receiptPlaceholderSub:   { fontSize: 12, textAlign: "center" },
   receiptPillBtn: {
     flexDirection: "row", alignItems: "center", gap: 6,
-    borderRadius: 12, paddingHorizontal: 18, paddingVertical: 9, marginTop: 6,
+    borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, marginTop: 4,
   },
   receiptPillBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
+
   receiptInfoBanner: {
-    flexDirection: "row", alignItems: "flex-start", gap: 8,
-    marginTop: 10, borderRadius: 12, borderWidth: 1, padding: 12,
+    flexDirection: "row", gap: 8, borderRadius: 12, borderWidth: 1,
+    padding: 12, alignItems: "flex-start",
   },
   receiptInfoText: { flex: 1, fontSize: 12, lineHeight: 18 },
 
   submitSection: {
-    marginHorizontal: 16, marginTop: 20, borderTopWidth: 1,
-    paddingTop: 18, gap: 12,
+    marginHorizontal: 16, marginTop: 8, paddingTop: 16,
+    borderTopWidth: 1, gap: 12,
   },
-  warningText:   { fontSize: 12, lineHeight: 18 },
-  uploadingRow:  { flexDirection: "row", alignItems: "center", gap: 7 },
+  warningText:  { fontSize: 12, textAlign: "center", lineHeight: 18 },
+  uploadingRow: { flexDirection: "row", alignItems: "center", gap: 8, justifyContent: "center" },
   uploadingText: { fontSize: 13, fontWeight: "600" },
 
+  successWrap: {
+    margin: 24, alignItems: "center", gap: 16, position: "relative",
+    paddingVertical: 32, paddingHorizontal: 20,
+  },
+  successGradientBg: { ...StyleSheet.absoluteFillObject, borderRadius: 24 },
+  successCircle: { width: 100, height: 100, borderRadius: 50, alignItems: "center", justifyContent: "center" },
+  successTitle: { fontSize: 26, fontWeight: "900", textAlign: "center", letterSpacing: -0.5 },
+  successDesc:  { fontSize: 13, textAlign: "center", lineHeight: 20 },
   btnPrimary: {
     flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 8, borderRadius: 16, paddingVertical: 16,
+    gap: 8, borderRadius: 14, paddingVertical: 16,
   },
-  btnPrimaryText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  btnPrimaryText: { color: "#fff", fontWeight: "700", fontSize: 16 },
   btnOutline: {
-    borderRadius: 16, borderWidth: 1.5, paddingVertical: 14,
+    borderRadius: 14, paddingVertical: 14,
     alignItems: "center", justifyContent: "center",
+    borderWidth: 1,
   },
-  btnOutlineText: { fontSize: 15, fontWeight: "600" },
+  btnOutlineText: { fontWeight: "600", fontSize: 15 },
 
   historyItem: {
-    flexDirection: "row", alignItems: "center", gap: 12,
-    borderRadius: 16, borderWidth: 1, padding: 14,
+    flexDirection: "row", gap: 12, borderRadius: 16, borderWidth: 1, padding: 14,
   },
-  historyIconWrap: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center" },
-  historyTopRow:    { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  historyBottomRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 },
-  historyAmount:    { fontSize: 13, fontWeight: "700" },
-  historyTime:      { fontSize: 11 },
-  statusBadge:      { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
-  statusText:       { fontSize: 10, fontWeight: "700" },
-
+  historyIconWrap: { width: 42, height: 42, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  historyTopRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 6 },
+  historyAmount: { fontSize: 13, fontWeight: "700", flex: 1 },
+  statusBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  statusText:  { fontSize: 10, fontWeight: "700" },
+  historyBottomRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  historyTime: { fontSize: 11, flex: 1 },
+  rejectedNote: {
+    flexDirection: "row", alignItems: "center", gap: 3,
+    backgroundColor: "#ef444410", borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2,
+  },
+  rejectedNoteText: { fontSize: 9, fontWeight: "700", color: "#ef4444" },
   receiptAttachedBadge: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    backgroundColor: "#059669" + "15", borderRadius: 6,
-    paddingHorizontal: 7, paddingVertical: 3,
+    flexDirection: "row", alignItems: "center", gap: 3,
+    backgroundColor: "#05966910", borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2,
   },
-  receiptAttachedText: { fontSize: 10, fontWeight: "700", color: "#059669" },
+  receiptAttachedText: { fontSize: 9, fontWeight: "700", color: "#059669" },
   noReceiptBadge: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    backgroundColor: "#94a3b8" + "15", borderRadius: 6,
-    paddingHorizontal: 7, paddingVertical: 3,
+    flexDirection: "row", alignItems: "center", gap: 3,
+    backgroundColor: "#94a3b810", borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2,
   },
-  noReceiptText: { fontSize: 10, fontWeight: "700", color: "#94a3b8" },
-
-  successWrap: {
-    alignItems: "center", paddingHorizontal: 28, paddingTop: 56,
-    gap: 14, overflow: "hidden",
-  },
-  successGradientBg: {
-    position: "absolute", top: 0, left: 0, right: 0, height: 260,
-  },
-  successCircle: {
-    width: 120, height: 120, borderRadius: 60,
-    alignItems: "center", justifyContent: "center", marginBottom: 8,
-  },
-  successTitle: { fontSize: 26, fontWeight: "800", textAlign: "center" },
-  successDesc:  { fontSize: 14, textAlign: "center", lineHeight: 22, marginBottom: 8 },
+  noReceiptText: { fontSize: 9, fontWeight: "700", color: "#94a3b8" },
 });

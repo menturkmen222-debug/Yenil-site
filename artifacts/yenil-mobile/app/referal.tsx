@@ -73,14 +73,14 @@ export default function ReferalScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await Share.share({
       message: [
-        "🎉 Ýeňile goşulyň — Türkmenistanyň iň ynamly onlayn platformasy!",
+        "Ýeňile goşulyň — Türkmenistanyň iň ynamly onlayn platformasy!",
         "",
         `Meniň çakylyk kodum: ${stats.code}`,
         "(Goşulsaň — ikimiz hem 1 BP bonus alýarys!)",
         "",
-        "✅ Kartsyz demirýol bileti",
-        "✅ Payeer / WebMoney çalyşmak",
-        "✅ Bonus Pul (BP) ulgamy",
+        "Kartsyz demirýol bileti",
+        "Payeer / WebMoney çalyşmak",
+        "Bonus Pul (BP) ulgamy",
       ].join("\n"),
       title: "Ýeňile goşulyň!",
     }).catch(() => {});
@@ -127,6 +127,8 @@ export default function ReferalScreen() {
     setApplying(false);
   }
 
+  const hasReferrals = (stats?.totalJoins ?? 0) > 0;
+
   return (
     <View style={[s.root, { backgroundColor: colors.background }]}>
       <LinearGradient
@@ -166,6 +168,28 @@ export default function ReferalScreen() {
                 </View>
               ))}
             </View>
+
+            {/* ── Empty referrals state ── */}
+            {!hasReferrals && (
+              <View style={[s.emptyCard, { backgroundColor: colors.card, borderColor: "#6366f1" + "25" }]}>
+                <View style={[s.emptyIconWrap, { backgroundColor: "#6366f1" + "18" }]}>
+                  <Ionicons name="people-outline" size={34} color="#6366f1" />
+                </View>
+                <Text style={[s.emptyTitle, { color: colors.foreground }]}>
+                  Heniz çagyrylmady
+                </Text>
+                <Text style={[s.emptyDesc, { color: colors.mutedForeground }]}>
+                  Referal koduňyzy dostlaryňyz bilen paýlaşyň we her birinden +1 BP gazanyň
+                </Text>
+                <Pressable
+                  onPress={handleShare}
+                  style={({ pressed }) => [s.emptyBtn, { backgroundColor: "#6366f1", opacity: pressed ? 0.85 : 1 }]}
+                >
+                  <Ionicons name="share-social-outline" size={16} color="#fff" />
+                  <Text style={s.emptyBtnText}>Kody paýlaş</Text>
+                </Pressable>
+              </View>
+            )}
 
             {/* ── Referral Code Card ── */}
             <Text style={[s.sectionLabel, { color: colors.mutedForeground }]}>SIZIŇ REFERAL KODUNUZ</Text>
@@ -219,7 +243,7 @@ export default function ReferalScreen() {
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={s.inviteBtnTitle}>
-                        {sharing ? "Paýlaşylýar..." : "🎉 Ýakynlarymy çagyr — bonus gazan!"}
+                        {sharing ? "Paýlaşylýar..." : "Ýakynlarymy çagyr — bonus gazan!"}
                       </Text>
                       <Text style={s.inviteBtnSub}>
                         Her çagyrylana +1 BP · Passiwli gazanç
@@ -354,6 +378,26 @@ const s = StyleSheet.create({
   statIcon: { width: 38, height: 38, borderRadius: 11, alignItems: "center", justifyContent: "center" },
   statValue: { fontSize: 16, fontWeight: "800" },
   statLabel: { fontSize: 9, textAlign: "center", fontWeight: "600" },
+
+  // Empty referrals state
+  emptyCard: {
+    marginHorizontal: 16, marginTop: 16,
+    borderRadius: 20, borderWidth: 1,
+    padding: 24, alignItems: "center", gap: 10,
+  },
+  emptyIconWrap: {
+    width: 68, height: 68, borderRadius: 34,
+    alignItems: "center", justifyContent: "center",
+    marginBottom: 4,
+  },
+  emptyTitle: { fontSize: 17, fontWeight: "700", textAlign: "center" },
+  emptyDesc: { fontSize: 13, textAlign: "center", lineHeight: 19, paddingHorizontal: 8 },
+  emptyBtn: {
+    flexDirection: "row", alignItems: "center", gap: 7,
+    borderRadius: 12, paddingHorizontal: 20, paddingVertical: 11,
+    marginTop: 4,
+  },
+  emptyBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
 
   codeCard: {
     marginHorizontal: 16, borderRadius: 20, padding: 22,
