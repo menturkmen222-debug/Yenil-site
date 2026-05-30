@@ -1537,7 +1537,14 @@ export default function YenilPayScreen() {
   const autoBonus = params.autoBonus === "1";
   const autoAmount = autoBonus && params.amount ? parseInt(params.amount, 10) : undefined;
   const autoMethod = autoBonus && params.method === "card" ? "card" as const : autoBonus && params.method === "terminal" ? "terminal" as const : undefined;
-  const [tab, setTab] = useState<Tab>(autoBonus ? "bonus" : "bonus");
+  const [tab, setTab] = useState<Tab>("bonus");
+  const bonusSectionKey = autoBonus ? `auto-${autoAmount}-${autoMethod}` : "default";
+
+  useEffect(() => {
+    if (autoBonus) {
+      setTab("bonus");
+    }
+  }, [autoBonus, autoAmount, autoMethod]);
 
   const activeTabDef = TAB_DEFS.find(t => t.id === tab)!;
 
@@ -1591,7 +1598,7 @@ export default function YenilPayScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {tab === "bonus" && <BonusPulSection colors={colors} autoAmount={autoAmount} autoMethod={autoMethod} />}
+        {tab === "bonus" && <BonusPulSection key={bonusSectionKey} colors={colors} autoAmount={autoAmount} autoMethod={autoMethod} />}
         {tab === "currency" && <CurrencySection colors={colors} />}
         {tab === "sim" && <SimSection colors={colors} />}
       </ScrollView>

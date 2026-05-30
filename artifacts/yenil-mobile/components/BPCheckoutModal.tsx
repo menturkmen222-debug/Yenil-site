@@ -116,7 +116,12 @@ export function BPCheckoutModal({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const method = selectedMethod === "card" ? "card" : "terminal";
     resolvedOnCancel();
-    router.push(`/(tabs)/tmcell?autoBonus=1&amount=${missingBP}&method=${method}` as any);
+    setTimeout(() => {
+      router.push({
+        pathname: "/(tabs)/tmcell",
+        params: { autoBonus: "1", amount: String(missingBP), method },
+      } as any);
+    }, 150);
   }, [selectedMethod, missingBP, resolvedOnCancel]);
 
   const isProcessing = paymentLocked;
